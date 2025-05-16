@@ -1,6 +1,6 @@
 body {
   margin: 0;
-  background: linear-gradient(180deg, rgb(117, 81, 194), rgb(255, 255, 255));
+  background: lightgray;
   display: flex;
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   height: 100vh;
@@ -62,4 +62,71 @@ li:hover {
 a {
   font-weight: 800;
   text-decoration: none;
+}
+
+.news-feed {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.news-feed-title {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.no-news {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+}
+
+.articles-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.article-card {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s;
+}
+
+.article-card:hover {
+  transform: translateY(-2px);
+}
+
+.article-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.article-title {
+  font-size: 1.2rem;
+  margin: 0;
+  flex: 1;
+  font-weight: 600;
+}
+
+.article-industry {
+  font-size: 0.9rem;
+  background-color: #e0f2ff;
+  color: #0077b6;
+  padding: 0.3rem 0.6rem;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+
+.article-summary {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #333;
 }
