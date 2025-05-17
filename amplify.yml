@@ -3,6 +3,9 @@ backend:
   phases:
     preBuild:
       commands:
+        # Install native build tools required for native modules like @parcel/watcher
+        - yum install -y gcc-c++ make python3
+
         - export N_PREFIX=$HOME/n
         - export PATH=$N_PREFIX/bin:$PATH
         - npm install -g n
@@ -29,7 +32,7 @@ frontend:
         - node -v
         - npm -v
         - npm install -g aws-cdk@2.93.0
-        - npm ci
+        - npm install
     build:
       commands:
         - npm run build
