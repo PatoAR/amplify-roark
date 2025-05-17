@@ -11,7 +11,7 @@ backend:
         - hash -r
         - node -v
         - npm -v
-        - npm ci
+        - npm install
     build:
       commands:
         - npm rebuild @parcel/watcher
