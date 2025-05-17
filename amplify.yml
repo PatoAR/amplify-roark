@@ -12,9 +12,9 @@ backend:
         - node -v
         - npm -v
         - npm ci
-        - npm rebuild @parcel/watcher
     build:
       commands:
+        - npm rebuild @parcel/watcher
         - npx ampx pipeline-deploy --branch $AWS_BRANCH --app-id $AWS_APP_ID
 frontend:
   phases:
