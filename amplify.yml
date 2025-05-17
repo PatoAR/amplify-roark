@@ -16,10 +16,11 @@ backend:
         - hash -r
 
         # Confirm correct versions
-        - node_path=$(which node)
-        - echo "Node path: $node_path"
+        - "node_path=$(which node)"
+        - "echo 'Node path: $node_path'"
         - node -v
         - npm -v
+        - npm ci
 
     build:
       commands:
@@ -39,8 +40,8 @@ frontend:
         - hash -r
 
         # Confirm correct 
-        - node_path=$(which node)
-        - echo "Node path: $node_path"
+        - "node_path=$(which node)"
+        - "echo 'Node path: $node_path'"
         - node -v
         - npm -v
 
