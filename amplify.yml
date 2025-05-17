@@ -16,6 +16,8 @@ backend:
         - hash -r
 
         # Confirm correct versions
+        - node_path=$(which node)
+        - echo "Node path: $node_path"
         - node -v
         - npm -v
 
@@ -31,12 +33,14 @@ frontend:
         - export PATH=$N_PREFIX/bin:$PATH
         - npm install -g n
         - n 20
-        
+
         # Re-export path and refresh shell command cache
         - export PATH=$HOME/n/bin:$PATH
         - hash -r
 
-        # Confirm correct versions
+        # Confirm correct 
+        - node_path=$(which node)
+        - echo "Node path: $node_path"
         - node -v
         - npm -v
 
