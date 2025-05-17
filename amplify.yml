@@ -3,9 +3,6 @@ backend:
   phases:
     preBuild:
       commands:
-        # Install native build tools required for native modules like @parcel/watcher
-        - yum install -y gcc-c++ make python3
-
         - export N_PREFIX=$HOME/n
         - export PATH=$N_PREFIX/bin:$PATH
         - npm install -g n
@@ -14,7 +11,7 @@ backend:
         - hash -r
         - node -v
         - npm -v
-        - npm install
+        - npm install --build-from-source @parcel/watcher
     build:
       commands:
         - npm rebuild @parcel/watcher
