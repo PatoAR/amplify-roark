@@ -3,6 +3,8 @@ backend:
   phases:
     preBuild:
       commands:
+        - export N_PREFIX=$HOME/n
+        - export PATH=$N_PREFIX/bin:$PATH
         - npm install -g n
         - n 20
         - node -v
@@ -14,6 +16,8 @@ frontend:
   phases:
     preBuild:
       commands:
+        - export N_PREFIX=$HOME/n
+        - export PATH=$N_PREFIX/bin:$PATH
         - npm install -g n
         - n 20
         - node -v
