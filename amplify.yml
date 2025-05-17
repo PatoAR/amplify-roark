@@ -21,6 +21,7 @@ backend:
         - node -v
         - npm -v
         - npm ci
+        - npm rebuild @parcel/watcher
 
     build:
       commands:
@@ -49,6 +50,7 @@ frontend:
         - npm install -g aws-cdk@2.93.0
 
         - npm ci
+        - npm rebuild @parcel/watcher
 
     build:
       commands:
