@@ -1,6 +1,5 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.tsx";
 import NewsSocketClient from "./NewsSocketClient.tsx";
 import "./index.css";
 import { Amplify } from "aws-amplify";
