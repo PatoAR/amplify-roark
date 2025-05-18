@@ -22,7 +22,6 @@ interface WebSocketMessage {
 
 function NewsSocketClient() {
   const [messages, setMessages] = useState<Article[]>([]);
-  const [socket, setSocket] = useState<WebSocket | null>(null);
   const [isTabVisible, setIsTabVisible] = useState<boolean>(!document.hidden);
 
 
@@ -63,7 +62,6 @@ function NewsSocketClient() {
   // WebSocket setup
   useEffect(() => {
     const ws = new WebSocket(WEBSOCKET_URL);
-    setSocket(ws);
 
     ws.onopen = () => console.log('🔌 WebSocket connected');
 
