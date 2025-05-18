@@ -28,7 +28,9 @@ frontend:
         - hash -r
         - node -v
         - npm -v
+        - npm install -g npm@latest    # update npm to latest to avoid bugs
         - npm install -g aws-cdk@2.93.0
+        - rm -rf node_modules package-lock.json
         - npm install
     build:
       commands:
