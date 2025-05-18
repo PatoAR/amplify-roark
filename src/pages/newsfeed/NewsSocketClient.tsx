@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import "./index.css";
+import "./NewsSocketClient.css"
 
 const WEBSOCKET_URL = 'wss://wi6tjpl49b.execute-api.us-east-1.amazonaws.com/dev';
 
 interface Article {
+  timestamp?: string;
   source: string;
   title: string;
   industry: string;
@@ -18,7 +19,6 @@ interface WebSocketMessage {
   type: string;
   article: Article;
 } 
-
 
 function NewsSocketClient() {
   const [messages, setMessages] = useState<Article[]>([]);
@@ -62,6 +62,11 @@ function NewsSocketClient() {
   // WebSocket setup
   useEffect(() => {
     const ws = new WebSocket(WEBSOCKET_URL);
+    
+    const cleanup = () => {
+      ws.close();
+    };
+    window.addEventListener('beforeunload', cleanup);
 
     ws.onopen = () => console.log('🔌 WebSocket connected');
 
@@ -71,10 +76,11 @@ function NewsSocketClient() {
         if (data.type === 'NEW_ARTICLE') {
           const newArticle = {
             ...data.article,
-            seen: isTabVisible
+            seen: document.hidden ? false : true, // Mark as unseen if tab is hidden
+            timestamp: formatTime(), // Add timestamp upon receiving
           };
           setMessages(prev => {
-            const updated = [...prev, newArticle];
+            const updated = [newArticle, ...prev];
             localStorage.setItem('newsMessages', JSON.stringify(updated));
             return updated;
           });
@@ -87,14 +93,19 @@ function NewsSocketClient() {
     ws.onclose = () => console.log('🔌 WebSocket disconnected');
     ws.onerror = error => console.error('❌ WebSocket error:', error);
 
-    return () => ws.close();
-  }, [isTabVisible]);
+    return () => {
+      window.removeEventListener('beforeunload', cleanup);
+      ws.close();
+    }
+  }, []);
 
   return (
     <div className="news-feed">
-      <h1 className="news-feed-title">📡 Live News Feed</h1>
       {messages.length === 0 ? (
+        <>
+        <h1 className="news-feed-title">📡 Live News Feed</h1>
         <p className="no-news">🕓 Waiting for news...</p>
+        </>
       ) : (
         <div className="articles-container">
           <AnimatePresence initial={false}>
@@ -110,7 +121,7 @@ function NewsSocketClient() {
                 >
                   <p className="article-line" title={`${msg.industry} ${msg.title} ${msg.summary}`}>
                     <span className={`article-timestamp-wrapper ${!msg.seen ? 'unseen' : ''}`}>
-                      <span className="article-timestamp">{formatTime()}</span>
+                      <span className="article-timestamp">{msg.timestamp}</span>
                     </span>
                     <span className="article-industry">{msg.industry}</span>{" "}
                     <strong className="article-source"> - {msg.source} - </strong>{" "}

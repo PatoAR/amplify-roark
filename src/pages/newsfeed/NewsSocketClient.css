@@ -1,0 +1,136 @@
+/* Main feed container */
+.news-feed {
+  margin-top: 1.5rem;
+  padding: 2rem 1.5rem;
+  max-width: 900px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Feed title */
+.news-feed-title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #222;
+}
+
+/* Empty state */
+.no-news {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #888;
+  font-style: italic;
+}
+
+/* Container for articles */
+.articles-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Article card */
+.article-card {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 0.6rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s, background-color 0.3s ease-in-out;
+  will-change: transform;
+  border-left: 4px solid transparent;
+}
+
+/* Hover animation */
+.article-card:hover {
+  transform: translateY(-4px);
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Highlight unseen articles */
+.article-card.unseen {
+  background-color: #e6f4ff;
+  border-left-color: #1890ff;
+}
+
+.article-timestamp-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-right: 0.5rem;
+}
+
+.article-timestamp-wrapper.unseen::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  background-color: #1890ff;
+  border-radius: 50%;
+  margin-left: 0.5rem;
+  animation: pulse 1.5s infinite;
+}
+
+.article-timestamp {
+  font-size: 0.75rem;
+  color: #666;
+  margin-right: 0.3rem;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.5; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Text wrapper */
+.article-line {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* Show max X lines */
+  -webkit-box-orient: vertical;
+  margin: 0;
+}
+
+/* Tag for industry */
+.article-industry {
+  font-size: 0.8rem;
+  font-weight: 600;
+  background-color: #e0f2ff;
+  color: #0077b6;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  margin-right: 0.1rem;
+}
+
+/* Article source reference */
+.article-source {
+  color: #666;
+  font-weight: 500;
+}
+
+/* Title inside article */
+.article-title {
+  font-weight: 600;
+  color: #111;
+  margin-right: 0.1rem;
+}
+
+/* Summary text */
+.article-summary {
+  color: #444;
+  font-weight: 400;
+}
+
+/* Links (future-proofing) */
+a {
+  color: #3366cc;
+  text-decoration: none;
+  font-weight: 600;
+}
+a:hover {
+  text-decoration: underline;
+}

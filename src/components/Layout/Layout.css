@@ -1,0 +1,20 @@
+
+.layout-container {
+    background-color: var(--amplify-colors-background-tertiary);
+}
+
+.page-container {
+    padding: var(--space-xl);
+    padding-left: var(--space-xl);
+    padding-top: calc(50px + var(--space-lg));
+    transition: padding 0.5s;
+    overflow-x: hidden;
+}
+
+@media (max-width: 1024px) {
+  .page-container {
+    padding: var(--space-lg);
+    padding-left: var(--space-lg);
+    padding-top: calc(50px + var(--space-md));
+  }
+}
