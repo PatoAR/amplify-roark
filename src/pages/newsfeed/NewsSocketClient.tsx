@@ -77,6 +77,7 @@ function NewsSocketClient() {
       })
       .subscribe({
         next: (payload: { data?: OnCreateArticleSubscription | null; errors?: any[] }) => {
+          console.log('✅ Subscription to onCreateArticle is active.');
           const newArticleData = payload.data?.onCreateArticle;
           console.log('📡 New article received from subscription:', newArticleData);
 
