@@ -1,42 +1,51 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import "./NewsSocketClient.css"
+import './NewsSocketClient.css';
 
-const WEBSOCKET_URL = 'wss://wi6tjpl49b.execute-api.us-east-1.amazonaws.com/dev';
+import { generateClient } from 'aws-amplify/api';
+import { onCreateArticle } from '../../graphql/subscriptions';
+import { OnCreateArticleSubscription } from '../../API';
 
-interface Article {
-  timestamp?: string;
+// Define a client
+const client = generateClient();
+
+// Interface for articles in your component's state
+interface ArticleForState {
+  id: string; 
+  timestamp?: string | null;
   source: string;
-  title: string;
-  industry: string;
-  summary: string;
-  link: string;
-  companies: string;
-  seen?: boolean;
+  title: string; 
+  industry?: string | null; 
+  summary?: string | null; 
+  link: string; 
+  companies?: string | null; 
+  seen: boolean; // local UI state, non-optional for consistency in state
 }
 
-interface WebSocketMessage {
-  type: string;
-  article: Article;
-} 
-
 function NewsSocketClient() {
-  const [messages, setMessages] = useState<Article[]>([]);
-  const [isTabVisible, setIsTabVisible] = useState<boolean>(!document.hidden);
+  const [messages, setMessages] = useState<ArticleForState[]>([]);
+  const [isTabVisible, setIsTabVisible] = useState<boolean>(() => !document.hidden); // Initial state from document.hidden
 
-
-  const formatTime = () => {
-    const now = new Date();
-    return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
-
-  // Load from localStorage on mount
+  // Load articles from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem('newsMessages');
     if (saved) {
-      setMessages(JSON.parse(saved));
+      try {
+        const parsedMessages: ArticleForState[] = JSON.parse(saved);
+        setMessages(parsedMessages);
+      } catch (e) {
+        console.error("Failed to parse messages from localStorage", e);
+        localStorage.removeItem('newsMessages'); // Clear corrupted data
+      }
     }
   }, []);
+
+  // Persist messages to localStorage
+  useEffect(() => {
+    if(messages.length > 0 || localStorage.getItem('newsMessages') !== null) {
+        localStorage.setItem('newsMessages', JSON.stringify(messages));
+    }
+  }, [messages]);
 
   // Track tab visibility
   useEffect(() => {
@@ -47,86 +56,92 @@ function NewsSocketClient() {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
-  // Mark unseen articles as seen after X seconds when user returns
+  // Mark unseen articles as seen when tab becomes visible
   useEffect(() => {
-    if (isTabVisible) {
+    if (isTabVisible && messages.some(msg => !msg.seen)) {
       const timer = setTimeout(() => {
         setMessages(prev =>
-          prev.map(msg => msg.seen ? msg : { ...msg, seen: true })
+          prev.map(msg => (msg.seen ? msg : { ...msg, seen: true }))
         );
-      }, 10000);
+      }, 10000); // 10 seconds
       return () => clearTimeout(timer);
     }
-  }, [isTabVisible]);
+  }, [isTabVisible, messages]);
 
-  // WebSocket setup
+  // Subscribe to new articles
   useEffect(() => {
-    const ws = new WebSocket(WEBSOCKET_URL);
-    
-    const cleanup = () => {
-      ws.close();
-    };
-    window.addEventListener('beforeunload', cleanup);
+    console.log('Attempting to subscribe to onCreateArticle...');
+    const subscription = client
+      .graphql({
+        query: onCreateArticle,
+      })
+      .subscribe({
+        next: (payload: { data?: OnCreateArticleSubscription | null; errors?: any[] }) => {
+          const newArticleData = payload.data?.onCreateArticle;
+          console.log('📡 New article received from subscription:', newArticleData);
 
-    ws.onopen = () => console.log('🔌 WebSocket connected');
+          if (newArticleData) {
+            const newArticleForState: ArticleForState = {
+              id: newArticleData.id,
+              timestamp: newArticleData.timestamp,
+              source: newArticleData.source,
+              title: newArticleData.title,
+              industry: newArticleData.industry,
+              summary: newArticleData.summary,
+              link: newArticleData.link ?? '#',
+              companies: newArticleData.companies,
+              seen: false,
+            };
 
-    ws.onmessage = (event: MessageEvent) => {
-      try {
-        const data: WebSocketMessage = JSON.parse(event.data);
-        if (data.type === 'NEW_ARTICLE') {
-          const newArticle = {
-            ...data.article,
-            seen: document.hidden ? false : true, // Mark as unseen if tab is hidden
-            timestamp: formatTime(), // Add timestamp upon receiving
-          };
-          setMessages(prev => {
-            const updated = [newArticle, ...prev];
-            localStorage.setItem('newsMessages', JSON.stringify(updated));
-            return updated;
-          });
-        }
-      } catch (err) {
-        console.error('❌ Failed to parse WebSocket message', err);
-      }
-    };
-
-    ws.onclose = () => console.log('🔌 WebSocket disconnected');
-    ws.onerror = error => console.error('❌ WebSocket error:', error);
+            setMessages((prevMessages) => {
+              if (prevMessages.find(msg => msg.id === newArticleForState.id)) {
+                return prevMessages;
+              }
+              return [newArticleForState, ...prevMessages];
+            });
+          }
+        },
+        error: (err: any) => {
+          console.error('Subscription error:', JSON.stringify(err, null, 2));
+        },
+        complete: () => {
+          console.log('Subscription ended.');
+        },
+      });
 
     return () => {
-      window.removeEventListener('beforeunload', cleanup);
-      ws.close();
-    }
-  }, []);
+      console.log('Unsubscribing from onCreateArticle...');
+      subscription.unsubscribe();
+    };
+  }, []); // Empty dependency array: runs once on mount, cleans up on unmount 
 
   return (
     <div className="news-feed">
       {messages.length === 0 ? (
         <>
-        <h1 className="news-feed-title">📡 Live News Feed</h1>
-        <p className="no-news">🕓 Waiting for news...</p>
+          <h1 className="news-feed-title">📡 Live News Feed</h1>
+          <p className="no-news">🕓 Waiting for news...</p>
         </>
       ) : (
         <div className="articles-container">
           <AnimatePresence initial={false}>
             {messages.map((msg, i) => (
-              <a href={msg.link} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+              <a key={`${msg.title}-${i}`} href={msg.link} target="_blank" rel="noopener noreferrer">
                 <motion.div
-                  key={`${msg.title}-${i}`}
                   className={`article-card ${msg.seen ? '' : 'unseen'}`}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 2, delay: 1 }}
                 >
-                  <p className="article-line" title={`${msg.industry} ${msg.title} ${msg.summary}`}>
+                  <p className="article-line">
                     <span className={`article-timestamp-wrapper ${!msg.seen ? 'unseen' : ''}`}>
                       <span className="article-timestamp">{msg.timestamp}</span>
                     </span>
                     <span className="article-industry">{msg.industry}</span>{" "}
                     <strong className="article-source"> - {msg.source} - </strong>{" "}
                     <strong className="article-title">{msg.title}</strong>{" "}
-                    <span className="article-summary">{msg.summary}</span>      
+                    <span className="article-summary">{msg.summary}</span>
                   </p>
                 </motion.div>
               </a>
