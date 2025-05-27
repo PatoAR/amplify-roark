@@ -6,8 +6,9 @@ import { Amplify } from "aws-amplify";
 import config from './aws-exports';
 import { BrowserRouter } from 'react-router-dom';
 import '@aws-amplify/ui-react/styles.css';
+import { ResourcesConfig } from 'aws-amplify';
 
-Amplify.configure(config);
+Amplify.configure(config as ResourcesConfig);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
