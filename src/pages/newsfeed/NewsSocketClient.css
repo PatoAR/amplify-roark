@@ -85,7 +85,7 @@
 
 /* Text wrapper */
 .article-line {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   line-height: 1.4;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -132,5 +132,9 @@ a {
   font-weight: 600;
 }
 a:hover {
-  text-decoration: underline;
+  text-decoration: none;
+}
+a:visited {
+  color: #3366cc;
+  text-decoration: none;
 }

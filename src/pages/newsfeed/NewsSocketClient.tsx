@@ -22,6 +22,13 @@ interface ArticleForState {
   seen: boolean; // local UI state, non-optional for consistency in state
 }
 
+// Utility: Format timestamp into local time
+function formatLocalTime(timestamp?: string | null): string {
+  if (!timestamp) return '';
+  const date = new Date(timestamp);
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
 function NewsSocketClient() {
   const [messages, setMessages] = useState<ArticleForState[]>([]);
   const [isTabVisible, setIsTabVisible] = useState<boolean>(() => !document.hidden); // Initial state from document.hidden
@@ -91,7 +98,7 @@ function NewsSocketClient() {
               summary: newArticleData.summary,
               link: newArticleData.link ?? '#',
               companies: newArticleData.companies,
-              seen: false,
+              seen: document.hidden,
             };
 
             setMessages((prevMessages) => {
@@ -126,18 +133,19 @@ function NewsSocketClient() {
       ) : (
         <div className="articles-container">
           <AnimatePresence initial={false}>
-            {messages.map((msg, i) => (
-              <a key={`${msg.title}-${i}`} href={msg.link} target="_blank" rel="noopener noreferrer">
+            {messages.map((msg) => (
+              <a key={msg.id} href={msg.link} target="_blank" rel="noopener noreferrer" className="article-link">
                 <motion.div
+                  layout="position"
                   className={`article-card ${msg.seen ? '' : 'unseen'}`}
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 2, delay: 1 }}
+                  exit={{ opacity: 0, y: -10, transition: { duration: 0.3 } }}
+                  transition={{ duration: 0.5}}
                 >
                   <p className="article-line">
                     <span className={`article-timestamp-wrapper ${!msg.seen ? 'unseen' : ''}`}>
-                      <span className="article-timestamp">{msg.timestamp}</span>
+                      <span className="article-timestamp">{formatLocalTime(msg.timestamp)}</span>
                     </span>
                     <span className="article-industry">{msg.industry}</span>{" "}
                     <strong className="article-source"> - {msg.source} - </strong>{" "}
