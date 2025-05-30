@@ -5,6 +5,7 @@ import './NewsSocketClient.css';
 import { generateClient } from 'aws-amplify/api';
 import { onCreateArticle } from '../../graphql/subscriptions';
 import { OnCreateArticleSubscription } from '../../API';
+import { listArticles } from '../../graphql/queries';
 
 // Define a client
 const client = generateClient();
@@ -54,6 +55,16 @@ function NewsSocketClient() {
     }
   }, [messages]);
 
+  // Update the document title whenever the unread count or tab visibility changes
+  useEffect(() => {
+    const count = messages.filter(msg => !msg.seen).length;
+    if (!isTabVisible && count > 0) {
+      document.title = `🔥(${count})🔥 Live Markets News Feed`;
+    } else {
+      document.title = 'Live Markets News Feed';
+    }
+  }, [messages, isTabVisible]);
+
   // Track tab visibility
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -77,51 +88,98 @@ function NewsSocketClient() {
 
   // Subscribe to new articles
   useEffect(() => {
-    console.log('Attempting to subscribe to onCreateArticle...');
-    const subscription = client
-      .graphql({
-        query: onCreateArticle,
-      })
-      .subscribe({
-        next: (payload: { data?: OnCreateArticleSubscription | null; errors?: any[] }) => {
-          console.log('✅ Subscription to onCreateArticle is active.');
-          const newArticleData = payload.data?.onCreateArticle;
-          console.log('📡 New article received from subscription:', newArticleData);
+    let pollingInterval: ReturnType<typeof setInterval> | null = null;
+    let cleanupFn: (() => void) | undefined;
 
-          if (newArticleData) {
-            const newArticleForState: ArticleForState = {
-              id: newArticleData.id,
-              timestamp: newArticleData.timestamp,
-              source: newArticleData.source,
-              title: newArticleData.title,
-              industry: newArticleData.industry,
-              summary: newArticleData.summary,
-              link: newArticleData.link ?? '#',
-              companies: newArticleData.companies,
-              seen: document.hidden,
-            };
+    const subscribeOrPoll = async () => {
+      console.log('🔁 Attempting to establish AppSync subscription...');      
+      const subscription = client
+        .graphql({query: onCreateArticle,})
+        .subscribe({
+          next: (payload: { data?: OnCreateArticleSubscription | null; errors?: any[] }) => {
+            console.log('✅ AppSync subscription active.');
+            const newArticleData = payload.data?.onCreateArticle;
+            console.log('📡 New article:', newArticleData);
 
-            setMessages((prevMessages) => {
-              if (prevMessages.find(msg => msg.id === newArticleForState.id)) {
-                return prevMessages;
+            if (newArticleData) {
+              const newArticleForState: ArticleForState = {
+                id: newArticleData.id,
+                timestamp: newArticleData.timestamp,
+                source: newArticleData.source,
+                title: newArticleData.title,
+                industry: newArticleData.industry,
+                summary: newArticleData.summary,
+                link: newArticleData.link ?? '#',
+                companies: newArticleData.companies,
+                seen: document.hidden,
+              };
+
+              setMessages((prevMessages) => {
+                if (prevMessages.find(msg => msg.id === newArticleForState.id)) {
+                  return prevMessages;
+                }
+                return [newArticleForState, ...prevMessages];
+              });
+            }
+          },
+          error: async (err: any) => {
+            console.error('❌ Subscription failed, falling back to polling:', JSON.stringify(err, null, 2));
+            // Start polling
+            pollingInterval = setInterval(async () => {
+              try {
+                const result: any = await client.graphql({ query: listArticles });
+                const articles: ArticleForState[] = result.data?.listArticles?.items || [];
+
+                setMessages(prevMessages => {
+                  const newMessages = articles.filter((a: ArticleForState) => 
+                    !prevMessages.some(m => m.id === a.id)
+                  );
+
+                  if (newMessages.length === 0) return prevMessages;
+                  
+  
+                  const formatted = newMessages.map((a: ArticleForState) => ({
+                    id: a.id,
+                    timestamp: a.timestamp,
+                    source: a.source,
+                    title: a.title,
+                    industry: a.industry,
+                    summary: a.summary,
+                    link: a.link ?? '#',
+                    companies: a.companies,
+                    seen: document.hidden,
+                  }));
+
+                  return [...formatted, ...prevMessages];
+                });
+              } catch (pollErr) {
+                console.error('Polling error:', pollErr);
               }
-              return [newArticleForState, ...prevMessages];
-            });
-          }
-        },
-        error: (err: any) => {
-          console.error('Subscription error:', JSON.stringify(err, null, 2));
-        },
-        complete: () => {
-          console.log('Subscription ended.');
-        },
-      });
+            }, 20000); // Poll every 20 seconds
+          },
+          complete: () => {
+            console.log('Subscription ended.');
+          },
+        });
+    
+      return () => {
+        console.log('Cleaning up subscription and polling fallback...');
+        subscription.unsubscribe();
+        if (pollingInterval) clearInterval(pollingInterval);
+      };
+    };
+  
+    const run = async () => {
+      cleanupFn = await subscribeOrPoll();
+    };
+
+    run();
 
     return () => {
-      console.log('Unsubscribing from onCreateArticle...');
-      subscription.unsubscribe();
+      if (cleanupFn) cleanupFn();
     };
-  }, []); // Empty dependency array: runs once on mount, cleans up on unmount 
+ 
+  }, []);
 
   return (
     <div className="news-feed">
