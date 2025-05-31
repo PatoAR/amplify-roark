@@ -9,7 +9,7 @@ const schema = a.schema({
       industry: a.string(),
       summary: a.string(),
       link: a.string(),
-      companies: a.json(),
+      companies: a.string(),
     })
     .authorization((allow) => [allow.publicApiKey()]),
 });

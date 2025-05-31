@@ -30,6 +30,21 @@ function formatLocalTime(timestamp?: string | null): string {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
+// Utility: Normalize and safe JSON Parse
+function normalizeCompanies(companies: string | Record<string, string> | null): Record<string, string> | null {
+  if (!companies) return null;
+  if (typeof companies === 'string') {
+    try {
+      return JSON.parse(companies);
+    } catch (e) {
+      console.warn('⚠️ Failed to parse companies JSON:', companies, e);
+      return null;
+    }
+  }
+  return companies; // already a Record<string, string>
+}
+
+
 function NewsSocketClient() {
   const [messages, setMessages] = useState<ArticleForState[]>([]);
   const [isTabVisible, setIsTabVisible] = useState<boolean>(() => !document.hidden); // Initial state from document.hidden
@@ -110,7 +125,7 @@ function NewsSocketClient() {
                 industry: newArticleData.industry,
                 summary: newArticleData.summary,
                 link: newArticleData.link ?? '#',
-                companies: newArticleData.companies || null,
+                companies: normalizeCompanies(newArticleData.companies),
                 seen: !document.hidden,
               };
 
@@ -146,9 +161,10 @@ function NewsSocketClient() {
                     industry: a.industry,
                     summary: a.summary,
                     link: a.link ?? '#',
-                    companies: a.companies || null,
+                    companies: a.companies ? JSON.parse(a.companies) : null,
                     seen: !document.hidden,
                   }));
+
 
                   return [...formatted, ...prevMessages];
                 });
