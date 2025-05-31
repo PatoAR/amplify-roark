@@ -19,7 +19,7 @@ interface ArticleForState {
   industry?: string | null; 
   summary?: string | null; 
   link: string; 
-  companies?: string | null; 
+  companies?: Record<string, string> | null;
   seen: boolean; // local UI state, non-optional for consistency in state
 }
 
@@ -56,14 +56,14 @@ function NewsSocketClient() {
   }, [messages]);
 
   // Update the document title whenever the unread count or tab visibility changes
+  const unreadCount = messages.filter(msg => !msg.seen).length;
   useEffect(() => {
-    const count = messages.filter(msg => !msg.seen).length;
-    if (!isTabVisible && count > 0) {
-      document.title = `🔥(${count})🔥 Live Markets News Feed`;
+    if (unreadCount > 0) {
+      document.title = `(${unreadCount}) 🔥 Live News Feed`;
     } else {
-      document.title = 'Live Markets News Feed';
+      document.title = 'Live News Feed';
     }
-  }, [messages, isTabVisible]);
+  }, [unreadCount]);
 
   // Track tab visibility
   useEffect(() => {
@@ -110,8 +110,8 @@ function NewsSocketClient() {
                 industry: newArticleData.industry,
                 summary: newArticleData.summary,
                 link: newArticleData.link ?? '#',
-                companies: newArticleData.companies,
-                seen: document.hidden,
+                companies: newArticleData.companies || null,
+                seen: !document.hidden,
               };
 
               setMessages((prevMessages) => {
@@ -146,8 +146,8 @@ function NewsSocketClient() {
                     industry: a.industry,
                     summary: a.summary,
                     link: a.link ?? '#',
-                    companies: a.companies,
-                    seen: document.hidden,
+                    companies: a.companies || null,
+                    seen: !document.hidden,
                   }));
 
                   return [...formatted, ...prevMessages];
@@ -209,6 +209,15 @@ function NewsSocketClient() {
                     <strong className="article-source"> - {msg.source} - </strong>{" "}
                     <strong className="article-title">{msg.title}</strong>{" "}
                     <span className="article-summary">{msg.summary}</span>
+                    {msg.companies && typeof msg.companies === 'object' && (
+                      <span className="article-companies">
+                        {Object.entries(msg.companies).map(([name, url]) => (
+                          <a key={name} href={url} target="_blank" rel="noopener noreferrer" className="company-link">
+                            {name}
+                          </a>
+                        ))}
+                      </span>
+                    )}
                   </p>
                 </motion.div>
               </a>
