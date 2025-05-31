@@ -1,0 +1,2 @@
+- Implement Query and not Scan of articles database
+- Set TTL on articles so the database does not grow forever

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './NewsSocketClient.css';
-
 import { generateClient } from 'aws-amplify/api';
 import { onCreateArticle } from '../../graphql/subscriptions';
 import { OnCreateArticleSubscription } from '../../API';
@@ -30,6 +29,25 @@ function formatLocalTime(timestamp?: string | null): string {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
+// Utility: Check if a timestamp is within the last N hours
+function isRecent(timestamp: string | null | undefined, hours: number): boolean {
+  if (!timestamp) return false;
+  try {
+    const messageTime = new Date(timestamp).getTime();
+    if (isNaN(messageTime)) { // Handle invalid date strings
+        console.warn('⚠️ Invalid timestamp for recency check:', timestamp);
+        return false;
+    }
+    const threshold = Date.now() - hours * 60 * 60 * 1000;
+    return messageTime >= threshold;
+  } catch (e) {
+    console.warn('⚠️ Error parsing timestamp for recency check:', timestamp, e);
+    return false;
+  }
+}
+
+const ARTICLE_RETENTION_HOURS = 12;
+
 // Utility: Normalize and safe JSON Parse
 function normalizeCompanies(companies: string | Record<string, string> | null | undefined): Record<string, string> | null {
   if (!companies) return null;
@@ -55,9 +73,10 @@ function NewsSocketClient() {
     if (saved) {
       try {
         const parsedMessages: ArticleForState[] = JSON.parse(saved);
-        setMessages(parsedMessages);
+        const recentMessages = parsedMessages.filter(msg => isRecent(msg.timestamp, ARTICLE_RETENTION_HOURS));
+        setMessages(recentMessages);
       } catch (e) {
-        console.error("Failed to parse messages from localStorage", e);
+        console.error("Failed to parse messages from localStorage or filter old messages", e);
         localStorage.removeItem('newsMessages'); // Clear corrupted data
       }
     }
