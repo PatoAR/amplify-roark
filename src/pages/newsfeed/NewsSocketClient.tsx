@@ -31,7 +31,7 @@ function formatLocalTime(timestamp?: string | null): string {
 }
 
 // Utility: Normalize and safe JSON Parse
-function normalizeCompanies(companies: string | Record<string, string> | null): Record<string, string> | null {
+function normalizeCompanies(companies: string | Record<string, string> | null | undefined): Record<string, string> | null {
   if (!companies) return null;
   if (typeof companies === 'string') {
     try {
@@ -41,7 +41,7 @@ function normalizeCompanies(companies: string | Record<string, string> | null): 
       return null;
     }
   }
-  return companies; // already a Record<string, string>
+  return companies; // already an object
 }
 
 
@@ -161,7 +161,7 @@ function NewsSocketClient() {
                     industry: a.industry,
                     summary: a.summary,
                     link: a.link ?? '#',
-                    companies: a.companies ? JSON.parse(a.companies) : null,
+                    companies: normalizeCompanies(a.companies),
                     seen: !document.hidden,
                   }));
 
