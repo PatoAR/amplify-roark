@@ -123,12 +123,12 @@
     // Subscribe to new articles
     useEffect(() => {
       let pollingInterval: ReturnType<typeof setInterval> | null = null;
-      let cleanupFn: (() => void) | undefined;
-
+      let subscription: { unsubscribe: () => void } | null = null;
+      
       const subscribeOrPoll = async () => {
-        console.log('🔁 Attempting to establish AppSync subscription...');      
-        const subscription = client
-          .graphql({query: onCreateArticle,})
+        console.log('🔁 Attempting to establish AppSync subscription...');
+        subscription = client
+          .graphql({ query: onCreateArticle })
           .subscribe({
             next: (payload: { data?: OnCreateArticleSubscription | null; errors?: any[] }) => {
               console.log('✅ AppSync subscription active.');
@@ -149,7 +149,7 @@
                 };
 
                 setMessages((prevMessages) => {
-                  if (prevMessages.find(msg => msg.id === newArticleForState.id)) {
+                  if (prevMessages.find((msg) => msg.id === newArticleForState.id)) {
                     return prevMessages;
                   }
                   return [newArticleForState, ...prevMessages];
@@ -158,20 +158,18 @@
             },
             error: async (err: any) => {
               console.error('❌ Subscription failed, falling back to polling:', JSON.stringify(err, null, 2));
-              // Start polling
               pollingInterval = setInterval(async () => {
                 try {
                   const result: any = await client.graphql({ query: listArticles });
                   const articles: ArticleForState[] = result.data?.listArticles?.items || [];
 
-                  setMessages(prevMessages => {
-                    const newMessages = articles.filter((a: ArticleForState) => 
-                      !prevMessages.some(m => m.id === a.id)
+                  setMessages((prevMessages) => {
+                    const newMessages = articles.filter(
+                      (a: ArticleForState) => !prevMessages.some((m) => m.id === a.id)
                     );
 
                     if (newMessages.length === 0) return prevMessages;
-                    
-    
+
                     const formatted = newMessages.map((a: ArticleForState) => ({
                       id: a.id,
                       timestamp: a.timestamp,
@@ -184,36 +182,32 @@
                       seen: !document.hidden,
                     }));
 
-
                     return [...formatted, ...prevMessages];
                   });
                 } catch (pollErr) {
                   console.error('Polling error:', pollErr);
                 }
-              }, 20000); // Poll every 20 seconds
+              }, 20000);
             },
             complete: () => {
               console.log('Subscription ended.');
             },
           });
-      
-        return () => {
-          console.log('Cleaning up subscription and polling fallback...');
-          subscription.unsubscribe();
-          if (pollingInterval) clearInterval(pollingInterval);
-        };
-      };
-    
-      const run = async () => {
-        cleanupFn = await subscribeOrPoll();
       };
 
-      run();
+      subscribeOrPoll();
 
       return () => {
-        if (cleanupFn) cleanupFn();
+        console.log('🧹 Cleaning up on unmount...');
+        if (pollingInterval) {
+          clearInterval(pollingInterval);
+          console.log('🛑 Cleared polling interval.');
+        }
+        if (subscription) {
+          subscription.unsubscribe();
+          console.log('🛑 Unsubscribed from AppSync.');
+        }
       };
-  
     }, []);
 
     return (
