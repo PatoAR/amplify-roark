@@ -20,6 +20,7 @@ export const createArticle = /* GraphQL */ `mutation CreateArticle(
     summary
     link
     companies
+    ttl
     id
     createdAt
     updatedAt
@@ -42,6 +43,7 @@ export const updateArticle = /* GraphQL */ `mutation UpdateArticle(
     summary
     link
     companies
+    ttl
     id
     createdAt
     updatedAt
@@ -64,6 +66,7 @@ export const deleteArticle = /* GraphQL */ `mutation DeleteArticle(
     summary
     link
     companies
+    ttl
     id
     createdAt
     updatedAt

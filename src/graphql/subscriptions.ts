@@ -17,6 +17,7 @@ export const onCreateArticle = /* GraphQL */ `subscription OnCreateArticle($filt
     summary
     link
     companies
+    ttl
     id
     createdAt
     updatedAt
@@ -36,6 +37,7 @@ export const onUpdateArticle = /* GraphQL */ `subscription OnUpdateArticle($filt
     summary
     link
     companies
+    ttl
     id
     createdAt
     updatedAt
@@ -55,6 +57,7 @@ export const onDeleteArticle = /* GraphQL */ `subscription OnDeleteArticle($filt
     summary
     link
     companies
+    ttl
     id
     createdAt
     updatedAt

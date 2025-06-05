@@ -10,6 +10,7 @@ export type CreateArticleInput = {
   summary?: string | null,
   link?: string | null,
   companies?: string | null,
+  ttl?: number | null,
   id?: string | null,
 };
 
@@ -21,6 +22,7 @@ export type ModelArticleConditionInput = {
   summary?: ModelStringInput | null,
   link?: ModelStringInput | null,
   companies?: ModelStringInput | null,
+  ttl?: ModelIntInput | null,
   and?: Array< ModelArticleConditionInput | null > | null,
   or?: Array< ModelArticleConditionInput | null > | null,
   not?: ModelArticleConditionInput | null,
@@ -68,6 +70,18 @@ export type ModelSizeInput = {
   between?: Array< number | null > | null,
 };
 
+export type ModelIntInput = {
+  ne?: number | null,
+  eq?: number | null,
+  le?: number | null,
+  lt?: number | null,
+  ge?: number | null,
+  gt?: number | null,
+  between?: Array< number | null > | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
+};
+
 export type Article = {
   __typename: "Article",
   timestamp?: string | null,
@@ -77,6 +91,7 @@ export type Article = {
   summary?: string | null,
   link?: string | null,
   companies?: string | null,
+  ttl?: number | null,
   id: string,
   createdAt: string,
   updatedAt: string,
@@ -90,6 +105,7 @@ export type UpdateArticleInput = {
   summary?: string | null,
   link?: string | null,
   companies?: string | null,
+  ttl?: number | null,
   id: string,
 };
 
@@ -105,6 +121,7 @@ export type ModelArticleFilterInput = {
   summary?: ModelStringInput | null,
   link?: ModelStringInput | null,
   companies?: ModelStringInput | null,
+  ttl?: ModelIntInput | null,
   id?: ModelIDInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
@@ -143,6 +160,7 @@ export type ModelSubscriptionArticleFilterInput = {
   summary?: ModelSubscriptionStringInput | null,
   link?: ModelSubscriptionStringInput | null,
   companies?: ModelSubscriptionStringInput | null,
+  ttl?: ModelSubscriptionIntInput | null,
   id?: ModelSubscriptionIDInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
@@ -163,6 +181,18 @@ export type ModelSubscriptionStringInput = {
   beginsWith?: string | null,
   in?: Array< string | null > | null,
   notIn?: Array< string | null > | null,
+};
+
+export type ModelSubscriptionIntInput = {
+  ne?: number | null,
+  eq?: number | null,
+  le?: number | null,
+  lt?: number | null,
+  ge?: number | null,
+  gt?: number | null,
+  between?: Array< number | null > | null,
+  in?: Array< number | null > | null,
+  notIn?: Array< number | null > | null,
 };
 
 export type ModelSubscriptionIDInput = {
@@ -195,6 +225,7 @@ export type CreateArticleMutation = {
     summary?: string | null,
     link?: string | null,
     companies?: string | null,
+    ttl?: number | null,
     id: string,
     createdAt: string,
     updatedAt: string,
@@ -216,6 +247,7 @@ export type UpdateArticleMutation = {
     summary?: string | null,
     link?: string | null,
     companies?: string | null,
+    ttl?: number | null,
     id: string,
     createdAt: string,
     updatedAt: string,
@@ -237,6 +269,7 @@ export type DeleteArticleMutation = {
     summary?: string | null,
     link?: string | null,
     companies?: string | null,
+    ttl?: number | null,
     id: string,
     createdAt: string,
     updatedAt: string,
@@ -257,6 +290,7 @@ export type GetArticleQuery = {
     summary?: string | null,
     link?: string | null,
     companies?: string | null,
+    ttl?: number | null,
     id: string,
     createdAt: string,
     updatedAt: string,
@@ -281,6 +315,7 @@ export type ListArticlesQuery = {
       summary?: string | null,
       link?: string | null,
       companies?: string | null,
+      ttl?: number | null,
       id: string,
       createdAt: string,
       updatedAt: string,
@@ -303,6 +338,7 @@ export type OnCreateArticleSubscription = {
     summary?: string | null,
     link?: string | null,
     companies?: string | null,
+    ttl?: number | null,
     id: string,
     createdAt: string,
     updatedAt: string,
@@ -323,6 +359,7 @@ export type OnUpdateArticleSubscription = {
     summary?: string | null,
     link?: string | null,
     companies?: string | null,
+    ttl?: number | null,
     id: string,
     createdAt: string,
     updatedAt: string,
@@ -343,6 +380,7 @@ export type OnDeleteArticleSubscription = {
     summary?: string | null,
     link?: string | null,
     companies?: string | null,
+    ttl?: number | null,
     id: string,
     createdAt: string,
     updatedAt: string,

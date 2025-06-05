@@ -17,6 +17,7 @@ export const getArticle = /* GraphQL */ `query GetArticle($id: ID!) {
     summary
     link
     companies
+    ttl
     id
     createdAt
     updatedAt
@@ -41,6 +42,7 @@ export const listArticles = /* GraphQL */ `query ListArticles(
       summary
       link
       companies
+      ttl
       id
       createdAt
       updatedAt
