@@ -3,5 +3,4 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 
 ## ToDo's
 - Implement Query and not Scan of articles database
-- Set TTL on articles so the database does not grow forever
 - Front end menu button to define countries / industries / companies
