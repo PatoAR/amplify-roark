@@ -58,7 +58,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  margin-right: 0.5rem;
+  margin-right: 0.2rem;
 }
 
 .article-timestamp-wrapper.unseen::before {
@@ -98,7 +98,7 @@
 .article-industry {
   font-size: 0.8rem;
   font-weight: 600;
-  background-color: #e0f2ff;
+  background-color: #eff7ff;
   color: #0077b6;
   padding: 0.2rem;
   border-radius: 4px;
@@ -125,12 +125,13 @@
 
 /* Companies format */
 .article-companies {
-  background-color: #d4f8d4; /* light green */
+  background-color: #eeeeee;
   color: #1a4d1a; /* darker green text for contrast */
-  padding: 2px 6px;
+  padding: 2px 4px;
   border-radius: 4px;
-  margin-left: 6px;
+  margin: 4px 6px 0 0; /* top: 4px, right: 6px, bottom: 0, left: 0 */
   font-size: 0.8em;
+  display: inline-block;
 }
 
 
