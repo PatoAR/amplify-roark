@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './NewsSocketClient.css';
 import { generateClient } from 'aws-amplify/api';
@@ -7,8 +7,6 @@ import { onCreateArticle } from '../../graphql/subscriptions';
 import { Article } from '../../API';
 
 const client = generateClient();
-const ARTICLE_RETENTION_HOURS = 6;
-const MAX_ARTICLES = 30;
 
 interface ArticleForState {
   id: string;
@@ -28,18 +26,6 @@ function formatLocalTime(timestamp?: string | null): string {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-function isRecent(timestamp: string | null | undefined, hours: number): boolean {
-  if (!timestamp) return false;
-  try {
-    const messageTime = new Date(timestamp).getTime();
-    if (isNaN(messageTime)) return false;
-    const threshold = Date.now() - hours * 60 * 60 * 1000;
-    return messageTime >= threshold;
-  } catch {
-    return false;
-  }
-}
-
 function normalizeCompanies(companies: string | Record<string, string> | null | undefined): Record<string, string> | null {
   if (!companies) return null;
   if (typeof companies === 'string') {
@@ -56,14 +42,20 @@ function NewsSocketClient() {
   const [messages, setMessages] = useState<ArticleForState[]>([]);
   const [isTabVisible, setIsTabVisible] = useState<boolean>(() => !document.hidden);
 
+  const messagesRef = useRef<ArticleForState[]>([]);
+  const articleIdsFromSubscriptionRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
   // Load from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem('newsMessages');
     if (saved) {
       try {
         const parsedMessages: ArticleForState[] = JSON.parse(saved);
-        const recentMessages = parsedMessages.filter(msg => isRecent(msg.timestamp, ARTICLE_RETENTION_HOURS));
-        setMessages(recentMessages);
+        setMessages(parsedMessages);
       } catch {
         localStorage.removeItem('newsMessages');
       }
@@ -75,13 +67,12 @@ function NewsSocketClient() {
     if (messages.length > 0 || localStorage.getItem('newsMessages') !== null) {
       const sorted = [...messages]
         .sort((a, b) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime())
-        .slice(0, MAX_ARTICLES); // keep only the newest N articles
       localStorage.setItem('newsMessages', JSON.stringify(sorted));
     }
   }, [messages]);
 
   // Unread counter in tab
-  const unreadCount = messages.filter(msg => !msg.seen).length;
+  const unreadCount = messages.filter(msg => !msg.seen).length;  
   useEffect(() => {
     document.title = unreadCount > 0 ? `(${unreadCount}) 🔥 Live News Feed` : 'Live News Feed';
   }, [unreadCount]);
@@ -107,15 +98,53 @@ function NewsSocketClient() {
   useEffect(() => {
     let unsubscribe: (() => void) | null = null;
     let pollingInterval: ReturnType<typeof setInterval> | null = null;
+    let shadowPoller: ReturnType<typeof setInterval> | null = null;
+    let shadowPollerStopped = false;
+
+    const fetchInitialArticles = async () => {
+      console.log('📰 Fetching initial articles to establish a baseline...');
+      try {
+        const result: any = await client.graphql({ query: listArticles });
+        const articles: Article[] = result.data?.listArticles?.items || [];
+        
+        const formatted = articles.map(a => ({
+          id: a.id,
+          timestamp: a.timestamp,
+          source: a.source,
+          title: a.title,
+          industry: a.industry,
+          summary: a.summary,
+          link: a.link ?? '#',
+          companies: normalizeCompanies(a.companies),
+          seen: true, // Mark initial articles as "seen"
+        }));
+
+        // Sort from newest to oldest by timestamp
+        const now = new Date().getTime();
+        const sorted = formatted.sort((a, b) =>
+          new Date(b.timestamp ?? now).getTime() - new Date(a.timestamp ?? now).getTime()
+        );
+            
+        setMessages(sorted);
+        console.log(`✅ Baseline established with ${formatted.length} articles.`);
+      } catch (err) {
+        console.error('Initial article fetch failed:', err);
+      }
+    };
 
     const startPolling = () => {
+      console.log('🔄 Starting polling mode.');
       const fetchArticles = async () => {
         try {
           const result: any = await client.graphql({ query: listArticles });
           const articles: Article[] = result.data?.listArticles?.items || [];
+          
           setMessages(prevMessages => {
-            const newMessages = articles.filter(a => !prevMessages.some(m => m.id === a.id));
+            const existingIds = new Set(prevMessages.map(m => m.id));
+            const newMessages = articles.filter(a => !existingIds.has(a.id));
+
             if (newMessages.length === 0) return prevMessages;
+
             const formatted = newMessages.map(a => ({
               id: a.id,
               timestamp: a.timestamp,
@@ -127,14 +156,19 @@ function NewsSocketClient() {
               companies: normalizeCompanies(a.companies),
               seen: !document.hidden,
             }));
-            return [...formatted, ...prevMessages];
+
+            const now = Date.now();
+            const sorted = formatted.sort((a, b) =>
+              new Date(b.timestamp ?? now).getTime() - new Date(a.timestamp ?? now).getTime()
+            );
+            return [...sorted, ...prevMessages];
           });
         } catch (err) {
           console.error('Polling error:', err);
         }
       };
+      if (pollingInterval) clearInterval(pollingInterval);
       pollingInterval = setInterval(fetchArticles, 20000);
-      fetchArticles(); // initial
     };
     
     const trySubscribe = () => {
@@ -142,9 +176,12 @@ function NewsSocketClient() {
       try {
         const sub = client.graphql({ query: onCreateArticle }).subscribe({
           next: ({ data }) => {
-            console.log('🟢 AppSync live: waiting for news...');
+            console.log('🟢 AppSync live: receiving news...');
             const article = data?.onCreateArticle;
             if (!article) return;
+            
+            articleIdsFromSubscriptionRef.current.add(article.id);
+
             const formatted = {
               id: article.id,
               timestamp: article.timestamp,
@@ -159,23 +196,72 @@ function NewsSocketClient() {
             setMessages(prev => [formatted, ...prev]);
           },
           error: (err) => {
-            console.error('WebSocket error, falling back to polling:', err);
+            console.error('WebSocket error:', err);
             startPolling();
           }
         });
+        
         unsubscribe = () => sub.unsubscribe();
 
+        // Start shadow poller to verify WebSocket reliability
+        shadowPoller = setInterval(async () => {
+          if (shadowPollerStopped) {
+            clearInterval(shadowPoller!);
+            return;
+          }
+          try {
+            // Fetch the latest articles from the server (the ground truth)
+            const result: any = await client.graphql({ query: listArticles });
+            const articlesFromServer: Article[] = result.data?.listArticles?.items || [];
+            
+            // Identify new articles that are not yet known
+            const newServerArticles = articlesFromServer.filter(
+              a => !messagesRef.current.find(m => m.id === a.id)
+            );
+
+            // If any of these new articles were NOT received via WebSocket
+            const missedArticle = newServerArticles.find(
+              a => !articleIdsFromSubscriptionRef.current.has(a.id)
+            );
+
+            if (missedArticle) {
+              console.warn(`⚠️ WebSocket missed article ${missedArticle.id}. Switching to polling.`);
+              unsubscribe?.(); // Stop the failing subscription
+              startPolling();   // Start the reliable polling
+              
+              shadowPollerStopped = true; // Stop this shadow poller
+              clearInterval(shadowPoller!);
+              return;
+            }
+            // SUCCESS CASE: If we have recent articles, check if the latest one came via WebSocket.
+            // This confirms the WebSocket is reliable.
+            if (newServerArticles.length > 0) {
+                 console.log('✅ WebSocket appears reliable. Stopping shadow poller.');
+                 shadowPollerStopped = true;
+                 clearInterval(shadowPoller!);
+            }
+          } catch (err) {
+            console.error('Shadow poller error:', err);
+          }
+        }, 60000); // Keep the polling interval
+     
       } catch (err) {
         console.error('Subscription setup failed, falling back to polling:', err);
         startPolling();
       }
     };
   
-    trySubscribe();
+    const initialize = async () => {
+      await fetchInitialArticles();
+      trySubscribe();
+    };
+
+    initialize();
 
     return () => {
       unsubscribe?.();
       if (pollingInterval) clearInterval(pollingInterval);
+      if (shadowPoller) clearInterval(shadowPoller);
     };
   }, []);
 

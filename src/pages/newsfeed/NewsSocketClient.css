@@ -98,9 +98,9 @@
 .article-industry {
   font-size: 0.8rem;
   font-weight: 600;
-  background-color: #eff7ff;
+  background-color: #eeeeee;
   color: #0077b6;
-  padding: 0.2rem;
+  padding: 0px 5px 2px 5px;
   border-radius: 4px;
 }
 
