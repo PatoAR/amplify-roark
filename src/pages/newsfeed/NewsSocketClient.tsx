@@ -180,20 +180,23 @@ function NewsSocketClient() {
             const article = data?.onCreateArticle;
             if (!article) return;
             
-            articleIdsFromSubscriptionRef.current.add(article.id);
+            if (!messagesRef.current.some(msg => msg.id === article.id) && !articleIdsFromSubscriptionRef.current.has(article.id)) {
 
-            const formatted = {
-              id: article.id,
-              timestamp: article.timestamp,
-              source: article.source,
-              title: article.title,
-              industry: article.industry,
-              summary: article.summary,
-              link: article.link ?? '#',
-              companies: normalizeCompanies(article.companies),
-              seen: !document.hidden,
-            };
-            setMessages(prev => [formatted, ...prev]);
+              articleIdsFromSubscriptionRef.current.add(article.id);
+
+              const formatted = {
+                id: article.id,
+                timestamp: article.timestamp,
+                source: article.source,
+                title: article.title,
+                industry: article.industry,
+                summary: article.summary,
+                link: article.link ?? '#',
+                companies: normalizeCompanies(article.companies),
+                seen: !document.hidden,
+              };
+              setMessages(prev => [formatted, ...prev]);
+            }
           },
           error: (err) => {
             console.error('WebSocket error:', err);

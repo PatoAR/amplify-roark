@@ -3,11 +3,19 @@
   position: fixed;
   z-index: 10;
   top: 0;
-  width: 100%;
   height: 50px;
   padding: 0 var(--space-lg);
   box-shadow: var(--box-shadow-sm);
-  max-width: 1240px;
+  width: 100%;
+  max-width: 1280px; /* Match the max-width of the body */
+  left: 0; /* Set left boundary */
+  right: 0; /* Set right boundary */
+  margin-left: auto; /* Center horizontally */
+  margin-right: auto; /* Center horizontally */
+}
+
+.header > .amplify-flex {
+  width: 100%;
 }
 
 @media (max-width: 1024px) {
@@ -20,6 +28,13 @@
   display: flex;
   align-items: center;
   gap: var(--space-md);
+}
+
+.header-center {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .header-avatar {
@@ -51,7 +66,7 @@
   align-items: center;
   gap: var(--space-sm);
 }
-.header-left .logo-title { /* Class for the "Logo" span */
+.header-left .logo-title {
   text-transform: uppercase;
   font-weight: 600;
   font-size: var(--font-size-md);

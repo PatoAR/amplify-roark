@@ -22,11 +22,13 @@ const Header = () => {
               <img src={Logo} alt="Logo" />
             </Link>
           </div>
-          <span>Logo</span>
+        </div>
+
+        <div className="header-center">
+          <HeaderSearchBar />
         </div>
 
         <div className="header-right">
-          <HeaderSearchBar />
           <HeaderNav />
         </div>
       </Flex>

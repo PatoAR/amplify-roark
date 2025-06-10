@@ -1,6 +1,7 @@
 
 .layout-container {
     background-color: var(--amplify-colors-background-tertiary);
+    max-width: 1280px;
 }
 
 .page-container {

@@ -1,5 +1,6 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
+import Header from "../Header"
 import "./Layout.css";
 
 export interface LayoutProps {
@@ -9,6 +10,7 @@ export interface LayoutProps {
 const Layout = () => {
   return (
     <div className="layout-container">
+      <Header />
       <div className="page-container">
         <Outlet />
       </div>
