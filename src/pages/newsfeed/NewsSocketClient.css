@@ -1,8 +1,8 @@
 /* Main feed container */
 .news-feed {
-  margin-top: 1.5rem;
+  margin-top: 2rem;
   padding: 2rem 1.5rem;
-  max-width: 900px;
+  max-width: 1000px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -121,15 +121,16 @@
 .article-summary {
   color: #444;
   font-weight: 400;
+  margin-right: 6px;
 }
 
 /* Companies format */
 .article-companies {
   background-color: #eeeeee;
   color: #1a4d1a; /* darker green text for contrast */
-  padding: 2px 4px;
+  padding: 0px 4px;
   border-radius: 4px;
-  margin: 4px 6px 0 0; /* top: 4px, right: 6px, bottom: 0, left: 0 */
+  margin-right: 6px;
   font-size: 0.8em;
   display: inline-block;
 }

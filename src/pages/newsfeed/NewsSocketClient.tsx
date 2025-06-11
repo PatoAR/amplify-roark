@@ -279,43 +279,36 @@ function NewsSocketClient() {
         <div className="articles-container">
           <AnimatePresence initial={false}>
             {messages.map((msg) => (
-              <div 
-                key={msg.id} 
-                className="article-link"
-                onClick={() => window.open(msg.link, '_blank')}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') window.open(msg.link, '_blank');
-                }}>
-                <motion.div
-                  layout="position"
-                  className={`article-card ${msg.seen ? '' : 'unseen'}`}
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10, transition: { duration: 0.3 } }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <p className="article-line">
-                    <span className="article-industry">{msg.industry}</span>{" "}
-                    <span className={`article-timestamp-wrapper ${!msg.seen ? 'unseen' : ''}`}>
-                      <span className="article-timestamp">{formatLocalTime(msg.timestamp)}</span>
-                    </span>
+              <motion.div
+                key={msg.id}
+                layout="position"
+                className={`article-card ${msg.seen ? '' : 'unseen'}`}
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10, transition: { duration: 0.3 } }}
+                transition={{ duration: 0.5 }}
+              >
+                <p className="article-line">
+                  <span className="article-industry">{msg.industry}</span>{" "}
+                  <span className={`article-timestamp-wrapper ${!msg.seen ? 'unseen' : ''}`}>
+                    <span className="article-timestamp">{formatLocalTime(msg.timestamp)}</span>
+                  </span>
+                  <a href={msg.link} target="_blank" rel="noopener noreferrer" className="article-title-link">
                     <strong className="article-source">| {msg.source} - </strong>{" "}
-                    <strong className="article-title">{msg.title}</strong>{" "}
-                    <span className="article-summary">{msg.summary}</span>
-                    {msg.companies && typeof msg.companies === 'object' && (
-                      <>
-                        {Object.entries(msg.companies).map(([name, url]) => (
-                          <a key={name} href={url} target="_blank" rel="noopener noreferrer" className="article-companies">
-                            {name}
-                          </a>
-                        ))}
-                      </>
-                    )}
-                  </p>
-                </motion.div>
-              </div>
+                    <strong className="article-title">{msg.title}</strong>
+                    <span className="article-summary">{msg.summary}</span>{" "}
+                  </a>
+                  {msg.companies && typeof msg.companies === 'object' && (
+                    <>
+                      {Object.entries(msg.companies).map(([name, url]) => (
+                        <a key={name} href={url} target="_blank" rel="noopener noreferrer" className="article-companies">
+                          {name}
+                        </a>
+                      ))}
+                    </>
+                  )}
+                </p>
+              </motion.div>
             ))}
           </AnimatePresence>
         </div>

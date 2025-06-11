@@ -1,17 +1,11 @@
 .header {
-  background-color: var(--amplify-colors-background-tertiary);
+  background-color: white;
   position: fixed;
   z-index: 10;
   top: 0;
   height: 50px;
-  padding: 0 var(--space-lg);
-  box-shadow: var(--box-shadow-sm);
   width: 100%;
-  max-width: 1280px; /* Match the max-width of the body */
-  left: 0; /* Set left boundary */
-  right: 0; /* Set right boundary */
-  margin-left: auto; /* Center horizontally */
-  margin-right: auto; /* Center horizontally */
+  max-width: 1000px;
 }
 
 .header > .amplify-flex {
@@ -20,7 +14,7 @@
 
 @media (max-width: 1024px) {
   .header {
-    padding: 0 var(--space-md) 0 calc(var(--space-md) + 50px);
+    padding: 0 var(--space-md);
   }
 }
 
