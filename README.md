@@ -3,3 +3,18 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 
 ## ToDo's
 - Front end menu button to define countries / industries / companies
+
+## CLI
+https://docs.amplify.aws/react/reference/cli-commands/
+- npm run dev : local client-side development
+
+- npx amplify sandbox : deploys to backend sandbox
+    > redeploys on changes on files in amplify folder
+    > updates amplify_outputs.json
+    > need to add aws-exports.js to amplify_outputs.json when deploying to AWS
+
+- npx ampx generate graphql-client-code --format graphql-codegen --out ./src/graphql/ 
+    > generates API.ts, and graphql files based on local schema and amplify_outputs.json
+
+- npx @aws-amplify/cli codegen 
+    > downloads schema from the server

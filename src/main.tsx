@@ -1,19 +1,37 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.tsx"
-import "./index.css";
 import { Amplify } from "aws-amplify";
-import config from './aws-exports';
 import { BrowserRouter } from 'react-router-dom';
+//import { ResourcesConfig } from 'aws-amplify';
+import { Authenticator, View, Image } from '@aws-amplify/ui-react';
+import App from "./App.tsx"
+import BaseLogo from "./assets/BaseLogo.png"
+//import config from './aws-exports';
+import outputs from './amplify_outputs.json';
 import '@aws-amplify/ui-react/styles.css';
-import { ResourcesConfig } from 'aws-amplify';
+import "./index.css";
 
-Amplify.configure(config as ResourcesConfig);
+Amplify.configure(outputs);
+
+// Custom Header component for the Authenticator
+const components = {
+  Header() {
+    return (
+      <p></p>  
+    );
+  },
+  Footer() {
+    return (
+    <p></p>
+  )}
+};
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <Authenticator components={components}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+    </Authenticator>
   </React.StrictMode>
-)
+);
