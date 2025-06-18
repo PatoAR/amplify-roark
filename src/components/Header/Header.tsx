@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import "./Header.css";
 
 //import Logo from "../../assets/react.svg";
-import Logo from "../../assets/BaseLogo_Clean_one.png";
+import Logo from "../../assets/BaseLogo_Clean_One.png";
 import HeaderNav from "./HeaderNav";
 import HeaderSearchBar from "./HeaderSearchBar";
 
