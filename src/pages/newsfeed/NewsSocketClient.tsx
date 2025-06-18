@@ -1,12 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './NewsSocketClient.css';
-import { generateClient } from 'aws-amplify/api';
 import { listArticles } from '../../graphql/queries';
 import { onCreateArticle } from '../../graphql/subscriptions';
 import { Article } from '../../API';
-
-const client = generateClient();
+import { client } from "./../../amplify-client"
 
 interface ArticleForState {
   id: string;

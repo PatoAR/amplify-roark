@@ -4,7 +4,7 @@ import { Amplify } from "aws-amplify";
 import { BrowserRouter } from 'react-router-dom';
 import { Authenticator } from '@aws-amplify/ui-react';
 import App from "./App.tsx"
-import outputs from './amplify_outputs.json';
+import outputs from '../amplify_outputs.json';
 import '@aws-amplify/ui-react/styles.css';
 import "./index.css";
 

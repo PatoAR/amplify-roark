@@ -3,11 +3,7 @@ import { Menu, MenuItem, Divider, Button, CheckboxField } from "@aws-amplify/ui-
 import { useNavigate } from "react-router-dom";
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import Modal from './Modal'
-
-// Import the client and schema types from the generated files
-import { generateClient } from "aws-amplify/api";
-import { type Schema } from "../../../amplify/data/resource";
-const client = generateClient<Schema>();
+import { client } from "./../../amplify-client"
 
 const INDUSTRY_OPTIONS = [
   { id: 'tech', label: 'Technology' },
