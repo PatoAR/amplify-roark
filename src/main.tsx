@@ -3,9 +3,8 @@ import ReactDOM from "react-dom/client";
 import { Amplify } from "aws-amplify";
 import { BrowserRouter } from 'react-router-dom';
 //import { ResourcesConfig } from 'aws-amplify';
-import { Authenticator, View, Image } from '@aws-amplify/ui-react';
+import { Authenticator } from '@aws-amplify/ui-react';
 import App from "./App.tsx"
-import BaseLogo from "./assets/BaseLogo.png"
 //import config from './aws-exports';
 import outputs from './amplify_outputs.json';
 import '@aws-amplify/ui-react/styles.css';
