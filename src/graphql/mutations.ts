@@ -9,20 +9,20 @@ type GeneratedMutation<InputType, OutputType> = string & {
 };
 
 export const createArticle = /* GraphQL */ `mutation CreateArticle(
-  $condition: ModelArticleConditionInput
   $input: CreateArticleInput!
+  $condition: ModelArticleConditionInput
 ) {
-  createArticle(condition: $condition, input: $input) {
-    companies
-    createdAt
-    id
-    industry
-    link
-    source
-    summary
+  createArticle(input: $input, condition: $condition) {
     timestamp
+    source
     title
+    industry
+    summary
+    link
+    companies
     ttl
+    id
+    createdAt
     updatedAt
     __typename
   }
@@ -31,80 +31,21 @@ export const createArticle = /* GraphQL */ `mutation CreateArticle(
   APITypes.CreateArticleMutationVariables,
   APITypes.CreateArticleMutation
 >;
-export const createUserProfile = /* GraphQL */ `mutation CreateUserProfile(
-  $condition: ModelUserProfileConditionInput
-  $input: CreateUserProfileInput!
-) {
-  createUserProfile(condition: $condition, input: $input) {
-    countryPreferences
-    createdAt
-    id
-    industryPreferences
-    owner
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.CreateUserProfileMutationVariables,
-  APITypes.CreateUserProfileMutation
->;
-export const deleteArticle = /* GraphQL */ `mutation DeleteArticle(
-  $condition: ModelArticleConditionInput
-  $input: DeleteArticleInput!
-) {
-  deleteArticle(condition: $condition, input: $input) {
-    companies
-    createdAt
-    id
-    industry
-    link
-    source
-    summary
-    timestamp
-    title
-    ttl
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.DeleteArticleMutationVariables,
-  APITypes.DeleteArticleMutation
->;
-export const deleteUserProfile = /* GraphQL */ `mutation DeleteUserProfile(
-  $condition: ModelUserProfileConditionInput
-  $input: DeleteUserProfileInput!
-) {
-  deleteUserProfile(condition: $condition, input: $input) {
-    countryPreferences
-    createdAt
-    id
-    industryPreferences
-    owner
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.DeleteUserProfileMutationVariables,
-  APITypes.DeleteUserProfileMutation
->;
 export const updateArticle = /* GraphQL */ `mutation UpdateArticle(
-  $condition: ModelArticleConditionInput
   $input: UpdateArticleInput!
+  $condition: ModelArticleConditionInput
 ) {
-  updateArticle(condition: $condition, input: $input) {
-    companies
-    createdAt
-    id
-    industry
-    link
-    source
-    summary
+  updateArticle(input: $input, condition: $condition) {
     timestamp
+    source
     title
+    industry
+    summary
+    link
+    companies
     ttl
+    id
+    createdAt
     updatedAt
     __typename
   }
@@ -113,21 +54,80 @@ export const updateArticle = /* GraphQL */ `mutation UpdateArticle(
   APITypes.UpdateArticleMutationVariables,
   APITypes.UpdateArticleMutation
 >;
-export const updateUserProfile = /* GraphQL */ `mutation UpdateUserProfile(
-  $condition: ModelUserProfileConditionInput
-  $input: UpdateUserProfileInput!
+export const deleteArticle = /* GraphQL */ `mutation DeleteArticle(
+  $input: DeleteArticleInput!
+  $condition: ModelArticleConditionInput
 ) {
-  updateUserProfile(condition: $condition, input: $input) {
-    countryPreferences
-    createdAt
+  deleteArticle(input: $input, condition: $condition) {
+    timestamp
+    source
+    title
+    industry
+    summary
+    link
+    companies
+    ttl
     id
-    industryPreferences
-    owner
+    createdAt
     updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteArticleMutationVariables,
+  APITypes.DeleteArticleMutation
+>;
+export const createUserProfile = /* GraphQL */ `mutation CreateUserProfile(
+  $input: CreateUserProfileInput!
+  $condition: ModelUserProfileConditionInput
+) {
+  createUserProfile(input: $input, condition: $condition) {
+    industryPreferences
+    countryPreferences
+    id
+    createdAt
+    updatedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateUserProfileMutationVariables,
+  APITypes.CreateUserProfileMutation
+>;
+export const updateUserProfile = /* GraphQL */ `mutation UpdateUserProfile(
+  $input: UpdateUserProfileInput!
+  $condition: ModelUserProfileConditionInput
+) {
+  updateUserProfile(input: $input, condition: $condition) {
+    industryPreferences
+    countryPreferences
+    id
+    createdAt
+    updatedAt
+    owner
     __typename
   }
 }
 ` as GeneratedMutation<
   APITypes.UpdateUserProfileMutationVariables,
   APITypes.UpdateUserProfileMutation
+>;
+export const deleteUserProfile = /* GraphQL */ `mutation DeleteUserProfile(
+  $input: DeleteUserProfileInput!
+  $condition: ModelUserProfileConditionInput
+) {
+  deleteUserProfile(input: $input, condition: $condition) {
+    industryPreferences
+    countryPreferences
+    id
+    createdAt
+    updatedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteUserProfileMutationVariables,
+  APITypes.DeleteUserProfileMutation
 >;

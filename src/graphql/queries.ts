@@ -10,16 +10,16 @@ type GeneratedQuery<InputType, OutputType> = string & {
 
 export const getArticle = /* GraphQL */ `query GetArticle($id: ID!) {
   getArticle(id: $id) {
-    companies
-    createdAt
-    id
-    industry
-    link
-    source
-    summary
     timestamp
+    source
     title
+    industry
+    summary
+    link
+    companies
     ttl
+    id
+    createdAt
     updatedAt
     __typename
   }
@@ -28,21 +28,6 @@ export const getArticle = /* GraphQL */ `query GetArticle($id: ID!) {
   APITypes.GetArticleQueryVariables,
   APITypes.GetArticleQuery
 >;
-export const getUserProfile = /* GraphQL */ `query GetUserProfile($id: ID!) {
-  getUserProfile(id: $id) {
-    countryPreferences
-    createdAt
-    id
-    industryPreferences
-    owner
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.GetUserProfileQueryVariables,
-  APITypes.GetUserProfileQuery
->;
 export const listArticles = /* GraphQL */ `query ListArticles(
   $filter: ModelArticleFilterInput
   $limit: Int
@@ -50,16 +35,16 @@ export const listArticles = /* GraphQL */ `query ListArticles(
 ) {
   listArticles(filter: $filter, limit: $limit, nextToken: $nextToken) {
     items {
-      companies
-      createdAt
-      id
-      industry
-      link
-      source
-      summary
       timestamp
+      source
       title
+      industry
+      summary
+      link
+      companies
       ttl
+      id
+      createdAt
       updatedAt
       __typename
     }
@@ -71,6 +56,21 @@ export const listArticles = /* GraphQL */ `query ListArticles(
   APITypes.ListArticlesQueryVariables,
   APITypes.ListArticlesQuery
 >;
+export const getUserProfile = /* GraphQL */ `query GetUserProfile($id: ID!) {
+  getUserProfile(id: $id) {
+    industryPreferences
+    countryPreferences
+    id
+    createdAt
+    updatedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetUserProfileQueryVariables,
+  APITypes.GetUserProfileQuery
+>;
 export const listUserProfiles = /* GraphQL */ `query ListUserProfiles(
   $filter: ModelUserProfileFilterInput
   $limit: Int
@@ -78,12 +78,12 @@ export const listUserProfiles = /* GraphQL */ `query ListUserProfiles(
 ) {
   listUserProfiles(filter: $filter, limit: $limit, nextToken: $nextToken) {
     items {
-      countryPreferences
-      createdAt
-      id
       industryPreferences
-      owner
+      countryPreferences
+      id
+      createdAt
       updatedAt
+      owner
       __typename
     }
     nextToken
