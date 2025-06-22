@@ -3,7 +3,7 @@ import { Menu, MenuItem, Divider, Button, CheckboxField } from "@aws-amplify/ui-
 import { useNavigate } from "react-router-dom";
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import Modal from './Modal'
-import { client } from "./../../amplify-client"
+import { authClient } from "./../../amplify-client"
 
 const INDUSTRY_OPTIONS = [
   { id: 'tech', label: 'Technology' },
@@ -25,10 +25,13 @@ const HeaderNav = () => {
   const loadUserPreferences = async (cognitoUserId: string) => {
     try {
       // Query for the specific user's profile using the automatically added 'owner' field
-      const { data: userProfiles, errors } = await client.models.UserProfile.list({
+      const { data: userProfiles, errors } = await authClient.models.UserProfile.list({
         filter: { owner: { eq: cognitoUserId } }
       });
 
+      console.log ("Cognito UserId:", cognitoUserId);
+      console.log ("User profiles:", userProfiles);
+      
       if (errors){
         console.log ("Error fetching user profile:", errors);
         return;
@@ -56,6 +59,7 @@ const HeaderNav = () => {
   // Load preferences when the component mounts or user changes
   useEffect(() => {
     if (user && user.userId) { // Only load if a user is logged in
+      console.log("Loading user preferences at mount or change");
       loadUserPreferences(user.userId);
     } else {
       setSelectedIndustries([]);
@@ -95,7 +99,7 @@ const HeaderNav = () => {
     try {
       if (userProfileId) {
         // Update existing profile
-        const { data, errors } = await client.models.UserProfile.update({
+        const { data, errors } = await authClient.models.UserProfile.update({
           id: userProfileId,
           industryPreferences: selectedIndustries
         });
@@ -106,7 +110,7 @@ const HeaderNav = () => {
         }
       } else {
         // Create a new profile if one doesn't exist
-        const { data, errors } = await client.models.UserProfile.create({
+        const { data, errors } = await authClient.models.UserProfile.create({
           industryPreferences: selectedIndustries,
         });
         if (errors) {

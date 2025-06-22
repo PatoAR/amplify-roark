@@ -4,7 +4,7 @@ import './NewsSocketClient.css';
 import { listArticles } from '../../graphql/queries';
 import { onCreateArticle } from '../../graphql/subscriptions';
 import { Article } from '../../API';
-import { client } from "./../../amplify-client"
+import { publicClient } from "./../../amplify-client"
 
 interface ArticleForState {
   id: string;
@@ -102,7 +102,7 @@ function NewsSocketClient() {
     const fetchInitialArticles = async () => {
       console.log('📰 Fetching initial articles to establish a baseline...');
       try {
-        const result: any = await client.graphql({ query: listArticles });
+        const result: any = await publicClient.graphql({ query: listArticles });
         const articles: Article[] = result.data?.listArticles?.items || [];
         
         const formatted = articles.map(a => ({
@@ -134,7 +134,7 @@ function NewsSocketClient() {
       console.log('🔄 Starting polling mode.');
       const fetchArticles = async () => {
         try {
-          const result: any = await client.graphql({ query: listArticles });
+          const result: any = await publicClient.graphql({ query: listArticles });
           const articles: Article[] = result.data?.listArticles?.items || [];
           
           setMessages(prevMessages => {
@@ -172,7 +172,7 @@ function NewsSocketClient() {
     const trySubscribe = () => {
       console.log('🔁 Attempting to establish AppSync subscription...');
       try {
-        const sub = client.graphql({ query: onCreateArticle }).subscribe({
+        const sub = publicClient.graphql({ query: onCreateArticle }).subscribe({
           next: ({ data }) => {
             console.log('🟢 AppSync live: receiving news...');
             const article = data?.onCreateArticle;
@@ -212,7 +212,7 @@ function NewsSocketClient() {
           }
           try {
             // Fetch the latest articles from the server (the ground truth)
-            const result: any = await client.graphql({ query: listArticles });
+            const result: any = await publicClient.graphql({ query: listArticles });
             const articlesFromServer: Article[] = result.data?.listArticles?.items || [];
             
             // Identify new articles that are not yet known
@@ -269,10 +269,10 @@ function NewsSocketClient() {
   return (
     <div className="news-feed">
       {messages.length === 0 ? (
-        <>
+        <div className="articles-container">
           <h1 className="news-feed-title">📡 Live News Feed</h1>
           <p className="no-news">🕓 Waiting for news...</p>
-        </>
+        </div>
       ) : (
         <div className="articles-container">
           <AnimatePresence initial={false}>

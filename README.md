@@ -7,6 +7,7 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 
 ## CLI
 https://docs.amplify.aws/react/reference/cli-commands/
+
 - npm run dev : local client-side development
 
 - npx amplify sandbox : deploys to backend sandbox

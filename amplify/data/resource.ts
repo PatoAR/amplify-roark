@@ -21,10 +21,11 @@ const schema = a.schema({
   // UserProfile Model
   UserProfile: a
   .model({
+    owner: a.string(),
     industryPreferences: a.string().array(), // An array of strings for industry IDs
     countryPreferences: a.string().array(), // An array of strings for country IDs
   })
-  .authorization(allow => [allow.owner()]),
+  .authorization(allow => [allow.owner().identityClaim('sub')]),
 });
 
 export type Schema = ClientSchema<typeof schema>;
