@@ -1,10 +1,12 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import './NewsSocketClient.css';
 import { listArticles } from '../../graphql/queries';
 import { onCreateArticle } from '../../graphql/subscriptions';
 import { Article } from '../../API';
 import { publicClient } from "./../../amplify-client"
+import { useUserPreferences } from '../../context/UserPreferencesContext';
+import { useAuthenticator } from '@aws-amplify/ui-react';
+import './NewsSocketClient.css';
 
 interface ArticleForState {
   id: string;
@@ -15,6 +17,8 @@ interface ArticleForState {
   summary?: string | null;
   link: string;
   companies?: Record<string, string> | null;
+  countries?: Record<string, string> | null;
+  language: string;
   seen: boolean;
 }
 
@@ -22,6 +26,18 @@ function formatLocalTime(timestamp?: string | null): string {
   if (!timestamp) return '';
   const date = new Date(timestamp);
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function normalizeCountries(countries: string | Record<string, string> | null | undefined): Record<string, string> | null {
+  if (!countries) return null;
+  if (typeof countries === 'string') {
+    try {
+      return JSON.parse(countries);
+    } catch {
+      return null;
+    }
+  }
+  return countries;
 }
 
 function normalizeCompanies(companies: string | Record<string, string> | null | undefined): Record<string, string> | null {
@@ -42,23 +58,18 @@ function NewsSocketClient() {
 
   const messagesRef = useRef<ArticleForState[]>([]);
   const articleIdsFromSubscriptionRef = useRef<Set<string>>(new Set());
+  const { user } = useAuthenticator(); 
+  const { preferences, isLoading } = useUserPreferences();
 
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
 
-  // Load from localStorage on mount
+  // When a new user logs in, clear the old cache and message state.
   useEffect(() => {
-    const saved = localStorage.getItem('newsMessages');
-    if (saved) {
-      try {
-        const parsedMessages: ArticleForState[] = JSON.parse(saved);
-        setMessages(parsedMessages);
-      } catch {
-        localStorage.removeItem('newsMessages');
-      }
-    }
-  }, []);
+    setMessages([]);
+    localStorage.removeItem('newsMessages');
+  }, [user]);
 
   // Save to localStorage
   useEffect(() => {
@@ -114,6 +125,8 @@ function NewsSocketClient() {
           summary: a.summary,
           link: a.link ?? '#',
           companies: normalizeCompanies(a.companies),
+          countries: normalizeCountries(a.countries),
+          language: a.language ?? 'N/A',
           seen: true, // Mark initial articles as "seen"
         }));
 
@@ -152,6 +165,8 @@ function NewsSocketClient() {
               summary: a.summary,
               link: a.link ?? '#',
               companies: normalizeCompanies(a.companies),
+              countries: normalizeCountries(a.countries),
+              language: a.language ?? 'N/A',
               seen: !document.hidden,
             }));
 
@@ -191,6 +206,8 @@ function NewsSocketClient() {
                 summary: article.summary,
                 link: article.link ?? '#',
                 companies: normalizeCompanies(article.companies),
+                countries: normalizeCountries(article.countries),
+                language: article.language ?? 'N/A',
                 seen: !document.hidden,
               };
               setMessages(prev => [formatted, ...prev]);
@@ -224,7 +241,7 @@ function NewsSocketClient() {
             const missedArticle = newServerArticles.find(
               a => !articleIdsFromSubscriptionRef.current.has(a.id)
             );
-
+      
             if (missedArticle) {
               console.warn(`⚠️ WebSocket missed article ${missedArticle.id}. Switching to polling.`);
               unsubscribe?.(); // Stop the failing subscription
@@ -266,17 +283,38 @@ function NewsSocketClient() {
     };
   }, []);
 
+  const filteredMessages = messages.filter(msg => {
+    // While preferences are loading, show nothing to avoid a flicker of unfiltered content.
+    if (isLoading) {
+      return false;
+    }
+
+    const industryMatch = preferences.industries.length === 0 ||
+                          (msg.industry && preferences.industries.includes(msg.industry));
+
+    const articleCountries = msg.countries ? Object.keys(msg.countries) : [];
+    const countryMatch = preferences.countries.length === 0 ||
+                         articleCountries.some(code => preferences.countries.includes(code));
+
+    return industryMatch && countryMatch;
+  });
+
   return (
     <div className="news-feed">
-      {messages.length === 0 ? (
+      {filteredMessages.length === 0 ? (
         <div className="articles-container">
           <h1 className="news-feed-title">📡 Live News Feed</h1>
-          <p className="no-news">🕓 Waiting for news...</p>
+          <p className="no-news">
+            {isLoading 
+              ? "Loading preferences..." 
+              : (messages.length > 0 ? "No articles match your current filters." : "🕓 Waiting for news...")
+            }
+          </p>
         </div>
       ) : (
         <div className="articles-container">
           <AnimatePresence initial={false}>
-            {messages.map((msg) => (
+            {filteredMessages.map((msg) => (
               <motion.div
                 key={msg.id}
                 layout="position"

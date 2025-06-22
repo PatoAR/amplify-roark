@@ -11,6 +11,8 @@ const schema = a.schema({
     summary: a.string(),
     link: a.string(),
     companies: a.string(),
+    countries: a.string(),
+    language: a.string(),
     ttl: a.integer(),
   })
   .authorization((allow) => [
