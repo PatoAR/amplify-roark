@@ -20,6 +20,8 @@ export const createArticle = /* GraphQL */ `mutation CreateArticle(
     summary
     link
     companies
+    countries
+    language
     ttl
     id
     createdAt
@@ -43,6 +45,8 @@ export const updateArticle = /* GraphQL */ `mutation UpdateArticle(
     summary
     link
     companies
+    countries
+    language
     ttl
     id
     createdAt
@@ -66,6 +70,8 @@ export const deleteArticle = /* GraphQL */ `mutation DeleteArticle(
     summary
     link
     companies
+    countries
+    language
     ttl
     id
     createdAt
@@ -82,12 +88,12 @@ export const createUserProfile = /* GraphQL */ `mutation CreateUserProfile(
   $condition: ModelUserProfileConditionInput
 ) {
   createUserProfile(input: $input, condition: $condition) {
+    owner
     industryPreferences
     countryPreferences
     id
     createdAt
     updatedAt
-    owner
     __typename
   }
 }
@@ -100,12 +106,12 @@ export const updateUserProfile = /* GraphQL */ `mutation UpdateUserProfile(
   $condition: ModelUserProfileConditionInput
 ) {
   updateUserProfile(input: $input, condition: $condition) {
+    owner
     industryPreferences
     countryPreferences
     id
     createdAt
     updatedAt
-    owner
     __typename
   }
 }
@@ -118,12 +124,12 @@ export const deleteUserProfile = /* GraphQL */ `mutation DeleteUserProfile(
   $condition: ModelUserProfileConditionInput
 ) {
   deleteUserProfile(input: $input, condition: $condition) {
+    owner
     industryPreferences
     countryPreferences
     id
     createdAt
     updatedAt
-    owner
     __typename
   }
 }

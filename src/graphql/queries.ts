@@ -17,6 +17,8 @@ export const getArticle = /* GraphQL */ `query GetArticle($id: ID!) {
     summary
     link
     companies
+    countries
+    language
     ttl
     id
     createdAt
@@ -42,6 +44,8 @@ export const listArticles = /* GraphQL */ `query ListArticles(
       summary
       link
       companies
+      countries
+      language
       ttl
       id
       createdAt
@@ -58,12 +62,12 @@ export const listArticles = /* GraphQL */ `query ListArticles(
 >;
 export const getUserProfile = /* GraphQL */ `query GetUserProfile($id: ID!) {
   getUserProfile(id: $id) {
+    owner
     industryPreferences
     countryPreferences
     id
     createdAt
     updatedAt
-    owner
     __typename
   }
 }
@@ -78,12 +82,12 @@ export const listUserProfiles = /* GraphQL */ `query ListUserProfiles(
 ) {
   listUserProfiles(filter: $filter, limit: $limit, nextToken: $nextToken) {
     items {
+      owner
       industryPreferences
       countryPreferences
       id
       createdAt
       updatedAt
-      owner
       __typename
     }
     nextToken

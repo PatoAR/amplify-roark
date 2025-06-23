@@ -17,6 +17,8 @@ export const onCreateArticle = /* GraphQL */ `subscription OnCreateArticle($filt
     summary
     link
     companies
+    countries
+    language
     ttl
     id
     createdAt
@@ -37,6 +39,8 @@ export const onUpdateArticle = /* GraphQL */ `subscription OnUpdateArticle($filt
     summary
     link
     companies
+    countries
+    language
     ttl
     id
     createdAt
@@ -57,6 +61,8 @@ export const onDeleteArticle = /* GraphQL */ `subscription OnDeleteArticle($filt
     summary
     link
     companies
+    countries
+    language
     ttl
     id
     createdAt
@@ -73,12 +79,12 @@ export const onCreateUserProfile = /* GraphQL */ `subscription OnCreateUserProfi
   $owner: String
 ) {
   onCreateUserProfile(filter: $filter, owner: $owner) {
+    owner
     industryPreferences
     countryPreferences
     id
     createdAt
     updatedAt
-    owner
     __typename
   }
 }
@@ -91,12 +97,12 @@ export const onUpdateUserProfile = /* GraphQL */ `subscription OnUpdateUserProfi
   $owner: String
 ) {
   onUpdateUserProfile(filter: $filter, owner: $owner) {
+    owner
     industryPreferences
     countryPreferences
     id
     createdAt
     updatedAt
-    owner
     __typename
   }
 }
@@ -109,12 +115,12 @@ export const onDeleteUserProfile = /* GraphQL */ `subscription OnDeleteUserProfi
   $owner: String
 ) {
   onDeleteUserProfile(filter: $filter, owner: $owner) {
+    owner
     industryPreferences
     countryPreferences
     id
     createdAt
     updatedAt
-    owner
     __typename
   }
 }

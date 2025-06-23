@@ -17,8 +17,8 @@ interface ArticleForState {
   summary?: string | null;
   link: string;
   companies?: Record<string, string> | null;
-  //countries?: Record<string, string> | null;
-  //language: string;
+  countries?: Record<string, string> | null;
+  language: string;
   seen: boolean;
 }
 
@@ -28,6 +28,17 @@ function formatLocalTime(timestamp?: string | null): string {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
+function normalizeCountries(countries: string | Record<string, string> | null | undefined): Record<string, string> | null {
+  if (!countries) return null;
+  if (typeof countries === 'string') {
+    try {
+      return JSON.parse(countries);
+    } catch {
+      return null;
+    }
+  }
+  return countries;
+}
 
 function normalizeCompanies(companies: string | Record<string, string> | null | undefined): Record<string, string> | null {
   if (!companies) return null;
@@ -48,7 +59,7 @@ function NewsSocketClient() {
   const messagesRef = useRef<ArticleForState[]>([]);
   const articleIdsFromSubscriptionRef = useRef<Set<string>>(new Set());
   const { user } = useAuthenticator(); 
-  const { isLoading } = useUserPreferences();
+  const { preferences, isLoading } = useUserPreferences();
 
   useEffect(() => {
     messagesRef.current = messages;
@@ -114,8 +125,8 @@ function NewsSocketClient() {
           summary: a.summary,
           link: a.link ?? '#',
           companies: normalizeCompanies(a.companies),
-          //countries: normalizeCountries(a.countries),
-          //language: a.language ?? 'N/A',
+          countries: normalizeCountries(a.countries),
+          language: a.language ?? 'N/A',
           seen: true, // Mark initial articles as "seen"
         }));
 
@@ -154,8 +165,8 @@ function NewsSocketClient() {
               summary: a.summary,
               link: a.link ?? '#',
               companies: normalizeCompanies(a.companies),
-              //countries: normalizeCountries(a.countries),
-              //language: a.language ?? 'N/A',
+              countries: normalizeCountries(a.countries),
+              language: a.language ?? 'N/A',
               seen: !document.hidden,
             }));
 
@@ -195,8 +206,8 @@ function NewsSocketClient() {
                 summary: article.summary,
                 link: article.link ?? '#',
                 companies: normalizeCompanies(article.companies),
-                //countries: normalizeCountries(article.countries),
-                //language: article.language ?? 'N/A',
+                countries: normalizeCountries(article.countries),
+                language: article.language ?? 'N/A',
                 seen: !document.hidden,
               };
               setMessages(prev => [formatted, ...prev]);
@@ -272,8 +283,21 @@ function NewsSocketClient() {
     };
   }, []);
 
-  const filteredMessages = messages;
+  const filteredMessages = messages.filter(msg => {
+    // While preferences are loading, show nothing to avoid a flicker of unfiltered content.
+    if (isLoading) {
+      return false;
+    }
 
+    const industryMatch = preferences.industries.length === 0 ||
+                          (msg.industry && preferences.industries.includes(msg.industry));
+
+    const articleCountries = msg.countries ? Object.keys(msg.countries) : [];
+    const countryMatch = preferences.countries.length === 0 ||
+                         articleCountries.some(code => preferences.countries.includes(code));
+
+    return industryMatch && countryMatch;
+  });
 
   return (
     <div className="news-feed">

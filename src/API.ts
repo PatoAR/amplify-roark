@@ -10,6 +10,8 @@ export type CreateArticleInput = {
   summary?: string | null,
   link?: string | null,
   companies?: string | null,
+  countries?: string | null,
+  language?: string | null,
   ttl?: number | null,
   id?: string | null,
 };
@@ -22,6 +24,8 @@ export type ModelArticleConditionInput = {
   summary?: ModelStringInput | null,
   link?: ModelStringInput | null,
   companies?: ModelStringInput | null,
+  countries?: ModelStringInput | null,
+  language?: ModelStringInput | null,
   ttl?: ModelIntInput | null,
   and?: Array< ModelArticleConditionInput | null > | null,
   or?: Array< ModelArticleConditionInput | null > | null,
@@ -91,6 +95,8 @@ export type Article = {
   summary?: string | null,
   link?: string | null,
   companies?: string | null,
+  countries?: string | null,
+  language?: string | null,
   ttl?: number | null,
   id: string,
   createdAt: string,
@@ -105,6 +111,8 @@ export type UpdateArticleInput = {
   summary?: string | null,
   link?: string | null,
   companies?: string | null,
+  countries?: string | null,
+  language?: string | null,
   ttl?: number | null,
   id: string,
 };
@@ -114,12 +122,14 @@ export type DeleteArticleInput = {
 };
 
 export type CreateUserProfileInput = {
+  owner?: string | null,
   industryPreferences?: Array< string | null > | null,
   countryPreferences?: Array< string | null > | null,
   id?: string | null,
 };
 
 export type ModelUserProfileConditionInput = {
+  owner?: ModelStringInput | null,
   industryPreferences?: ModelStringInput | null,
   countryPreferences?: ModelStringInput | null,
   and?: Array< ModelUserProfileConditionInput | null > | null,
@@ -127,20 +137,20 @@ export type ModelUserProfileConditionInput = {
   not?: ModelUserProfileConditionInput | null,
   createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
-  owner?: ModelStringInput | null,
 };
 
 export type UserProfile = {
   __typename: "UserProfile",
+  owner?: string | null,
   industryPreferences?: Array< string | null > | null,
   countryPreferences?: Array< string | null > | null,
   id: string,
   createdAt: string,
   updatedAt: string,
-  owner?: string | null,
 };
 
 export type UpdateUserProfileInput = {
+  owner?: string | null,
   industryPreferences?: Array< string | null > | null,
   countryPreferences?: Array< string | null > | null,
   id: string,
@@ -158,6 +168,8 @@ export type ModelArticleFilterInput = {
   summary?: ModelStringInput | null,
   link?: ModelStringInput | null,
   companies?: ModelStringInput | null,
+  countries?: ModelStringInput | null,
+  language?: ModelStringInput | null,
   ttl?: ModelIntInput | null,
   id?: ModelIDInput | null,
   createdAt?: ModelStringInput | null,
@@ -190,6 +202,7 @@ export type ModelArticleConnection = {
 };
 
 export type ModelUserProfileFilterInput = {
+  owner?: ModelStringInput | null,
   industryPreferences?: ModelStringInput | null,
   countryPreferences?: ModelStringInput | null,
   id?: ModelIDInput | null,
@@ -198,7 +211,6 @@ export type ModelUserProfileFilterInput = {
   and?: Array< ModelUserProfileFilterInput | null > | null,
   or?: Array< ModelUserProfileFilterInput | null > | null,
   not?: ModelUserProfileFilterInput | null,
-  owner?: ModelStringInput | null,
 };
 
 export type ModelUserProfileConnection = {
@@ -215,6 +227,8 @@ export type ModelSubscriptionArticleFilterInput = {
   summary?: ModelSubscriptionStringInput | null,
   link?: ModelSubscriptionStringInput | null,
   companies?: ModelSubscriptionStringInput | null,
+  countries?: ModelSubscriptionStringInput | null,
+  language?: ModelSubscriptionStringInput | null,
   ttl?: ModelSubscriptionIntInput | null,
   id?: ModelSubscriptionIDInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
@@ -291,6 +305,8 @@ export type CreateArticleMutation = {
     summary?: string | null,
     link?: string | null,
     companies?: string | null,
+    countries?: string | null,
+    language?: string | null,
     ttl?: number | null,
     id: string,
     createdAt: string,
@@ -313,6 +329,8 @@ export type UpdateArticleMutation = {
     summary?: string | null,
     link?: string | null,
     companies?: string | null,
+    countries?: string | null,
+    language?: string | null,
     ttl?: number | null,
     id: string,
     createdAt: string,
@@ -335,6 +353,8 @@ export type DeleteArticleMutation = {
     summary?: string | null,
     link?: string | null,
     companies?: string | null,
+    countries?: string | null,
+    language?: string | null,
     ttl?: number | null,
     id: string,
     createdAt: string,
@@ -350,12 +370,12 @@ export type CreateUserProfileMutationVariables = {
 export type CreateUserProfileMutation = {
   createUserProfile?:  {
     __typename: "UserProfile",
+    owner?: string | null,
     industryPreferences?: Array< string | null > | null,
     countryPreferences?: Array< string | null > | null,
     id: string,
     createdAt: string,
     updatedAt: string,
-    owner?: string | null,
   } | null,
 };
 
@@ -367,12 +387,12 @@ export type UpdateUserProfileMutationVariables = {
 export type UpdateUserProfileMutation = {
   updateUserProfile?:  {
     __typename: "UserProfile",
+    owner?: string | null,
     industryPreferences?: Array< string | null > | null,
     countryPreferences?: Array< string | null > | null,
     id: string,
     createdAt: string,
     updatedAt: string,
-    owner?: string | null,
   } | null,
 };
 
@@ -384,12 +404,12 @@ export type DeleteUserProfileMutationVariables = {
 export type DeleteUserProfileMutation = {
   deleteUserProfile?:  {
     __typename: "UserProfile",
+    owner?: string | null,
     industryPreferences?: Array< string | null > | null,
     countryPreferences?: Array< string | null > | null,
     id: string,
     createdAt: string,
     updatedAt: string,
-    owner?: string | null,
   } | null,
 };
 
@@ -407,6 +427,8 @@ export type GetArticleQuery = {
     summary?: string | null,
     link?: string | null,
     companies?: string | null,
+    countries?: string | null,
+    language?: string | null,
     ttl?: number | null,
     id: string,
     createdAt: string,
@@ -432,6 +454,8 @@ export type ListArticlesQuery = {
       summary?: string | null,
       link?: string | null,
       companies?: string | null,
+      countries?: string | null,
+      language?: string | null,
       ttl?: number | null,
       id: string,
       createdAt: string,
@@ -448,12 +472,12 @@ export type GetUserProfileQueryVariables = {
 export type GetUserProfileQuery = {
   getUserProfile?:  {
     __typename: "UserProfile",
+    owner?: string | null,
     industryPreferences?: Array< string | null > | null,
     countryPreferences?: Array< string | null > | null,
     id: string,
     createdAt: string,
     updatedAt: string,
-    owner?: string | null,
   } | null,
 };
 
@@ -468,12 +492,12 @@ export type ListUserProfilesQuery = {
     __typename: "ModelUserProfileConnection",
     items:  Array< {
       __typename: "UserProfile",
+      owner?: string | null,
       industryPreferences?: Array< string | null > | null,
       countryPreferences?: Array< string | null > | null,
       id: string,
       createdAt: string,
       updatedAt: string,
-      owner?: string | null,
     } | null >,
     nextToken?: string | null,
   } | null,
@@ -493,6 +517,8 @@ export type OnCreateArticleSubscription = {
     summary?: string | null,
     link?: string | null,
     companies?: string | null,
+    countries?: string | null,
+    language?: string | null,
     ttl?: number | null,
     id: string,
     createdAt: string,
@@ -514,6 +540,8 @@ export type OnUpdateArticleSubscription = {
     summary?: string | null,
     link?: string | null,
     companies?: string | null,
+    countries?: string | null,
+    language?: string | null,
     ttl?: number | null,
     id: string,
     createdAt: string,
@@ -535,6 +563,8 @@ export type OnDeleteArticleSubscription = {
     summary?: string | null,
     link?: string | null,
     companies?: string | null,
+    countries?: string | null,
+    language?: string | null,
     ttl?: number | null,
     id: string,
     createdAt: string,
@@ -550,12 +580,12 @@ export type OnCreateUserProfileSubscriptionVariables = {
 export type OnCreateUserProfileSubscription = {
   onCreateUserProfile?:  {
     __typename: "UserProfile",
+    owner?: string | null,
     industryPreferences?: Array< string | null > | null,
     countryPreferences?: Array< string | null > | null,
     id: string,
     createdAt: string,
     updatedAt: string,
-    owner?: string | null,
   } | null,
 };
 
@@ -567,12 +597,12 @@ export type OnUpdateUserProfileSubscriptionVariables = {
 export type OnUpdateUserProfileSubscription = {
   onUpdateUserProfile?:  {
     __typename: "UserProfile",
+    owner?: string | null,
     industryPreferences?: Array< string | null > | null,
     countryPreferences?: Array< string | null > | null,
     id: string,
     createdAt: string,
     updatedAt: string,
-    owner?: string | null,
   } | null,
 };
 
@@ -584,11 +614,11 @@ export type OnDeleteUserProfileSubscriptionVariables = {
 export type OnDeleteUserProfileSubscription = {
   onDeleteUserProfile?:  {
     __typename: "UserProfile",
+    owner?: string | null,
     industryPreferences?: Array< string | null > | null,
     countryPreferences?: Array< string | null > | null,
     id: string,
     createdAt: string,
     updatedAt: string,
-    owner?: string | null,
   } | null,
 };
