@@ -4,7 +4,6 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 ## ToDo's
 - Limit localStorage size (only store latest?, eliminate? do not use at mount)
 
-
 ## CLI
 https://docs.amplify.aws/react/reference/cli-commands/
 

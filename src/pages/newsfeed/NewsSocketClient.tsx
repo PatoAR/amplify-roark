@@ -291,11 +291,11 @@ function NewsSocketClient() {
 
     const industryMatch = preferences.industries.length === 0 ||
                           (msg.industry && preferences.industries.includes(msg.industry));
-
-    const articleCountries = msg.countries ? Object.keys(msg.countries) : [];
+    
+    const articleCountries = Array.isArray(msg.countries) ? msg.countries : [];
     const countryMatch = preferences.countries.length === 0 ||
                          articleCountries.some(code => preferences.countries.includes(code));
-
+    console.log("🇧🇷 BRA");
     return industryMatch && countryMatch;
   });
 

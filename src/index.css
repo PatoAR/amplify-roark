@@ -3,7 +3,7 @@ body {
   margin: 0;
   padding: 0;
   background: var(--amplify-colors-background-tertiary);
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: var(--amplify-fonts-default-variable); 
   display: flex;
   justify-content: center;
   align-items: center;

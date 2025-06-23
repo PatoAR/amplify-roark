@@ -6,17 +6,23 @@ import Modal from './Modal'
 import { useUserPreferences } from '../../context/UserPreferencesContext';
 
 const INDUSTRY_OPTIONS = [
-  { id: 'tech', label: 'Technology' },
-  { id: 'fina', label: 'Finance' },
-  { id: 'heal', label: 'Healthcare' },
-  { id: 'manu', label: 'Manufacturing' },
-  { id: 'reta', label: 'Retail' },
-  { id: 'educ', label: 'Education' },
+  { id: '💵 MARKETS', label: '💵 MARKETS' },
+  { id: '📈 ECONOMY', label: '📈 ECONOMY' },
+  { id: '⛏️ MINING', label: '⛏️ MINING' },
+  { id: '⚡ ENERGY', label: '⚡ ENERGY' },
+  { id: '🚜 AGRIBUSINESS', label: '🚜 AGRIBUSINESS' },
+  { id: '🏛️ FINANCIALS', label: '🏛️ FINANCIALS' },
+  { id: '💊 HEALTHCARE', label: '💊 HEALTHCARE' },
+  { id: '🏭 INDUSTRIALS', label: '🏭 INDUSTRIALS' },
+  { id: '🛰️ TECH•MEDIA•TELCO', label: '🛰️ TECH•MEDIA•TELCO' },
+  { id: '🛍️ RETAIL', label: '🛍️ RETAIL' },
+  { id: '✈️ TRAVEL•LEISURE', label: '✈️ TRAVEL•LEISURE' },
+  { id: '🚂 TRANSPORTATION', label: '🚂 TRANSPORTATION' },
 ];
 
 const COUNTRY_OPTIONS = [
-  { id: 'Q414', label: 'ARG 🇦🇷' },
-  { id: 'Q155', label: 'BRA 🇧🇷' },
+  { id: 'Q414', label: '🇦🇷 ARG' },
+  { id: 'Q155', label: '🇧🇷 BRA' },
 ];
 
 const HeaderNav = () => {
@@ -49,7 +55,6 @@ const HeaderNav = () => {
     });
     handleCloseFiltersModal();
   };
-
   
   // Handlers now update local state
   const handleIndustryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,7 +104,6 @@ const HeaderNav = () => {
               name="country"
             />
           ))}
-
           <Button type="submit">Submit</Button>
         </form>
       </Modal>
