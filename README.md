@@ -22,6 +22,23 @@ https://docs.amplify.aws/react/reference/cli-commands/
     > downloads schema from the server
     > updates src/API.ts and graphql/files
 
+
+const { preferences, isLoading } = useUserPreferences();
+
+
+function normalizeCountries(countries: string | Record<string, string> | null | undefined): Record<string, string> | null {
+  if (!countries) return null;
+  if (typeof countries === 'string') {
+    try {
+      return JSON.parse(countries);
+    } catch {
+      return null;
+    }
+  }
+  return countries;
+}
+
+
   const filteredMessages = messages.filter(msg => {
     // While preferences are loading, show nothing to avoid a flicker of unfiltered content.
     if (isLoading) {

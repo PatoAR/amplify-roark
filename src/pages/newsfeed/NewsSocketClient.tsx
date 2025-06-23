@@ -28,17 +28,6 @@ function formatLocalTime(timestamp?: string | null): string {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-function normalizeCountries(countries: string | Record<string, string> | null | undefined): Record<string, string> | null {
-  if (!countries) return null;
-  if (typeof countries === 'string') {
-    try {
-      return JSON.parse(countries);
-    } catch {
-      return null;
-    }
-  }
-  return countries;
-}
 
 function normalizeCompanies(companies: string | Record<string, string> | null | undefined): Record<string, string> | null {
   if (!companies) return null;
@@ -59,7 +48,7 @@ function NewsSocketClient() {
   const messagesRef = useRef<ArticleForState[]>([]);
   const articleIdsFromSubscriptionRef = useRef<Set<string>>(new Set());
   const { user } = useAuthenticator(); 
-  const { preferences, isLoading } = useUserPreferences();
+  const { isLoading } = useUserPreferences();
 
   useEffect(() => {
     messagesRef.current = messages;
