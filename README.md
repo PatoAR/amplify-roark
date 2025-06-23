@@ -21,3 +21,19 @@ https://docs.amplify.aws/react/reference/cli-commands/
 - npx @aws-amplify/cli codegen 
     > downloads schema from the server
     > updates src/API.ts and graphql/files
+
+  const filteredMessages = messages.filter(msg => {
+    // While preferences are loading, show nothing to avoid a flicker of unfiltered content.
+    if (isLoading) {
+      return false;
+    }
+
+    const industryMatch = preferences.industries.length === 0 ||
+                          (msg.industry && preferences.industries.includes(msg.industry));
+
+    const articleCountries = msg.countries ? Object.keys(msg.countries) : [];
+    const countryMatch = preferences.countries.length === 0 ||
+                         articleCountries.some(code => preferences.countries.includes(code));
+
+    return industryMatch && countryMatch;
+  });

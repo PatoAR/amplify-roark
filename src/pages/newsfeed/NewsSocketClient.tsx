@@ -17,8 +17,8 @@ interface ArticleForState {
   summary?: string | null;
   link: string;
   companies?: Record<string, string> | null;
-  countries?: Record<string, string> | null;
-  language: string;
+  //countries?: Record<string, string> | null;
+  //language: string;
   seen: boolean;
 }
 
@@ -125,8 +125,8 @@ function NewsSocketClient() {
           summary: a.summary,
           link: a.link ?? '#',
           companies: normalizeCompanies(a.companies),
-          countries: normalizeCountries(a.countries),
-          language: a.language ?? 'N/A',
+          //countries: normalizeCountries(a.countries),
+          //language: a.language ?? 'N/A',
           seen: true, // Mark initial articles as "seen"
         }));
 
@@ -165,8 +165,8 @@ function NewsSocketClient() {
               summary: a.summary,
               link: a.link ?? '#',
               companies: normalizeCompanies(a.companies),
-              countries: normalizeCountries(a.countries),
-              language: a.language ?? 'N/A',
+              //countries: normalizeCountries(a.countries),
+              //language: a.language ?? 'N/A',
               seen: !document.hidden,
             }));
 
@@ -206,8 +206,8 @@ function NewsSocketClient() {
                 summary: article.summary,
                 link: article.link ?? '#',
                 companies: normalizeCompanies(article.companies),
-                countries: normalizeCountries(article.countries),
-                language: article.language ?? 'N/A',
+                //countries: normalizeCountries(article.countries),
+                //language: article.language ?? 'N/A',
                 seen: !document.hidden,
               };
               setMessages(prev => [formatted, ...prev]);
@@ -283,21 +283,8 @@ function NewsSocketClient() {
     };
   }, []);
 
-  const filteredMessages = messages.filter(msg => {
-    // While preferences are loading, show nothing to avoid a flicker of unfiltered content.
-    if (isLoading) {
-      return false;
-    }
+  const filteredMessages = messages;
 
-    const industryMatch = preferences.industries.length === 0 ||
-                          (msg.industry && preferences.industries.includes(msg.industry));
-
-    const articleCountries = msg.countries ? Object.keys(msg.countries) : [];
-    const countryMatch = preferences.countries.length === 0 ||
-                         articleCountries.some(code => preferences.countries.includes(code));
-
-    return industryMatch && countryMatch;
-  });
 
   return (
     <div className="news-feed">
