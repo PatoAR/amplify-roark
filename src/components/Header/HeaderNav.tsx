@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Menu, MenuItem, Divider, Button, CheckboxField } from "@aws-amplify/ui-react";
+import { Menu, MenuItem, Divider, Button } from "@aws-amplify/ui-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import Modal from './Modal'
@@ -21,9 +21,11 @@ const INDUSTRY_OPTIONS = [
 ];
 
 const COUNTRY_OPTIONS = [
-  { id: 'Q414', label: '🇦🇷 ARG' },
-  { id: 'Q155', label: '🇧🇷 BRA' },
+  { id: 'Q414', label: 'ARG', code:'ar' },
+  { id: 'Q155', label: 'BRA', code: 'br' },
 ];
+
+
 
 const HeaderNav = () => {
   const { signOut } = useAuthenticator();
@@ -56,14 +58,21 @@ const HeaderNav = () => {
     handleCloseFiltersModal();
   };
   
-  // Handlers now update local state
-  const handleIndustryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value, checked } = e.target;
-    setLocalIndustries(prev => checked ? [...prev, value] : prev.filter(id => id !== value));
+  // Handlers for tag system
+  const handleIndustryChange = (industryId: string) => {
+    setLocalIndustries(prev => 
+      prev.includes(industryId) 
+        ? prev.filter(id => id !== industryId) 
+        : [...prev, industryId]
+    );
   };
-  const handleCountryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value, checked } = e.target;
-    setLocalCountries(prev => checked ? [...prev, value] : prev.filter(id => id !== value));
+
+  const handleCountryChange = (countryId: string) => {
+    setLocalCountries(prev => 
+      prev.includes(countryId) 
+        ? prev.filter(id => id !== countryId) 
+        : [...prev, countryId]
+    );
   };
   
   return (
@@ -78,33 +87,53 @@ const HeaderNav = () => {
       <Modal
         show={showFiltersModal}
         onClose={handleCloseFiltersModal}
-        title="Apply Filters"
+        title="Select News Filters"
       >
-        <form onSubmit={onSubmitFilters}>
-          <h3>Filter by Industry:</h3>
-          {INDUSTRY_OPTIONS.map((industry) => (
-            <CheckboxField
-              key={industry.id}
-              label={industry.label}
-              value={industry.id} // The value when checked
-              checked={localIndustries.includes(industry.id)}
-              onChange={handleIndustryChange}
-              name="industry"
-            />
-          ))}
-          <Divider />
-          <h3>Filter by Country:</h3>
-          {COUNTRY_OPTIONS.map((country) => (
-            <CheckboxField
-              key={country.id}
-              label={country.label}
-              value={country.id} // The value when checked
-              checked={localCountries.includes(country.id)}
-              onChange={handleCountryChange}
-              name="country"
-            />
-          ))}
-          <Button type="submit">Submit</Button>
+        {/* The form is now much cleaner and uses the tag system */}
+        <form onSubmit={onSubmitFilters} className="modal-form-layout">
+          <div className="form-section">
+            <h3 className="section-title">Industries</h3>
+            <div className="tag-container">
+              {INDUSTRY_OPTIONS.map((industry) => (
+                <button
+                  type="button" // Important to prevent form submission on click
+                  key={industry.id}
+                  className="tag-button"
+                  data-checked={localIndustries.includes(industry.id)}
+                  onClick={() => handleIndustryChange(industry.id)}
+                >
+                  {industry.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          <div className="form-section">
+            <h3 className="section-title">Countries</h3>
+            <div className="tag-container">
+              {COUNTRY_OPTIONS.map((country) => (
+                <button
+                  type="button"
+                  key={country.id}
+                  className="tag-button"
+                  data-checked={localCountries.includes(country.id)}
+                  onClick={() => handleCountryChange(country.id)}
+                >
+                  <img
+                    src={`https://flagcdn.com/w20/${country.code}.png`}
+                    alt={`${country.label} flag`}
+                    style={{ width: '20px', height: '15px', marginRight: '0.5rem' }}
+                  />
+                  {country.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Moved the submission button to a dedicated footer area */}
+          <div className="modal-form-footer">
+            <Button type="submit" variation="primary" isFullWidth>Apply Filters</Button>
+          </div>
         </form>
       </Modal>
     </>
