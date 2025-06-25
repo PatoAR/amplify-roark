@@ -80,12 +80,7 @@ function NewsSocketClient() {
     }
   }, [messages]);
 
-  // Unread counter in tab
-  const unreadCount = messages.filter(msg => !msg.seen).length;  
-  useEffect(() => {
-    document.title = unreadCount > 0 ? `(${unreadCount}) 🔥 Live News Feed` : 'Live News Feed';
-  }, [unreadCount]);
-
+  
   // Tab visibility change
   useEffect(() => {
     const handleVisibilityChange = () => setIsTabVisible(!document.hidden);
@@ -298,6 +293,12 @@ function NewsSocketClient() {
     console.log("🇧🇷 BRA");
     return industryMatch && countryMatch;
   });
+
+  // Unread counter in tab
+  const unreadCount = filteredMessages.filter(msg => !msg.seen).length;  
+  useEffect(() => {
+    document.title = unreadCount > 0 ? `(${unreadCount}) 🔥 Live News Feed` : 'Live News Feed';
+  }, [unreadCount]);
 
   return (
     <div className="news-feed">

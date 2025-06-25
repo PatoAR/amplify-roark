@@ -5,19 +5,21 @@
   position: fixed;
   z-index: 1000;
   top: 0;
+  left: 0;
+  right: 0;
   height: 50px;
   width: 100%;
   padding: 0 1rem;
   display: flex;
+  justify-content: center; /* This centers the child .amplify-flex */
   align-items: center;
   border-bottom: 1px solid #eee;
   box-shadow: 0 3px 0px rgba(0, 0, 0, 0.05);
-  max-width: 1000px;
 }
 
 .header > .amplify-flex {
   width: 100%;
-  max-width: 1280px;
+  max-width: 1000px;
   margin: 0 auto;
 }
 

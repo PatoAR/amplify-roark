@@ -2,7 +2,15 @@
 Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fetches, processes and stores news articles in dynambodb. The articles are distributed to varios channels (whatsapp, telegram) and to this webapp via AppSync subscriptions or long-polling.
 
 ## ToDo's
-- Limit localStorage size (only store latest?, eliminate? do not use at mount)
+- Use logo at login
+- Inactivity timeout
+- Define Settings parameters (change password, etc)
+- Implement "Search Bar" functionality
+- Internationalization
+- Create interface to deliver different content  - publicity, financials, etc - fix on top, colors, etc.
+- Track user activity
+- Invite friends, establish rule to keep 3 months free for each friend
+- Pay suscription
 
 ## CLI
 https://docs.amplify.aws/react/reference/cli-commands/

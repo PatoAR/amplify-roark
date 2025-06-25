@@ -4,6 +4,7 @@
   padding: 2rem 1.5rem;
   max-width: 1000px;
   width: 100%;
+  min-height: 50vh; /* ensures enough space for layout stability */
   box-sizing: border-box;
 }
 
