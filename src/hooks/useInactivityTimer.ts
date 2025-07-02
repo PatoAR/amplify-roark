@@ -10,8 +10,8 @@ interface UseInactivityTimerOptions {
   onWarning?: (timeLeft: number) => void; // Callback for warning
 }
 
-const DEFAULT_TIMEOUT_MINUTES = 10; // Default 30 minutes
-const DEFAULT_WARNING_MINUTES = 5;  // Default 5 minutes before logout
+const DEFAULT_TIMEOUT_MINUTES = 60;
+const DEFAULT_WARNING_MINUTES = 5;  // minutes before logout
 
 export const useInactivityTimer = ({
   timeoutInMinutes = DEFAULT_TIMEOUT_MINUTES,
