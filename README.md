@@ -1,16 +1,23 @@
 ## AWS Roark
 Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fetches, processes and stores news articles in dynambodb. The articles are distributed to varios channels (whatsapp, telegram) and to this webapp via AppSync subscriptions or long-polling.
 
+## User Settings - to be improved
+- Change password
+- Delete account
+- Subscription Details
+
 ## ToDo's
-- Use logo at login
-- Inactivity timeout
-- Define Settings parameters (change password, etc)
+- Apply modified text
+- Lucide Icons
 - Implement "Search Bar" functionality
-- Internationalization
-- Create interface to deliver different content  - publicity, financials, etc - fix on top, colors, etc.
-- Track user activity
+
 - Invite friends, establish rule to keep 3 months free for each friend
+- Track user activity
 - Pay suscription
+- Custom domain
+- Internationalization
+
+- Create interface to deliver different content  - publicity, financials, etc - fix on top, colors, etc.
 
 ## CLI
 https://docs.amplify.aws/react/reference/cli-commands/
@@ -28,3 +35,12 @@ https://docs.amplify.aws/react/reference/cli-commands/
 - npx @aws-amplify/cli codegen 
     > downloads schema from the server
     > updates src/API.ts and graphql/files
+
+
+howard > 
+    sends full description, content as one text variable
+    sends country codes ("Qs") as value pairs with their respective character index in text, chloc -1 if country in source definition
+
+roark > calculates text to display
+    if any of user country selected in country codes list with index -1, display first 200 characters
+

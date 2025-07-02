@@ -1,7 +1,6 @@
 /* Main feed container */
 .news-feed {
-  margin-top: 2rem;
-  padding: 2rem 1.5rem;
+  padding: 3rem 1.5rem;
   max-width: 1000px;
   width: 100%;
   min-height: 50vh; /* ensures enough space for layout stability */
@@ -52,7 +51,19 @@
 /* Highlight unseen articles */
 .article-card.unseen {
   background-color: #e6f4ff;
-  border-left-color: #1890ff;
+  animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+  0% {
+    border-left-color: #1890ff;
+  }
+  50% {
+    border-left-color: #a0d9ff;
+  }
+  100% {
+    border-left-color: #1890ff;
+  }
 }
 
 .article-timestamp-wrapper {
@@ -62,25 +73,9 @@
   margin-right: 0.2rem;
 }
 
-.article-timestamp-wrapper.unseen::before {
-  content: '';
-  width: 7px;
-  height: 7px;
-  background-color: #1890ff;
-  border-radius: 50%;
-  margin-left: 0.5rem;
-  animation: pulse 1.5s infinite;
-}
-
 .article-timestamp {
   font-size: 0.75rem;
   color: #666;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.5); opacity: 0.5; }
-  100% { transform: scale(1); opacity: 1; }
 }
 
 /* Text wrapper */
@@ -93,6 +88,12 @@
   -webkit-line-clamp: 4; /* Show max X lines */
   -webkit-box-orient: vertical;
   margin: 0;
+}
+
+.article-line-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
 }
 
 /* Tag for industry */
@@ -137,7 +138,7 @@
 }
 
 
-/* Links (future-proofing) */
+/* Links */
 a {
   color: #3366cc;
   text-decoration: none;

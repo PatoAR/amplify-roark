@@ -22,7 +22,7 @@ const Header = () => {
             <img src={Logo} alt="Company Logo" />
           </Link>
         </div>
-
+        
         <div className="header-center">
           <HeaderSearchBar />
         </div>

@@ -11,6 +11,7 @@ interface UserPreferencesContextType {
   preferences: UserPreferences;
   savePreferences: (newPrefs: UserPreferences) => Promise<void>;
   isLoading: boolean;
+  userProfileId: string | null; 
 }
 
 // Create the context with a default value
@@ -85,7 +86,7 @@ export const UserPreferencesProvider = ({ children }: { children: ReactNode }) =
     }
   };
 
-  const value = { preferences, savePreferences, isLoading };
+  const value = { preferences, savePreferences, isLoading, userProfileId };
 
   return (
     <UserPreferencesContext.Provider value={value}>

@@ -1,29 +1,9 @@
-.logo {
-  height: 6em;
-  padding: var(--space-lg);
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.auth-logo {
+  max-width: 250px;  /* maximum width for larger screens */
+  width: 100%;       /* allow the logo to shrink on smaller screens */
+  height: auto;      /* maintain the aspect ratio */
+  margin-bottom: 1rem; /* adds some space between the logo and the form */
+  max-height: 25vh;
 }
 
 .read-the-docs {

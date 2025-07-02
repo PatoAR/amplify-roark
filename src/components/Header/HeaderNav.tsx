@@ -23,9 +23,10 @@ const INDUSTRY_OPTIONS = [
 const COUNTRY_OPTIONS = [
   { id: 'Q414', label: 'ARG', code:'ar' },
   { id: 'Q155', label: 'BRA', code: 'br' },
+  { id: 'Q298', label: 'CHL', code: 'cl' },
+  { id: 'Q733', label: 'PAR', code: 'py' },
+  { id: 'Q77', label: 'URU', code: 'uy' },
 ];
-
-
 
 const HeaderNav = () => {
   const { signOut } = useAuthenticator();
@@ -47,6 +48,15 @@ const HeaderNav = () => {
     setLocalCountries(preferences.countries);
     setShowFiltersModal(true);
   };
+
+  // Listen for the custom event from the WelcomeScreen
+  useEffect(() => {
+    window.addEventListener('open-filters-modal', handleOpenFiltersModal);
+    return () => {
+      window.removeEventListener('open-filters-modal', handleOpenFiltersModal);
+    };
+  }, [handleOpenFiltersModal]);
+
   const handleCloseFiltersModal = () => setShowFiltersModal(false);
 
   const onSubmitFilters = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -75,6 +85,23 @@ const HeaderNav = () => {
     );
   };
   
+  const getFilteringLegend = () => {
+    const hasIndustries = localIndustries.length > 0;
+    const hasCountries = localCountries.length > 0;
+
+    if (hasIndustries && hasCountries) {
+      return 'Articles that match BOTH the selected industries AND countries will be shown.';
+    }
+    if (hasIndustries) {
+      return 'All articles that match ANY of the selected industries will be shown.';
+    }
+    if (hasCountries) {
+      return 'All articles that match ANY of the selected countries will be shown.';
+    }
+    // This is the state where no articles will be shown after applying filters.
+    return 'No filters are selected. ALL articles will be shown.';
+  };
+
   return (
     <>    
       <Menu menuAlign="end" aria-label="User menu">
@@ -89,7 +116,6 @@ const HeaderNav = () => {
         onClose={handleCloseFiltersModal}
         title="Select News Filters"
       >
-        {/* The form is now much cleaner and uses the tag system */}
         <form onSubmit={onSubmitFilters} className="modal-form-layout">
           <div className="form-section">
             <h3 className="section-title">Industries</h3>
@@ -130,7 +156,12 @@ const HeaderNav = () => {
             </div>
           </div>
 
-          {/* Moved the submission button to a dedicated footer area */}
+          <div className="filter-legend">
+            <span className="filter-legend-icon">ℹ️</span>
+            <p className="filter-legend-text">{getFilteringLegend()}</p>
+          </div>
+          
+          {/* Submission button dedicated footer area */}
           <div className="modal-form-footer">
             <Button type="submit" variation="primary" isFullWidth>Apply Filters</Button>
           </div>

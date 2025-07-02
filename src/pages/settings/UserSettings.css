@@ -1,0 +1,43 @@
+.settings-box {
+  margin: 4rem auto;
+}
+
+.password-card {
+  text-align: left;
+  box-shadow: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.password-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.danger-zone-card {
+  text-align: left;
+  box-shadow: none;
+  border: 1px solid #fecaca; /* light red border */
+  background-color: #fff1f2; /* very light red */
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.danger-title {
+  color: #b91c1c;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.danger-subtitle {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  color: #1f2937;
+}
+
+.danger-text {
+  font-size: 0.9rem;
+  color: #6b7280;
+}

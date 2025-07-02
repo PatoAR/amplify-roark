@@ -1,12 +1,12 @@
 /* Global styles */
 body {
   margin: 0;
-  padding: 0;
+  padding: 0.5rem 0; 
   background: var(--amplify-colors-background-tertiary);
   font-family: var(--amplify-fonts-default-variable); 
   display: flex;
   justify-content: center;
-  align-items: center;
   min-height: 100vh;
   width: 100vw;
+  box-sizing: border-box;
 }

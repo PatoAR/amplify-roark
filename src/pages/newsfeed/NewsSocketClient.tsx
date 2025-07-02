@@ -6,6 +6,7 @@ import { Article } from '../../API';
 import { publicClient } from "./../../amplify-client"
 import { useUserPreferences } from '../../context/UserPreferencesContext';
 import { useAuthenticator } from '@aws-amplify/ui-react';
+import WelcomeScreen from '../../components/WelcomeScreen/WelcomeScreen'; 
 import './NewsSocketClient.css';
 
 interface ArticleForState {
@@ -52,6 +53,24 @@ function normalizeCompanies(companies: string | Record<string, string> | null | 
   return companies;
 }
 
+declare global {
+  interface Window {
+    documentPictureInPicture?: {
+      requestWindow: (options: { width: number; height: number }) => Promise<Window>;
+    };
+  }
+}
+
+// Handles opening the article link to a new tab.
+const handleArticleClick = async (event: React.MouseEvent<HTMLAnchorElement>, link: string) => {
+  event.preventDefault();
+  const a = document.createElement('a');
+  a.href = link;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  a.click();
+};
+
 function NewsSocketClient() {
   const [messages, setMessages] = useState<ArticleForState[]>([]);
   const [isTabVisible, setIsTabVisible] = useState<boolean>(() => !document.hidden);
@@ -59,7 +78,7 @@ function NewsSocketClient() {
   const messagesRef = useRef<ArticleForState[]>([]);
   const articleIdsFromSubscriptionRef = useRef<Set<string>>(new Set());
   const { user } = useAuthenticator(); 
-  const { preferences, isLoading } = useUserPreferences();
+  const { preferences, isLoading, userProfileId } = useUserPreferences();
 
   useEffect(() => {
     messagesRef.current = messages;
@@ -80,7 +99,6 @@ function NewsSocketClient() {
     }
   }, [messages]);
 
-  
   // Tab visibility change
   useEffect(() => {
     const handleVisibilityChange = () => setIsTabVisible(!document.hidden);
@@ -162,7 +180,7 @@ function NewsSocketClient() {
               companies: normalizeCompanies(a.companies),
               countries: normalizeCountries(a.countries),
               language: a.language ?? 'N/A',
-              seen: !document.hidden,
+              seen: false,
             }));
 
             const now = Date.now();
@@ -203,7 +221,7 @@ function NewsSocketClient() {
                 companies: normalizeCompanies(article.companies),
                 countries: normalizeCountries(article.countries),
                 language: article.language ?? 'N/A',
-                seen: !document.hidden,
+                seen: false,
               };
               setMessages(prev => [formatted, ...prev]);
             }
@@ -284,14 +302,41 @@ function NewsSocketClient() {
       return false;
     }
 
-    const industryMatch = preferences.industries.length === 0 ||
-                          (msg.industry && preferences.industries.includes(msg.industry));
-    
-    const articleCountries = Array.isArray(msg.countries) ? msg.countries : [];
-    const countryMatch = preferences.countries.length === 0 ||
-                         articleCountries.some(code => preferences.countries.includes(code));
-    console.log("🇧🇷 BRA");
-    return industryMatch && countryMatch;
+    // If the user has no profile yet (is a new user), show nothing.
+    // if (userProfileId === null) {
+    //  return false;
+    //}
+
+    // --- Filtering Logic ---
+    const hasIndustryFilters = preferences.industries.length > 0;
+    const hasCountryFilters = preferences.countries.length > 0;
+
+    // Determine if the current article matches the selected filters.
+    const industryMatches = !!(msg.industry && preferences.industries.includes(msg.industry));
+    const articleCountryCodes = Array.isArray(msg.countries) ? msg.countries : []
+    const countryMatches = articleCountryCodes.some(code => preferences.countries.includes(code));
+
+    // Case 1: Filters are set for BOTH Industries and Countries.
+    // An article must match one of each.
+    if (hasIndustryFilters && hasCountryFilters) {
+      return industryMatches && countryMatches;
+    }
+
+    // Case 2: Filters are set for Industries ONLY.
+    // An article only needs to match an industry.
+    if (hasIndustryFilters) {
+      return industryMatches;
+    }
+
+    // Case 3: Filters are set for Countries ONLY.
+    // An article only needs to match a country.
+    if (hasCountryFilters) {
+      return countryMatches;
+    }
+
+    // Case 4: No filters are set.
+    // An existing user wants to see all news, so show everything.
+    return true;
   });
 
   // Unread counter in tab
@@ -302,16 +347,20 @@ function NewsSocketClient() {
 
   return (
     <div className="news-feed">
-      {filteredMessages.length === 0 ? (
-        <div className="articles-container">
-          <h1 className="news-feed-title">📡 Live News Feed</h1>
-          <p className="no-news">
-            {isLoading 
-              ? "Loading preferences..." 
-              : (messages.length > 0 ? "No articles match your current filters." : "🕓 Waiting for news...")
-            }
-          </p>
-        </div>
+      {isLoading ? (
+        <p className="no-news">Loading preferences...</p>
+      
+      ) : userProfileId === null ? (
+        <WelcomeScreen />
+      
+      ) : filteredMessages.length === 0 ? (
+        <p className="no-news">
+          {messages.length > 0
+            ? "No articles match your current filters."
+            : "🕓 Waiting for news..."
+          }
+        </p>
+  
       ) : (
         <div className="articles-container">
           <AnimatePresence initial={false}>
@@ -325,26 +374,43 @@ function NewsSocketClient() {
                 exit={{ opacity: 0, y: -10, transition: { duration: 0.3 } }}
                 transition={{ duration: 0.5 }}
               >
-                <p className="article-line">
-                  <span className="article-industry">{msg.industry}</span>{" "}
-                  <span className={`article-timestamp-wrapper ${!msg.seen ? 'unseen' : ''}`}>
-                    <span className="article-timestamp">{formatLocalTime(msg.timestamp)}</span>
-                  </span>
-                  <a href={msg.link} target="_blank" rel="noopener noreferrer" className="article-title-link">
+                <a 
+                  href={msg.link} 
+                  onClick={(e) => handleArticleClick(e, msg.link)} 
+                  className="article-line-link"
+                >
+                  <p className="article-line">
+                    <span className="article-industry">{msg.industry}</span>{" "}
+                    <span className="article-timestamp-wrapper">
+                      <span className="article-timestamp">{formatLocalTime(msg.timestamp)}</span>
+                    </span>
                     <strong className="article-source">| {msg.source} - </strong>{" "}
                     <strong className="article-title">{msg.title}</strong>
                     <span className="article-summary">{msg.summary}</span>{" "}
-                  </a>
-                  {msg.companies && typeof msg.companies === 'object' && (
-                    <>
-                      {Object.entries(msg.companies).map(([name, url]) => (
-                        <a key={name} href={url} target="_blank" rel="noopener noreferrer" className="article-companies">
-                          {name}
-                        </a>
-                      ))}
-                    </>
-                  )}
-                </p>
+                    {msg.companies && typeof msg.companies === 'object' && (
+                      <>
+                        {Object.entries(msg.companies).map(([name, url]) => (
+                          <span
+                            key={name}
+                            className="article-companies"
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevents bubbling to outer <a>
+                              e.preventDefault();  // Prevents any anchor behavior just in case
+                              const a = document.createElement('a');
+                              a.href = url;
+                              a.target = '_blank';
+                              a.rel = 'noopener noreferrer';
+                              a.click();
+                            }}
+                            title={`Google > ${name}`}
+                          >
+                            {name}
+                          </span>
+                        ))}
+                      </>
+                    )}
+                  </p>
+                </a>
               </motion.div>
             ))}
           </AnimatePresence>

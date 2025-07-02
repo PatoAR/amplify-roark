@@ -96,7 +96,6 @@
   justify-content: center;
   align-items: center; /* Vertically centers the modal */
   z-index: 1000;
-  padding: 1rem; /* Ensures modal isn't flush with screen edges */
 }
 
 .modal-content {
@@ -115,7 +114,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 1.5rem; /* Increased padding */
+  padding: 1rem; /* Increased padding */
   border-bottom: 1px solid #e5e7eb; /* Softer border color */
   flex-shrink: 0; /* Prevents header from shrinking */
 }
@@ -134,7 +133,6 @@
   line-height: 1;
   color: #6b7280;
   cursor: pointer;
-  padding: 0.25rem;
   border-radius: 4px;
   transition: color 0.2s, background-color 0.2s;
 }
@@ -145,7 +143,7 @@
 }
 
 .modal-body {
-  padding: 1.25rem; /* Generous padding for content */
+  padding: 15px; /* Generous padding for content */
   overflow-y: auto; /* Makes only the body scrollable */
 }
 
@@ -153,13 +151,13 @@
 .modal-form-layout {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem; /* Space between form sections */
+  gap: 1rem; /* Space between form sections */
 }
 
 .form-section {
   display: flex;
   flex-direction: column;
-  gap: 1rem; /* Space between title and tags */
+  gap: 0.5rem; /* Space between title and tags */
 }
 
 .section-title {
@@ -170,12 +168,11 @@
 }
 
 .modal-form-footer {
-  padding: 1rem 1.5rem;
-  margin-top: 0.5rem;
-  border-top: 1px solid #e5e7eb;
+  padding: 0.5rem 2rem;
+  margin-top: 0.25rem;
+  border-top: 1px solid gainsboro;
   flex-shrink: 0; /* Prevents footer from shrinking */
 }
-
 
 /* === Interactive Tag/Pill Styles === */
 .tag-container {
@@ -212,4 +209,28 @@
 
 .tag-button[data-checked='true']:hover {
     background-color: #c7d2fe; /* indigo-200 */
+}
+
+/* === Messages Legend Styles === */
+.filter-legend {
+  display: flex;
+  align-items: center;
+  background-color: #f7f7f7; /* A light, neutral background */
+  border-radius: 8px;
+  padding: 5px 16px;
+  margin-top: 12px; /* Space above the legend */
+  border: 1px solid #e0e0e0;
+}
+
+.filter-legend-icon {
+  font-size: 1.2rem;
+  margin-right: 12px;
+  flex-shrink: 0; /* Prevents the icon from shrinking */
+}
+
+.filter-legend-text {
+  margin: 0;
+  font-size: 0.875rem; /* Slightly smaller than body text */
+  color: #555; /* A softer text color */
+  line-height: 1.5;
 }
