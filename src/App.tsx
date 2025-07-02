@@ -12,10 +12,10 @@ export default function App() {
   // Use the inactivity timer only if the user is authenticated
   useInactivityTimer({
     onLogout: () => {
-      alert('You have been logged out due to inactivity.');
+      //alert('You have been logged out due to inactivity.');
     },
-    onWarning: (timeLeft) => {
-      alert(`You will be logged out in ${Math.ceil(timeLeft / 60)} minutes due to inactivity.`);
+    onWarning: () => {
+      //alert(`You will be logged out in ${Math.ceil(timeLeft / 60)} minutes due to inactivity.`);
     }
   });
 

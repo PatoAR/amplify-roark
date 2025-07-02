@@ -7,6 +7,7 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 - Subscription Details
 
 ## ToDo's
+- Fix logout due to inactivity alerts
 - Apply modified text
 - Lucide Icons
 - Implement "Search Bar" functionality
