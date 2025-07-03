@@ -6,7 +6,7 @@ export const handler: CustomMessageTriggerHandler = async (event) => {
     event.response.emailMessage = `
       <html>
         <body>
-          <p>Hello ${event.request.usernameParameter},</p>
+          <p>Hello,</p>
           <p>Thank you for signing up for Perkis News</p>
           <p>To verify your email address, please use the following code:</p>
           <h3>${event.request.codeParameter}</h3>

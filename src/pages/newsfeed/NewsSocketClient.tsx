@@ -244,38 +244,38 @@ function NewsSocketClient() {
             // Fetch the latest articles from the server (the ground truth)
             const result: any = await publicClient.graphql({ query: listArticles });
             const articlesFromServer: Article[] = result.data?.listArticles?.items || [];
-            
+           
             // Identify new articles that are not yet known
             const newServerArticles = articlesFromServer.filter(
               a => !messagesRef.current.find(m => m.id === a.id)
             );
 
-            // If any of these new articles were NOT received via WebSocket
-            const missedArticle = newServerArticles.find(
-              a => !articleIdsFromSubscriptionRef.current.has(a.id)
-            );
-      
-            if (missedArticle) {
-              console.warn(`⚠️ WebSocket missed article ${missedArticle.id}. Switching to polling.`);
-              unsubscribe?.(); // Stop the failing subscription
-              startPolling();   // Start the reliable polling
-              
-              shadowPollerStopped = true; // Stop this shadow poller
-              clearInterval(shadowPoller!);
-              return;
-            }
-            // SUCCESS CASE: If we have recent articles, check if the latest one came via WebSocket.
-            // This confirms the WebSocket is reliable.
+            // If we have recent articles, check if the latest one came via WebSocket.
             if (newServerArticles.length > 0) {
-                 console.log('✅ WebSocket appears reliable. Stopping shadow poller.');
-                 shadowPollerStopped = true;
-                 clearInterval(shadowPoller!);
+              // Wait a brief moment to allow any in-flight WebSocket messages to arrive
+              setTimeout(() => {
+                // Find if any new server article was NOT received by the subscription
+                const missedArticle = newServerArticles.find(
+                  a => !articleIdsFromSubscriptionRef.current.has(a.id)
+                );
+                if (missedArticle) {
+                  console.warn(`⚠️ WebSocket missed article ${missedArticle.id}. Switching to polling.`);
+                  unsubscribe?.(); // Stop the failing subscription
+                  startPolling();   // Start the reliable polling                  
+                  shadowPollerStopped = true;
+                  clearInterval(shadowPoller!);
+                } else {
+                  // If all new articles were received via WebSocket, it's working reliably.
+                  console.log('✅ WebSocket appears reliable. Stopping shadow poller.');
+                  shadowPollerStopped = true;
+                  clearInterval(shadowPoller!);
+                }
+              }, 2000); // 2-second buffer to account for WebSocket latency
             }
           } catch (err) {
             console.error('Shadow poller error:', err);
           }
         }, 60000); // Keep the polling interval
-     
       } catch (err) {
         console.error('Subscription setup failed, falling back to polling:', err);
         startPolling();

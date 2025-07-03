@@ -1,11 +1,23 @@
-.auth-logo {
-  max-width: 250px;  /* maximum width for larger screens */
-  width: 100%;       /* allow the logo to shrink on smaller screens */
-  height: auto;      /* maintain the aspect ratio */
-  margin-bottom: 1rem; /* adds some space between the logo and the form */
-  max-height: 25vh;
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000; /* Ensure it's on top of other content */
 }
 
-.read-the-docs {
-  color: #888;
+.dialog-content {
+  background-color: var(--amplify-colors-background-secondary, #fdfdfd);
+  border-radius: 12px; /* Softer corners */
+  padding: 2.5rem; /* Generous whitespace inside the box */
+  text-align: center; /* Center the text content */
+  border: none;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  width: 90%;
+  max-width: 500px; /* Slightly smaller max-width than welcome-box for a dialog */
 }

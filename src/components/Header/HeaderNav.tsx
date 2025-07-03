@@ -36,12 +36,7 @@ const HeaderNav = () => {
   const [localIndustries, setLocalIndustries] = useState(preferences.industries);
   const [localCountries, setLocalCountries] = useState(preferences.countries);
 
-  // Ensure local state syncs with the context
-  useEffect(() => {
-    setLocalIndustries(preferences.industries);
-    setLocalCountries(preferences.countries);
-  }, [preferences]);
-
+  
   const handleOpenFiltersModal = () => {
     // When opening the modal, sync local state with context
     setLocalIndustries(preferences.industries);

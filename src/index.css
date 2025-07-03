@@ -2,11 +2,18 @@
 body {
   margin: 0;
   padding: 0.5rem 0; 
-  background: var(--amplify-colors-background-tertiary);
+  background: #F7F5F2;
   font-family: var(--amplify-fonts-default-variable); 
   display: flex;
   justify-content: center;
   min-height: 100vh;
   width: 100vw;
   box-sizing: border-box;
+}
+
+.auth-logo {
+  max-width: 200px;  /* maximum width for larger screens */
+  width: 100%;       /* allow the logo to shrink on smaller screens */
+  height: auto;      /* maintain the aspect ratio */
+  max-height: 25vh;
 }

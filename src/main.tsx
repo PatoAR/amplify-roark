@@ -8,9 +8,13 @@ import outputs from '../amplify_outputs.json';
 import { UserPreferencesProvider } from './context/UserPreferencesContext';
 import '@aws-amplify/ui-react/styles.css';
 import "./index.css";
-import "./App.css";
+import perkinsLogo from './assets/BaseLogo_v1.png'
 
-import perkinsLogo from './assets/BaseLogo_LogIn.png'
+import { I18n } from 'aws-amplify/utils';
+import { translations } from '@aws-amplify/ui-react';
+I18n.putVocabularies(translations);
+I18n.setLanguage('es');
+
 
 Amplify.configure(outputs);
 

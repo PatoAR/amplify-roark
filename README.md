@@ -4,10 +4,10 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 ## User Settings - to be improved
 - Change password
 - Delete account
+- Language
 - Subscription Details
 
 ## ToDo's
-- Fix logout due to inactivity alerts
 - Apply modified text
 - Lucide Icons
 - Implement "Search Bar" functionality
