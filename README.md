@@ -4,8 +4,8 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 ## ToDo's
 - Apply modified text
 
-- Lucide Icons
 - Implement "Search Bar" functionality
+- Lucide Icons
 - Button for "all" news
 
 - Custom domain

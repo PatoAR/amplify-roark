@@ -199,7 +199,7 @@ export const AnalyticsDashboard = () => {
           <h3>Event Breakdown</h3>
           <div className="event-stats">
             {eventStats.length > 0 ? (
-              eventStats.map((event, index) => (
+              eventStats.map((event) => (
                 <div key={event.eventType} className="event-item">
                   <div className="event-info">
                     <span className="event-type">{formatEventType(event.eventType)}</span>
