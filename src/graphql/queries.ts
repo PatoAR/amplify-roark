@@ -10,18 +10,18 @@ type GeneratedQuery<InputType, OutputType> = string & {
 
 export const getArticle = /* GraphQL */ `query GetArticle($id: ID!) {
   getArticle(id: $id) {
+    timestamp
+    source
+    title
+    industry
+    summary
+    link
     companies
     countries
-    createdAt
-    id
-    industry
     language
-    link
-    source
-    summary
-    timestamp
-    title
     ttl
+    id
+    createdAt
     updatedAt
     __typename
   }
@@ -30,77 +30,6 @@ export const getArticle = /* GraphQL */ `query GetArticle($id: ID!) {
   APITypes.GetArticleQueryVariables,
   APITypes.GetArticleQuery
 >;
-export const getReferral = /* GraphQL */ `query GetReferral($id: ID!) {
-  getReferral(id: $id) {
-    completedAt
-    createdAt
-    freeMonthsEarned
-    id
-    owner
-    referralCode
-    referredId
-    referrerId
-    status
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.GetReferralQueryVariables,
-  APITypes.GetReferralQuery
->;
-export const getReferralCode = /* GraphQL */ `query GetReferralCode($id: ID!) {
-  getReferralCode(id: $id) {
-    code
-    createdAt
-    id
-    isActive
-    owner
-    successfulReferrals
-    totalReferrals
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.GetReferralCodeQueryVariables,
-  APITypes.GetReferralCodeQuery
->;
-export const getUserProfile = /* GraphQL */ `query GetUserProfile($id: ID!) {
-  getUserProfile(id: $id) {
-    countryPreferences
-    createdAt
-    id
-    industryPreferences
-    owner
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.GetUserProfileQueryVariables,
-  APITypes.GetUserProfileQuery
->;
-export const getUserSubscription = /* GraphQL */ `query GetUserSubscription($id: ID!) {
-  getUserSubscription(id: $id) {
-    createdAt
-    earnedFreeMonths
-    id
-    owner
-    referralCodeUsed
-    referrerId
-    subscriptionStatus
-    totalFreeMonths
-    trialEndDate
-    trialStartDate
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.GetUserSubscriptionQueryVariables,
-  APITypes.GetUserSubscriptionQuery
->;
 export const listArticles = /* GraphQL */ `query ListArticles(
   $filter: ModelArticleFilterInput
   $limit: Int
@@ -108,18 +37,18 @@ export const listArticles = /* GraphQL */ `query ListArticles(
 ) {
   listArticles(filter: $filter, limit: $limit, nextToken: $nextToken) {
     items {
+      timestamp
+      source
+      title
+      industry
+      summary
+      link
       companies
       countries
-      createdAt
-      id
-      industry
       language
-      link
-      source
-      summary
-      timestamp
-      title
       ttl
+      id
+      createdAt
       updatedAt
       __typename
     }
@@ -131,57 +60,20 @@ export const listArticles = /* GraphQL */ `query ListArticles(
   APITypes.ListArticlesQueryVariables,
   APITypes.ListArticlesQuery
 >;
-export const listReferralCodes = /* GraphQL */ `query ListReferralCodes(
-  $filter: ModelReferralCodeFilterInput
-  $limit: Int
-  $nextToken: String
-) {
-  listReferralCodes(filter: $filter, limit: $limit, nextToken: $nextToken) {
-    items {
-      code
-      createdAt
-      id
-      isActive
-      owner
-      successfulReferrals
-      totalReferrals
-      updatedAt
-      __typename
-    }
-    nextToken
+export const getUserProfile = /* GraphQL */ `query GetUserProfile($id: ID!) {
+  getUserProfile(id: $id) {
+    owner
+    industryPreferences
+    countryPreferences
+    id
+    createdAt
+    updatedAt
     __typename
   }
 }
 ` as GeneratedQuery<
-  APITypes.ListReferralCodesQueryVariables,
-  APITypes.ListReferralCodesQuery
->;
-export const listReferrals = /* GraphQL */ `query ListReferrals(
-  $filter: ModelReferralFilterInput
-  $limit: Int
-  $nextToken: String
-) {
-  listReferrals(filter: $filter, limit: $limit, nextToken: $nextToken) {
-    items {
-      completedAt
-      createdAt
-      freeMonthsEarned
-      id
-      owner
-      referralCode
-      referredId
-      referrerId
-      status
-      updatedAt
-      __typename
-    }
-    nextToken
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.ListReferralsQueryVariables,
-  APITypes.ListReferralsQuery
+  APITypes.GetUserProfileQueryVariables,
+  APITypes.GetUserProfileQuery
 >;
 export const listUserProfiles = /* GraphQL */ `query ListUserProfiles(
   $filter: ModelUserProfileFilterInput
@@ -190,11 +82,11 @@ export const listUserProfiles = /* GraphQL */ `query ListUserProfiles(
 ) {
   listUserProfiles(filter: $filter, limit: $limit, nextToken: $nextToken) {
     items {
-      countryPreferences
-      createdAt
-      id
-      industryPreferences
       owner
+      industryPreferences
+      countryPreferences
+      id
+      createdAt
       updatedAt
       __typename
     }
@@ -206,6 +98,114 @@ export const listUserProfiles = /* GraphQL */ `query ListUserProfiles(
   APITypes.ListUserProfilesQueryVariables,
   APITypes.ListUserProfilesQuery
 >;
+export const getReferralCode = /* GraphQL */ `query GetReferralCode($id: ID!) {
+  getReferralCode(id: $id) {
+    owner
+    code
+    isActive
+    totalReferrals
+    successfulReferrals
+    id
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetReferralCodeQueryVariables,
+  APITypes.GetReferralCodeQuery
+>;
+export const listReferralCodes = /* GraphQL */ `query ListReferralCodes(
+  $filter: ModelReferralCodeFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listReferralCodes(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      owner
+      code
+      isActive
+      totalReferrals
+      successfulReferrals
+      id
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListReferralCodesQueryVariables,
+  APITypes.ListReferralCodesQuery
+>;
+export const getReferral = /* GraphQL */ `query GetReferral($id: ID!) {
+  getReferral(id: $id) {
+    referrerId
+    referredId
+    referralCode
+    status
+    completedAt
+    freeMonthsEarned
+    id
+    createdAt
+    updatedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetReferralQueryVariables,
+  APITypes.GetReferralQuery
+>;
+export const listReferrals = /* GraphQL */ `query ListReferrals(
+  $filter: ModelReferralFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listReferrals(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      referrerId
+      referredId
+      referralCode
+      status
+      completedAt
+      freeMonthsEarned
+      id
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListReferralsQueryVariables,
+  APITypes.ListReferralsQuery
+>;
+export const getUserSubscription = /* GraphQL */ `query GetUserSubscription($id: ID!) {
+  getUserSubscription(id: $id) {
+    owner
+    subscriptionStatus
+    trialStartDate
+    trialEndDate
+    totalFreeMonths
+    earnedFreeMonths
+    referralCodeUsed
+    referrerId
+    id
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetUserSubscriptionQueryVariables,
+  APITypes.GetUserSubscriptionQuery
+>;
 export const listUserSubscriptions = /* GraphQL */ `query ListUserSubscriptions(
   $filter: ModelUserSubscriptionFilterInput
   $limit: Int
@@ -213,16 +213,16 @@ export const listUserSubscriptions = /* GraphQL */ `query ListUserSubscriptions(
 ) {
   listUserSubscriptions(filter: $filter, limit: $limit, nextToken: $nextToken) {
     items {
-      createdAt
-      earnedFreeMonths
-      id
       owner
+      subscriptionStatus
+      trialStartDate
+      trialEndDate
+      totalFreeMonths
+      earnedFreeMonths
       referralCodeUsed
       referrerId
-      subscriptionStatus
-      totalFreeMonths
-      trialEndDate
-      trialStartDate
+      id
+      createdAt
       updatedAt
       __typename
     }
@@ -233,4 +233,106 @@ export const listUserSubscriptions = /* GraphQL */ `query ListUserSubscriptions(
 ` as GeneratedQuery<
   APITypes.ListUserSubscriptionsQueryVariables,
   APITypes.ListUserSubscriptionsQuery
+>;
+export const getUserActivity = /* GraphQL */ `query GetUserActivity($id: ID!) {
+  getUserActivity(id: $id) {
+    owner
+    sessionId
+    startTime
+    endTime
+    duration
+    pageViews
+    interactions
+    deviceInfo
+    userAgent
+    ipAddress
+    isActive
+    id
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetUserActivityQueryVariables,
+  APITypes.GetUserActivityQuery
+>;
+export const listUserActivities = /* GraphQL */ `query ListUserActivities(
+  $filter: ModelUserActivityFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listUserActivities(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      owner
+      sessionId
+      startTime
+      endTime
+      duration
+      pageViews
+      interactions
+      deviceInfo
+      userAgent
+      ipAddress
+      isActive
+      id
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListUserActivitiesQueryVariables,
+  APITypes.ListUserActivitiesQuery
+>;
+export const getUserEvent = /* GraphQL */ `query GetUserEvent($id: ID!) {
+  getUserEvent(id: $id) {
+    owner
+    sessionId
+    eventType
+    eventData
+    timestamp
+    pageUrl
+    elementId
+    metadata
+    id
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetUserEventQueryVariables,
+  APITypes.GetUserEventQuery
+>;
+export const listUserEvents = /* GraphQL */ `query ListUserEvents(
+  $filter: ModelUserEventFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listUserEvents(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      owner
+      sessionId
+      eventType
+      eventData
+      timestamp
+      pageUrl
+      elementId
+      metadata
+      id
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListUserEventsQueryVariables,
+  APITypes.ListUserEventsQuery
 >;

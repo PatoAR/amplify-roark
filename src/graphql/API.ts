@@ -2,126 +2,55 @@
 /* eslint-disable */
 //  This file was automatically generated and should not be edited.
 
-export type Article = {
-  __typename: "Article",
+export type CreateArticleInput = {
+  timestamp?: string | null,
+  source: string,
+  title: string,
+  industry?: string | null,
+  summary?: string | null,
+  link?: string | null,
   companies?: string | null,
   countries?: string | null,
-  createdAt: string,
-  id: string,
-  industry?: string | null,
   language?: string | null,
-  link?: string | null,
-  source: string,
-  summary?: string | null,
-  timestamp?: string | null,
-  title: string,
   ttl?: number | null,
-  updatedAt: string,
+  id?: string | null,
 };
 
-export type Referral = {
-  __typename: "Referral",
-  completedAt?: string | null,
-  createdAt: string,
-  freeMonthsEarned?: number | null,
-  id: string,
-  owner?: string | null,
-  referralCode: string,
-  referredId: string,
-  referrerId: string,
-  status?: ReferralStatus | null,
-  updatedAt: string,
-};
-
-export enum ReferralStatus {
-  completed = "completed",
-  expired = "expired",
-  pending = "pending",
-}
-
-
-export type ReferralCode = {
-  __typename: "ReferralCode",
-  code: string,
-  createdAt: string,
-  id: string,
-  isActive?: boolean | null,
-  owner?: string | null,
-  successfulReferrals?: number | null,
-  totalReferrals?: number | null,
-  updatedAt: string,
-};
-
-export type UserProfile = {
-  __typename: "UserProfile",
-  countryPreferences?: Array< string | null > | null,
-  createdAt: string,
-  id: string,
-  industryPreferences?: Array< string | null > | null,
-  owner?: string | null,
-  updatedAt: string,
-};
-
-export type UserSubscription = {
-  __typename: "UserSubscription",
-  createdAt: string,
-  earnedFreeMonths?: number | null,
-  id: string,
-  owner?: string | null,
-  referralCodeUsed?: string | null,
-  referrerId?: string | null,
-  subscriptionStatus?: UserSubscriptionSubscriptionStatus | null,
-  totalFreeMonths?: number | null,
-  trialEndDate?: string | null,
-  trialStartDate?: string | null,
-  updatedAt: string,
-};
-
-export enum UserSubscriptionSubscriptionStatus {
-  active = "active",
-  cancelled = "cancelled",
-  expired = "expired",
-  free_trial = "free_trial",
-}
-
-
-export type ModelArticleFilterInput = {
-  and?: Array< ModelArticleFilterInput | null > | null,
+export type ModelArticleConditionInput = {
+  timestamp?: ModelStringInput | null,
+  source?: ModelStringInput | null,
+  title?: ModelStringInput | null,
+  industry?: ModelStringInput | null,
+  summary?: ModelStringInput | null,
+  link?: ModelStringInput | null,
   companies?: ModelStringInput | null,
   countries?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  id?: ModelIDInput | null,
-  industry?: ModelStringInput | null,
   language?: ModelStringInput | null,
-  link?: ModelStringInput | null,
-  not?: ModelArticleFilterInput | null,
-  or?: Array< ModelArticleFilterInput | null > | null,
-  source?: ModelStringInput | null,
-  summary?: ModelStringInput | null,
-  timestamp?: ModelStringInput | null,
-  title?: ModelStringInput | null,
   ttl?: ModelIntInput | null,
+  and?: Array< ModelArticleConditionInput | null > | null,
+  or?: Array< ModelArticleConditionInput | null > | null,
+  not?: ModelArticleConditionInput | null,
+  createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
 };
 
 export type ModelStringInput = {
-  attributeExists?: boolean | null,
-  attributeType?: ModelAttributeTypes | null,
-  beginsWith?: string | null,
-  between?: Array< string | null > | null,
-  contains?: string | null,
+  ne?: string | null,
   eq?: string | null,
-  ge?: string | null,
-  gt?: string | null,
   le?: string | null,
   lt?: string | null,
-  ne?: string | null,
+  ge?: string | null,
+  gt?: string | null,
+  contains?: string | null,
   notContains?: string | null,
+  between?: Array< string | null > | null,
+  beginsWith?: string | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
   size?: ModelSizeInput | null,
 };
 
 export enum ModelAttributeTypes {
-  _null = "_null",
   binary = "binary",
   binarySet = "binarySet",
   bool = "bool",
@@ -131,45 +60,480 @@ export enum ModelAttributeTypes {
   numberSet = "numberSet",
   string = "string",
   stringSet = "stringSet",
+  _null = "_null",
 }
 
 
 export type ModelSizeInput = {
-  between?: Array< number | null > | null,
+  ne?: number | null,
   eq?: number | null,
-  ge?: number | null,
-  gt?: number | null,
   le?: number | null,
   lt?: number | null,
-  ne?: number | null,
-};
-
-export type ModelIDInput = {
-  attributeExists?: boolean | null,
-  attributeType?: ModelAttributeTypes | null,
-  beginsWith?: string | null,
-  between?: Array< string | null > | null,
-  contains?: string | null,
-  eq?: string | null,
-  ge?: string | null,
-  gt?: string | null,
-  le?: string | null,
-  lt?: string | null,
-  ne?: string | null,
-  notContains?: string | null,
-  size?: ModelSizeInput | null,
+  ge?: number | null,
+  gt?: number | null,
+  between?: Array< number | null > | null,
 };
 
 export type ModelIntInput = {
-  attributeExists?: boolean | null,
-  attributeType?: ModelAttributeTypes | null,
-  between?: Array< number | null > | null,
+  ne?: number | null,
   eq?: number | null,
-  ge?: number | null,
-  gt?: number | null,
   le?: number | null,
   lt?: number | null,
-  ne?: number | null,
+  ge?: number | null,
+  gt?: number | null,
+  between?: Array< number | null > | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
+};
+
+export type Article = {
+  __typename: "Article",
+  timestamp?: string | null,
+  source: string,
+  title: string,
+  industry?: string | null,
+  summary?: string | null,
+  link?: string | null,
+  companies?: string | null,
+  countries?: string | null,
+  language?: string | null,
+  ttl?: number | null,
+  id: string,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type UpdateArticleInput = {
+  timestamp?: string | null,
+  source?: string | null,
+  title?: string | null,
+  industry?: string | null,
+  summary?: string | null,
+  link?: string | null,
+  companies?: string | null,
+  countries?: string | null,
+  language?: string | null,
+  ttl?: number | null,
+  id: string,
+};
+
+export type DeleteArticleInput = {
+  id: string,
+};
+
+export type CreateUserProfileInput = {
+  owner?: string | null,
+  industryPreferences?: Array< string | null > | null,
+  countryPreferences?: Array< string | null > | null,
+  id?: string | null,
+};
+
+export type ModelUserProfileConditionInput = {
+  owner?: ModelStringInput | null,
+  industryPreferences?: ModelStringInput | null,
+  countryPreferences?: ModelStringInput | null,
+  and?: Array< ModelUserProfileConditionInput | null > | null,
+  or?: Array< ModelUserProfileConditionInput | null > | null,
+  not?: ModelUserProfileConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+};
+
+export type UserProfile = {
+  __typename: "UserProfile",
+  owner?: string | null,
+  industryPreferences?: Array< string | null > | null,
+  countryPreferences?: Array< string | null > | null,
+  id: string,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type UpdateUserProfileInput = {
+  owner?: string | null,
+  industryPreferences?: Array< string | null > | null,
+  countryPreferences?: Array< string | null > | null,
+  id: string,
+};
+
+export type DeleteUserProfileInput = {
+  id: string,
+};
+
+export type CreateReferralCodeInput = {
+  owner?: string | null,
+  code: string,
+  isActive?: boolean | null,
+  totalReferrals?: number | null,
+  successfulReferrals?: number | null,
+  id?: string | null,
+};
+
+export type ModelReferralCodeConditionInput = {
+  owner?: ModelStringInput | null,
+  code?: ModelStringInput | null,
+  isActive?: ModelBooleanInput | null,
+  totalReferrals?: ModelIntInput | null,
+  successfulReferrals?: ModelIntInput | null,
+  and?: Array< ModelReferralCodeConditionInput | null > | null,
+  or?: Array< ModelReferralCodeConditionInput | null > | null,
+  not?: ModelReferralCodeConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+};
+
+export type ModelBooleanInput = {
+  ne?: boolean | null,
+  eq?: boolean | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
+};
+
+export type ReferralCode = {
+  __typename: "ReferralCode",
+  owner?: string | null,
+  code: string,
+  isActive?: boolean | null,
+  totalReferrals?: number | null,
+  successfulReferrals?: number | null,
+  id: string,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type UpdateReferralCodeInput = {
+  owner?: string | null,
+  code?: string | null,
+  isActive?: boolean | null,
+  totalReferrals?: number | null,
+  successfulReferrals?: number | null,
+  id: string,
+};
+
+export type DeleteReferralCodeInput = {
+  id: string,
+};
+
+export type CreateReferralInput = {
+  referrerId: string,
+  referredId: string,
+  referralCode: string,
+  status?: ReferralStatus | null,
+  completedAt?: string | null,
+  freeMonthsEarned?: number | null,
+  id?: string | null,
+};
+
+export enum ReferralStatus {
+  pending = "pending",
+  completed = "completed",
+  expired = "expired",
+}
+
+
+export type ModelReferralConditionInput = {
+  referrerId?: ModelStringInput | null,
+  referredId?: ModelStringInput | null,
+  referralCode?: ModelStringInput | null,
+  status?: ModelReferralStatusInput | null,
+  completedAt?: ModelStringInput | null,
+  freeMonthsEarned?: ModelIntInput | null,
+  and?: Array< ModelReferralConditionInput | null > | null,
+  or?: Array< ModelReferralConditionInput | null > | null,
+  not?: ModelReferralConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  owner?: ModelStringInput | null,
+};
+
+export type ModelReferralStatusInput = {
+  eq?: ReferralStatus | null,
+  ne?: ReferralStatus | null,
+};
+
+export type Referral = {
+  __typename: "Referral",
+  referrerId: string,
+  referredId: string,
+  referralCode: string,
+  status?: ReferralStatus | null,
+  completedAt?: string | null,
+  freeMonthsEarned?: number | null,
+  id: string,
+  createdAt: string,
+  updatedAt: string,
+  owner?: string | null,
+};
+
+export type UpdateReferralInput = {
+  referrerId?: string | null,
+  referredId?: string | null,
+  referralCode?: string | null,
+  status?: ReferralStatus | null,
+  completedAt?: string | null,
+  freeMonthsEarned?: number | null,
+  id: string,
+};
+
+export type DeleteReferralInput = {
+  id: string,
+};
+
+export type CreateUserSubscriptionInput = {
+  owner?: string | null,
+  subscriptionStatus?: UserSubscriptionSubscriptionStatus | null,
+  trialStartDate?: string | null,
+  trialEndDate?: string | null,
+  totalFreeMonths?: number | null,
+  earnedFreeMonths?: number | null,
+  referralCodeUsed?: string | null,
+  referrerId?: string | null,
+  id?: string | null,
+};
+
+export enum UserSubscriptionSubscriptionStatus {
+  free_trial = "free_trial",
+  active = "active",
+  expired = "expired",
+  cancelled = "cancelled",
+}
+
+
+export type ModelUserSubscriptionConditionInput = {
+  owner?: ModelStringInput | null,
+  subscriptionStatus?: ModelUserSubscriptionSubscriptionStatusInput | null,
+  trialStartDate?: ModelStringInput | null,
+  trialEndDate?: ModelStringInput | null,
+  totalFreeMonths?: ModelIntInput | null,
+  earnedFreeMonths?: ModelIntInput | null,
+  referralCodeUsed?: ModelStringInput | null,
+  referrerId?: ModelStringInput | null,
+  and?: Array< ModelUserSubscriptionConditionInput | null > | null,
+  or?: Array< ModelUserSubscriptionConditionInput | null > | null,
+  not?: ModelUserSubscriptionConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+};
+
+export type ModelUserSubscriptionSubscriptionStatusInput = {
+  eq?: UserSubscriptionSubscriptionStatus | null,
+  ne?: UserSubscriptionSubscriptionStatus | null,
+};
+
+export type UserSubscription = {
+  __typename: "UserSubscription",
+  owner?: string | null,
+  subscriptionStatus?: UserSubscriptionSubscriptionStatus | null,
+  trialStartDate?: string | null,
+  trialEndDate?: string | null,
+  totalFreeMonths?: number | null,
+  earnedFreeMonths?: number | null,
+  referralCodeUsed?: string | null,
+  referrerId?: string | null,
+  id: string,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type UpdateUserSubscriptionInput = {
+  owner?: string | null,
+  subscriptionStatus?: UserSubscriptionSubscriptionStatus | null,
+  trialStartDate?: string | null,
+  trialEndDate?: string | null,
+  totalFreeMonths?: number | null,
+  earnedFreeMonths?: number | null,
+  referralCodeUsed?: string | null,
+  referrerId?: string | null,
+  id: string,
+};
+
+export type DeleteUserSubscriptionInput = {
+  id: string,
+};
+
+export type CreateUserActivityInput = {
+  owner?: string | null,
+  sessionId: string,
+  startTime: string,
+  endTime?: string | null,
+  duration?: number | null,
+  pageViews?: number | null,
+  interactions?: number | null,
+  deviceInfo?: string | null,
+  userAgent?: string | null,
+  ipAddress?: string | null,
+  isActive?: boolean | null,
+  id?: string | null,
+};
+
+export type ModelUserActivityConditionInput = {
+  owner?: ModelStringInput | null,
+  sessionId?: ModelStringInput | null,
+  startTime?: ModelStringInput | null,
+  endTime?: ModelStringInput | null,
+  duration?: ModelIntInput | null,
+  pageViews?: ModelIntInput | null,
+  interactions?: ModelIntInput | null,
+  deviceInfo?: ModelStringInput | null,
+  userAgent?: ModelStringInput | null,
+  ipAddress?: ModelStringInput | null,
+  isActive?: ModelBooleanInput | null,
+  and?: Array< ModelUserActivityConditionInput | null > | null,
+  or?: Array< ModelUserActivityConditionInput | null > | null,
+  not?: ModelUserActivityConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+};
+
+export type UserActivity = {
+  __typename: "UserActivity",
+  owner?: string | null,
+  sessionId: string,
+  startTime: string,
+  endTime?: string | null,
+  duration?: number | null,
+  pageViews?: number | null,
+  interactions?: number | null,
+  deviceInfo?: string | null,
+  userAgent?: string | null,
+  ipAddress?: string | null,
+  isActive?: boolean | null,
+  id: string,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type UpdateUserActivityInput = {
+  owner?: string | null,
+  sessionId?: string | null,
+  startTime?: string | null,
+  endTime?: string | null,
+  duration?: number | null,
+  pageViews?: number | null,
+  interactions?: number | null,
+  deviceInfo?: string | null,
+  userAgent?: string | null,
+  ipAddress?: string | null,
+  isActive?: boolean | null,
+  id: string,
+};
+
+export type DeleteUserActivityInput = {
+  id: string,
+};
+
+export type CreateUserEventInput = {
+  owner?: string | null,
+  sessionId: string,
+  eventType?: UserEventEventType | null,
+  eventData?: string | null,
+  timestamp: string,
+  pageUrl?: string | null,
+  elementId?: string | null,
+  metadata?: string | null,
+  id?: string | null,
+};
+
+export enum UserEventEventType {
+  page_view = "page_view",
+  article_click = "article_click",
+  article_share = "article_share",
+  filter_change = "filter_change",
+  preference_update = "preference_update",
+  referral_generated = "referral_generated",
+  referral_shared = "referral_shared",
+  settings_accessed = "settings_accessed",
+  search_performed = "search_performed",
+  logout = "logout",
+  login = "login",
+}
+
+
+export type ModelUserEventConditionInput = {
+  owner?: ModelStringInput | null,
+  sessionId?: ModelStringInput | null,
+  eventType?: ModelUserEventEventTypeInput | null,
+  eventData?: ModelStringInput | null,
+  timestamp?: ModelStringInput | null,
+  pageUrl?: ModelStringInput | null,
+  elementId?: ModelStringInput | null,
+  metadata?: ModelStringInput | null,
+  and?: Array< ModelUserEventConditionInput | null > | null,
+  or?: Array< ModelUserEventConditionInput | null > | null,
+  not?: ModelUserEventConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+};
+
+export type ModelUserEventEventTypeInput = {
+  eq?: UserEventEventType | null,
+  ne?: UserEventEventType | null,
+};
+
+export type UserEvent = {
+  __typename: "UserEvent",
+  owner?: string | null,
+  sessionId: string,
+  eventType?: UserEventEventType | null,
+  eventData?: string | null,
+  timestamp: string,
+  pageUrl?: string | null,
+  elementId?: string | null,
+  metadata?: string | null,
+  id: string,
+  createdAt: string,
+  updatedAt: string,
+};
+
+export type UpdateUserEventInput = {
+  owner?: string | null,
+  sessionId?: string | null,
+  eventType?: UserEventEventType | null,
+  eventData?: string | null,
+  timestamp?: string | null,
+  pageUrl?: string | null,
+  elementId?: string | null,
+  metadata?: string | null,
+  id: string,
+};
+
+export type DeleteUserEventInput = {
+  id: string,
+};
+
+export type ModelArticleFilterInput = {
+  timestamp?: ModelStringInput | null,
+  source?: ModelStringInput | null,
+  title?: ModelStringInput | null,
+  industry?: ModelStringInput | null,
+  summary?: ModelStringInput | null,
+  link?: ModelStringInput | null,
+  companies?: ModelStringInput | null,
+  countries?: ModelStringInput | null,
+  language?: ModelStringInput | null,
+  ttl?: ModelIntInput | null,
+  id?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelArticleFilterInput | null > | null,
+  or?: Array< ModelArticleFilterInput | null > | null,
+  not?: ModelArticleFilterInput | null,
+};
+
+export type ModelIDInput = {
+  ne?: string | null,
+  eq?: string | null,
+  le?: string | null,
+  lt?: string | null,
+  ge?: string | null,
+  gt?: string | null,
+  contains?: string | null,
+  notContains?: string | null,
+  between?: Array< string | null > | null,
+  beginsWith?: string | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
+  size?: ModelSizeInput | null,
 };
 
 export type ModelArticleConnection = {
@@ -178,25 +542,36 @@ export type ModelArticleConnection = {
   nextToken?: string | null,
 };
 
-export type ModelReferralCodeFilterInput = {
-  and?: Array< ModelReferralCodeFilterInput | null > | null,
-  code?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  id?: ModelIDInput | null,
-  isActive?: ModelBooleanInput | null,
-  not?: ModelReferralCodeFilterInput | null,
-  or?: Array< ModelReferralCodeFilterInput | null > | null,
+export type ModelUserProfileFilterInput = {
   owner?: ModelStringInput | null,
-  successfulReferrals?: ModelIntInput | null,
-  totalReferrals?: ModelIntInput | null,
+  industryPreferences?: ModelStringInput | null,
+  countryPreferences?: ModelStringInput | null,
+  id?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
+  and?: Array< ModelUserProfileFilterInput | null > | null,
+  or?: Array< ModelUserProfileFilterInput | null > | null,
+  not?: ModelUserProfileFilterInput | null,
 };
 
-export type ModelBooleanInput = {
-  attributeExists?: boolean | null,
-  attributeType?: ModelAttributeTypes | null,
-  eq?: boolean | null,
-  ne?: boolean | null,
+export type ModelUserProfileConnection = {
+  __typename: "ModelUserProfileConnection",
+  items:  Array<UserProfile | null >,
+  nextToken?: string | null,
+};
+
+export type ModelReferralCodeFilterInput = {
+  owner?: ModelStringInput | null,
+  code?: ModelStringInput | null,
+  isActive?: ModelBooleanInput | null,
+  totalReferrals?: ModelIntInput | null,
+  successfulReferrals?: ModelIntInput | null,
+  id?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelReferralCodeFilterInput | null > | null,
+  or?: Array< ModelReferralCodeFilterInput | null > | null,
+  not?: ModelReferralCodeFilterInput | null,
 };
 
 export type ModelReferralCodeConnection = {
@@ -206,24 +581,19 @@ export type ModelReferralCodeConnection = {
 };
 
 export type ModelReferralFilterInput = {
-  and?: Array< ModelReferralFilterInput | null > | null,
+  referrerId?: ModelStringInput | null,
+  referredId?: ModelStringInput | null,
+  referralCode?: ModelStringInput | null,
+  status?: ModelReferralStatusInput | null,
   completedAt?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
   freeMonthsEarned?: ModelIntInput | null,
   id?: ModelIDInput | null,
-  not?: ModelReferralFilterInput | null,
-  or?: Array< ModelReferralFilterInput | null > | null,
-  owner?: ModelStringInput | null,
-  referralCode?: ModelStringInput | null,
-  referredId?: ModelStringInput | null,
-  referrerId?: ModelStringInput | null,
-  status?: ModelReferralStatusInput | null,
+  createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
-};
-
-export type ModelReferralStatusInput = {
-  eq?: ReferralStatus | null,
-  ne?: ReferralStatus | null,
+  and?: Array< ModelReferralFilterInput | null > | null,
+  or?: Array< ModelReferralFilterInput | null > | null,
+  not?: ModelReferralFilterInput | null,
+  owner?: ModelStringInput | null,
 };
 
 export type ModelReferralConnection = {
@@ -232,44 +602,21 @@ export type ModelReferralConnection = {
   nextToken?: string | null,
 };
 
-export type ModelUserProfileFilterInput = {
-  and?: Array< ModelUserProfileFilterInput | null > | null,
-  countryPreferences?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  id?: ModelIDInput | null,
-  industryPreferences?: ModelStringInput | null,
-  not?: ModelUserProfileFilterInput | null,
-  or?: Array< ModelUserProfileFilterInput | null > | null,
-  owner?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-};
-
-export type ModelUserProfileConnection = {
-  __typename: "ModelUserProfileConnection",
-  items:  Array<UserProfile | null >,
-  nextToken?: string | null,
-};
-
 export type ModelUserSubscriptionFilterInput = {
-  and?: Array< ModelUserSubscriptionFilterInput | null > | null,
-  createdAt?: ModelStringInput | null,
-  earnedFreeMonths?: ModelIntInput | null,
-  id?: ModelIDInput | null,
-  not?: ModelUserSubscriptionFilterInput | null,
-  or?: Array< ModelUserSubscriptionFilterInput | null > | null,
   owner?: ModelStringInput | null,
+  subscriptionStatus?: ModelUserSubscriptionSubscriptionStatusInput | null,
+  trialStartDate?: ModelStringInput | null,
+  trialEndDate?: ModelStringInput | null,
+  totalFreeMonths?: ModelIntInput | null,
+  earnedFreeMonths?: ModelIntInput | null,
   referralCodeUsed?: ModelStringInput | null,
   referrerId?: ModelStringInput | null,
-  subscriptionStatus?: ModelUserSubscriptionSubscriptionStatusInput | null,
-  totalFreeMonths?: ModelIntInput | null,
-  trialEndDate?: ModelStringInput | null,
-  trialStartDate?: ModelStringInput | null,
+  id?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
-};
-
-export type ModelUserSubscriptionSubscriptionStatusInput = {
-  eq?: UserSubscriptionSubscriptionStatus | null,
-  ne?: UserSubscriptionSubscriptionStatus | null,
+  and?: Array< ModelUserSubscriptionFilterInput | null > | null,
+  or?: Array< ModelUserSubscriptionFilterInput | null > | null,
+  not?: ModelUserSubscriptionFilterInput | null,
 };
 
 export type ModelUserSubscriptionConnection = {
@@ -278,321 +625,658 @@ export type ModelUserSubscriptionConnection = {
   nextToken?: string | null,
 };
 
-export type ModelArticleConditionInput = {
-  and?: Array< ModelArticleConditionInput | null > | null,
-  companies?: ModelStringInput | null,
-  countries?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  industry?: ModelStringInput | null,
-  language?: ModelStringInput | null,
-  link?: ModelStringInput | null,
-  not?: ModelArticleConditionInput | null,
-  or?: Array< ModelArticleConditionInput | null > | null,
-  source?: ModelStringInput | null,
-  summary?: ModelStringInput | null,
-  timestamp?: ModelStringInput | null,
-  title?: ModelStringInput | null,
-  ttl?: ModelIntInput | null,
-  updatedAt?: ModelStringInput | null,
-};
-
-export type CreateArticleInput = {
-  companies?: string | null,
-  countries?: string | null,
-  id?: string | null,
-  industry?: string | null,
-  language?: string | null,
-  link?: string | null,
-  source: string,
-  summary?: string | null,
-  timestamp?: string | null,
-  title: string,
-  ttl?: number | null,
-};
-
-export type ModelReferralConditionInput = {
-  and?: Array< ModelReferralConditionInput | null > | null,
-  completedAt?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
-  freeMonthsEarned?: ModelIntInput | null,
-  not?: ModelReferralConditionInput | null,
-  or?: Array< ModelReferralConditionInput | null > | null,
+export type ModelUserActivityFilterInput = {
   owner?: ModelStringInput | null,
-  referralCode?: ModelStringInput | null,
-  referredId?: ModelStringInput | null,
-  referrerId?: ModelStringInput | null,
-  status?: ModelReferralStatusInput | null,
-  updatedAt?: ModelStringInput | null,
-};
-
-export type CreateReferralInput = {
-  completedAt?: string | null,
-  freeMonthsEarned?: number | null,
-  id?: string | null,
-  referralCode: string,
-  referredId: string,
-  referrerId: string,
-  status?: ReferralStatus | null,
-};
-
-export type ModelReferralCodeConditionInput = {
-  and?: Array< ModelReferralCodeConditionInput | null > | null,
-  code?: ModelStringInput | null,
-  createdAt?: ModelStringInput | null,
+  sessionId?: ModelStringInput | null,
+  startTime?: ModelStringInput | null,
+  endTime?: ModelStringInput | null,
+  duration?: ModelIntInput | null,
+  pageViews?: ModelIntInput | null,
+  interactions?: ModelIntInput | null,
+  deviceInfo?: ModelStringInput | null,
+  userAgent?: ModelStringInput | null,
+  ipAddress?: ModelStringInput | null,
   isActive?: ModelBooleanInput | null,
-  not?: ModelReferralCodeConditionInput | null,
-  or?: Array< ModelReferralCodeConditionInput | null > | null,
-  owner?: ModelStringInput | null,
-  successfulReferrals?: ModelIntInput | null,
-  totalReferrals?: ModelIntInput | null,
-  updatedAt?: ModelStringInput | null,
-};
-
-export type CreateReferralCodeInput = {
-  code: string,
-  id?: string | null,
-  isActive?: boolean | null,
-  owner?: string | null,
-  successfulReferrals?: number | null,
-  totalReferrals?: number | null,
-};
-
-export type ModelUserProfileConditionInput = {
-  and?: Array< ModelUserProfileConditionInput | null > | null,
-  countryPreferences?: ModelStringInput | null,
+  id?: ModelIDInput | null,
   createdAt?: ModelStringInput | null,
-  industryPreferences?: ModelStringInput | null,
-  not?: ModelUserProfileConditionInput | null,
-  or?: Array< ModelUserProfileConditionInput | null > | null,
-  owner?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
+  and?: Array< ModelUserActivityFilterInput | null > | null,
+  or?: Array< ModelUserActivityFilterInput | null > | null,
+  not?: ModelUserActivityFilterInput | null,
 };
 
-export type CreateUserProfileInput = {
-  countryPreferences?: Array< string | null > | null,
-  id?: string | null,
-  industryPreferences?: Array< string | null > | null,
-  owner?: string | null,
+export type ModelUserActivityConnection = {
+  __typename: "ModelUserActivityConnection",
+  items:  Array<UserActivity | null >,
+  nextToken?: string | null,
 };
 
-export type ModelUserSubscriptionConditionInput = {
-  and?: Array< ModelUserSubscriptionConditionInput | null > | null,
+export type ModelUserEventFilterInput = {
+  owner?: ModelStringInput | null,
+  sessionId?: ModelStringInput | null,
+  eventType?: ModelUserEventEventTypeInput | null,
+  eventData?: ModelStringInput | null,
+  timestamp?: ModelStringInput | null,
+  pageUrl?: ModelStringInput | null,
+  elementId?: ModelStringInput | null,
+  metadata?: ModelStringInput | null,
+  id?: ModelIDInput | null,
   createdAt?: ModelStringInput | null,
-  earnedFreeMonths?: ModelIntInput | null,
-  not?: ModelUserSubscriptionConditionInput | null,
-  or?: Array< ModelUserSubscriptionConditionInput | null > | null,
-  owner?: ModelStringInput | null,
-  referralCodeUsed?: ModelStringInput | null,
-  referrerId?: ModelStringInput | null,
-  subscriptionStatus?: ModelUserSubscriptionSubscriptionStatusInput | null,
-  totalFreeMonths?: ModelIntInput | null,
-  trialEndDate?: ModelStringInput | null,
-  trialStartDate?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
+  and?: Array< ModelUserEventFilterInput | null > | null,
+  or?: Array< ModelUserEventFilterInput | null > | null,
+  not?: ModelUserEventFilterInput | null,
 };
 
-export type CreateUserSubscriptionInput = {
-  earnedFreeMonths?: number | null,
-  id?: string | null,
-  owner?: string | null,
-  referralCodeUsed?: string | null,
-  referrerId?: string | null,
-  subscriptionStatus?: UserSubscriptionSubscriptionStatus | null,
-  totalFreeMonths?: number | null,
-  trialEndDate?: string | null,
-  trialStartDate?: string | null,
-};
-
-export type DeleteArticleInput = {
-  id: string,
-};
-
-export type DeleteReferralInput = {
-  id: string,
-};
-
-export type DeleteReferralCodeInput = {
-  id: string,
-};
-
-export type DeleteUserProfileInput = {
-  id: string,
-};
-
-export type DeleteUserSubscriptionInput = {
-  id: string,
-};
-
-export type UpdateArticleInput = {
-  companies?: string | null,
-  countries?: string | null,
-  id: string,
-  industry?: string | null,
-  language?: string | null,
-  link?: string | null,
-  source?: string | null,
-  summary?: string | null,
-  timestamp?: string | null,
-  title?: string | null,
-  ttl?: number | null,
-};
-
-export type UpdateReferralInput = {
-  completedAt?: string | null,
-  freeMonthsEarned?: number | null,
-  id: string,
-  referralCode?: string | null,
-  referredId?: string | null,
-  referrerId?: string | null,
-  status?: ReferralStatus | null,
-};
-
-export type UpdateReferralCodeInput = {
-  code?: string | null,
-  id: string,
-  isActive?: boolean | null,
-  owner?: string | null,
-  successfulReferrals?: number | null,
-  totalReferrals?: number | null,
-};
-
-export type UpdateUserProfileInput = {
-  countryPreferences?: Array< string | null > | null,
-  id: string,
-  industryPreferences?: Array< string | null > | null,
-  owner?: string | null,
-};
-
-export type UpdateUserSubscriptionInput = {
-  earnedFreeMonths?: number | null,
-  id: string,
-  owner?: string | null,
-  referralCodeUsed?: string | null,
-  referrerId?: string | null,
-  subscriptionStatus?: UserSubscriptionSubscriptionStatus | null,
-  totalFreeMonths?: number | null,
-  trialEndDate?: string | null,
-  trialStartDate?: string | null,
+export type ModelUserEventConnection = {
+  __typename: "ModelUserEventConnection",
+  items:  Array<UserEvent | null >,
+  nextToken?: string | null,
 };
 
 export type ModelSubscriptionArticleFilterInput = {
-  and?: Array< ModelSubscriptionArticleFilterInput | null > | null,
+  timestamp?: ModelSubscriptionStringInput | null,
+  source?: ModelSubscriptionStringInput | null,
+  title?: ModelSubscriptionStringInput | null,
+  industry?: ModelSubscriptionStringInput | null,
+  summary?: ModelSubscriptionStringInput | null,
+  link?: ModelSubscriptionStringInput | null,
   companies?: ModelSubscriptionStringInput | null,
   countries?: ModelSubscriptionStringInput | null,
-  createdAt?: ModelSubscriptionStringInput | null,
-  id?: ModelSubscriptionIDInput | null,
-  industry?: ModelSubscriptionStringInput | null,
   language?: ModelSubscriptionStringInput | null,
-  link?: ModelSubscriptionStringInput | null,
-  or?: Array< ModelSubscriptionArticleFilterInput | null > | null,
-  source?: ModelSubscriptionStringInput | null,
-  summary?: ModelSubscriptionStringInput | null,
-  timestamp?: ModelSubscriptionStringInput | null,
-  title?: ModelSubscriptionStringInput | null,
   ttl?: ModelSubscriptionIntInput | null,
+  id?: ModelSubscriptionIDInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionArticleFilterInput | null > | null,
+  or?: Array< ModelSubscriptionArticleFilterInput | null > | null,
 };
 
 export type ModelSubscriptionStringInput = {
-  beginsWith?: string | null,
-  between?: Array< string | null > | null,
-  contains?: string | null,
+  ne?: string | null,
   eq?: string | null,
-  ge?: string | null,
-  gt?: string | null,
-  in?: Array< string | null > | null,
   le?: string | null,
   lt?: string | null,
-  ne?: string | null,
-  notContains?: string | null,
-  notIn?: Array< string | null > | null,
-};
-
-export type ModelSubscriptionIDInput = {
-  beginsWith?: string | null,
-  between?: Array< string | null > | null,
-  contains?: string | null,
-  eq?: string | null,
   ge?: string | null,
   gt?: string | null,
-  in?: Array< string | null > | null,
-  le?: string | null,
-  lt?: string | null,
-  ne?: string | null,
+  contains?: string | null,
   notContains?: string | null,
+  between?: Array< string | null > | null,
+  beginsWith?: string | null,
+  in?: Array< string | null > | null,
   notIn?: Array< string | null > | null,
 };
 
 export type ModelSubscriptionIntInput = {
-  between?: Array< number | null > | null,
+  ne?: number | null,
   eq?: number | null,
-  ge?: number | null,
-  gt?: number | null,
-  in?: Array< number | null > | null,
   le?: number | null,
   lt?: number | null,
-  ne?: number | null,
+  ge?: number | null,
+  gt?: number | null,
+  between?: Array< number | null > | null,
+  in?: Array< number | null > | null,
   notIn?: Array< number | null > | null,
 };
 
-export type ModelSubscriptionReferralFilterInput = {
-  and?: Array< ModelSubscriptionReferralFilterInput | null > | null,
-  completedAt?: ModelSubscriptionStringInput | null,
-  createdAt?: ModelSubscriptionStringInput | null,
-  freeMonthsEarned?: ModelSubscriptionIntInput | null,
-  id?: ModelSubscriptionIDInput | null,
-  or?: Array< ModelSubscriptionReferralFilterInput | null > | null,
-  owner?: ModelStringInput | null,
-  referralCode?: ModelSubscriptionStringInput | null,
-  referredId?: ModelSubscriptionStringInput | null,
-  referrerId?: ModelSubscriptionStringInput | null,
-  status?: ModelSubscriptionStringInput | null,
-  updatedAt?: ModelSubscriptionStringInput | null,
-};
-
-export type ModelSubscriptionReferralCodeFilterInput = {
-  and?: Array< ModelSubscriptionReferralCodeFilterInput | null > | null,
-  code?: ModelSubscriptionStringInput | null,
-  createdAt?: ModelSubscriptionStringInput | null,
-  id?: ModelSubscriptionIDInput | null,
-  isActive?: ModelSubscriptionBooleanInput | null,
-  or?: Array< ModelSubscriptionReferralCodeFilterInput | null > | null,
-  owner?: ModelStringInput | null,
-  successfulReferrals?: ModelSubscriptionIntInput | null,
-  totalReferrals?: ModelSubscriptionIntInput | null,
-  updatedAt?: ModelSubscriptionStringInput | null,
-};
-
-export type ModelSubscriptionBooleanInput = {
-  eq?: boolean | null,
-  ne?: boolean | null,
+export type ModelSubscriptionIDInput = {
+  ne?: string | null,
+  eq?: string | null,
+  le?: string | null,
+  lt?: string | null,
+  ge?: string | null,
+  gt?: string | null,
+  contains?: string | null,
+  notContains?: string | null,
+  between?: Array< string | null > | null,
+  beginsWith?: string | null,
+  in?: Array< string | null > | null,
+  notIn?: Array< string | null > | null,
 };
 
 export type ModelSubscriptionUserProfileFilterInput = {
-  and?: Array< ModelSubscriptionUserProfileFilterInput | null > | null,
-  countryPreferences?: ModelSubscriptionStringInput | null,
-  createdAt?: ModelSubscriptionStringInput | null,
-  id?: ModelSubscriptionIDInput | null,
   industryPreferences?: ModelSubscriptionStringInput | null,
+  countryPreferences?: ModelSubscriptionStringInput | null,
+  id?: ModelSubscriptionIDInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionUserProfileFilterInput | null > | null,
   or?: Array< ModelSubscriptionUserProfileFilterInput | null > | null,
   owner?: ModelStringInput | null,
+};
+
+export type ModelSubscriptionReferralCodeFilterInput = {
+  code?: ModelSubscriptionStringInput | null,
+  isActive?: ModelSubscriptionBooleanInput | null,
+  totalReferrals?: ModelSubscriptionIntInput | null,
+  successfulReferrals?: ModelSubscriptionIntInput | null,
+  id?: ModelSubscriptionIDInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionReferralCodeFilterInput | null > | null,
+  or?: Array< ModelSubscriptionReferralCodeFilterInput | null > | null,
+  owner?: ModelStringInput | null,
+};
+
+export type ModelSubscriptionBooleanInput = {
+  ne?: boolean | null,
+  eq?: boolean | null,
+};
+
+export type ModelSubscriptionReferralFilterInput = {
+  referrerId?: ModelSubscriptionStringInput | null,
+  referredId?: ModelSubscriptionStringInput | null,
+  referralCode?: ModelSubscriptionStringInput | null,
+  status?: ModelSubscriptionStringInput | null,
+  completedAt?: ModelSubscriptionStringInput | null,
+  freeMonthsEarned?: ModelSubscriptionIntInput | null,
+  id?: ModelSubscriptionIDInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionReferralFilterInput | null > | null,
+  or?: Array< ModelSubscriptionReferralFilterInput | null > | null,
+  owner?: ModelStringInput | null,
 };
 
 export type ModelSubscriptionUserSubscriptionFilterInput = {
-  and?: Array< ModelSubscriptionUserSubscriptionFilterInput | null > | null,
-  createdAt?: ModelSubscriptionStringInput | null,
+  subscriptionStatus?: ModelSubscriptionStringInput | null,
+  trialStartDate?: ModelSubscriptionStringInput | null,
+  trialEndDate?: ModelSubscriptionStringInput | null,
+  totalFreeMonths?: ModelSubscriptionIntInput | null,
   earnedFreeMonths?: ModelSubscriptionIntInput | null,
-  id?: ModelSubscriptionIDInput | null,
-  or?: Array< ModelSubscriptionUserSubscriptionFilterInput | null > | null,
-  owner?: ModelStringInput | null,
   referralCodeUsed?: ModelSubscriptionStringInput | null,
   referrerId?: ModelSubscriptionStringInput | null,
-  subscriptionStatus?: ModelSubscriptionStringInput | null,
-  totalFreeMonths?: ModelSubscriptionIntInput | null,
-  trialEndDate?: ModelSubscriptionStringInput | null,
-  trialStartDate?: ModelSubscriptionStringInput | null,
+  id?: ModelSubscriptionIDInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionUserSubscriptionFilterInput | null > | null,
+  or?: Array< ModelSubscriptionUserSubscriptionFilterInput | null > | null,
+  owner?: ModelStringInput | null,
+};
+
+export type ModelSubscriptionUserActivityFilterInput = {
+  sessionId?: ModelSubscriptionStringInput | null,
+  startTime?: ModelSubscriptionStringInput | null,
+  endTime?: ModelSubscriptionStringInput | null,
+  duration?: ModelSubscriptionIntInput | null,
+  pageViews?: ModelSubscriptionIntInput | null,
+  interactions?: ModelSubscriptionIntInput | null,
+  deviceInfo?: ModelSubscriptionStringInput | null,
+  userAgent?: ModelSubscriptionStringInput | null,
+  ipAddress?: ModelSubscriptionStringInput | null,
+  isActive?: ModelSubscriptionBooleanInput | null,
+  id?: ModelSubscriptionIDInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionUserActivityFilterInput | null > | null,
+  or?: Array< ModelSubscriptionUserActivityFilterInput | null > | null,
+  owner?: ModelStringInput | null,
+};
+
+export type ModelSubscriptionUserEventFilterInput = {
+  sessionId?: ModelSubscriptionStringInput | null,
+  eventType?: ModelSubscriptionStringInput | null,
+  eventData?: ModelSubscriptionStringInput | null,
+  timestamp?: ModelSubscriptionStringInput | null,
+  pageUrl?: ModelSubscriptionStringInput | null,
+  elementId?: ModelSubscriptionStringInput | null,
+  metadata?: ModelSubscriptionStringInput | null,
+  id?: ModelSubscriptionIDInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionUserEventFilterInput | null > | null,
+  or?: Array< ModelSubscriptionUserEventFilterInput | null > | null,
+  owner?: ModelStringInput | null,
+};
+
+export type CreateArticleMutationVariables = {
+  input: CreateArticleInput,
+  condition?: ModelArticleConditionInput | null,
+};
+
+export type CreateArticleMutation = {
+  createArticle?:  {
+    __typename: "Article",
+    timestamp?: string | null,
+    source: string,
+    title: string,
+    industry?: string | null,
+    summary?: string | null,
+    link?: string | null,
+    companies?: string | null,
+    countries?: string | null,
+    language?: string | null,
+    ttl?: number | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type UpdateArticleMutationVariables = {
+  input: UpdateArticleInput,
+  condition?: ModelArticleConditionInput | null,
+};
+
+export type UpdateArticleMutation = {
+  updateArticle?:  {
+    __typename: "Article",
+    timestamp?: string | null,
+    source: string,
+    title: string,
+    industry?: string | null,
+    summary?: string | null,
+    link?: string | null,
+    companies?: string | null,
+    countries?: string | null,
+    language?: string | null,
+    ttl?: number | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteArticleMutationVariables = {
+  input: DeleteArticleInput,
+  condition?: ModelArticleConditionInput | null,
+};
+
+export type DeleteArticleMutation = {
+  deleteArticle?:  {
+    __typename: "Article",
+    timestamp?: string | null,
+    source: string,
+    title: string,
+    industry?: string | null,
+    summary?: string | null,
+    link?: string | null,
+    companies?: string | null,
+    countries?: string | null,
+    language?: string | null,
+    ttl?: number | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type CreateUserProfileMutationVariables = {
+  input: CreateUserProfileInput,
+  condition?: ModelUserProfileConditionInput | null,
+};
+
+export type CreateUserProfileMutation = {
+  createUserProfile?:  {
+    __typename: "UserProfile",
+    owner?: string | null,
+    industryPreferences?: Array< string | null > | null,
+    countryPreferences?: Array< string | null > | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type UpdateUserProfileMutationVariables = {
+  input: UpdateUserProfileInput,
+  condition?: ModelUserProfileConditionInput | null,
+};
+
+export type UpdateUserProfileMutation = {
+  updateUserProfile?:  {
+    __typename: "UserProfile",
+    owner?: string | null,
+    industryPreferences?: Array< string | null > | null,
+    countryPreferences?: Array< string | null > | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteUserProfileMutationVariables = {
+  input: DeleteUserProfileInput,
+  condition?: ModelUserProfileConditionInput | null,
+};
+
+export type DeleteUserProfileMutation = {
+  deleteUserProfile?:  {
+    __typename: "UserProfile",
+    owner?: string | null,
+    industryPreferences?: Array< string | null > | null,
+    countryPreferences?: Array< string | null > | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type CreateReferralCodeMutationVariables = {
+  input: CreateReferralCodeInput,
+  condition?: ModelReferralCodeConditionInput | null,
+};
+
+export type CreateReferralCodeMutation = {
+  createReferralCode?:  {
+    __typename: "ReferralCode",
+    owner?: string | null,
+    code: string,
+    isActive?: boolean | null,
+    totalReferrals?: number | null,
+    successfulReferrals?: number | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type UpdateReferralCodeMutationVariables = {
+  input: UpdateReferralCodeInput,
+  condition?: ModelReferralCodeConditionInput | null,
+};
+
+export type UpdateReferralCodeMutation = {
+  updateReferralCode?:  {
+    __typename: "ReferralCode",
+    owner?: string | null,
+    code: string,
+    isActive?: boolean | null,
+    totalReferrals?: number | null,
+    successfulReferrals?: number | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteReferralCodeMutationVariables = {
+  input: DeleteReferralCodeInput,
+  condition?: ModelReferralCodeConditionInput | null,
+};
+
+export type DeleteReferralCodeMutation = {
+  deleteReferralCode?:  {
+    __typename: "ReferralCode",
+    owner?: string | null,
+    code: string,
+    isActive?: boolean | null,
+    totalReferrals?: number | null,
+    successfulReferrals?: number | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type CreateReferralMutationVariables = {
+  input: CreateReferralInput,
+  condition?: ModelReferralConditionInput | null,
+};
+
+export type CreateReferralMutation = {
+  createReferral?:  {
+    __typename: "Referral",
+    referrerId: string,
+    referredId: string,
+    referralCode: string,
+    status?: ReferralStatus | null,
+    completedAt?: string | null,
+    freeMonthsEarned?: number | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+    owner?: string | null,
+  } | null,
+};
+
+export type UpdateReferralMutationVariables = {
+  input: UpdateReferralInput,
+  condition?: ModelReferralConditionInput | null,
+};
+
+export type UpdateReferralMutation = {
+  updateReferral?:  {
+    __typename: "Referral",
+    referrerId: string,
+    referredId: string,
+    referralCode: string,
+    status?: ReferralStatus | null,
+    completedAt?: string | null,
+    freeMonthsEarned?: number | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+    owner?: string | null,
+  } | null,
+};
+
+export type DeleteReferralMutationVariables = {
+  input: DeleteReferralInput,
+  condition?: ModelReferralConditionInput | null,
+};
+
+export type DeleteReferralMutation = {
+  deleteReferral?:  {
+    __typename: "Referral",
+    referrerId: string,
+    referredId: string,
+    referralCode: string,
+    status?: ReferralStatus | null,
+    completedAt?: string | null,
+    freeMonthsEarned?: number | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+    owner?: string | null,
+  } | null,
+};
+
+export type CreateUserSubscriptionMutationVariables = {
+  input: CreateUserSubscriptionInput,
+  condition?: ModelUserSubscriptionConditionInput | null,
+};
+
+export type CreateUserSubscriptionMutation = {
+  createUserSubscription?:  {
+    __typename: "UserSubscription",
+    owner?: string | null,
+    subscriptionStatus?: UserSubscriptionSubscriptionStatus | null,
+    trialStartDate?: string | null,
+    trialEndDate?: string | null,
+    totalFreeMonths?: number | null,
+    earnedFreeMonths?: number | null,
+    referralCodeUsed?: string | null,
+    referrerId?: string | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type UpdateUserSubscriptionMutationVariables = {
+  input: UpdateUserSubscriptionInput,
+  condition?: ModelUserSubscriptionConditionInput | null,
+};
+
+export type UpdateUserSubscriptionMutation = {
+  updateUserSubscription?:  {
+    __typename: "UserSubscription",
+    owner?: string | null,
+    subscriptionStatus?: UserSubscriptionSubscriptionStatus | null,
+    trialStartDate?: string | null,
+    trialEndDate?: string | null,
+    totalFreeMonths?: number | null,
+    earnedFreeMonths?: number | null,
+    referralCodeUsed?: string | null,
+    referrerId?: string | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteUserSubscriptionMutationVariables = {
+  input: DeleteUserSubscriptionInput,
+  condition?: ModelUserSubscriptionConditionInput | null,
+};
+
+export type DeleteUserSubscriptionMutation = {
+  deleteUserSubscription?:  {
+    __typename: "UserSubscription",
+    owner?: string | null,
+    subscriptionStatus?: UserSubscriptionSubscriptionStatus | null,
+    trialStartDate?: string | null,
+    trialEndDate?: string | null,
+    totalFreeMonths?: number | null,
+    earnedFreeMonths?: number | null,
+    referralCodeUsed?: string | null,
+    referrerId?: string | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type CreateUserActivityMutationVariables = {
+  input: CreateUserActivityInput,
+  condition?: ModelUserActivityConditionInput | null,
+};
+
+export type CreateUserActivityMutation = {
+  createUserActivity?:  {
+    __typename: "UserActivity",
+    owner?: string | null,
+    sessionId: string,
+    startTime: string,
+    endTime?: string | null,
+    duration?: number | null,
+    pageViews?: number | null,
+    interactions?: number | null,
+    deviceInfo?: string | null,
+    userAgent?: string | null,
+    ipAddress?: string | null,
+    isActive?: boolean | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type UpdateUserActivityMutationVariables = {
+  input: UpdateUserActivityInput,
+  condition?: ModelUserActivityConditionInput | null,
+};
+
+export type UpdateUserActivityMutation = {
+  updateUserActivity?:  {
+    __typename: "UserActivity",
+    owner?: string | null,
+    sessionId: string,
+    startTime: string,
+    endTime?: string | null,
+    duration?: number | null,
+    pageViews?: number | null,
+    interactions?: number | null,
+    deviceInfo?: string | null,
+    userAgent?: string | null,
+    ipAddress?: string | null,
+    isActive?: boolean | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteUserActivityMutationVariables = {
+  input: DeleteUserActivityInput,
+  condition?: ModelUserActivityConditionInput | null,
+};
+
+export type DeleteUserActivityMutation = {
+  deleteUserActivity?:  {
+    __typename: "UserActivity",
+    owner?: string | null,
+    sessionId: string,
+    startTime: string,
+    endTime?: string | null,
+    duration?: number | null,
+    pageViews?: number | null,
+    interactions?: number | null,
+    deviceInfo?: string | null,
+    userAgent?: string | null,
+    ipAddress?: string | null,
+    isActive?: boolean | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type CreateUserEventMutationVariables = {
+  input: CreateUserEventInput,
+  condition?: ModelUserEventConditionInput | null,
+};
+
+export type CreateUserEventMutation = {
+  createUserEvent?:  {
+    __typename: "UserEvent",
+    owner?: string | null,
+    sessionId: string,
+    eventType?: UserEventEventType | null,
+    eventData?: string | null,
+    timestamp: string,
+    pageUrl?: string | null,
+    elementId?: string | null,
+    metadata?: string | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type UpdateUserEventMutationVariables = {
+  input: UpdateUserEventInput,
+  condition?: ModelUserEventConditionInput | null,
+};
+
+export type UpdateUserEventMutation = {
+  updateUserEvent?:  {
+    __typename: "UserEvent",
+    owner?: string | null,
+    sessionId: string,
+    eventType?: UserEventEventType | null,
+    eventData?: string | null,
+    timestamp: string,
+    pageUrl?: string | null,
+    elementId?: string | null,
+    metadata?: string | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteUserEventMutationVariables = {
+  input: DeleteUserEventInput,
+  condition?: ModelUserEventConditionInput | null,
+};
+
+export type DeleteUserEventMutation = {
+  deleteUserEvent?:  {
+    __typename: "UserEvent",
+    owner?: string | null,
+    sessionId: string,
+    eventType?: UserEventEventType | null,
+    eventData?: string | null,
+    timestamp: string,
+    pageUrl?: string | null,
+    elementId?: string | null,
+    metadata?: string | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type GetArticleQueryVariables = {
@@ -602,93 +1286,18 @@ export type GetArticleQueryVariables = {
 export type GetArticleQuery = {
   getArticle?:  {
     __typename: "Article",
+    timestamp?: string | null,
+    source: string,
+    title: string,
+    industry?: string | null,
+    summary?: string | null,
+    link?: string | null,
     companies?: string | null,
     countries?: string | null,
-    createdAt: string,
-    id: string,
-    industry?: string | null,
     language?: string | null,
-    link?: string | null,
-    source: string,
-    summary?: string | null,
-    timestamp?: string | null,
-    title: string,
     ttl?: number | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type GetReferralQueryVariables = {
-  id: string,
-};
-
-export type GetReferralQuery = {
-  getReferral?:  {
-    __typename: "Referral",
-    completedAt?: string | null,
-    createdAt: string,
-    freeMonthsEarned?: number | null,
     id: string,
-    owner?: string | null,
-    referralCode: string,
-    referredId: string,
-    referrerId: string,
-    status?: ReferralStatus | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type GetReferralCodeQueryVariables = {
-  id: string,
-};
-
-export type GetReferralCodeQuery = {
-  getReferralCode?:  {
-    __typename: "ReferralCode",
-    code: string,
     createdAt: string,
-    id: string,
-    isActive?: boolean | null,
-    owner?: string | null,
-    successfulReferrals?: number | null,
-    totalReferrals?: number | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type GetUserProfileQueryVariables = {
-  id: string,
-};
-
-export type GetUserProfileQuery = {
-  getUserProfile?:  {
-    __typename: "UserProfile",
-    countryPreferences?: Array< string | null > | null,
-    createdAt: string,
-    id: string,
-    industryPreferences?: Array< string | null > | null,
-    owner?: string | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type GetUserSubscriptionQueryVariables = {
-  id: string,
-};
-
-export type GetUserSubscriptionQuery = {
-  getUserSubscription?:  {
-    __typename: "UserSubscription",
-    createdAt: string,
-    earnedFreeMonths?: number | null,
-    id: string,
-    owner?: string | null,
-    referralCodeUsed?: string | null,
-    referrerId?: string | null,
-    subscriptionStatus?: UserSubscriptionSubscriptionStatus | null,
-    totalFreeMonths?: number | null,
-    trialEndDate?: string | null,
-    trialStartDate?: string | null,
     updatedAt: string,
   } | null,
 };
@@ -704,71 +1313,37 @@ export type ListArticlesQuery = {
     __typename: "ModelArticleConnection",
     items:  Array< {
       __typename: "Article",
+      timestamp?: string | null,
+      source: string,
+      title: string,
+      industry?: string | null,
+      summary?: string | null,
+      link?: string | null,
       companies?: string | null,
       countries?: string | null,
-      createdAt: string,
-      id: string,
-      industry?: string | null,
       language?: string | null,
-      link?: string | null,
-      source: string,
-      summary?: string | null,
-      timestamp?: string | null,
-      title: string,
       ttl?: number | null,
+      id: string,
+      createdAt: string,
       updatedAt: string,
     } | null >,
     nextToken?: string | null,
   } | null,
 };
 
-export type ListReferralCodesQueryVariables = {
-  filter?: ModelReferralCodeFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
+export type GetUserProfileQueryVariables = {
+  id: string,
 };
 
-export type ListReferralCodesQuery = {
-  listReferralCodes?:  {
-    __typename: "ModelReferralCodeConnection",
-    items:  Array< {
-      __typename: "ReferralCode",
-      code: string,
-      createdAt: string,
-      id: string,
-      isActive?: boolean | null,
-      owner?: string | null,
-      successfulReferrals?: number | null,
-      totalReferrals?: number | null,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type ListReferralsQueryVariables = {
-  filter?: ModelReferralFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListReferralsQuery = {
-  listReferrals?:  {
-    __typename: "ModelReferralConnection",
-    items:  Array< {
-      __typename: "Referral",
-      completedAt?: string | null,
-      createdAt: string,
-      freeMonthsEarned?: number | null,
-      id: string,
-      owner?: string | null,
-      referralCode: string,
-      referredId: string,
-      referrerId: string,
-      status?: ReferralStatus | null,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
+export type GetUserProfileQuery = {
+  getUserProfile?:  {
+    __typename: "UserProfile",
+    owner?: string | null,
+    industryPreferences?: Array< string | null > | null,
+    countryPreferences?: Array< string | null > | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
   } | null,
 };
 
@@ -783,14 +1358,123 @@ export type ListUserProfilesQuery = {
     __typename: "ModelUserProfileConnection",
     items:  Array< {
       __typename: "UserProfile",
-      countryPreferences?: Array< string | null > | null,
-      createdAt: string,
-      id: string,
-      industryPreferences?: Array< string | null > | null,
       owner?: string | null,
+      industryPreferences?: Array< string | null > | null,
+      countryPreferences?: Array< string | null > | null,
+      id: string,
+      createdAt: string,
       updatedAt: string,
     } | null >,
     nextToken?: string | null,
+  } | null,
+};
+
+export type GetReferralCodeQueryVariables = {
+  id: string,
+};
+
+export type GetReferralCodeQuery = {
+  getReferralCode?:  {
+    __typename: "ReferralCode",
+    owner?: string | null,
+    code: string,
+    isActive?: boolean | null,
+    totalReferrals?: number | null,
+    successfulReferrals?: number | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListReferralCodesQueryVariables = {
+  filter?: ModelReferralCodeFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListReferralCodesQuery = {
+  listReferralCodes?:  {
+    __typename: "ModelReferralCodeConnection",
+    items:  Array< {
+      __typename: "ReferralCode",
+      owner?: string | null,
+      code: string,
+      isActive?: boolean | null,
+      totalReferrals?: number | null,
+      successfulReferrals?: number | null,
+      id: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetReferralQueryVariables = {
+  id: string,
+};
+
+export type GetReferralQuery = {
+  getReferral?:  {
+    __typename: "Referral",
+    referrerId: string,
+    referredId: string,
+    referralCode: string,
+    status?: ReferralStatus | null,
+    completedAt?: string | null,
+    freeMonthsEarned?: number | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+    owner?: string | null,
+  } | null,
+};
+
+export type ListReferralsQueryVariables = {
+  filter?: ModelReferralFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListReferralsQuery = {
+  listReferrals?:  {
+    __typename: "ModelReferralConnection",
+    items:  Array< {
+      __typename: "Referral",
+      referrerId: string,
+      referredId: string,
+      referralCode: string,
+      status?: ReferralStatus | null,
+      completedAt?: string | null,
+      freeMonthsEarned?: number | null,
+      id: string,
+      createdAt: string,
+      updatedAt: string,
+      owner?: string | null,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetUserSubscriptionQueryVariables = {
+  id: string,
+};
+
+export type GetUserSubscriptionQuery = {
+  getUserSubscription?:  {
+    __typename: "UserSubscription",
+    owner?: string | null,
+    subscriptionStatus?: UserSubscriptionSubscriptionStatus | null,
+    trialStartDate?: string | null,
+    trialEndDate?: string | null,
+    totalFreeMonths?: number | null,
+    earnedFreeMonths?: number | null,
+    referralCodeUsed?: string | null,
+    referrerId?: string | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
   } | null,
 };
 
@@ -805,328 +1489,121 @@ export type ListUserSubscriptionsQuery = {
     __typename: "ModelUserSubscriptionConnection",
     items:  Array< {
       __typename: "UserSubscription",
-      createdAt: string,
-      earnedFreeMonths?: number | null,
-      id: string,
       owner?: string | null,
+      subscriptionStatus?: UserSubscriptionSubscriptionStatus | null,
+      trialStartDate?: string | null,
+      trialEndDate?: string | null,
+      totalFreeMonths?: number | null,
+      earnedFreeMonths?: number | null,
       referralCodeUsed?: string | null,
       referrerId?: string | null,
-      subscriptionStatus?: UserSubscriptionSubscriptionStatus | null,
-      totalFreeMonths?: number | null,
-      trialEndDate?: string | null,
-      trialStartDate?: string | null,
+      id: string,
+      createdAt: string,
       updatedAt: string,
     } | null >,
     nextToken?: string | null,
   } | null,
 };
 
-export type CreateArticleMutationVariables = {
-  condition?: ModelArticleConditionInput | null,
-  input: CreateArticleInput,
+export type GetUserActivityQueryVariables = {
+  id: string,
 };
 
-export type CreateArticleMutation = {
-  createArticle?:  {
-    __typename: "Article",
-    companies?: string | null,
-    countries?: string | null,
-    createdAt: string,
-    id: string,
-    industry?: string | null,
-    language?: string | null,
-    link?: string | null,
-    source: string,
-    summary?: string | null,
-    timestamp?: string | null,
-    title: string,
-    ttl?: number | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type CreateReferralMutationVariables = {
-  condition?: ModelReferralConditionInput | null,
-  input: CreateReferralInput,
-};
-
-export type CreateReferralMutation = {
-  createReferral?:  {
-    __typename: "Referral",
-    completedAt?: string | null,
-    createdAt: string,
-    freeMonthsEarned?: number | null,
-    id: string,
+export type GetUserActivityQuery = {
+  getUserActivity?:  {
+    __typename: "UserActivity",
     owner?: string | null,
-    referralCode: string,
-    referredId: string,
-    referrerId: string,
-    status?: ReferralStatus | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type CreateReferralCodeMutationVariables = {
-  condition?: ModelReferralCodeConditionInput | null,
-  input: CreateReferralCodeInput,
-};
-
-export type CreateReferralCodeMutation = {
-  createReferralCode?:  {
-    __typename: "ReferralCode",
-    code: string,
-    createdAt: string,
-    id: string,
+    sessionId: string,
+    startTime: string,
+    endTime?: string | null,
+    duration?: number | null,
+    pageViews?: number | null,
+    interactions?: number | null,
+    deviceInfo?: string | null,
+    userAgent?: string | null,
+    ipAddress?: string | null,
     isActive?: boolean | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type ListUserActivitiesQueryVariables = {
+  filter?: ModelUserActivityFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListUserActivitiesQuery = {
+  listUserActivities?:  {
+    __typename: "ModelUserActivityConnection",
+    items:  Array< {
+      __typename: "UserActivity",
+      owner?: string | null,
+      sessionId: string,
+      startTime: string,
+      endTime?: string | null,
+      duration?: number | null,
+      pageViews?: number | null,
+      interactions?: number | null,
+      deviceInfo?: string | null,
+      userAgent?: string | null,
+      ipAddress?: string | null,
+      isActive?: boolean | null,
+      id: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetUserEventQueryVariables = {
+  id: string,
+};
+
+export type GetUserEventQuery = {
+  getUserEvent?:  {
+    __typename: "UserEvent",
     owner?: string | null,
-    successfulReferrals?: number | null,
-    totalReferrals?: number | null,
+    sessionId: string,
+    eventType?: UserEventEventType | null,
+    eventData?: string | null,
+    timestamp: string,
+    pageUrl?: string | null,
+    elementId?: string | null,
+    metadata?: string | null,
+    id: string,
+    createdAt: string,
     updatedAt: string,
   } | null,
 };
 
-export type CreateUserProfileMutationVariables = {
-  condition?: ModelUserProfileConditionInput | null,
-  input: CreateUserProfileInput,
+export type ListUserEventsQueryVariables = {
+  filter?: ModelUserEventFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
 };
 
-export type CreateUserProfileMutation = {
-  createUserProfile?:  {
-    __typename: "UserProfile",
-    countryPreferences?: Array< string | null > | null,
-    createdAt: string,
-    id: string,
-    industryPreferences?: Array< string | null > | null,
-    owner?: string | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type CreateUserSubscriptionMutationVariables = {
-  condition?: ModelUserSubscriptionConditionInput | null,
-  input: CreateUserSubscriptionInput,
-};
-
-export type CreateUserSubscriptionMutation = {
-  createUserSubscription?:  {
-    __typename: "UserSubscription",
-    createdAt: string,
-    earnedFreeMonths?: number | null,
-    id: string,
-    owner?: string | null,
-    referralCodeUsed?: string | null,
-    referrerId?: string | null,
-    subscriptionStatus?: UserSubscriptionSubscriptionStatus | null,
-    totalFreeMonths?: number | null,
-    trialEndDate?: string | null,
-    trialStartDate?: string | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type DeleteArticleMutationVariables = {
-  condition?: ModelArticleConditionInput | null,
-  input: DeleteArticleInput,
-};
-
-export type DeleteArticleMutation = {
-  deleteArticle?:  {
-    __typename: "Article",
-    companies?: string | null,
-    countries?: string | null,
-    createdAt: string,
-    id: string,
-    industry?: string | null,
-    language?: string | null,
-    link?: string | null,
-    source: string,
-    summary?: string | null,
-    timestamp?: string | null,
-    title: string,
-    ttl?: number | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type DeleteReferralMutationVariables = {
-  condition?: ModelReferralConditionInput | null,
-  input: DeleteReferralInput,
-};
-
-export type DeleteReferralMutation = {
-  deleteReferral?:  {
-    __typename: "Referral",
-    completedAt?: string | null,
-    createdAt: string,
-    freeMonthsEarned?: number | null,
-    id: string,
-    owner?: string | null,
-    referralCode: string,
-    referredId: string,
-    referrerId: string,
-    status?: ReferralStatus | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type DeleteReferralCodeMutationVariables = {
-  condition?: ModelReferralCodeConditionInput | null,
-  input: DeleteReferralCodeInput,
-};
-
-export type DeleteReferralCodeMutation = {
-  deleteReferralCode?:  {
-    __typename: "ReferralCode",
-    code: string,
-    createdAt: string,
-    id: string,
-    isActive?: boolean | null,
-    owner?: string | null,
-    successfulReferrals?: number | null,
-    totalReferrals?: number | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type DeleteUserProfileMutationVariables = {
-  condition?: ModelUserProfileConditionInput | null,
-  input: DeleteUserProfileInput,
-};
-
-export type DeleteUserProfileMutation = {
-  deleteUserProfile?:  {
-    __typename: "UserProfile",
-    countryPreferences?: Array< string | null > | null,
-    createdAt: string,
-    id: string,
-    industryPreferences?: Array< string | null > | null,
-    owner?: string | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type DeleteUserSubscriptionMutationVariables = {
-  condition?: ModelUserSubscriptionConditionInput | null,
-  input: DeleteUserSubscriptionInput,
-};
-
-export type DeleteUserSubscriptionMutation = {
-  deleteUserSubscription?:  {
-    __typename: "UserSubscription",
-    createdAt: string,
-    earnedFreeMonths?: number | null,
-    id: string,
-    owner?: string | null,
-    referralCodeUsed?: string | null,
-    referrerId?: string | null,
-    subscriptionStatus?: UserSubscriptionSubscriptionStatus | null,
-    totalFreeMonths?: number | null,
-    trialEndDate?: string | null,
-    trialStartDate?: string | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type UpdateArticleMutationVariables = {
-  condition?: ModelArticleConditionInput | null,
-  input: UpdateArticleInput,
-};
-
-export type UpdateArticleMutation = {
-  updateArticle?:  {
-    __typename: "Article",
-    companies?: string | null,
-    countries?: string | null,
-    createdAt: string,
-    id: string,
-    industry?: string | null,
-    language?: string | null,
-    link?: string | null,
-    source: string,
-    summary?: string | null,
-    timestamp?: string | null,
-    title: string,
-    ttl?: number | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type UpdateReferralMutationVariables = {
-  condition?: ModelReferralConditionInput | null,
-  input: UpdateReferralInput,
-};
-
-export type UpdateReferralMutation = {
-  updateReferral?:  {
-    __typename: "Referral",
-    completedAt?: string | null,
-    createdAt: string,
-    freeMonthsEarned?: number | null,
-    id: string,
-    owner?: string | null,
-    referralCode: string,
-    referredId: string,
-    referrerId: string,
-    status?: ReferralStatus | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type UpdateReferralCodeMutationVariables = {
-  condition?: ModelReferralCodeConditionInput | null,
-  input: UpdateReferralCodeInput,
-};
-
-export type UpdateReferralCodeMutation = {
-  updateReferralCode?:  {
-    __typename: "ReferralCode",
-    code: string,
-    createdAt: string,
-    id: string,
-    isActive?: boolean | null,
-    owner?: string | null,
-    successfulReferrals?: number | null,
-    totalReferrals?: number | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type UpdateUserProfileMutationVariables = {
-  condition?: ModelUserProfileConditionInput | null,
-  input: UpdateUserProfileInput,
-};
-
-export type UpdateUserProfileMutation = {
-  updateUserProfile?:  {
-    __typename: "UserProfile",
-    countryPreferences?: Array< string | null > | null,
-    createdAt: string,
-    id: string,
-    industryPreferences?: Array< string | null > | null,
-    owner?: string | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type UpdateUserSubscriptionMutationVariables = {
-  condition?: ModelUserSubscriptionConditionInput | null,
-  input: UpdateUserSubscriptionInput,
-};
-
-export type UpdateUserSubscriptionMutation = {
-  updateUserSubscription?:  {
-    __typename: "UserSubscription",
-    createdAt: string,
-    earnedFreeMonths?: number | null,
-    id: string,
-    owner?: string | null,
-    referralCodeUsed?: string | null,
-    referrerId?: string | null,
-    subscriptionStatus?: UserSubscriptionSubscriptionStatus | null,
-    totalFreeMonths?: number | null,
-    trialEndDate?: string | null,
-    trialStartDate?: string | null,
-    updatedAt: string,
+export type ListUserEventsQuery = {
+  listUserEvents?:  {
+    __typename: "ModelUserEventConnection",
+    items:  Array< {
+      __typename: "UserEvent",
+      owner?: string | null,
+      sessionId: string,
+      eventType?: UserEventEventType | null,
+      eventData?: string | null,
+      timestamp: string,
+      pageUrl?: string | null,
+      elementId?: string | null,
+      metadata?: string | null,
+      id: string,
+      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
   } | null,
 };
 
@@ -1137,58 +1614,64 @@ export type OnCreateArticleSubscriptionVariables = {
 export type OnCreateArticleSubscription = {
   onCreateArticle?:  {
     __typename: "Article",
+    timestamp?: string | null,
+    source: string,
+    title: string,
+    industry?: string | null,
+    summary?: string | null,
+    link?: string | null,
     companies?: string | null,
     countries?: string | null,
-    createdAt: string,
-    id: string,
-    industry?: string | null,
     language?: string | null,
-    link?: string | null,
-    source: string,
-    summary?: string | null,
-    timestamp?: string | null,
-    title: string,
     ttl?: number | null,
+    id: string,
+    createdAt: string,
     updatedAt: string,
   } | null,
 };
 
-export type OnCreateReferralSubscriptionVariables = {
-  filter?: ModelSubscriptionReferralFilterInput | null,
-  owner?: string | null,
+export type OnUpdateArticleSubscriptionVariables = {
+  filter?: ModelSubscriptionArticleFilterInput | null,
 };
 
-export type OnCreateReferralSubscription = {
-  onCreateReferral?:  {
-    __typename: "Referral",
-    completedAt?: string | null,
-    createdAt: string,
-    freeMonthsEarned?: number | null,
+export type OnUpdateArticleSubscription = {
+  onUpdateArticle?:  {
+    __typename: "Article",
+    timestamp?: string | null,
+    source: string,
+    title: string,
+    industry?: string | null,
+    summary?: string | null,
+    link?: string | null,
+    companies?: string | null,
+    countries?: string | null,
+    language?: string | null,
+    ttl?: number | null,
     id: string,
-    owner?: string | null,
-    referralCode: string,
-    referredId: string,
-    referrerId: string,
-    status?: ReferralStatus | null,
+    createdAt: string,
     updatedAt: string,
   } | null,
 };
 
-export type OnCreateReferralCodeSubscriptionVariables = {
-  filter?: ModelSubscriptionReferralCodeFilterInput | null,
-  owner?: string | null,
+export type OnDeleteArticleSubscriptionVariables = {
+  filter?: ModelSubscriptionArticleFilterInput | null,
 };
 
-export type OnCreateReferralCodeSubscription = {
-  onCreateReferralCode?:  {
-    __typename: "ReferralCode",
-    code: string,
-    createdAt: string,
+export type OnDeleteArticleSubscription = {
+  onDeleteArticle?:  {
+    __typename: "Article",
+    timestamp?: string | null,
+    source: string,
+    title: string,
+    industry?: string | null,
+    summary?: string | null,
+    link?: string | null,
+    companies?: string | null,
+    countries?: string | null,
+    language?: string | null,
+    ttl?: number | null,
     id: string,
-    isActive?: boolean | null,
-    owner?: string | null,
-    successfulReferrals?: number | null,
-    totalReferrals?: number | null,
+    createdAt: string,
     updatedAt: string,
   } | null,
 };
@@ -1201,198 +1684,11 @@ export type OnCreateUserProfileSubscriptionVariables = {
 export type OnCreateUserProfileSubscription = {
   onCreateUserProfile?:  {
     __typename: "UserProfile",
-    countryPreferences?: Array< string | null > | null,
-    createdAt: string,
-    id: string,
+    owner?: string | null,
     industryPreferences?: Array< string | null > | null,
-    owner?: string | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type OnCreateUserSubscriptionSubscriptionVariables = {
-  filter?: ModelSubscriptionUserSubscriptionFilterInput | null,
-  owner?: string | null,
-};
-
-export type OnCreateUserSubscriptionSubscription = {
-  onCreateUserSubscription?:  {
-    __typename: "UserSubscription",
-    createdAt: string,
-    earnedFreeMonths?: number | null,
-    id: string,
-    owner?: string | null,
-    referralCodeUsed?: string | null,
-    referrerId?: string | null,
-    subscriptionStatus?: UserSubscriptionSubscriptionStatus | null,
-    totalFreeMonths?: number | null,
-    trialEndDate?: string | null,
-    trialStartDate?: string | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type OnDeleteArticleSubscriptionVariables = {
-  filter?: ModelSubscriptionArticleFilterInput | null,
-};
-
-export type OnDeleteArticleSubscription = {
-  onDeleteArticle?:  {
-    __typename: "Article",
-    companies?: string | null,
-    countries?: string | null,
-    createdAt: string,
-    id: string,
-    industry?: string | null,
-    language?: string | null,
-    link?: string | null,
-    source: string,
-    summary?: string | null,
-    timestamp?: string | null,
-    title: string,
-    ttl?: number | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type OnDeleteReferralSubscriptionVariables = {
-  filter?: ModelSubscriptionReferralFilterInput | null,
-  owner?: string | null,
-};
-
-export type OnDeleteReferralSubscription = {
-  onDeleteReferral?:  {
-    __typename: "Referral",
-    completedAt?: string | null,
-    createdAt: string,
-    freeMonthsEarned?: number | null,
-    id: string,
-    owner?: string | null,
-    referralCode: string,
-    referredId: string,
-    referrerId: string,
-    status?: ReferralStatus | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type OnDeleteReferralCodeSubscriptionVariables = {
-  filter?: ModelSubscriptionReferralCodeFilterInput | null,
-  owner?: string | null,
-};
-
-export type OnDeleteReferralCodeSubscription = {
-  onDeleteReferralCode?:  {
-    __typename: "ReferralCode",
-    code: string,
-    createdAt: string,
-    id: string,
-    isActive?: boolean | null,
-    owner?: string | null,
-    successfulReferrals?: number | null,
-    totalReferrals?: number | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type OnDeleteUserProfileSubscriptionVariables = {
-  filter?: ModelSubscriptionUserProfileFilterInput | null,
-  owner?: string | null,
-};
-
-export type OnDeleteUserProfileSubscription = {
-  onDeleteUserProfile?:  {
-    __typename: "UserProfile",
     countryPreferences?: Array< string | null > | null,
-    createdAt: string,
     id: string,
-    industryPreferences?: Array< string | null > | null,
-    owner?: string | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type OnDeleteUserSubscriptionSubscriptionVariables = {
-  filter?: ModelSubscriptionUserSubscriptionFilterInput | null,
-  owner?: string | null,
-};
-
-export type OnDeleteUserSubscriptionSubscription = {
-  onDeleteUserSubscription?:  {
-    __typename: "UserSubscription",
     createdAt: string,
-    earnedFreeMonths?: number | null,
-    id: string,
-    owner?: string | null,
-    referralCodeUsed?: string | null,
-    referrerId?: string | null,
-    subscriptionStatus?: UserSubscriptionSubscriptionStatus | null,
-    totalFreeMonths?: number | null,
-    trialEndDate?: string | null,
-    trialStartDate?: string | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type OnUpdateArticleSubscriptionVariables = {
-  filter?: ModelSubscriptionArticleFilterInput | null,
-};
-
-export type OnUpdateArticleSubscription = {
-  onUpdateArticle?:  {
-    __typename: "Article",
-    companies?: string | null,
-    countries?: string | null,
-    createdAt: string,
-    id: string,
-    industry?: string | null,
-    language?: string | null,
-    link?: string | null,
-    source: string,
-    summary?: string | null,
-    timestamp?: string | null,
-    title: string,
-    ttl?: number | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type OnUpdateReferralSubscriptionVariables = {
-  filter?: ModelSubscriptionReferralFilterInput | null,
-  owner?: string | null,
-};
-
-export type OnUpdateReferralSubscription = {
-  onUpdateReferral?:  {
-    __typename: "Referral",
-    completedAt?: string | null,
-    createdAt: string,
-    freeMonthsEarned?: number | null,
-    id: string,
-    owner?: string | null,
-    referralCode: string,
-    referredId: string,
-    referrerId: string,
-    status?: ReferralStatus | null,
-    updatedAt: string,
-  } | null,
-};
-
-export type OnUpdateReferralCodeSubscriptionVariables = {
-  filter?: ModelSubscriptionReferralCodeFilterInput | null,
-  owner?: string | null,
-};
-
-export type OnUpdateReferralCodeSubscription = {
-  onUpdateReferralCode?:  {
-    __typename: "ReferralCode",
-    code: string,
-    createdAt: string,
-    id: string,
-    isActive?: boolean | null,
-    owner?: string | null,
-    successfulReferrals?: number | null,
-    totalReferrals?: number | null,
     updatedAt: string,
   } | null,
 };
@@ -1405,11 +1701,170 @@ export type OnUpdateUserProfileSubscriptionVariables = {
 export type OnUpdateUserProfileSubscription = {
   onUpdateUserProfile?:  {
     __typename: "UserProfile",
-    countryPreferences?: Array< string | null > | null,
-    createdAt: string,
-    id: string,
-    industryPreferences?: Array< string | null > | null,
     owner?: string | null,
+    industryPreferences?: Array< string | null > | null,
+    countryPreferences?: Array< string | null > | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnDeleteUserProfileSubscriptionVariables = {
+  filter?: ModelSubscriptionUserProfileFilterInput | null,
+  owner?: string | null,
+};
+
+export type OnDeleteUserProfileSubscription = {
+  onDeleteUserProfile?:  {
+    __typename: "UserProfile",
+    owner?: string | null,
+    industryPreferences?: Array< string | null > | null,
+    countryPreferences?: Array< string | null > | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnCreateReferralCodeSubscriptionVariables = {
+  filter?: ModelSubscriptionReferralCodeFilterInput | null,
+  owner?: string | null,
+};
+
+export type OnCreateReferralCodeSubscription = {
+  onCreateReferralCode?:  {
+    __typename: "ReferralCode",
+    owner?: string | null,
+    code: string,
+    isActive?: boolean | null,
+    totalReferrals?: number | null,
+    successfulReferrals?: number | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnUpdateReferralCodeSubscriptionVariables = {
+  filter?: ModelSubscriptionReferralCodeFilterInput | null,
+  owner?: string | null,
+};
+
+export type OnUpdateReferralCodeSubscription = {
+  onUpdateReferralCode?:  {
+    __typename: "ReferralCode",
+    owner?: string | null,
+    code: string,
+    isActive?: boolean | null,
+    totalReferrals?: number | null,
+    successfulReferrals?: number | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnDeleteReferralCodeSubscriptionVariables = {
+  filter?: ModelSubscriptionReferralCodeFilterInput | null,
+  owner?: string | null,
+};
+
+export type OnDeleteReferralCodeSubscription = {
+  onDeleteReferralCode?:  {
+    __typename: "ReferralCode",
+    owner?: string | null,
+    code: string,
+    isActive?: boolean | null,
+    totalReferrals?: number | null,
+    successfulReferrals?: number | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnCreateReferralSubscriptionVariables = {
+  filter?: ModelSubscriptionReferralFilterInput | null,
+  owner?: string | null,
+};
+
+export type OnCreateReferralSubscription = {
+  onCreateReferral?:  {
+    __typename: "Referral",
+    referrerId: string,
+    referredId: string,
+    referralCode: string,
+    status?: ReferralStatus | null,
+    completedAt?: string | null,
+    freeMonthsEarned?: number | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+    owner?: string | null,
+  } | null,
+};
+
+export type OnUpdateReferralSubscriptionVariables = {
+  filter?: ModelSubscriptionReferralFilterInput | null,
+  owner?: string | null,
+};
+
+export type OnUpdateReferralSubscription = {
+  onUpdateReferral?:  {
+    __typename: "Referral",
+    referrerId: string,
+    referredId: string,
+    referralCode: string,
+    status?: ReferralStatus | null,
+    completedAt?: string | null,
+    freeMonthsEarned?: number | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+    owner?: string | null,
+  } | null,
+};
+
+export type OnDeleteReferralSubscriptionVariables = {
+  filter?: ModelSubscriptionReferralFilterInput | null,
+  owner?: string | null,
+};
+
+export type OnDeleteReferralSubscription = {
+  onDeleteReferral?:  {
+    __typename: "Referral",
+    referrerId: string,
+    referredId: string,
+    referralCode: string,
+    status?: ReferralStatus | null,
+    completedAt?: string | null,
+    freeMonthsEarned?: number | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+    owner?: string | null,
+  } | null,
+};
+
+export type OnCreateUserSubscriptionSubscriptionVariables = {
+  filter?: ModelSubscriptionUserSubscriptionFilterInput | null,
+  owner?: string | null,
+};
+
+export type OnCreateUserSubscriptionSubscription = {
+  onCreateUserSubscription?:  {
+    __typename: "UserSubscription",
+    owner?: string | null,
+    subscriptionStatus?: UserSubscriptionSubscriptionStatus | null,
+    trialStartDate?: string | null,
+    trialEndDate?: string | null,
+    totalFreeMonths?: number | null,
+    earnedFreeMonths?: number | null,
+    referralCodeUsed?: string | null,
+    referrerId?: string | null,
+    id: string,
+    createdAt: string,
     updatedAt: string,
   } | null,
 };
@@ -1422,16 +1877,179 @@ export type OnUpdateUserSubscriptionSubscriptionVariables = {
 export type OnUpdateUserSubscriptionSubscription = {
   onUpdateUserSubscription?:  {
     __typename: "UserSubscription",
-    createdAt: string,
-    earnedFreeMonths?: number | null,
-    id: string,
     owner?: string | null,
+    subscriptionStatus?: UserSubscriptionSubscriptionStatus | null,
+    trialStartDate?: string | null,
+    trialEndDate?: string | null,
+    totalFreeMonths?: number | null,
+    earnedFreeMonths?: number | null,
     referralCodeUsed?: string | null,
     referrerId?: string | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnDeleteUserSubscriptionSubscriptionVariables = {
+  filter?: ModelSubscriptionUserSubscriptionFilterInput | null,
+  owner?: string | null,
+};
+
+export type OnDeleteUserSubscriptionSubscription = {
+  onDeleteUserSubscription?:  {
+    __typename: "UserSubscription",
+    owner?: string | null,
     subscriptionStatus?: UserSubscriptionSubscriptionStatus | null,
-    totalFreeMonths?: number | null,
-    trialEndDate?: string | null,
     trialStartDate?: string | null,
+    trialEndDate?: string | null,
+    totalFreeMonths?: number | null,
+    earnedFreeMonths?: number | null,
+    referralCodeUsed?: string | null,
+    referrerId?: string | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnCreateUserActivitySubscriptionVariables = {
+  filter?: ModelSubscriptionUserActivityFilterInput | null,
+  owner?: string | null,
+};
+
+export type OnCreateUserActivitySubscription = {
+  onCreateUserActivity?:  {
+    __typename: "UserActivity",
+    owner?: string | null,
+    sessionId: string,
+    startTime: string,
+    endTime?: string | null,
+    duration?: number | null,
+    pageViews?: number | null,
+    interactions?: number | null,
+    deviceInfo?: string | null,
+    userAgent?: string | null,
+    ipAddress?: string | null,
+    isActive?: boolean | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnUpdateUserActivitySubscriptionVariables = {
+  filter?: ModelSubscriptionUserActivityFilterInput | null,
+  owner?: string | null,
+};
+
+export type OnUpdateUserActivitySubscription = {
+  onUpdateUserActivity?:  {
+    __typename: "UserActivity",
+    owner?: string | null,
+    sessionId: string,
+    startTime: string,
+    endTime?: string | null,
+    duration?: number | null,
+    pageViews?: number | null,
+    interactions?: number | null,
+    deviceInfo?: string | null,
+    userAgent?: string | null,
+    ipAddress?: string | null,
+    isActive?: boolean | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnDeleteUserActivitySubscriptionVariables = {
+  filter?: ModelSubscriptionUserActivityFilterInput | null,
+  owner?: string | null,
+};
+
+export type OnDeleteUserActivitySubscription = {
+  onDeleteUserActivity?:  {
+    __typename: "UserActivity",
+    owner?: string | null,
+    sessionId: string,
+    startTime: string,
+    endTime?: string | null,
+    duration?: number | null,
+    pageViews?: number | null,
+    interactions?: number | null,
+    deviceInfo?: string | null,
+    userAgent?: string | null,
+    ipAddress?: string | null,
+    isActive?: boolean | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnCreateUserEventSubscriptionVariables = {
+  filter?: ModelSubscriptionUserEventFilterInput | null,
+  owner?: string | null,
+};
+
+export type OnCreateUserEventSubscription = {
+  onCreateUserEvent?:  {
+    __typename: "UserEvent",
+    owner?: string | null,
+    sessionId: string,
+    eventType?: UserEventEventType | null,
+    eventData?: string | null,
+    timestamp: string,
+    pageUrl?: string | null,
+    elementId?: string | null,
+    metadata?: string | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnUpdateUserEventSubscriptionVariables = {
+  filter?: ModelSubscriptionUserEventFilterInput | null,
+  owner?: string | null,
+};
+
+export type OnUpdateUserEventSubscription = {
+  onUpdateUserEvent?:  {
+    __typename: "UserEvent",
+    owner?: string | null,
+    sessionId: string,
+    eventType?: UserEventEventType | null,
+    eventData?: string | null,
+    timestamp: string,
+    pageUrl?: string | null,
+    elementId?: string | null,
+    metadata?: string | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnDeleteUserEventSubscriptionVariables = {
+  filter?: ModelSubscriptionUserEventFilterInput | null,
+  owner?: string | null,
+};
+
+export type OnDeleteUserEventSubscription = {
+  onDeleteUserEvent?:  {
+    __typename: "UserEvent",
+    owner?: string | null,
+    sessionId: string,
+    eventType?: UserEventEventType | null,
+    eventData?: string | null,
+    timestamp: string,
+    pageUrl?: string | null,
+    elementId?: string | null,
+    metadata?: string | null,
+    id: string,
+    createdAt: string,
     updatedAt: string,
   } | null,
 };
