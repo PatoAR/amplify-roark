@@ -1,9 +1,11 @@
+@import './styles/design-system.css';
+
 /* Global styles */
 body {
   margin: 0;
   padding: 0.5rem 0; 
-  background: #F7F5F2;
-  font-family: var(--amplify-fonts-default-variable); 
+  background: var(--color-background);
+  font-family: var(--font-family); 
   display: flex;
   justify-content: center;
   min-height: 100vh;

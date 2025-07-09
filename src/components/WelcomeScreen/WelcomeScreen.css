@@ -1,66 +1,64 @@
 .welcome-box {
-  /* Use a softer background and more padding for a spacious, airy feel. */
-  background-color: var(--amplify-colors-background-secondary, #fdfdfd);
-  border-radius: 12px; /* Softer corners */
-  padding: 2.5rem; /* Generous whitespace inside the box */
+  background-color: var(--color-surface-secondary);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-2xl);
   text-align: center;
   margin-top: var(--space-lg);
   
-  /* A subtle shadow creates a modern, elevated look without a harsh border. */
-  border: none;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  border: var(--border-width) solid var(--color-border);
+  box-shadow: var(--shadow-lg);
 
-  /* Center the box and constrain its width for better readability on large screens. */
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
 }
 
-/* A simple, friendly icon makes the screen more engaging and welcoming. */
 .welcome-icon {
   font-size: 3rem;
-  margin-bottom: 1rem;
-  line-height: 1; /* Ensures icon spacing is predictable. */
+  margin-bottom: var(--space-md);
+  line-height: 1;
+  color: var(--color-primary);
 }
 
 .welcome-title {
-  font-size: 2.2rem; /* Slightly larger for more impact. */
-  font-weight: 700; /* */
-  color: #1c1c1c; /* A softer black for better readability. */
-  margin-bottom: 0.75rem; /* */
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-sm);
 }
 
 .welcome-subtitle {
-  font-size: 1.1rem; /* */
-  color: #555; /* */
-  margin-bottom: 2rem; /* More space between the text and the main button. */
-  line-height: 1.6; /* */
-  max-width: 480px; /* Constrains line length for comfortable reading. */
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-2xl);
+  line-height: var(--line-height-relaxed);
+  max-width: 480px;
   margin-left: auto;
   margin-right: auto;
 }
 
-/* This is the new primary button style. */
 .welcome-button {
   display: inline-block;
-  background-color: #007bff; /* A vibrant, standard blue for the main action. */
-  color: #ffffff;
-  font-size: 1rem;
-  font-weight: 600;
-  padding: 12px 28px;
+  background-color: var(--color-primary);
+  color: white;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--space-md) var(--space-xl);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--border-radius-md);
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: all var(--transition-normal);
+  text-decoration: none;
 }
 
 .welcome-button:hover {
-  transform: translateY(-2px); /* A subtle lift effect on hover. */
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.25); /* A soft glow adds to the interactivity. */
+  background-color: var(--color-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .welcome-hint {
-  font-size: 0.9rem;
-  color: #777;
-  margin-top: 1.5rem;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-top: var(--space-xl);
 }

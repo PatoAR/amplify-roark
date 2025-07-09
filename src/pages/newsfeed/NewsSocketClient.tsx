@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { listArticles } from '../../graphql/queries';
 import { onCreateArticle } from '../../graphql/subscriptions';
-import { Article } from '../../API';
+import { Article } from '../../graphql/API';
 import { publicClient } from "./../../amplify-client"
 import { useUserPreferences } from '../../context/UserPreferencesContext';
 import { useAuthenticator } from '@aws-amplify/ui-react';

@@ -1,6 +1,6 @@
 .layout-container {
-    background-color: #F7F5F2;
-    max-width: 1280px;
+    background-color: var(--color-background);
+    max-width: var(--container-max-width);
     width: 100%;
     margin: 0 auto;
     display: flex;
@@ -10,15 +10,16 @@
 .page-container {
     padding: var(--space-xl);
     padding-left: var(--space-xl);
-    padding-top: calc(50px + var(--space-lg));
-    transition: padding 0.5s;
+    padding-top: calc(var(--header-height) + var(--space-lg));
+    transition: padding var(--transition-slow);
     overflow-x: hidden;
+    min-height: calc(100vh - var(--header-height));
 }
 
 @media (max-width: 1024px) {
   .page-container {
     padding: var(--space-lg);
     padding-left: var(--space-lg);
-    padding-top: calc(50px + var(--space-md));
+    padding-top: calc(var(--header-height) + var(--space-md));
   }
 }

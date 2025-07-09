@@ -86,7 +86,7 @@ export const useInactivityTimer = ({
         window.removeEventListener(event, handleUserActivity)
       );
     };
-  }, [handleUserActivity, resetTimers]); // Depend on memoized handlers
+  }, [handleUserActivity]);
 
   // Optional: Provide a way to manually reset the timer from outside
   return { resetInactivityTimer: resetTimers };

@@ -2,29 +2,29 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
-import * as APITypes from "../API";
+import * as APITypes from "./API";
 type GeneratedMutation<InputType, OutputType> = string & {
   __generatedMutationInput: InputType;
   __generatedMutationOutput: OutputType;
 };
 
 export const createArticle = /* GraphQL */ `mutation CreateArticle(
-  $input: CreateArticleInput!
   $condition: ModelArticleConditionInput
+  $input: CreateArticleInput!
 ) {
-  createArticle(input: $input, condition: $condition) {
-    timestamp
-    source
-    title
-    industry
-    summary
-    link
+  createArticle(condition: $condition, input: $input) {
     companies
     countries
-    language
-    ttl
-    id
     createdAt
+    id
+    industry
+    language
+    link
+    source
+    summary
+    timestamp
+    title
+    ttl
     updatedAt
     __typename
   }
@@ -33,66 +33,58 @@ export const createArticle = /* GraphQL */ `mutation CreateArticle(
   APITypes.CreateArticleMutationVariables,
   APITypes.CreateArticleMutation
 >;
-export const updateArticle = /* GraphQL */ `mutation UpdateArticle(
-  $input: UpdateArticleInput!
-  $condition: ModelArticleConditionInput
+export const createReferral = /* GraphQL */ `mutation CreateReferral(
+  $condition: ModelReferralConditionInput
+  $input: CreateReferralInput!
 ) {
-  updateArticle(input: $input, condition: $condition) {
-    timestamp
-    source
-    title
-    industry
-    summary
-    link
-    companies
-    countries
-    language
-    ttl
-    id
+  createReferral(condition: $condition, input: $input) {
+    completedAt
     createdAt
+    freeMonthsEarned
+    id
+    owner
+    referralCode
+    referredId
+    referrerId
+    status
     updatedAt
     __typename
   }
 }
 ` as GeneratedMutation<
-  APITypes.UpdateArticleMutationVariables,
-  APITypes.UpdateArticleMutation
+  APITypes.CreateReferralMutationVariables,
+  APITypes.CreateReferralMutation
 >;
-export const deleteArticle = /* GraphQL */ `mutation DeleteArticle(
-  $input: DeleteArticleInput!
-  $condition: ModelArticleConditionInput
+export const createReferralCode = /* GraphQL */ `mutation CreateReferralCode(
+  $condition: ModelReferralCodeConditionInput
+  $input: CreateReferralCodeInput!
 ) {
-  deleteArticle(input: $input, condition: $condition) {
-    timestamp
-    source
-    title
-    industry
-    summary
-    link
-    companies
-    countries
-    language
-    ttl
-    id
+  createReferralCode(condition: $condition, input: $input) {
+    code
     createdAt
+    id
+    isActive
+    owner
+    successfulReferrals
+    totalReferrals
     updatedAt
     __typename
   }
 }
 ` as GeneratedMutation<
-  APITypes.DeleteArticleMutationVariables,
-  APITypes.DeleteArticleMutation
+  APITypes.CreateReferralCodeMutationVariables,
+  APITypes.CreateReferralCodeMutation
 >;
 export const createUserProfile = /* GraphQL */ `mutation CreateUserProfile(
-  $input: CreateUserProfileInput!
   $condition: ModelUserProfileConditionInput
+  $input: CreateUserProfileInput!
 ) {
-  createUserProfile(input: $input, condition: $condition) {
-    owner
-    industryPreferences
+  createUserProfile(condition: $condition, input: $input) {
     countryPreferences
-    id
     createdAt
+    id
+    industryPreferences
+    owner
     updatedAt
     __typename
   }
@@ -101,16 +93,214 @@ export const createUserProfile = /* GraphQL */ `mutation CreateUserProfile(
   APITypes.CreateUserProfileMutationVariables,
   APITypes.CreateUserProfileMutation
 >;
-export const updateUserProfile = /* GraphQL */ `mutation UpdateUserProfile(
-  $input: UpdateUserProfileInput!
-  $condition: ModelUserProfileConditionInput
+export const createUserSubscription = /* GraphQL */ `mutation CreateUserSubscription(
+  $condition: ModelUserSubscriptionConditionInput
+  $input: CreateUserSubscriptionInput!
 ) {
-  updateUserProfile(input: $input, condition: $condition) {
-    owner
-    industryPreferences
-    countryPreferences
-    id
+  createUserSubscription(condition: $condition, input: $input) {
     createdAt
+    earnedFreeMonths
+    id
+    owner
+    referralCodeUsed
+    referrerId
+    subscriptionStatus
+    totalFreeMonths
+    trialEndDate
+    trialStartDate
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateUserSubscriptionMutationVariables,
+  APITypes.CreateUserSubscriptionMutation
+>;
+export const deleteArticle = /* GraphQL */ `mutation DeleteArticle(
+  $condition: ModelArticleConditionInput
+  $input: DeleteArticleInput!
+) {
+  deleteArticle(condition: $condition, input: $input) {
+    companies
+    countries
+    createdAt
+    id
+    industry
+    language
+    link
+    source
+    summary
+    timestamp
+    title
+    ttl
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteArticleMutationVariables,
+  APITypes.DeleteArticleMutation
+>;
+export const deleteReferral = /* GraphQL */ `mutation DeleteReferral(
+  $condition: ModelReferralConditionInput
+  $input: DeleteReferralInput!
+) {
+  deleteReferral(condition: $condition, input: $input) {
+    completedAt
+    createdAt
+    freeMonthsEarned
+    id
+    owner
+    referralCode
+    referredId
+    referrerId
+    status
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteReferralMutationVariables,
+  APITypes.DeleteReferralMutation
+>;
+export const deleteReferralCode = /* GraphQL */ `mutation DeleteReferralCode(
+  $condition: ModelReferralCodeConditionInput
+  $input: DeleteReferralCodeInput!
+) {
+  deleteReferralCode(condition: $condition, input: $input) {
+    code
+    createdAt
+    id
+    isActive
+    owner
+    successfulReferrals
+    totalReferrals
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteReferralCodeMutationVariables,
+  APITypes.DeleteReferralCodeMutation
+>;
+export const deleteUserProfile = /* GraphQL */ `mutation DeleteUserProfile(
+  $condition: ModelUserProfileConditionInput
+  $input: DeleteUserProfileInput!
+) {
+  deleteUserProfile(condition: $condition, input: $input) {
+    countryPreferences
+    createdAt
+    id
+    industryPreferences
+    owner
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteUserProfileMutationVariables,
+  APITypes.DeleteUserProfileMutation
+>;
+export const deleteUserSubscription = /* GraphQL */ `mutation DeleteUserSubscription(
+  $condition: ModelUserSubscriptionConditionInput
+  $input: DeleteUserSubscriptionInput!
+) {
+  deleteUserSubscription(condition: $condition, input: $input) {
+    createdAt
+    earnedFreeMonths
+    id
+    owner
+    referralCodeUsed
+    referrerId
+    subscriptionStatus
+    totalFreeMonths
+    trialEndDate
+    trialStartDate
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteUserSubscriptionMutationVariables,
+  APITypes.DeleteUserSubscriptionMutation
+>;
+export const updateArticle = /* GraphQL */ `mutation UpdateArticle(
+  $condition: ModelArticleConditionInput
+  $input: UpdateArticleInput!
+) {
+  updateArticle(condition: $condition, input: $input) {
+    companies
+    countries
+    createdAt
+    id
+    industry
+    language
+    link
+    source
+    summary
+    timestamp
+    title
+    ttl
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateArticleMutationVariables,
+  APITypes.UpdateArticleMutation
+>;
+export const updateReferral = /* GraphQL */ `mutation UpdateReferral(
+  $condition: ModelReferralConditionInput
+  $input: UpdateReferralInput!
+) {
+  updateReferral(condition: $condition, input: $input) {
+    completedAt
+    createdAt
+    freeMonthsEarned
+    id
+    owner
+    referralCode
+    referredId
+    referrerId
+    status
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateReferralMutationVariables,
+  APITypes.UpdateReferralMutation
+>;
+export const updateReferralCode = /* GraphQL */ `mutation UpdateReferralCode(
+  $condition: ModelReferralCodeConditionInput
+  $input: UpdateReferralCodeInput!
+) {
+  updateReferralCode(condition: $condition, input: $input) {
+    code
+    createdAt
+    id
+    isActive
+    owner
+    successfulReferrals
+    totalReferrals
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateReferralCodeMutationVariables,
+  APITypes.UpdateReferralCodeMutation
+>;
+export const updateUserProfile = /* GraphQL */ `mutation UpdateUserProfile(
+  $condition: ModelUserProfileConditionInput
+  $input: UpdateUserProfileInput!
+) {
+  updateUserProfile(condition: $condition, input: $input) {
+    countryPreferences
+    createdAt
+    id
+    industryPreferences
+    owner
     updatedAt
     __typename
   }
@@ -119,21 +309,26 @@ export const updateUserProfile = /* GraphQL */ `mutation UpdateUserProfile(
   APITypes.UpdateUserProfileMutationVariables,
   APITypes.UpdateUserProfileMutation
 >;
-export const deleteUserProfile = /* GraphQL */ `mutation DeleteUserProfile(
-  $input: DeleteUserProfileInput!
-  $condition: ModelUserProfileConditionInput
+export const updateUserSubscription = /* GraphQL */ `mutation UpdateUserSubscription(
+  $condition: ModelUserSubscriptionConditionInput
+  $input: UpdateUserSubscriptionInput!
 ) {
-  deleteUserProfile(input: $input, condition: $condition) {
-    owner
-    industryPreferences
-    countryPreferences
-    id
+  updateUserSubscription(condition: $condition, input: $input) {
     createdAt
+    earnedFreeMonths
+    id
+    owner
+    referralCodeUsed
+    referrerId
+    subscriptionStatus
+    totalFreeMonths
+    trialEndDate
+    trialStartDate
     updatedAt
     __typename
   }
 }
 ` as GeneratedMutation<
-  APITypes.DeleteUserProfileMutationVariables,
-  APITypes.DeleteUserProfileMutation
+  APITypes.UpdateUserSubscriptionMutationVariables,
+  APITypes.UpdateUserSubscriptionMutation
 >;

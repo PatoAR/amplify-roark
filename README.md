@@ -1,24 +1,56 @@
 ## AWS Roark
 Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fetches, processes and stores news articles in dynambodb. The articles are distributed to varios channels (whatsapp, telegram) and to this webapp via AppSync subscriptions or long-polling.
 
-## User Settings - to be improved
-- Change password
-- Delete account
-- Language
-- Subscription Details
-
 ## ToDo's
+- Change settings layout to page with cards that redirect to specific pages for each setting
 - Apply modified text
 - Lucide Icons
 - Implement "Search Bar" functionality
-
-- Invite friends, establish rule to keep 3 months free for each friend
+- Button for "all" news
 - Track user activity
 - Pay suscription
 - Custom domain
 - Internationalization
-
 - Create interface to deliver different content  - publicity, financials, etc - fix on top, colors, etc.
+
+## 🎁 Referral System
+
+The referral system is now fully implemented! Users can:
+
+- **Generate unique referral codes** - Each user gets a unique 8-character code
+- **Share via multiple platforms** - WhatsApp, Email, or copy link
+- **Track statistics** - See successful referrals and earned months
+- **Earn free months** - Get 3 additional months for each successful referral
+- **URL-based signup** - Users can sign up using referral links
+
+### How to Use
+
+1. **For Referrers**: Visit Settings → "🎁 Invite Friends" tab
+2. **For New Users**: Use referral code during signup or click referral links
+3. **Business Logic**: 3 months initial + 3 months per referral (unlimited)
+
+See `REFERRAL_SYSTEM.md` for complete technical documentation.
+
+## 🎨 Design System
+
+The application now features a **unified minimalistic design system** that provides:
+
+- **Consistent visual hierarchy** with standardized typography and spacing
+- **Clean, ascetic interfaces** with generous whitespace and subtle shadows
+- **Accessibility-first approach** with proper contrast ratios and focus states
+- **Mobile-responsive design** that works seamlessly across all devices
+- **Smooth interactions** with purposeful animations and transitions
+
+### Key Features
+
+- **CSS Custom Properties** for consistent theming
+- **Modular component architecture** for reusability
+- **Performance-optimized animations** (60fps)
+- **Accessibility compliance** with WCAG guidelines
+- **Touch-friendly mobile experience**
+
+See `UI_UX_GUIDELINES.md` for complete design system documentation.
+
 
 ## CLI
 https://docs.amplify.aws/react/reference/cli-commands/
@@ -26,9 +58,9 @@ https://docs.amplify.aws/react/reference/cli-commands/
 - npm run dev : local client-side development
 
 - npx amplify sandbox : deploys to backend sandbox
-    > redeploys new schema on changes on files in amplify/ folder
+    > redeploys new schema on changes on files in amplify/folder
     > updates local amplify_outputs.json
-    > //?// need to add aws-exports.js to amplify_outputs.json when deploying to AWS
+    > need to add aws-exports.js to amplify_outputs.json when deploying to AWS
 
 - npx ampx generate graphql-client-code --format graphql-codegen --out ./src/graphql/ 
     > generates API.ts, and graphql files based on local schema and amplify_outputs.json
@@ -38,6 +70,9 @@ https://docs.amplify.aws/react/reference/cli-commands/
     > updates src/API.ts and graphql/files
 
 
+
+
+# Modified text
 howard > 
     sends full description, content as one text variable
     sends country codes ("Qs") as value pairs with their respective character index in text, chloc -1 if country in source definition
