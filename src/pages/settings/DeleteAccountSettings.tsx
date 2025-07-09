@@ -1,91 +1,119 @@
+import { useState } from 'react';
 import { deleteUser } from 'aws-amplify/auth';
-import { useNavigate } from 'react-router-dom';
-import {
-  Button,
-  Card,
-  Flex,
-  Heading,
-  View,
-} from '@aws-amplify/ui-react';
-import '@aws-amplify/ui-react/styles.css';
+import { Card, Flex, Heading, Text, PasswordField, Button, Alert } from '@aws-amplify/ui-react';
+import { isApiError, AuthError, ErrorContext } from '../../types/errors';
 import './DeleteAccountSettings.css';
 
 const DeleteAccountSettings = () => {
-  const navigate = useNavigate();
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  const handleDeleteAccount = async () => {
-    if (window.confirm('Are you sure? Deleting your account cannot be undone.')) {
-      try {
-        await deleteUser();
-        alert('Account deleted successfully.');
+  const createErrorContext = (action: string): ErrorContext => ({
+    component: 'DeleteAccountSettings',
+    action,
+    timestamp: new Date().toISOString(),
+  });
+
+  const handleDeleteAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (!password) {
+      setError('Please enter your password to confirm account deletion');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      await deleteUser();
+      setSuccess('Account deleted successfully. You will be redirected to the login page.');
+      
+      // Redirect after a short delay
+      setTimeout(() => {
         window.location.href = '/';
-      } catch (err: any) {
-        alert(`Error: ${err.message}`);
-        window.location.href = '/';
+      }, 2000);
+    } catch (err: unknown) {
+      const errorContext = createErrorContext('deleteAccount');
+      
+      let authError: AuthError;
+      
+      if (isApiError(err)) {
+        authError = {
+          message: err.message || 'Failed to delete account',
+          code: 'INVALID_CREDENTIALS',
+          details: errorContext,
+        };
+      } else {
+        authError = {
+          message: 'An unexpected error occurred while deleting account',
+          code: 'INVALID_CREDENTIALS',
+          details: errorContext,
+        };
       }
+      
+      console.error('Account deletion error:', err, errorContext);
+      setError(authError.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleBack = () => {
-    navigate('/settings');
-  };
-
   return (
-    <Flex
-      className="delete-account-settings-box"
-      direction="column"
-      gap="1rem"
-    >
-      <Flex alignItems="center" gap="1rem" className="page-header">
-        <Button
-          variation="link"
-          onClick={handleBack}
-          className="back-button"
-        >
-          ← Back to Settings
-        </Button>
-      </Flex>
+    <div className="delete-account-settings">
+      <Card>
+        <Flex direction="column" gap="large">
+          <Heading level={2}>Delete Account</Heading>
+          
+          <Alert variation="warning" isDismissible>
+            <Text>
+              <strong>Warning:</strong> This action cannot be undone. All your data, preferences, and account information will be permanently deleted.
+            </Text>
+          </Alert>
 
-      <Card className="delete-account-card">
-        <Flex direction="column" gap="1rem">
-          <View className="card-header">
-            <View className="card-icon">🗑️</View>
-            <Heading level={2} className="card-title">
-              Delete Account
-            </Heading>
-            <View className="card-subtitle">
-              This action cannot be undone. All your data will be permanently deleted.
-            </View>
-          </View>
+          {error && (
+            <Alert variation="error" isDismissible>
+              {error}
+            </Alert>
+          )}
 
-          <View className="warning-section">
-            <View className="warning-icon">⚠️</View>
-            <Heading level={4} className="warning-title">
-              Warning
-            </Heading>
-            <View className="warning-text">
-              <p>Once you delete your account:</p>
-              <ul>
-                <li>All your data will be permanently removed</li>
-                <li>Your referral codes will be invalidated</li>
-                <li>You will lose access to all services</li>
-                <li>This action cannot be reversed</li>
-              </ul>
-            </View>
-          </View>
+          {success && (
+            <Alert variation="success" isDismissible>
+              {success}
+            </Alert>
+          )}
 
-          <View className="action-section">
-            <Button 
-              variation="destructive" 
-              onClick={handleDeleteAccount}
-              className="delete-button"
-            >
-              Delete My Account
-            </Button>
-          </View>
+          <form onSubmit={handleDeleteAccount}>
+            <Flex direction="column" gap="medium">
+              <PasswordField
+                label="Confirm Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password to confirm"
+                isRequired
+                autoComplete="current-password"
+              />
+
+              <Button
+                type="submit"
+                variation="destructive"
+                isLoading={isLoading}
+                loadingText="Deleting account..."
+              >
+                Delete Account
+              </Button>
+            </Flex>
+          </form>
+
+          <Text fontSize="small" color="font.secondary">
+            By deleting your account, you will lose access to all your personalized news feeds, preferences, and referral benefits.
+          </Text>
         </Flex>
       </Card>
-    </Flex>
+    </div>
   );
 };
 

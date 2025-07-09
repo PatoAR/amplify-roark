@@ -5,7 +5,6 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 - Implement "Search Bar" functionality
 - Lucide Icons
 - Button for "all" news
-
 - Custom domain
 - Internationalization
 
@@ -72,7 +71,6 @@ https://docs.amplify.aws/react/reference/cli-commands/
 - npx @aws-amplify/cli codegen 
     > downloads schema from the server
     > updates src/API.ts and graphql/files
-
 
 
 # Modified text

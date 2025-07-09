@@ -6,7 +6,7 @@ import {
 } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import './ReferralSettings.css';
-import Referral from '../../components/Referral';
+import Referral from '../../components/Referral/Referral';
 
 const ReferralSettings = () => {
   const navigate = useNavigate();

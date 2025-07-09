@@ -1,19 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import {
-  View,
-  Heading,
-  TextField,
-  PasswordField,
-  Button,
-  Alert,
-  Flex,
-  Card,
-  Text,
-  useTheme,
-} from '@aws-amplify/ui-react';
 import { signUp } from 'aws-amplify/auth';
+import { Card, Flex, Heading, Text, TextField, PasswordField, Button, Alert, View, useTheme } from '@aws-amplify/ui-react';
 import { useReferral } from '../../hooks/useReferral';
+import { UserAttributes, SignUpOptions, validateEmail, validatePassword, validateUserAttributes } from '../../types/auth';
+import { isApiError, AuthError, ErrorContext } from '../../types/errors';
 import './CustomSignUp.css';
 
 interface CustomSignUpProps {
@@ -24,7 +15,6 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
   const { tokens } = useTheme();
   const [searchParams] = useSearchParams();
   const { validateReferralCode } = useReferral();
-  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -78,26 +68,42 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
     }
   };
 
+  const createErrorContext = (action: string): ErrorContext => ({
+    component: 'CustomSignUp',
+    action,
+    timestamp: new Date().toISOString(),
+    additionalData: { email, referralCode },
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
+    // Validate email
+    if (!validateEmail(email)) {
+      setError('Please enter a valid email address');
       return;
     }
 
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters long');
+    // Validate password
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      setError(`Password requirements: ${passwordValidation.errors.join(', ')}`);
+      return;
+    }
+
+    // Validate password confirmation
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
       return;
     }
 
     setIsLoading(true);
 
     try {
-      // Prepare user attributes
-      const userAttributes: any = {
+      // Prepare user attributes with proper typing
+      const userAttributes: UserAttributes = {
         email,
       };
 
@@ -111,19 +117,50 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
         }
       }
 
-      await signUp({
+      // Validate user attributes before sending
+      if (!validateUserAttributes(userAttributes)) {
+        const errorContext = createErrorContext('validateUserAttributes');
+        const authError: AuthError = {
+          message: 'Invalid user attributes',
+          code: 'INVALID_EMAIL',
+          details: errorContext,
+        };
+        throw authError;
+      }
+
+      const signUpOptions: SignUpOptions = {
         username: email,
         password,
         options: {
           userAttributes,
         },
-      });
+      };
+
+      await signUp(signUpOptions);
 
       setSuccess('Account created successfully! Please check your email to verify your account.');
       onSuccess?.();
-    } catch (err: any) {
-      console.error('Sign up error:', err);
-      setError(err.message || 'An error occurred during sign up');
+    } catch (err: unknown) {
+      const errorContext = createErrorContext('signUp');
+      
+      let authError: AuthError;
+      
+      if (isApiError(err)) {
+        authError = {
+          message: err.message || 'An error occurred during sign up',
+          code: 'INVALID_CREDENTIALS',
+          details: errorContext,
+        };
+      } else {
+        authError = {
+          message: 'An unexpected error occurred during sign up',
+          code: 'INVALID_CREDENTIALS',
+          details: errorContext,
+        };
+      }
+      
+      console.error('Sign up error:', err, errorContext);
+      setError(authError.message);
     } finally {
       setIsLoading(false);
     }

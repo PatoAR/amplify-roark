@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Menu, MenuItem, Divider, Button } from "@aws-amplify/ui-react";
 import { useNavigate } from "react-router-dom";
-import { useAuthenticator } from '@aws-amplify/ui-react';
+import { useSession } from '../../context/SessionContext';
 import Modal from './Modal'
 import { useUserPreferences } from '../../context/UserPreferencesContext';
 
@@ -29,7 +29,7 @@ const COUNTRY_OPTIONS = [
 ];
 
 const HeaderNav = () => {
-  const { signOut } = useAuthenticator();
+  const { logout } = useSession();
   const navigate = useNavigate();
   const [showFiltersModal, setShowFiltersModal] = useState(false); // State to control modal visibility
   const { preferences, savePreferences } = useUserPreferences();
@@ -103,7 +103,7 @@ const HeaderNav = () => {
         <MenuItem onClick={handleOpenFiltersModal}>Filters</MenuItem>
         <Divider />
         <MenuItem onClick={() => navigate("/settings")}>Settings</MenuItem>
-        <MenuItem onClick={signOut}>Logout</MenuItem>
+        <MenuItem onClick={logout}>Logout</MenuItem>
       </Menu>
 
       <Modal

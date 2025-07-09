@@ -1,16 +1,10 @@
-import { Autocomplete } from "@aws-amplify/ui-react";
-
 const HeaderSearchBar = () => {
   return (
     <div className="header-search-bar">
-      <Autocomplete
-        label="Autocomplete"
-        options={[
-          { id: "companies", label: "Companies" },
-        ]}
-        placeholder="Search here..."
-        size="small"
-      />
+      {/* Search functionality to be implemented */}
+      <div style={{ padding: '8px', color: '#666' }}>
+        Article search coming soon ...
+      </div>
     </div>
   );
 };
