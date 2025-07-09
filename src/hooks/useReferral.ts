@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { authClient } from '../amplify-client';
+import { useActivityTracking } from './useActivityTracking';
 
 
 
@@ -20,6 +21,7 @@ export const useReferral = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
+  const { trackReferralActivity } = useActivityTracking();
 
   // Load user's referral code and stats
   useEffect(() => {
@@ -52,6 +54,9 @@ export const useReferral = () => {
         // Generate new referral code if none exists
         await generateReferralCode();
       }
+      
+      // Track referral code generation
+      trackReferralActivity('generated', referralCode);
     } catch (err) {
       console.error('Error loading referral data:', err);
       setError('Failed to load referral data');
@@ -67,25 +72,23 @@ export const useReferral = () => {
       setIsLoading(true);
       setError('');
 
-      // Call the Lambda function to generate a referral code
-      const response = await fetch('/api/referral', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'generate_code',
-          userId: user.userId,
-        }),
+      // Generate a unique 8-character code
+      const code = generateUniqueCode();
+      
+      // Create the referral code directly in the database
+      const result = await authClient.models.ReferralCode.create({
+        owner: user.userId,
+        code,
+        isActive: true,
+        totalReferrals: 0,
+        successfulReferrals: 0,
       });
 
-      const result = await response.json();
-
-      if (result.success) {
-        setReferralCode(result.data.code);
+      if (result.data) {
+        setReferralCode(code);
         await loadReferralData(); // Reload to get updated stats
       } else {
-        setError(result.message || 'Failed to generate referral code');
+        setError('Failed to generate referral code');
       }
     } catch (err) {
       console.error('Error generating referral code:', err);
@@ -95,24 +98,34 @@ export const useReferral = () => {
     }
   };
 
+  // Helper function to generate unique code
+  const generateUniqueCode = (): string => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 8; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  };
+
   const validateReferralCode = async (code: string): Promise<{ valid: boolean; referrerId?: string }> => {
     try {
-      const response = await fetch('/api/referral', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'validate_code',
-          referralCode: code,
-        }),
+      const { data: referralCodes } = await authClient.models.ReferralCode.list({
+        filter: { 
+          code: { eq: code },
+          isActive: { eq: true }
+        }
       });
-
-      const result = await response.json();
-      return {
-        valid: result.success,
-        referrerId: result.data?.referrerId,
-      };
+      
+      if (referralCodes && referralCodes.length > 0) {
+        const referralCode = referralCodes[0];
+        return {
+          valid: true,
+          referrerId: referralCode.owner || undefined,
+        };
+      } else {
+        return { valid: false };
+      }
     } catch (err) {
       console.error('Error validating referral code:', err);
       return { valid: false };
@@ -151,6 +164,9 @@ export const useReferral = () => {
           );
           break;
       }
+      
+      // Track referral sharing
+      trackReferralActivity('shared', referralCode);
     } catch (err) {
       console.error('Error sharing referral link:', err);
       setError('Failed to share referral link');

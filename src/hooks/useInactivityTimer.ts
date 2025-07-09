@@ -8,6 +8,7 @@ interface UseInactivityTimerOptions {
   warningBeforeLogoutInMinutes?: number; // Time before logout to show a warning
   onLogout?: () => void; // Callback function on logout
   onWarning?: (timeLeft: number) => void; // Callback for warning
+  onActivity?: () => void; // Callback for user activity
 }
 
 const DEFAULT_TIMEOUT_MINUTES = 120;
@@ -18,6 +19,7 @@ export const useInactivityTimer = ({
   warningBeforeLogoutInMinutes = DEFAULT_WARNING_MINUTES,
   onLogout,
   onWarning,
+  onActivity,
 }: UseInactivityTimerOptions = {}) => {
   const navigate = useNavigate();
   const logoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -55,7 +57,8 @@ export const useInactivityTimer = ({
 
   const handleUserActivity = useCallback(() => {
     resetTimers();
-  }, [resetTimers]);
+    onActivity?.(); // Notify activity tracking system
+  }, [resetTimers, onActivity]);
 
   useEffect(() => {
     // Start timers on component mount

@@ -65,6 +65,49 @@ const schema = a.schema({
     referrerId: a.string(), // ID of user who referred this user
   })
   .authorization(allow => [allow.owner().identityClaim('sub')]),
+
+  // UserActivity Model - Track user sessions and activity periods
+  UserActivity: a
+  .model({
+    owner: a.string(),
+    sessionId: a.string().required(), // Unique session identifier
+    startTime: a.datetime().required(),
+    endTime: a.datetime(),
+    duration: a.integer(), // Duration in seconds
+    pageViews: a.integer().default(0),
+    interactions: a.integer().default(0), // Clicks, form submissions, etc.
+    deviceInfo: a.string(), // Browser, OS, screen size
+    userAgent: a.string(),
+    ipAddress: a.string(),
+    isActive: a.boolean().default(true),
+  })
+  .authorization(allow => [allow.owner().identityClaim('sub')]),
+
+  // UserEvent Model - Track specific user actions
+  UserEvent: a
+  .model({
+    owner: a.string(),
+    sessionId: a.string().required(),
+    eventType: a.enum([
+      'page_view',
+      'article_click',
+      'article_share',
+      'filter_change',
+      'preference_update',
+      'referral_generated',
+      'referral_shared',
+      'settings_accessed',
+      'search_performed',
+      'logout',
+      'login'
+    ]),
+    eventData: a.string(), // JSON string with additional event data
+    timestamp: a.datetime().required(),
+    pageUrl: a.string(),
+    elementId: a.string(), // ID of the element that triggered the event
+    metadata: a.string(), // Additional metadata as JSON string
+  })
+  .authorization(allow => [allow.owner().identityClaim('sub')]),
 });
 
 export type Schema = ClientSchema<typeof schema>;

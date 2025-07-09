@@ -2,15 +2,16 @@
 Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fetches, processes and stores news articles in dynambodb. The articles are distributed to varios channels (whatsapp, telegram) and to this webapp via AppSync subscriptions or long-polling.
 
 ## ToDo's
-- Change settings layout to page with cards that redirect to specific pages for each setting
 - Apply modified text
+
 - Lucide Icons
 - Implement "Search Bar" functionality
 - Button for "all" news
-- Track user activity
-- Pay suscription
+
 - Custom domain
 - Internationalization
+
+- Pay suscription
 - Create interface to deliver different content  - publicity, financials, etc - fix on top, colors, etc.
 
 ## 🎁 Referral System
@@ -55,12 +56,17 @@ See `UI_UX_GUIDELINES.md` for complete design system documentation.
 ## CLI
 https://docs.amplify.aws/react/reference/cli-commands/
 
+1. Run git commit/push
+2. Download amplify_outpust.json from AWS 
+3. Run npx ampx generate graphql-client-code --format graphql-codegen --out ./src/graphql/ 
+    > generate API.ts, and graphql files based on local schema and amplify_outputs.json
+
+
 - npm run dev : local client-side development
 
 - npx amplify sandbox : deploys to backend sandbox
     > redeploys new schema on changes on files in amplify/folder
     > updates local amplify_outputs.json
-    > need to add aws-exports.js to amplify_outputs.json when deploying to AWS
 
 - npx ampx generate graphql-client-code --format graphql-codegen --out ./src/graphql/ 
     > generates API.ts, and graphql files based on local schema and amplify_outputs.json
@@ -68,7 +74,6 @@ https://docs.amplify.aws/react/reference/cli-commands/
 - npx @aws-amplify/cli codegen 
     > downloads schema from the server
     > updates src/API.ts and graphql/files
-
 
 
 

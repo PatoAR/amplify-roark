@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { authClient } from '../amplify-client'; // Adjust path if needed
+import { useActivityTracking } from '../hooks/useActivityTracking';
 
 interface UserPreferences {
   industries: string[];
@@ -23,6 +24,7 @@ export const UserPreferencesProvider = ({ children }: { children: ReactNode }) =
   const [preferences, setPreferences] = useState<UserPreferences>({ industries: [], countries: [] });
   const [userProfileId, setUserProfileId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { trackPreferenceUpdate } = useActivityTracking();
 
   // Function to load preferences, fetched only once here
   const loadUserPreferences = useCallback(async (cognitoUserId: string) => {
@@ -80,6 +82,18 @@ export const UserPreferencesProvider = ({ children }: { children: ReactNode }) =
         if (newProfile) setUserProfileId(newProfile.id);
       }
       setPreferences(newPrefs); // Update state immediately for responsiveness
+      
+      // Track preference updates
+      const changedIndustries = newPrefs.industries.filter(ind => !preferences.industries.includes(ind));
+      const changedCountries = newPrefs.countries.filter(country => !preferences.countries.includes(country));
+      
+      if (changedIndustries.length > 0) {
+        trackPreferenceUpdate('industries', changedIndustries);
+      }
+      if (changedCountries.length > 0) {
+        trackPreferenceUpdate('countries', changedCountries);
+      }
+      
       console.log("Preferences saved successfully.");
     } catch (error) {
       console.error("Error saving preferences:", error);

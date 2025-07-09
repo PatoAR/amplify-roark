@@ -1,7 +1,7 @@
 /* === Header Styles === */
 .header {
-  backdrop-filter: blur(8px);
-  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  background-color: rgba(255, 255, 255, 0.5);
   position: fixed;
   z-index: 1000;
   top: 0;
@@ -13,7 +13,7 @@
   display: flex;
   align-items: center;
   border-bottom: var(--border-width) solid var(--color-border);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
 }
 
 .header > .amplify-flex {

@@ -6,6 +6,7 @@ import { Article } from '../../graphql/API';
 import { publicClient } from "./../../amplify-client"
 import { useUserPreferences } from '../../context/UserPreferencesContext';
 import { useAuthenticator } from '@aws-amplify/ui-react';
+import { useActivityTracking } from '../../hooks/useActivityTracking';
 import WelcomeScreen from '../../components/WelcomeScreen/WelcomeScreen'; 
 import './NewsSocketClient.css';
 
@@ -61,16 +62,6 @@ declare global {
   }
 }
 
-// Handles opening the article link to a new tab.
-const handleArticleClick = async (event: React.MouseEvent<HTMLAnchorElement>, link: string) => {
-  event.preventDefault();
-  const a = document.createElement('a');
-  a.href = link;
-  a.target = '_blank';
-  a.rel = 'noopener noreferrer';
-  a.click();
-};
-
 function NewsSocketClient() {
   const [messages, setMessages] = useState<ArticleForState[]>([]);
   const [isTabVisible, setIsTabVisible] = useState<boolean>(() => !document.hidden);
@@ -79,6 +70,21 @@ function NewsSocketClient() {
   const articleIdsFromSubscriptionRef = useRef<Set<string>>(new Set());
   const { user } = useAuthenticator(); 
   const { preferences, isLoading, userProfileId } = useUserPreferences();
+  const { trackArticleClick } = useActivityTracking();
+
+  // Handles opening the article link to a new tab.
+  const handleArticleClick = async (event: React.MouseEvent<HTMLAnchorElement>, link: string, articleId: string, articleTitle: string) => {
+    event.preventDefault();
+    
+    // Track article click
+    trackArticleClick(articleId, articleTitle);
+    
+    const a = document.createElement('a');
+    a.href = link;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.click();
+  };
 
   useEffect(() => {
     messagesRef.current = messages;
@@ -270,7 +276,7 @@ function NewsSocketClient() {
                   shadowPollerStopped = true;
                   clearInterval(shadowPoller!);
                 }
-              }, 2000); // 2-second buffer to account for WebSocket latency
+              }, 500); // 0.5-second buffer to account for WebSocket latency
             }
           } catch (err) {
             console.error('Shadow poller error:', err);
@@ -376,7 +382,7 @@ function NewsSocketClient() {
               >
                 <a 
                   href={msg.link} 
-                  onClick={(e) => handleArticleClick(e, msg.link)} 
+                  onClick={(e) => handleArticleClick(e, msg.link, msg.id, msg.title)} 
                   className="article-line-link"
                 >
                   <p className="article-line">
