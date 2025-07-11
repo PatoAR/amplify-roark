@@ -419,20 +419,6 @@ export const NewsManager: React.FC = () => {
     };
   }, [user?.userId, fetchInitialArticles, trySubscribe, cleanupResources]); // Only depend on user ID, not the callback functions
 
-  // Auto-mark articles as seen after 10 seconds
-  useEffect(() => {
-    if (articles.length === 0) return;
-    
-    const timer = setTimeout(() => {
-      if (isComponentMountedRef.current) {
-        const updatedArticles = articles.map(article => ({ ...article, seen: true }));
-        setArticles(updatedArticles);
-      }
-    }, 10000);
-    
-    return () => clearTimeout(timer);
-  }, [articles.length, setArticles]); // Only depend on articles length, not the full articles array
-
   // This component doesn't render anything, it just manages the news state
   return null;
 }; 

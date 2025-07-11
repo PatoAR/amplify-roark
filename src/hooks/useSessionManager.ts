@@ -24,6 +24,7 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     isSessionActive: false,
   });
   const isLoggingOutRef = useRef<boolean>(false);
+  const sessionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Create error context for debugging
   const createErrorContext = useCallback((action: string): ErrorContext => ({
@@ -34,6 +35,14 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     timestamp: new Date().toISOString(),
   }), [user?.userId]);
 
+  // Clear session timeout
+  const clearSessionTimeout = useCallback(() => {
+    if (sessionTimeoutRef.current) {
+      clearTimeout(sessionTimeoutRef.current);
+      sessionTimeoutRef.current = null;
+    }
+  }, []);
+
   // Centralized logout function
   const performLogout = useCallback(async () => {
     const errorContext = createErrorContext('performLogout');
@@ -42,6 +51,9 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     try {
       console.log('🔄 Performing centralized logout...');
       isLoggingOutRef.current = true;
+
+      // Clear session timeout
+      clearSessionTimeout();
 
       // 1. End activity tracking session
       if (sessionStateRef.current.isSessionActive) {
@@ -90,7 +102,22 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
         isLoggingOutRef.current = false;
       }, 1000);
     }
-  }, [endSession, signOut, options, createErrorContext]);
+  }, [endSession, signOut, options, createErrorContext, clearSessionTimeout]);
+
+  // Set up session timeout detection
+  const setupSessionTimeout = useCallback(() => {
+    if (sessionTimeoutRef.current) {
+      clearTimeout(sessionTimeoutRef.current);
+    }
+
+    // Set a timeout to detect if session becomes stale (2 hours)
+    sessionTimeoutRef.current = setTimeout(() => {
+      if (sessionStateRef.current.isSessionActive && !isLoggingOutRef.current) {
+        console.warn('⚠️ Session timeout detected, forcing logout...');
+        performLogout();
+      }
+    }, 2 * 60 * 60 * 1000); // 2 hours
+  }, [performLogout]);
 
   // Start session when user becomes authenticated
   useEffect(() => {
@@ -101,13 +128,17 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
       if (!sessionStateRef.current.isSessionActive && !isLoggingOutRef.current) {
         console.log('🔄 Starting session for authenticated user...');
         
+        // Set session state immediately to prevent multiple starts
+        sessionStateRef.current = {
+          isAuthenticated: true,
+          isSessionActive: true,
+          userId: user.userId,
+          sessionId: sessionStateRef.current.sessionId,
+        };
+        
         startSession().then(() => {
-          sessionStateRef.current = {
-            isAuthenticated: true,
-            isSessionActive: true,
-            userId: user.userId,
-            sessionId: sessionStateRef.current.sessionId,
-          };
+          // Set up session timeout
+          setupSessionTimeout();
 
           console.log('✅ Session started successfully');
           
@@ -116,6 +147,13 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
           }
         }).catch((error) => {
           console.error('❌ Failed to start session:', error, errorContext);
+          // Reset session state on error
+          sessionStateRef.current = {
+            isAuthenticated: false,
+            isSessionActive: false,
+            userId: undefined,
+            sessionId: undefined,
+          };
           if (options.onAuthError) {
             options.onAuthError(error);
           }
@@ -125,10 +163,16 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
       // User is not authenticated, ensure session is ended
       if (sessionStateRef.current.isSessionActive) {
         console.log('🔄 User not authenticated, ending session...');
+        clearSessionTimeout();
         performLogout();
       }
     }
-  }, [authStatus, user?.userId, startSession, performLogout, options, createErrorContext]);
+
+    // Cleanup function
+    return () => {
+      clearSessionTimeout();
+    };
+  }, [authStatus, user?.userId, startSession, performLogout, options, createErrorContext, setupSessionTimeout, clearSessionTimeout]);
 
   // Handle authentication errors - authStatus can be 'authenticated', 'unauthenticated', or 'configuring'
   useEffect(() => {
@@ -146,6 +190,8 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     } else if (authStatus === 'unauthenticated' && sessionStateRef.current.isSessionActive) {
       console.log('🔍 Session manager: User unauthenticated but not logging out, skipping session end');
     }
+
+    // Remove the redundant session start trigger to prevent multiple starts
   }, [authStatus, performLogout, options, createErrorContext]);
 
   // Manual logout function
