@@ -5,8 +5,6 @@ import { type Schema } from '../../amplify/data/resource';
 import { ActivityEvent, SessionInfo, EventData, isValidEventType, validateEventData, validateMetadata } from '../types/activity';
 import { ErrorContext } from '../types/errors';
 
-const client = generateClient<Schema>();
-
 export const useActivityTracking = () => {
   const { user } = useAuthenticator();
   const sessionRef = useRef<SessionInfo | null>(null);
@@ -14,6 +12,15 @@ export const useActivityTracking = () => {
   const [isTracking, setIsTracking] = useState(false);
   const isUnmountingRef = useRef<boolean>(false);
   const shouldEndSessionRef = useRef<boolean>(false);
+  const clientRef = useRef<ReturnType<typeof generateClient<Schema>> | null>(null);
+
+  // Initialize client when needed
+  const getClient = useCallback(() => {
+    if (!clientRef.current) {
+      clientRef.current = generateClient<Schema>();
+    }
+    return clientRef.current;
+  }, []);
 
   // Generate unique session ID
   const generateSessionId = useCallback(() => {
@@ -45,6 +52,7 @@ export const useActivityTracking = () => {
   const startSession = useCallback(async () => {
     if (!user?.userId) return;
 
+    const client = getClient();
     const sessionId = generateSessionId();
     const deviceInfo = getDeviceInfo();
     const userAgent = navigator.userAgent;
@@ -57,14 +65,30 @@ export const useActivityTracking = () => {
     };
 
     try {
-      await client.models.UserActivity.create({
-        sessionId,
-        startTime: sessionRef.current.startTime.toISOString(),
-        deviceInfo,
-        userAgent,
-        pageViews: 0,
-        interactions: 0,
-        isActive: true,
+      const createUserActivityMutation = /* GraphQL */ `
+        mutation CreateUserActivity($input: CreateUserActivityInput!) {
+          createUserActivity(input: $input) {
+            id
+            sessionId
+            startTime
+            isActive
+          }
+        }
+      `;
+
+      await client.graphql({
+        query: createUserActivityMutation,
+        variables: {
+          input: {
+            sessionId,
+            startTime: sessionRef.current.startTime.toISOString(),
+            deviceInfo,
+            userAgent,
+            pageViews: 0,
+            interactions: 0,
+            isActive: true,
+          }
+        }
       });
 
       setIsTracking(true);
@@ -73,32 +97,75 @@ export const useActivityTracking = () => {
       const errorContext = createErrorContext('startSession');
       console.error('Failed to start activity session:', error, errorContext);
     }
-  }, [user?.userId, generateSessionId, getDeviceInfo, createErrorContext]);
+  }, [user?.userId, generateSessionId, getDeviceInfo, createErrorContext, getClient]);
 
   // End current session
   const endSession = useCallback(async () => {
     if (!sessionRef.current || !user?.userId) return;
+
+    const client = getClient();
+    if (!client) {
+      console.error('Cannot end session: Amplify client not available');
+      return;
+    }
 
     const session = sessionRef.current;
     const endTime = new Date();
     const duration = Math.floor((endTime.getTime() - session.startTime.getTime()) / 1000);
 
     try {
-      // Update the session record
-      const { data: activities } = await client.models.UserActivity.list({
-        filter: { sessionId: { eq: session.sessionId } }
-      });
+      // Find the UserActivity record via GraphQL
+      const listUserActivitiesQuery = /* GraphQL */ `
+        query ListUserActivities($filter: ModelUserActivityFilterInput) {
+          listUserActivities(filter: $filter) {
+            items {
+              id
+              sessionId
+              startTime
+              pageViews
+              interactions
+            }
+          }
+        }
+      `;
 
-      if (activities && activities.length > 0) {
-        const activity = activities[0];
-        await client.models.UserActivity.update({
-          id: activity.id,
-          endTime: endTime.toISOString(),
-          duration,
-          pageViews: activityRef.current.pageViews,
-          interactions: activityRef.current.interactions,
-          isActive: false,
-        });
+      const result = await client.graphql({
+        query: listUserActivitiesQuery,
+        variables: {
+          filter: { sessionId: { eq: session.sessionId } }
+        }
+      }) as any;
+
+      if (result.data?.listUserActivities?.items?.length > 0) {
+        const activity = result.data.listUserActivities.items[0];
+        
+        // Update the UserActivity record via GraphQL
+        const updateUserActivityMutation = /* GraphQL */ `
+          mutation UpdateUserActivity($input: UpdateUserActivityInput!) {
+            updateUserActivity(input: $input) {
+              id
+              endTime
+              duration
+              pageViews
+              interactions
+              isActive
+            }
+          }
+        `;
+
+        await client.graphql({
+          query: updateUserActivityMutation,
+          variables: {
+            input: {
+              id: activity.id,
+              endTime: endTime.toISOString(),
+              duration,
+              pageViews: activityRef.current.pageViews,
+              interactions: activityRef.current.interactions,
+              isActive: false,
+            }
+          }
+        }) as any;
       }
 
       console.log('📊 Activity tracking session ended');
@@ -110,7 +177,7 @@ export const useActivityTracking = () => {
       activityRef.current = { pageViews: 0, interactions: 0 };
       setIsTracking(false);
     }
-  }, [user?.userId, createErrorContext]);
+  }, [user?.userId, createErrorContext, getClient]);
 
   // Safe end session - only ends if user is actually logging out
   const safeEndSession = useCallback(async () => {
@@ -154,6 +221,12 @@ export const useActivityTracking = () => {
   const trackEvent = useCallback(async (event: ActivityEvent) => {
     if (!sessionRef.current || !user?.userId) return;
 
+    const client = getClient();
+    if (!client) {
+      console.error('Cannot track event: Amplify client not available');
+      return;
+    }
+
     // Validate event type
     if (!isValidEventType(event.eventType)) {
       const errorContext = createErrorContext('trackEvent');
@@ -178,30 +251,77 @@ export const useActivityTracking = () => {
     const { sessionId } = sessionRef.current;
     
     try {
-      await client.models.UserEvent.create({
-        sessionId,
-        eventType: event.eventType,
-        eventData: event.eventData ? JSON.stringify(event.eventData) : undefined,
-        timestamp: new Date().toISOString(),
-        pageUrl: event.pageUrl || window.location.pathname,
-        elementId: event.elementId,
-        metadata: event.metadata ? JSON.stringify(event.metadata) : undefined,
-      });
+      // Create UserEvent via GraphQL
+      const createUserEventMutation = /* GraphQL */ `
+        mutation CreateUserEvent($input: CreateUserEventInput!) {
+          createUserEvent(input: $input) {
+            id
+            sessionId
+            eventType
+            timestamp
+          }
+        }
+      `;
+
+      await client.graphql({
+        query: createUserEventMutation,
+        variables: {
+          input: {
+            sessionId,
+            eventType: event.eventType,
+            eventData: event.eventData ? JSON.stringify(event.eventData) : undefined,
+            timestamp: new Date().toISOString(),
+            pageUrl: event.pageUrl || window.location.pathname,
+            elementId: event.elementId,
+            metadata: event.metadata ? JSON.stringify(event.metadata) : undefined,
+          }
+        }
+      }) as any;
 
       // Update session counters
       activityRef.current.interactions++;
       
-      // Update session record
-      const { data: activities } = await client.models.UserActivity.list({
-        filter: { sessionId: { eq: sessionId } }
-      });
+      // Update UserActivity record via GraphQL
+      const listUserActivitiesQuery = /* GraphQL */ `
+        query ListUserActivities($filter: ModelUserActivityFilterInput) {
+          listUserActivities(filter: $filter) {
+            items {
+              id
+              sessionId
+              interactions
+            }
+          }
+        }
+      `;
 
-      if (activities && activities.length > 0) {
-        const activity = activities[0];
-        await client.models.UserActivity.update({
-          id: activity.id,
-          interactions: activityRef.current.interactions,
-        });
+      const result = await client.graphql({
+        query: listUserActivitiesQuery,
+        variables: {
+          filter: { sessionId: { eq: sessionId } }
+        }
+      }) as any;
+
+      if (result.data?.listUserActivities?.items?.length > 0) {
+        const activity = result.data.listUserActivities.items[0];
+        
+        const updateUserActivityMutation = /* GraphQL */ `
+          mutation UpdateUserActivity($input: UpdateUserActivityInput!) {
+            updateUserActivity(input: $input) {
+              id
+              interactions
+            }
+          }
+        `;
+
+        await client.graphql({
+          query: updateUserActivityMutation,
+          variables: {
+            input: {
+              id: activity.id,
+              interactions: activityRef.current.interactions,
+            }
+          }
+        }) as any;
       }
 
       console.log(`📊 Tracked event: ${event.eventType}`);
@@ -209,11 +329,11 @@ export const useActivityTracking = () => {
       const errorContext = createErrorContext('trackEvent');
       console.error('Failed to track event:', error, errorContext);
     }
-  }, [user?.userId, createErrorContext]);
+  }, [user?.userId, createErrorContext, getClient]);
 
   // Track page view
   const trackPageView = useCallback(async (pageUrl?: string) => {
-    if (!sessionRef.current) return;
+    if (!sessionRef.current || !user?.userId) return;
 
     activityRef.current.pageViews++;
     
@@ -224,10 +344,12 @@ export const useActivityTracking = () => {
       pageUrl: pageUrl || window.location.pathname,
       eventData,
     });
-  }, [trackEvent]);
+  }, [trackEvent, user?.userId]);
 
   // Track article click
   const trackArticleClick = useCallback(async (articleId: string, articleTitle: string) => {
+    if (!user?.userId) return;
+    
     const eventData: EventData = { articleId, articleTitle };
     
     await trackEvent({
@@ -235,37 +357,43 @@ export const useActivityTracking = () => {
       elementId: `article-${articleId}`,
       eventData,
     });
-  }, [trackEvent]);
+  }, [trackEvent, user?.userId]);
 
   // Track filter change
   const trackFilterChange = useCallback(async (filterType: string, filterValue: string) => {
+    if (!user?.userId) return;
+    
     const eventData: EventData = { filterType, filterValue };
     
     await trackEvent({
       eventType: 'filter_change',
       eventData,
     });
-  }, [trackEvent]);
+  }, [trackEvent, user?.userId]);
 
   // Track preference update
   const trackPreferenceUpdate = useCallback(async (preferenceType: string, preferenceValue: string | string[] | boolean | number) => {
+    if (!user?.userId) return;
+    
     const eventData: EventData = { preferenceType, preferenceValue };
     
     await trackEvent({
       eventType: 'preference_update',
       eventData,
     });
-  }, [trackEvent]);
+  }, [trackEvent, user?.userId]);
 
   // Track referral activity
   const trackReferralActivity = useCallback(async (action: 'generated' | 'shared', referralCode?: string) => {
+    if (!user?.userId) return;
+    
     const eventData: EventData = { referralCode };
     
     await trackEvent({
       eventType: action === 'generated' ? 'referral_generated' : 'referral_shared',
       eventData,
     });
-  }, [trackEvent]);
+  }, [trackEvent, user?.userId]);
 
   // Initialize tracking when user logs in
   useEffect(() => {
@@ -296,10 +424,10 @@ export const useActivityTracking = () => {
 
   // Track initial page view
   useEffect(() => {
-    if (isTracking) {
+    if (isTracking && user?.userId) {
       trackPageView();
     }
-  }, [isTracking, trackPageView]);
+  }, [isTracking, trackPageView, user?.userId]);
 
   return {
     isTracking,

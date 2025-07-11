@@ -4,8 +4,6 @@ import { generateClient } from 'aws-amplify/api';
 import { type Schema } from '../../../amplify/data/resource';
 import { useNews } from '../../context/NewsContext';
 
-const client = generateClient<Schema>();
-
 // Constants
 const MAX_ARTICLES_IN_MEMORY = 100;
 const WEBSOCKET_LATENCY_BUFFER = 2000; // 2 seconds
@@ -103,6 +101,15 @@ function normalizeCompanies(companies: string | Record<string, string> | null | 
 export const NewsManager: React.FC = () => {
   const { user } = useAuthenticator();
   const { articles, setArticles, addArticle, isInitialized, setIsInitialized, seenArticlesRef } = useNews();
+  const clientRef = useRef<ReturnType<typeof generateClient<Schema>> | null>(null);
+
+  // Initialize client when needed
+  const getClient = useCallback(() => {
+    if (!clientRef.current) {
+      clientRef.current = generateClient<Schema>();
+    }
+    return clientRef.current;
+  }, []);
 
   // Resource management refs
   const unsubscribeRef = useRef<(() => void) | null>(null);
@@ -185,6 +192,8 @@ export const NewsManager: React.FC = () => {
     
     console.log('📰 Fetching initial articles to establish a baseline...');
     try {
+      const client = getClient();
+
       const result = await client.graphql({ query: listArticles });
       const articles: Article[] = (result as any).data?.listArticles?.items || [];
       
@@ -199,23 +208,25 @@ export const NewsManager: React.FC = () => {
         companies: normalizeCompanies(a.companies),
         countries: normalizeCountries(a.countries),
         language: a.language ?? 'N/A',
-        seen: true, // Mark initial articles as "seen"
+        seen: false,
       }));
 
-      // Sort from newest to oldest by timestamp
+      // Sort articles by timestamp in reverse chronological order (newest first)
       const now = new Date().getTime();
-      const sorted = formatted.sort((a, b) =>
-        new Date(b.timestamp ?? now).getTime() - new Date(a.timestamp ?? now).getTime()
-      );
-      
+      const sorted = formatted.sort((a, b) => {
+        const timeA = a.timestamp ? new Date(a.timestamp).getTime() : now;
+        const timeB = b.timestamp ? new Date(b.timestamp).getTime() : now;
+        return timeB - timeA; // Reverse chronological order
+      });
+
       const managedArticles = manageMemory(sorted);
       setArticles(managedArticles);
       setIsInitialized(true);
-      console.log(`✅ Baseline established with ${managedArticles.length} articles.`);
+      console.log(`📰 Loaded ${formatted.length} initial articles (sorted by timestamp)`);
     } catch (error) {
       console.error('Failed to fetch initial articles:', error);
     }
-  }, [isInitialized, setArticles, setIsInitialized, manageMemory]);
+  }, [isInitialized, setArticles, setIsInitialized, manageMemory, getClient]);
 
   // Start polling for new articles
   const startPolling = useCallback(() => {
@@ -226,11 +237,12 @@ export const NewsManager: React.FC = () => {
 
       const fetchArticles = async () => {
         try {
+          const client = getClient();
           const result = await client.graphql({ query: listArticles });
           const articles: Article[] = (result as any).data?.listArticles?.items || [];
           
           const newArticles = articles.filter(
-            a => !articles.find(existing => existing.id === a.id) && !isArticleSeen(a.id)
+            a => !articlesRef.current.find(existing => existing.id === a.id) && !isArticleSeen(a.id)
           );
 
           if (newArticles.length > 0) {
@@ -248,8 +260,16 @@ export const NewsManager: React.FC = () => {
               seen: false,
             }));
 
-            formatted.forEach(article => addArticle(article));
-            console.log(`📰 Polling: Added ${formatted.length} new articles`);
+            // Sort new articles by timestamp in reverse chronological order
+            const now = new Date().getTime();
+            const sorted = formatted.sort((a, b) => {
+              const timeA = a.timestamp ? new Date(a.timestamp).getTime() : now;
+              const timeB = b.timestamp ? new Date(b.timestamp).getTime() : now;
+              return timeB - timeA; // Reverse chronological order
+            });
+
+            sorted.forEach(article => addArticle(article));
+            console.log(`📰 Polling: Added ${formatted.length} new articles (sorted by timestamp)`);
           }
         } catch (error) {
           console.error('Polling error:', error);
@@ -258,7 +278,7 @@ export const NewsManager: React.FC = () => {
 
       fetchArticles();
     }, 30000); // Poll every 30 seconds
-  }, [addArticle, isArticleSeen]);
+  }, [addArticle, isArticleSeen, getClient]);
 
   // Try to establish AppSync subscription
   const trySubscribe = useCallback(async () => {
@@ -268,6 +288,8 @@ export const NewsManager: React.FC = () => {
       console.log('🔁 Attempting to establish AppSync subscription...');
       subscriptionEstablishedRef.current = true;
       
+      const client = getClient();
+
       const subscription = (client.graphql({
         query: onCreateArticle,
       }) as any).subscribe({
@@ -313,6 +335,7 @@ export const NewsManager: React.FC = () => {
           
           try {
             // Fetch the latest articles from the server (the ground truth)
+            const client = getClient();
             const result = await client.graphql({ query: listArticles });
             const articlesFromServer: Article[] = (result as any).data?.listArticles?.items || [];
            
@@ -367,7 +390,7 @@ export const NewsManager: React.FC = () => {
         startPolling();
       }
     }
-  }, [addArticle, isArticleSeen, startPolling]);
+  }, [addArticle, isArticleSeen, startPolling, getClient]);
 
   // Initialize when user changes
   useEffect(() => {
@@ -394,7 +417,7 @@ export const NewsManager: React.FC = () => {
       isInitializingRef.current = false;
       cleanupResources();
     };
-  }, [user?.userId]); // Only depend on user ID, not the callback functions
+  }, [user?.userId, fetchInitialArticles, trySubscribe, cleanupResources]); // Only depend on user ID, not the callback functions
 
   // Auto-mark articles as seen after 10 seconds
   useEffect(() => {
@@ -408,7 +431,7 @@ export const NewsManager: React.FC = () => {
     }, 10000);
     
     return () => clearTimeout(timer);
-  }, [articles.length]); // Only depend on articles length, not the full articles array
+  }, [articles.length, setArticles]); // Only depend on articles length, not the full articles array
 
   // This component doesn't render anything, it just manages the news state
   return null;

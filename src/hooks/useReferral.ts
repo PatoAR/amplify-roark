@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuthenticator } from '@aws-amplify/ui-react';
-import { authClient } from '../amplify-client';
+import { generateClient } from 'aws-amplify/api';
+import { type Schema } from '../../amplify/data/resource';
 import { useActivityTracking } from './useActivityTracking';
-
-
 
 interface ReferralStats {
   totalReferrals: number;
@@ -22,6 +21,15 @@ export const useReferral = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const { trackReferralActivity } = useActivityTracking();
+  const clientRef = useRef<ReturnType<typeof generateClient<Schema>> | null>(null);
+
+  // Initialize client when needed
+  const getClient = useCallback(() => {
+    if (!clientRef.current) {
+      clientRef.current = generateClient<Schema>();
+    }
+    return clientRef.current;
+  }, []);
 
   // Load user's referral code and stats
   useEffect(() => {
@@ -37,8 +45,10 @@ export const useReferral = () => {
       setIsLoading(true);
       setError('');
 
+      const client = getClient();
+
       // Get user's referral code
-      const { data: referralCodes } = await authClient.models.ReferralCode.list({
+      const { data: referralCodes } = await client.models.ReferralCode.list({
         filter: { owner: { eq: user.userId } }
       });
 
@@ -72,11 +82,13 @@ export const useReferral = () => {
       setIsLoading(true);
       setError('');
 
+      const client = getClient();
+
       // Generate a unique 8-character code
       const code = generateUniqueCode();
       
       // Create the referral code directly in the database
-      const result = await authClient.models.ReferralCode.create({
+      const result = await client.models.ReferralCode.create({
         owner: user.userId,
         code,
         isActive: true,
@@ -110,7 +122,9 @@ export const useReferral = () => {
 
   const validateReferralCode = async (code: string): Promise<{ valid: boolean; referrerId?: string }> => {
     try {
-      const { data: referralCodes } = await authClient.models.ReferralCode.list({
+      const client = getClient();
+
+      const { data: referralCodes } = await client.models.ReferralCode.list({
         filter: { 
           code: { eq: code },
           isActive: { eq: true }

@@ -156,10 +156,10 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
 
   // Track page view when session is active
   const trackPageViewIfActive = useCallback(() => {
-    if (isTracking && sessionStateRef.current.isSessionActive) {
+    if (isTracking && sessionStateRef.current.isSessionActive && user?.userId) {
       trackPageView();
     }
-  }, [isTracking, trackPageView]);
+  }, [isTracking, trackPageView, user?.userId]);
 
   return {
     // State

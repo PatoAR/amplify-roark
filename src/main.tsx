@@ -16,8 +16,28 @@ import { I18n } from 'aws-amplify/utils';
 import { translations } from '@aws-amplify/ui-react';
 I18n.putVocabularies(translations);
 
-// Configure Amplify
-Amplify.configure(outputs);
+// Configure Amplify with the correct format
+Amplify.configure({
+  Auth: {
+    Cognito: {
+      userPoolId: outputs.auth.user_pool_id,
+      userPoolClientId: outputs.auth.user_pool_client_id,
+      identityPoolId: outputs.auth.identity_pool_id,
+      loginWith: {
+        email: true,
+        username: false,
+        phone: false,
+      },
+    },
+  },
+  API: {
+    GraphQL: {
+      endpoint: outputs.data.url,
+      region: outputs.data.aws_region,
+      defaultAuthMode: 'userPool',
+    },
+  },
+});
 
 // Custom components to pass to the Authenticator
 const customComponents = {
