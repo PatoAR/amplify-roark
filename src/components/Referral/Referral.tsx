@@ -12,10 +12,12 @@ import {
   useTheme,
 } from '@aws-amplify/ui-react';
 import { useReferral } from '../../hooks/useReferral';
+import { useTranslation } from '../../i18n';
 import './Referral.css';
 
 const Referral: React.FC = () => {
   const { tokens } = useTheme();
+  const { t } = useTranslation();
   const {
     referralCode,
     referralStats,
@@ -32,7 +34,7 @@ const Referral: React.FC = () => {
     try {
       await shareReferralLink('copy');
       setCopied(true);
-      setShareSuccess('Referral link copied to clipboard!');
+      setShareSuccess(t('referral.linkCopied'));
       setTimeout(() => setCopied(false), 2000);
       setTimeout(() => setShareSuccess(''), 3000);
     } catch (err) {
@@ -43,7 +45,7 @@ const Referral: React.FC = () => {
   const handleShareWhatsApp = async () => {
     try {
       await shareReferralLink('whatsapp');
-      setShareSuccess('Opening WhatsApp...');
+      setShareSuccess(t('referral.openingWhatsApp'));
       setTimeout(() => setShareSuccess(''), 3000);
     } catch (err) {
       console.error('Failed to share via WhatsApp:', err);
@@ -53,20 +55,18 @@ const Referral: React.FC = () => {
   const handleShareEmail = async () => {
     try {
       await shareReferralLink('email');
-      setShareSuccess('Opening email client...');
+      setShareSuccess(t('referral.openingEmail'));
       setTimeout(() => setShareSuccess(''), 3000);
     } catch (err) {
       console.error('Failed to share via email:', err);
     }
   };
 
-
-
   if (isLoading) {
     return (
       <Card className="referral-card">
         <Flex direction="column" alignItems="center" gap={tokens.space.medium}>
-          <Text>Loading referral information...</Text>
+          <Text>{t('referral.loading')}</Text>
         </Flex>
       </Card>
     );
@@ -77,10 +77,10 @@ const Referral: React.FC = () => {
       <Flex direction="column" gap={tokens.space.large}>
         <View>
           <Heading level={4} className="referral-title">
-            🎁 Invite Friends & Earn Free Months
+            {t('referral.title')}
           </Heading>
           <Text className="referral-subtitle">
-            Share your referral code with friends and get 3 additional months of free access for each successful referral!
+            {t('referral.subtitle')}
           </Text>
         </View>
 
@@ -99,10 +99,10 @@ const Referral: React.FC = () => {
         {/* Referral Code Section */}
         <Card className="referral-code-section">
           <Flex direction="column" gap={tokens.space.medium}>
-            <Heading level={5}>Your Referral Code</Heading>
+            <Heading level={5}>{t('referral.yourCode')}</Heading>
             <Flex alignItems="center" gap={tokens.space.small}>
               <Badge variation="info" size="large" className="referral-code-badge">
-                {referralCode || 'Loading...'}
+                {referralCode || t('common.loading')}
               </Badge>
               <Button
                 size="small"
@@ -110,11 +110,11 @@ const Referral: React.FC = () => {
                 onClick={handleCopyLink}
                 disabled={copied}
               >
-                {copied ? 'Copied!' : 'Copy'}
+                {copied ? t('referral.copied') : t('referral.copyCode')}
               </Button>
             </Flex>
             <Text fontSize="small" color="font.secondary">
-              Share this code with friends to earn free months
+              {t('referral.shareCodeHint')}
             </Text>
           </Flex>
         </Card>
@@ -122,7 +122,7 @@ const Referral: React.FC = () => {
         {/* Share Options */}
         <Card className="share-options-section">
           <Heading level={5} marginBottom={tokens.space.small}>
-            Share Your Referral Link
+            {t('referral.shareTitle')}
           </Heading>
           <Flex gap={tokens.space.small} wrap="wrap">
             <Button
@@ -130,21 +130,21 @@ const Referral: React.FC = () => {
               onClick={handleShareWhatsApp}
               className="share-button whatsapp"
             >
-              📱 WhatsApp
+              {t('referral.whatsapp')}
             </Button>
             <Button
               variation="primary"
               onClick={handleShareEmail}
               className="share-button email"
             >
-              📧 Email
+              {t('referral.email')}
             </Button>
             <Button
               onClick={handleCopyLink}
               disabled={copied}
               className="share-button copy"
             >
-              📋 Copy Link
+              {t('referral.copyLink')}
             </Button>
           </Flex>
         </Card>
@@ -152,7 +152,7 @@ const Referral: React.FC = () => {
         {/* Referral Statistics */}
         <Card className="stats-section">
           <Heading level={5} marginBottom={tokens.space.medium}>
-            Your Referral Stats
+            {t('referral.statsTitle')}
           </Heading>
           <Flex gap={tokens.space.large} wrap="wrap">
             <View className="stat-item">
@@ -160,7 +160,7 @@ const Referral: React.FC = () => {
                 {referralStats.successfulReferrals}
               </Text>
               <Text fontSize="small" color="font.secondary">
-                Successful Referrals
+                {t('referral.successfulReferrals')}
               </Text>
             </View>
             <View className="stat-item">
@@ -168,7 +168,7 @@ const Referral: React.FC = () => {
                 {referralStats.earnedMonths}
               </Text>
               <Text fontSize="small" color="font.secondary">
-                Months Earned
+                {t('referral.monthsEarned')}
               </Text>
             </View>
             <View className="stat-item">
@@ -176,7 +176,7 @@ const Referral: React.FC = () => {
                 {referralStats.totalReferrals}
               </Text>
               <Text fontSize="small" color="font.secondary">
-                Total Referrals
+                {t('referral.totalReferrals')}
               </Text>
             </View>
           </Flex>
@@ -185,24 +185,24 @@ const Referral: React.FC = () => {
         {/* How It Works */}
         <Card className="how-it-works-section">
           <Heading level={5} marginBottom={tokens.space.medium}>
-            How It Works
+            {t('referral.howItWorks')}
           </Heading>
           <Flex direction="column" gap={tokens.space.small}>
             <Flex gap={tokens.space.small} alignItems="flex-start">
               <Badge variation="success" size="small">1</Badge>
-              <Text>Share your referral code with friends via WhatsApp, email, or copy the link</Text>
+              <Text>{t('referral.step1')}</Text>
             </Flex>
             <Flex gap={tokens.space.small} alignItems="flex-start">
               <Badge variation="success" size="small">2</Badge>
-              <Text>When they sign up using your code, they get 3 months of free access</Text>
+              <Text>{t('referral.step2')}</Text>
             </Flex>
             <Flex gap={tokens.space.small} alignItems="flex-start">
               <Badge variation="success" size="small">3</Badge>
-              <Text>You earn 3 additional months of free access for each successful referral</Text>
+              <Text>{t('referral.step3')}</Text>
             </Flex>
             <Flex gap={tokens.space.small} alignItems="flex-start">
               <Badge variation="success" size="small">4</Badge>
-              <Text>Track your progress and earnings in the stats above</Text>
+              <Text>{t('referral.step4')}</Text>
             </Flex>
           </Flex>
         </Card>
@@ -213,9 +213,9 @@ const Referral: React.FC = () => {
         <Button
           onClick={refreshData}
           isLoading={isLoading}
-          loadingText="Refreshing..."
+          loadingText={t('referral.refreshing')}
         >
-          Refresh Stats
+          {t('referral.refreshStats')}
         </Button>
       </Flex>
     </Card>

@@ -2,9 +2,19 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUserPreferences } from '../../context/UserPreferencesContext';
 import { useNews } from '../../context/NewsContext';
-import { useActivityTracking } from '../../hooks/useActivityTracking';
+import { useSession } from '../../context/SessionContext';
 import WelcomeScreen from '../../components/WelcomeScreen/WelcomeScreen';
+import { useTranslation } from '../../i18n';
 import './NewsSocketClient.css';
+
+// Constants for filtering logic
+const COUNTRY_OPTIONS = [
+  { id: 'Q414', label: 'ARG', code:'ar' },
+  { id: 'Q155', label: 'BRA', code: 'br' },
+  { id: 'Q298', label: 'CHL', code: 'cl' },
+  { id: 'Q733', label: 'PAR', code: 'py' },
+  { id: 'Q77', label: 'URU', code: 'uy' },
+];
 
 function formatLocalTime(timestamp?: string | null): string {
   if (!timestamp) return '';
@@ -17,7 +27,8 @@ function NewsSocketClient() {
   const [isTabVisible, setIsTabVisible] = useState<boolean>(() => !document.hidden);
   const { preferences, isLoading, userProfileId } = useUserPreferences();
   const { articles, markArticleAsSeen } = useNews();
-  const { trackArticleClick } = useActivityTracking();
+  const { trackArticleClick } = useSession();
+  const { t } = useTranslation();
 
   // Handles opening the article link to a new tab.
   const handleArticleClick = async (event: React.MouseEvent<HTMLAnchorElement>, link: string, articleId: string, articleTitle: string) => {
@@ -68,6 +79,12 @@ function NewsSocketClient() {
     // --- Filtering Logic ---
     const hasIndustryFilters = preferences.industries.length > 0;
     const hasCountryFilters = preferences.countries.length > 0;
+    
+    // Check if "all countries" is selected (all available countries are selected)
+    const allCountriesSelected = preferences.countries.length === COUNTRY_OPTIONS.length;
+    
+    // When all countries are selected, treat it as having no country filters
+    const effectiveHasCountryFilters = hasCountryFilters && !allCountriesSelected;
 
     // Determine if the current article matches the selected filters.
     const industryMatches = !!(msg.industry && preferences.industries.includes(msg.industry));
@@ -76,7 +93,7 @@ function NewsSocketClient() {
 
     // Case 1: Filters are set for BOTH Industries and Countries.
     // An article must match one of each.
-    if (hasIndustryFilters && hasCountryFilters) {
+    if (hasIndustryFilters && effectiveHasCountryFilters) {
       return industryMatches && countryMatches;
     }
 
@@ -86,14 +103,14 @@ function NewsSocketClient() {
       return industryMatches;
     }
 
-    // Case 3: Filters are set for Countries ONLY.
+    // Case 3: Filters are set for Countries ONLY (but not "all countries").
     // An article only needs to match a country.
-    if (hasCountryFilters) {
+    if (effectiveHasCountryFilters) {
       return countryMatches;
     }
 
-    // Case 4: No filters are set.
-    // An existing user wants to see all news, so show everything.
+    // Case 4: No filters are set OR "all countries" is selected.
+    // Show all articles.
     return true;
   });
 
@@ -106,7 +123,7 @@ function NewsSocketClient() {
   return (
     <div className="news-feed">
       {isLoading ? (
-        <p className="no-news">Loading preferences...</p>
+        <p className="no-news">{t('common.loadingPreferences')}</p>
       
       ) : userProfileId === null ? (
         <WelcomeScreen />
@@ -114,8 +131,8 @@ function NewsSocketClient() {
       ) : filteredMessages.length === 0 ? (
         <p className="no-news">
           {articles.length > 0
-            ? "No articles match your current filters."
-            : "🕓 Waiting for news..."
+            ? t('common.noArticles')
+            : t('common.waitingForNews')
           }
         </p>
   

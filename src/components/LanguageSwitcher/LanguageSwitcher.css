@@ -1,0 +1,95 @@
+.language-switcher-compact {
+  position: relative;
+  display: inline-block;
+}
+
+.language-icon-button {
+  background: none;
+  border: var(--border-width) solid var(--color-border);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--border-radius-sm);
+  color: var(--color-text-primary);
+  background-color: var(--color-surface-secondary);
+  transition: all var(--transition-normal);
+  min-width: 40px;
+  text-align: center;
+}
+
+.language-icon-button:hover {
+  border-color: var(--color-text-tertiary);
+  background-color: var(--color-border-light);
+}
+
+.language-code {
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.5px;
+}
+
+.language-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: var(--space-xs);
+  background-color: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  min-width: 160px;
+  overflow: hidden;
+}
+
+.language-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  color: var(--color-text-primary);
+  transition: background-color var(--transition-normal);
+  text-align: left;
+}
+
+.language-option:hover {
+  background-color: var(--color-border-light);
+}
+
+.language-option.active {
+  background-color: #e0e7ff;
+  color: #3730a3;
+  font-weight: var(--font-weight-semibold);
+}
+
+.language-option.active:hover {
+  background-color: #c7d2fe;
+}
+
+.lang-flag {
+  font-size: var(--font-size-sm);
+  flex-shrink: 0;
+}
+
+.lang-name {
+  flex: 1;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .language-icon-button {
+    min-width: 35px;
+    padding: var(--space-xs);
+  }
+  
+  .language-dropdown {
+    min-width: 140px;
+  }
+} 

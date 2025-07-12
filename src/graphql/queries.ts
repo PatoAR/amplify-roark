@@ -206,34 +206,17 @@ export const getUserSubscription = /* GraphQL */ `query GetUserSubscription($id:
   APITypes.GetUserSubscriptionQueryVariables,
   APITypes.GetUserSubscriptionQuery
 >;
-export const listUserSubscriptions = /* GraphQL */ `query ListUserSubscriptions(
-  $filter: ModelUserSubscriptionFilterInput
-  $limit: Int
-  $nextToken: String
-) {
-  listUserSubscriptions(filter: $filter, limit: $limit, nextToken: $nextToken) {
-    items {
-      owner
-      subscriptionStatus
-      trialStartDate
-      trialEndDate
-      totalFreeMonths
-      earnedFreeMonths
-      referralCodeUsed
-      referrerId
-      id
-      createdAt
-      updatedAt
-      __typename
+export const listUserSubscriptions = /* GraphQL */ `
+  query ListUserSubscriptions($filter: ModelUserSubscriptionFilterInput) {
+    listUserSubscriptions(filter: $filter) {
+      items {
+        id
+        owner
+        trialEndDate
+      }
     }
-    nextToken
-    __typename
   }
-}
-` as GeneratedQuery<
-  APITypes.ListUserSubscriptionsQueryVariables,
-  APITypes.ListUserSubscriptionsQuery
->;
+`;
 export const getUserActivity = /* GraphQL */ `query GetUserActivity($id: ID!) {
   getUserActivity(id: $id) {
     owner

@@ -3,48 +3,13 @@ import { useAuthenticator } from '@aws-amplify/ui-react';
 import { generateClient } from 'aws-amplify/api';
 import { type Schema } from '../../../amplify/data/resource';
 import { useNews } from '../../context/NewsContext';
+import { listArticles } from '../../graphql/queries';
+import { onCreateArticle } from '../../graphql/subscriptions';
 
 // Constants
 const MAX_ARTICLES_IN_MEMORY = 100;
-const WEBSOCKET_LATENCY_BUFFER = 2000; // 2 seconds
-const SHADOW_POLLER_INTERVAL = 30000; // 30 seconds
-
-// GraphQL queries
-const listArticles = /* GraphQL */ `
-  query ListArticles {
-    listArticles {
-      items {
-        id
-        timestamp
-        source
-        title
-        industry
-        summary
-        link
-        companies
-        countries
-        language
-      }
-    }
-  }
-`;
-
-const onCreateArticle = /* GraphQL */ `
-  subscription OnCreateArticle {
-    onCreateArticle {
-      id
-      timestamp
-      source
-      title
-      industry
-      summary
-      link
-      companies
-      countries
-      language
-    }
-  }
-`;
+const WEBSOCKET_LATENCY_BUFFER = 5000; // 5 seconds
+const POLLER_INTERVAL = 60000; // 60 seconds
 
 interface Article {
   id: string;
@@ -121,6 +86,8 @@ export const NewsManager: React.FC = () => {
   const articlesRef = useRef<typeof articles>(articles);
   const subscriptionEstablishedRef = useRef<boolean>(false);
   const isInitializingRef = useRef<boolean>(false);
+  const appSyncHasReceivedArticlesRef = useRef<boolean>(false);
+  const previousUserIdRef = useRef<string | undefined>(undefined);
 
   // Keep articlesRef in sync with articles
   useEffect(() => {
@@ -129,29 +96,33 @@ export const NewsManager: React.FC = () => {
 
   // Cleanup function to prevent memory leaks
   const cleanupResources = useCallback(() => {
-    console.log('🧹 Cleaning up resources...');
-    
-    // Clear subscription
+    // Idempotent cleanup
+    let cleaned = false;
     if (unsubscribeRef.current) {
       unsubscribeRef.current();
       unsubscribeRef.current = null;
+      cleaned = true;
     }
-    
-    // Clear polling intervals
     if (pollingIntervalRef.current) {
       clearInterval(pollingIntervalRef.current);
       pollingIntervalRef.current = null;
+      cleaned = true;
     }
-    
     if (shadowPollerRef.current) {
       clearInterval(shadowPollerRef.current);
       shadowPollerRef.current = null;
+      cleaned = true;
     }
-    
     // Reset flags
     shadowPollerStoppedRef.current = false;
     articleIdsFromSubscriptionRef.current.clear();
     subscriptionEstablishedRef.current = false;
+    appSyncHasReceivedArticlesRef.current = false;
+    if (cleaned) {
+      console.log('[NewsManager] 🧹 Cleaning up resources (unsubscribed, cleared intervals, reset flags)');
+    } else {
+      console.log('[NewsManager] 🧹 Cleanup called, nothing to clean');
+    }
   }, []);
 
   // Memory management: limit articles in memory while preserving seen tracking
@@ -188,14 +159,17 @@ export const NewsManager: React.FC = () => {
 
   // Fetch initial articles
   const fetchInitialArticles = useCallback(async () => {
-    if (!isComponentMountedRef.current || isInitialized) return;
+    if (!isComponentMountedRef.current || isInitialized) {
+      console.log('[NewsManager] Skipping fetchInitialArticles: isComponentMountedRef.current:', isComponentMountedRef.current, 'isInitialized:', isInitialized);
+      return;
+    }
     
-    console.log('📰 Fetching initial articles to establish a baseline...');
+    console.log('[NewsManager] 📰 Fetching initial articles to establish a baseline...');
     try {
       const client = getClient();
-
       const result = await client.graphql({ query: listArticles });
       const articles: Article[] = (result as any).data?.listArticles?.items || [];
+      console.log('[NewsManager] Initial articles fetched', articles.length);
       
       const formatted = articles.map(a => ({
         id: a.id,
@@ -222,29 +196,32 @@ export const NewsManager: React.FC = () => {
       const managedArticles = manageMemory(sorted);
       setArticles(managedArticles);
       setIsInitialized(true);
-      console.log(`📰 Loaded ${formatted.length} initial articles (sorted by timestamp)`);
+      console.log(`[NewsManager] 📰 Loaded ${formatted.length} initial articles (sorted by timestamp)`);
     } catch (error) {
-      console.error('Failed to fetch initial articles:', error);
+      console.error('[NewsManager] Failed to fetch initial articles:', error);
     }
   }, [isInitialized, setArticles, setIsInitialized, manageMemory, getClient]);
 
   // Start polling for new articles
   const startPolling = useCallback(() => {
-    if (pollingIntervalRef.current) return;
-
+    if (pollingIntervalRef.current) {
+      console.log('[NewsManager] Polling already running, skipping startPolling');
+      return;
+    }
+    console.log('[NewsManager] 🟡 Starting polling for new articles...');
     pollingIntervalRef.current = setInterval(async () => {
-      if (!isComponentMountedRef.current) return;
-
+      if (!isComponentMountedRef.current) {
+        console.log('[NewsManager] Polling interval fired but component is unmounted');
+        return;
+      }
       const fetchArticles = async () => {
         try {
           const client = getClient();
           const result = await client.graphql({ query: listArticles });
           const articles: Article[] = (result as any).data?.listArticles?.items || [];
-          
           const newArticles = articles.filter(
             a => !articlesRef.current.find(existing => existing.id === a.id) && !isArticleSeen(a.id)
           );
-
           if (newArticles.length > 0) {
             const formatted = newArticles.map(a => ({
               id: a.id,
@@ -259,7 +236,6 @@ export const NewsManager: React.FC = () => {
               language: a.language ?? 'N/A',
               seen: false,
             }));
-
             // Sort new articles by timestamp in reverse chronological order
             const now = new Date().getTime();
             const sorted = formatted.sort((a, b) => {
@@ -267,37 +243,42 @@ export const NewsManager: React.FC = () => {
               const timeB = b.timestamp ? new Date(b.timestamp).getTime() : now;
               return timeB - timeA; // Reverse chronological order
             });
-
             sorted.forEach(article => addArticle(article));
-            console.log(`📰 Polling: Added ${formatted.length} new articles (sorted by timestamp)`);
+            console.log(`[NewsManager] 📰 Polling: Added ${formatted.length} new articles (sorted by timestamp):`, formatted.map(a => a.id));
+          } else {
+            console.log('[NewsManager] Polling: No new articles found');
           }
         } catch (error) {
-          console.error('Polling error:', error);
+          console.error('[NewsManager] Polling error:', error);
         }
       };
-
       fetchArticles();
-    }, 30000); // Poll every 30 seconds
+    }, POLLER_INTERVAL);
   }, [addArticle, isArticleSeen, getClient]);
 
   // Try to establish AppSync subscription
   const trySubscribe = useCallback(async () => {
-    if (unsubscribeRef.current || subscriptionEstablishedRef.current) return;
-
+    if (unsubscribeRef.current || subscriptionEstablishedRef.current) {
+      console.log('[NewsManager] Subscription already established, skipping trySubscribe');
+      return;
+    }
     try {
-      console.log('🔁 Attempting to establish AppSync subscription...');
-      subscriptionEstablishedRef.current = true;
-      
+      console.log('[NewsManager] 🔁 Attempting to establish AppSync subscription...');
       const client = getClient();
-
       const subscription = (client.graphql({
         query: onCreateArticle,
       }) as any).subscribe({
         next: ({ data }: { data: any }) => {
           if (!isComponentMountedRef.current) return;
-          
           const newArticle = data.onCreateArticle;
           if (newArticle && !isArticleSeen(newArticle.id)) {
+            // Mark subscription as established only when we receive the first article
+            if (!subscriptionEstablishedRef.current) {
+              subscriptionEstablishedRef.current = true;
+              console.log('[NewsManager] ✅ AppSync subscription confirmed working (first article received)');
+            }
+            // Mark that AppSync has received at least one article
+            appSyncHasReceivedArticlesRef.current = true;
             const formatted: ArticleForState = {
               id: newArticle.id,
               timestamp: newArticle.timestamp,
@@ -311,80 +292,82 @@ export const NewsManager: React.FC = () => {
               language: newArticle.language ?? 'N/A',
               seen: false,
             };
-
             articleIdsFromSubscriptionRef.current.add(newArticle.id);
             addArticle(formatted);
-            console.log('🟢 AppSync live: receiving news...');
+            console.log('[NewsManager] 🟢 AppSync live: receiving news (via WebSocket):', newArticle.id);
+          } else {
+            console.log('[NewsManager] AppSync received duplicate or already seen article:', newArticle?.id);
           }
         },
         error: (error: any) => {
-          console.error('Subscription error:', error);
+          console.error('[NewsManager] Subscription error:', error);
           subscriptionEstablishedRef.current = false;
           if (isComponentMountedRef.current) {
             startPolling();
           }
         },
       });
-
       unsubscribeRef.current = () => subscription.unsubscribe();
-
       // Start shadow poller to detect missed articles
       if (!shadowPollerRef.current && !shadowPollerStoppedRef.current) {
+        console.log('[NewsManager] 🟣 Starting shadow poller to verify WebSocket reliability...');
         shadowPollerRef.current = setInterval(async () => {
-          if (!isComponentMountedRef.current || shadowPollerStoppedRef.current) return;
-          
+          if (!isComponentMountedRef.current || shadowPollerStoppedRef.current) {
+            console.log('[NewsManager] Shadow poller fired but component is unmounted or stopped');
+            return;
+          }
           try {
-            // Fetch the latest articles from the server (the ground truth)
             const client = getClient();
             const result = await client.graphql({ query: listArticles });
             const articlesFromServer: Article[] = (result as any).data?.listArticles?.items || [];
-           
-            // Identify new articles that are not yet known
-            const newServerArticles = articlesFromServer.filter(
-              a => !articlesRef.current.find(m => m.id === a.id) && !isArticleSeen(a.id)
-            );
-
-            // If we have recent articles, check if the latest one came via WebSocket.
-            if (newServerArticles.length > 0) {
-              // Wait a brief moment to allow any in-flight WebSocket messages to arrive
-              setTimeout(() => {
-                if (!isComponentMountedRef.current) return;
-                
-                // Find if any new server article was NOT received by the subscription
-                const missedArticle = newServerArticles.find(
-                  a => !articleIdsFromSubscriptionRef.current.has(a.id)
-                );
-                if (missedArticle) {
-                  console.warn(`⚠️ WebSocket missed article ${missedArticle.id}. Switching to polling.`);
-                  if (unsubscribeRef.current) {
-                    unsubscribeRef.current();
-                    unsubscribeRef.current = null;
-                  }
-                  subscriptionEstablishedRef.current = false;
-                  startPolling();   // Start the reliable polling                  
+            // Wait for WebSocket latency buffer to allow AppSync to deliver any pending articles
+            setTimeout(() => {
+              if (!isComponentMountedRef.current || shadowPollerStoppedRef.current) return;
+              
+              // Check for articles in database that are NOT in local state (AppSync missed them)
+              const missedArticles = articlesFromServer.filter(
+                serverArticle => !articlesRef.current.find(localArticle => localArticle.id === serverArticle.id) && !isArticleSeen(serverArticle.id)
+              );
+              
+              if (missedArticles.length > 0) {
+                console.log('[NewsManager] ⚠️ Shadow poller found articles missed by AppSync:', missedArticles.map(a => a.id));
+                console.log('[NewsManager] Switching from AppSync to polling due to missed articles');
+                // Stop AppSync subscription
+                if (unsubscribeRef.current) {
+                  unsubscribeRef.current();
+                  unsubscribeRef.current = null;
+                }
+                subscriptionEstablishedRef.current = false;
+                // Start polling
+                startPolling();
+                // Stop shadow poller
+                shadowPollerStoppedRef.current = true;
+                if (shadowPollerRef.current) {
+                  clearInterval(shadowPollerRef.current);
+                  shadowPollerRef.current = null;
+                }
+              } else {
+                // Only stop shadow poller if AppSync has received at least one article (proving it works)
+                if (appSyncHasReceivedArticlesRef.current) {
+                  console.log('[NewsManager] ✅ Shadow poller confirms AppSync is reliable - no articles missed and AppSync has proven itself');
+                  // Stop shadow poller, keep AppSync
                   shadowPollerStoppedRef.current = true;
                   if (shadowPollerRef.current) {
                     clearInterval(shadowPollerRef.current);
                     shadowPollerRef.current = null;
                   }
                 } else {
-                  // If all new articles were received via WebSocket, it's working reliably.
-                  console.log('✅ WebSocket appears reliable. Stopping shadow poller.');
-                  shadowPollerStoppedRef.current = true;
-                  if (shadowPollerRef.current) {
-                    clearInterval(shadowPollerRef.current);
-                    shadowPollerRef.current = null;
-                  }
+                  console.log('[NewsManager] Shadow poller: No missed articles found, but AppSync has not received any articles yet - continuing to monitor');
                 }
-              }, WEBSOCKET_LATENCY_BUFFER);
-            }
+              }
+            }, WEBSOCKET_LATENCY_BUFFER);
           } catch (err) {
-            console.error('Shadow poller error:', err);
+            console.error('[NewsManager] Shadow poller error:', err);
           }
-        }, SHADOW_POLLER_INTERVAL);
+        }, POLLER_INTERVAL);
       }
     } catch (err) {
-      console.error('Subscription setup failed, falling back to polling:', err);
+      console.error('[NewsManager] Subscription setup failed, falling back to polling:', err);
       subscriptionEstablishedRef.current = false;
       if (isComponentMountedRef.current) {
         startPolling();
@@ -394,30 +377,45 @@ export const NewsManager: React.FC = () => {
 
   // Initialize when user changes
   useEffect(() => {
-    if (isInitializingRef.current) return;
+    console.log('[NewsManager] useEffect triggered - user?.userId:', user?.userId, 'previousUserId:', previousUserIdRef.current);
     
-    // Don't initialize if user is logging out
-    if (!user?.userId) return;
+    if (isInitializingRef.current) {
+      console.log('[NewsManager] Initialization already in progress, skipping');
+      return;
+    }
+    if (!user?.userId) {
+      console.log('[NewsManager] No user detected, skipping initialization');
+      return;
+    }
     
+    // Check if user actually changed
+    if (previousUserIdRef.current === user.userId) {
+      console.log('[NewsManager] User ID unchanged, skipping re-initialization');
+      return;
+    }
+    
+    previousUserIdRef.current = user.userId;
     isComponentMountedRef.current = true;
     isInitializingRef.current = true;
     cleanupResources();
-
+    console.log('[NewsManager] Initializing for user:', user.userId);
     const initialize = async () => {
       await fetchInitialArticles();
       if (isComponentMountedRef.current) {
         trySubscribe();
       }
     };
-
     initialize();
-
     return () => {
       isComponentMountedRef.current = false;
       isInitializingRef.current = false;
+      previousUserIdRef.current = undefined;
+      // Reset initialization state for React Strict Mode remounts
+      setIsInitialized(false);
       cleanupResources();
+      console.log('[NewsManager] Component unmounted or user changed, cleanup complete');
     };
-  }, [user?.userId, fetchInitialArticles, trySubscribe, cleanupResources]); // Only depend on user ID, not the callback functions
+  }, [user?.userId]); // Only depend on user ID, not the callback functions
 
   // This component doesn't render anything, it just manages the news state
   return null;

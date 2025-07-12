@@ -1,5 +1,6 @@
 import { defineAuth } from '@aws-amplify/backend';
 import { customMessage } from "./custom-message/resource";
+import { postConfirmation } from "./post-confirmation/resource";
 
 /**
  * Define and configure your auth resource
@@ -11,5 +12,6 @@ export const auth = defineAuth({
   },
   triggers: {
     customMessage, // Custom message function as a trigger
+    postConfirmation, // Post-confirmation trigger for referral processing
   }
 });

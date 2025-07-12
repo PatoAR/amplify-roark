@@ -2,54 +2,10 @@
 Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fetches, processes and stores news articles in dynambodb. The articles are distributed to varios channels (whatsapp, telegram) and to this webapp via AppSync subscriptions or long-polling.
 
 ## ToDo's
-- Button for "all" news
-- Internationalization
-- Modified display text
-- Implement "Search Bar" functionality
-- Lucide Icons
-
-- Custom domain
-- Pay suscription
 - Create interface to deliver different content  - publicity, financials, etc - fix on top, colors, etc.
-
-## 🎁 Referral System
-
-The referral system is now fully implemented! Users can:
-
-- **Generate unique referral codes** - Each user gets a unique 8-character code
-- **Share via multiple platforms** - WhatsApp, Email, or copy link
-- **Track statistics** - See successful referrals and earned months
-- **Earn free months** - Get 3 additional months for each successful referral
-- **URL-based signup** - Users can sign up using referral links
-
-### How to Use
-
-1. **For Referrers**: Visit Settings → "🎁 Invite Friends" tab
-2. **For New Users**: Use referral code during signup or click referral links
-3. **Business Logic**: 3 months initial + 3 months per referral (unlimited)
-
-See `REFERRAL_SYSTEM.md` for complete technical documentation.
-
-## 🎨 Design System
-
-The application now features a **unified minimalistic design system** that provides:
-
-- **Consistent visual hierarchy** with standardized typography and spacing
-- **Clean, ascetic interfaces** with generous whitespace and subtle shadows
-- **Accessibility-first approach** with proper contrast ratios and focus states
-- **Mobile-responsive design** that works seamlessly across all devices
-- **Smooth interactions** with purposeful animations and transitions
-
-### Key Features
-
-- **CSS Custom Properties** for consistent theming
-- **Modular component architecture** for reusability
-- **Performance-optimized animations** (60fps)
-- **Accessibility compliance** with WCAG guidelines
-- **Touch-friendly mobile experience**
-
-See `UI_UX_GUIDELINES.md` for complete design system documentation.
-
+- Modified display text
+- Open AWS account on the name of Finu, transfer domain 
+- Pay suscription
 
 ## CLI
 https://docs.amplify.aws/react/reference/cli-commands/
@@ -82,3 +38,7 @@ howard >
 roark > calculates text to display
     if any of user country selected in country codes list with index -1, display first 200 characters
 
+
+# GoDaddy DNS
+ns43.domaincontrol.com
+ns44.domaincontrol.com

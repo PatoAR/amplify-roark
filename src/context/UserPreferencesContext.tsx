@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback, ReactNode,
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { generateClient } from 'aws-amplify/api';
 import { type Schema } from '../../amplify/data/resource';
-import { useActivityTracking } from '../hooks/useActivityTracking';
+import { useSession } from './SessionContext';
 
 interface UserPreferences {
   industries: string[];
@@ -25,7 +25,7 @@ export const UserPreferencesProvider = ({ children }: { children: ReactNode }) =
   const [preferences, setPreferences] = useState<UserPreferences>({ industries: [], countries: [] });
   const [userProfileId, setUserProfileId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { trackPreferenceUpdate } = useActivityTracking();
+  const { trackPreferenceUpdate } = useSession();
   const clientRef = useRef<ReturnType<typeof generateClient<Schema>> | null>(null);
 
   // Initialize client when needed

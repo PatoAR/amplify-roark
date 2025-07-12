@@ -1,17 +1,18 @@
-import { Card, Flex, Heading, Text, Button } from '@aws-amplify/ui-react';
+import React from 'react';
+import { useTranslation } from '../i18n';
+import { Button, Card, Flex, Heading, Text } from '@aws-amplify/ui-react';
+import '@aws-amplify/ui-react/styles.css';
 import { signOut } from 'aws-amplify/auth';
 
 interface AuthErrorFallbackProps {
-  error?: Error;
-  onRetry?: () => void;
-  onLogout?: () => void;
+  error: Error;
+  onRetry: () => void;
+  onLogout: () => void;
 }
 
-export const AuthErrorFallback: React.FC<AuthErrorFallbackProps> = ({ 
-  error, 
-  onRetry, 
-  onLogout 
-}) => {
+export const AuthErrorFallback: React.FC<AuthErrorFallbackProps> = ({ error, onRetry, onLogout }) => {
+  const { t } = useTranslation();
+
   const handleRetry = () => {
     if (onRetry) {
       onRetry();
@@ -48,16 +49,16 @@ export const AuthErrorFallback: React.FC<AuthErrorFallbackProps> = ({
       <Card variation="elevated" style={{ maxWidth: '500px', width: '100%' }}>
         <Flex direction="column" gap="large" alignItems="center">
           <Heading level={3} textAlign="center">
-            Authentication Error
+            {t('authError.title')}
           </Heading>
           
           <Text textAlign="center">
-            {error?.message || 'There was an issue with your authentication. Please try again or log out and sign back in.'}
+            {error?.message || t('authError.message')}
           </Text>
 
           {error && (
             <details style={{ width: '100%', fontSize: '12px', color: '#666' }}>
-              <summary>Technical Details</summary>
+              <summary>{t('authError.technicalDetails')}</summary>
               <pre style={{ 
                 background: '#f0f0f0', 
                 padding: '10px', 
@@ -72,10 +73,10 @@ export const AuthErrorFallback: React.FC<AuthErrorFallbackProps> = ({
 
           <Flex gap="medium" justifyContent="center">
             <Button onClick={handleRetry} variation="primary">
-              Try Again
+              {t('authError.tryAgain')}
             </Button>
             <Button onClick={handleLogout} variation="warning">
-              Logout
+              {t('authError.logout')}
             </Button>
           </Flex>
         </Flex>

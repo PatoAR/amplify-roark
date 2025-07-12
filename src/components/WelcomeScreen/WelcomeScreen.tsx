@@ -1,6 +1,9 @@
+import { useTranslation } from '../../i18n';
 import './WelcomeScreen.css';
 
 const WelcomeScreen = () => {
+  const { t } = useTranslation();
+
   const handleOpenFiltersModal = () => {
     window.dispatchEvent(new CustomEvent('open-filters-modal'));
   };
@@ -8,15 +11,15 @@ const WelcomeScreen = () => {
   return (
     <div className="welcome-box">
       <div className="welcome-icon">👋</div>
-      <h1 className="welcome-title">Welcome to Perkins News</h1>
+      <h1 className="welcome-title">{t('welcome.title')}</h1>
       <p className="welcome-subtitle">
-        To get started, personalize your news feed by selecting the industries and countries that matter most to you.
+        {t('welcome.subtitle')}
       </p>
       <button className="welcome-button" onClick={handleOpenFiltersModal}>
-        Personalize Your Feed
+        {t('welcome.button')}
       </button>
       <p className="welcome-hint">
-        You can always change these settings later from the main menu.
+        {t('welcome.hint')}
       </p>
     </div>
   );

@@ -8,13 +8,12 @@ import outputs from '../amplify_outputs.json';
 import { UserPreferencesProvider } from './context/UserPreferencesContext';
 import { SessionProvider } from './context/SessionContext';
 import { NewsProvider } from './context/NewsContext';
+import { LanguageProvider } from './context/LanguageContext';
 import '@aws-amplify/ui-react/styles.css';
 import "./index.css";
 import perkinsLogo from './assets/BaseLogo_v1.png'
 
-import { I18n } from 'aws-amplify/utils';
-import { translations } from '@aws-amplify/ui-react';
-I18n.putVocabularies(translations);
+import './i18n'; // Initialize our custom translations
 
 // Configure Amplify with the correct format
 Amplify.configure({
@@ -60,13 +59,15 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <Authenticator components={customComponents}>
       <BrowserRouter>
-        <SessionProvider>
-          <NewsProvider>
-            <UserPreferencesProvider>
-              <App />
-            </UserPreferencesProvider>
-          </NewsProvider>
-        </SessionProvider>
+        <LanguageProvider>
+          <SessionProvider>
+            <NewsProvider>
+              <UserPreferencesProvider>
+                <App />
+              </UserPreferencesProvider>
+            </NewsProvider>
+          </SessionProvider>
+        </LanguageProvider>
       </BrowserRouter>
     </Authenticator>
   </React.StrictMode>

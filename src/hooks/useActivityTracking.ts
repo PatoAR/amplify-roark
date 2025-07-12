@@ -16,10 +16,14 @@ export const useActivityTracking = () => {
 
   // Initialize client when needed
   const getClient = useCallback(() => {
-    if (!clientRef.current) {
-      clientRef.current = generateClient<Schema>();
+    try {
+      if (!clientRef.current) {
+        clientRef.current = generateClient<Schema>();
+      }
+      return clientRef.current;
+    } catch (e) {
+      throw new Error('Amplify client could not be initialized. Ensure Amplify.configure() is called before using any Amplify APIs.');
     }
-    return clientRef.current;
   }, []);
 
   // Generate unique session ID
@@ -333,7 +337,8 @@ export const useActivityTracking = () => {
 
   // Track page view
   const trackPageView = useCallback(async (pageUrl?: string) => {
-    if (!sessionRef.current || !user?.userId) return;
+    // Only track if session is active and user is authenticated
+    if (!isTracking || !sessionRef.current || !user?.userId) return;
 
     activityRef.current.pageViews++;
     
@@ -344,7 +349,7 @@ export const useActivityTracking = () => {
       pageUrl: pageUrl || window.location.pathname,
       eventData,
     });
-  }, [trackEvent, user?.userId]);
+  }, [trackEvent, user?.userId, isTracking]);
 
   // Track article click
   const trackArticleClick = useCallback(async (articleId: string, articleTitle: string) => {

@@ -5,6 +5,7 @@ import { Card, Flex, Heading, Text, TextField, PasswordField, Button, Alert, Vie
 import { useReferral } from '../../hooks/useReferral';
 import { UserAttributes, SignUpOptions, validateEmail, validatePassword, validateUserAttributes } from '../../types/auth';
 import { isApiError, AuthError, ErrorContext } from '../../types/errors';
+import { useTranslation } from '../../i18n';
 import './CustomSignUp.css';
 
 interface CustomSignUpProps {
@@ -13,6 +14,7 @@ interface CustomSignUpProps {
 
 const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
   const { tokens } = useTheme();
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const { validateReferralCode } = useReferral();
   const [email, setEmail] = useState('');
@@ -39,12 +41,12 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
       const result = await validateReferralCode(code);
       setReferralValid(result.valid);
       setReferralMessage(result.valid 
-        ? '✅ Valid referral code! You\'ll get 3 months of free access.'
-        : '❌ Invalid referral code. You can still sign up for 3 months free.'
+        ? t('signup.validReferralCode')
+        : t('signup.invalidReferralCode')
       );
     } catch (err) {
       setReferralValid(false);
-      setReferralMessage('❌ Error validating referral code.');
+      setReferralMessage(t('signup.errorValidatingCode'));
     }
   };
 
@@ -55,12 +57,12 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
         const result = await validateReferralCode(value);
         setReferralValid(result.valid);
         setReferralMessage(result.valid 
-          ? '✅ Valid referral code! You\'ll get 3 months of free access.'
-          : '❌ Invalid referral code. You can still sign up for 3 months free.'
+          ? t('signup.validReferralCode')
+          : t('signup.invalidReferralCode')
         );
       } catch (err) {
         setReferralValid(false);
-        setReferralMessage('❌ Error validating referral code.');
+        setReferralMessage(t('signup.errorValidatingCode'));
       }
     } else {
       setReferralValid(null);
@@ -82,20 +84,20 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
 
     // Validate email
     if (!validateEmail(email)) {
-      setError('Please enter a valid email address');
+      setError(t('signup.validEmail'));
       return;
     }
 
     // Validate password
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.isValid) {
-      setError(`Password requirements: ${passwordValidation.errors.join(', ')}`);
+      setError(`${t('password.requirements')} ${passwordValidation.errors.join(', ')}`);
       return;
     }
 
     // Validate password confirmation
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('signup.passwordsDontMatch'));
       return;
     }
 
@@ -121,7 +123,7 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
       if (!validateUserAttributes(userAttributes)) {
         const errorContext = createErrorContext('validateUserAttributes');
         const authError: AuthError = {
-          message: 'Invalid user attributes',
+          message: t('signup.invalidUserAttributes'),
           code: 'INVALID_EMAIL',
           details: errorContext,
         };
@@ -138,7 +140,7 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
 
       await signUp(signUpOptions);
 
-      setSuccess('Account created successfully! Please check your email to verify your account.');
+      setSuccess(t('signup.accountCreated'));
       onSuccess?.();
     } catch (err: unknown) {
       const errorContext = createErrorContext('signUp');
@@ -147,13 +149,13 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
       
       if (isApiError(err)) {
         authError = {
-          message: err.message || 'An error occurred during sign up',
+          message: err.message || t('signup.errorDuringSignup'),
           code: 'INVALID_CREDENTIALS',
           details: errorContext,
         };
       } else {
         authError = {
-          message: 'An unexpected error occurred during sign up',
+          message: t('signup.unexpectedError'),
           code: 'INVALID_CREDENTIALS',
           details: errorContext,
         };
@@ -172,10 +174,10 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
         <Flex direction="column" gap={tokens.space.large}>
           <View textAlign="center">
             <Heading level={3} className="signup-title">
-              Join Perkins News Service
+              {t('signup.title')}
             </Heading>
             <Text className="signup-subtitle">
-              Get 3 months of free access to personalized business news
+              {t('signup.subtitle')}
             </Text>
           </View>
 
@@ -194,38 +196,38 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
           <form onSubmit={handleSubmit}>
             <Flex direction="column" gap={tokens.space.medium}>
               <TextField
-                label="Email"
+                label={t('signup.email')}
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
+                placeholder={t('signup.enterEmail')}
                 isRequired
                 autoComplete="email"
               />
 
               <PasswordField
-                label="Password"
+                label={t('signup.password')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Create a password"
+                placeholder={t('signup.createPassword')}
                 isRequired
                 autoComplete="new-password"
               />
 
               <PasswordField
-                label="Confirm Password"
+                label={t('signup.confirmPassword')}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm your password"
+                placeholder={t('signup.confirmPasswordPlaceholder')}
                 isRequired
                 autoComplete="new-password"
               />
 
               <TextField
-                label="Referral Code (Optional)"
+                label={t('signup.referralCode')}
                 value={referralCode}
                 onChange={(e) => handleReferralCodeChange(e.target.value)}
-                placeholder="Enter referral code if you have one"
+                placeholder={t('signup.enterReferralCode')}
                 autoComplete="off"
               />
 
@@ -242,17 +244,17 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
                 type="submit"
                 variation="primary"
                 isLoading={isLoading}
-                loadingText="Creating account..."
+                loadingText={t('signup.creatingAccount')}
                 isFullWidth
               >
-                Create Account
+                {t('signup.createAccount')}
               </Button>
             </Flex>
           </form>
 
           <View textAlign="center">
             <Text fontSize="small" color="font.secondary">
-              By creating an account, you agree to our Terms of Service and Privacy Policy
+              {t('signup.termsAgreement')}
             </Text>
           </View>
         </Flex>

@@ -2,7 +2,9 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { generateClient } from 'aws-amplify/api';
 import { type Schema } from '../../amplify/data/resource';
-import { useActivityTracking } from './useActivityTracking';
+import { useSession } from '../context/SessionContext';
+import { listReferralCodes } from '../graphql/queries';
+import { useTranslation } from '../i18n';
 
 interface ReferralStats {
   totalReferrals: number;
@@ -12,6 +14,7 @@ interface ReferralStats {
 
 export const useReferral = () => {
   const { user } = useAuthenticator();
+  const { t } = useTranslation();
   const [referralCode, setReferralCode] = useState<string>('');
   const [referralStats, setReferralStats] = useState<ReferralStats>({
     totalReferrals: 0,
@@ -20,7 +23,7 @@ export const useReferral = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
-  const { trackReferralActivity } = useActivityTracking();
+  const { trackReferralActivity } = useSession();
   const clientRef = useRef<ReturnType<typeof generateClient<Schema>> | null>(null);
 
   // Initialize client when needed
@@ -46,13 +49,13 @@ export const useReferral = () => {
       setError('');
 
       const client = getClient();
+      const result = await client.graphql({
+        query: listReferralCodes,
+        variables: { filter: { owner: { eq: user.userId } } }
+      }) as any;
+      const referralCodes = result.data?.listReferralCodes?.items || [];
 
-      // Get user's referral code
-      const { data: referralCodes } = await client.models.ReferralCode.list({
-        filter: { owner: { eq: user.userId } }
-      });
-
-      if (referralCodes && referralCodes.length > 0) {
+      if (referralCodes.length > 0) {
         const code = referralCodes[0];
         setReferralCode(code.code);
         setReferralStats({
@@ -64,7 +67,6 @@ export const useReferral = () => {
         // Generate new referral code if none exists
         await generateReferralCode();
       }
-      
       // Track referral code generation
       trackReferralActivity('generated', referralCode);
     } catch (err) {
@@ -81,27 +83,7 @@ export const useReferral = () => {
     try {
       setIsLoading(true);
       setError('');
-
-      const client = getClient();
-
-      // Generate a unique 8-character code
-      const code = generateUniqueCode();
-      
-      // Create the referral code directly in the database
-      const result = await client.models.ReferralCode.create({
-        owner: user.userId,
-        code,
-        isActive: true,
-        totalReferrals: 0,
-        successfulReferrals: 0,
-      });
-
-      if (result.data) {
-        setReferralCode(code);
-        await loadReferralData(); // Reload to get updated stats
-      } else {
-        setError('Failed to generate referral code');
-      }
+      await loadReferralData();
     } catch (err) {
       console.error('Error generating referral code:', err);
       setError('Failed to generate referral code');
@@ -110,28 +92,15 @@ export const useReferral = () => {
     }
   };
 
-  // Helper function to generate unique code
-  const generateUniqueCode = (): string => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = '';
-    for (let i = 0; i < 8; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-  };
-
   const validateReferralCode = async (code: string): Promise<{ valid: boolean; referrerId?: string }> => {
     try {
       const client = getClient();
-
-      const { data: referralCodes } = await client.models.ReferralCode.list({
-        filter: { 
-          code: { eq: code },
-          isActive: { eq: true }
-        }
-      });
-      
-      if (referralCodes && referralCodes.length > 0) {
+      const result = await client.graphql({
+        query: listReferralCodes,
+        variables: { filter: { code: { eq: code }, isActive: { eq: true } } }
+      }) as any;
+      const referralCodes = result.data?.listReferralCodes?.items || [];
+      if (referralCodes.length > 0) {
         const referralCode = referralCodes[0];
         return {
           valid: true,
@@ -153,32 +122,31 @@ export const useReferral = () => {
     }
 
     const baseUrl = window.location.origin;
-    const referralUrl = `${baseUrl}/signup?ref=${referralCode}`;
+    const referralUrl = `${baseUrl}/?ref=${referralCode}`;
 
     try {
       switch (platform) {
         case 'whatsapp':
           const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(
-            `Join Perkins News Service and get 3 months free! Use my referral code: ${referralCode}\n\n${referralUrl}`
+            t('referral.shareMessage').replace('{code}', referralCode) + `\n\n${referralUrl}`
           )}`;
           window.open(whatsappUrl, '_blank');
           break;
 
         case 'email':
-          const emailSubject = encodeURIComponent('Join Perkins News Service - 3 Months Free!');
+          const emailSubject = encodeURIComponent(t('referral.emailSubject'));
           const emailBody = encodeURIComponent(
-            `Hi!\n\nI'm using Perkins News Service and thought you might be interested. It's a great way to stay updated with business news.\n\nYou can get 3 months of free access using my referral code: ${referralCode}\n\nSign up here: ${referralUrl}\n\nBest regards!`
+            t('referral.emailBody').replace('{code}', referralCode).replace('{url}', referralUrl)
           );
           window.location.href = `mailto:?subject=${emailSubject}&body=${emailBody}`;
           break;
 
         case 'copy':
           await navigator.clipboard.writeText(
-            `Join Perkins News Service and get 3 months free! Use my referral code: ${referralCode}\n\n${referralUrl}`
+            t('referral.shareMessage').replace('{code}', referralCode) + `\n\n${referralUrl}`
           );
           break;
       }
-      
       // Track referral sharing
       trackReferralActivity('shared', referralCode);
     } catch (err) {
@@ -190,7 +158,7 @@ export const useReferral = () => {
   const getReferralUrl = (): string => {
     if (!referralCode) return '';
     const baseUrl = window.location.origin;
-    return `${baseUrl}/signup?ref=${referralCode}`;
+    return `${baseUrl}/?ref=${referralCode}`;
   };
 
   return {

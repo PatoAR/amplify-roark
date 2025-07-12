@@ -163,11 +163,48 @@
   gap: var(--space-sm);
 }
 
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+}
+
 .section-title {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   margin: 0;
+}
+
+.all-button {
+  background: none;
+  border: var(--border-width) solid var(--color-border);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: 9999px;
+  color: var(--color-text-secondary);
+  background-color: var(--color-surface-secondary);
+  transition: all var(--transition-normal);
+  font-weight: var(--font-weight-medium);
+}
+
+.all-button:hover {
+  border-color: var(--color-text-tertiary);
+  background-color: var(--color-border-light);
+}
+
+.all-button[data-checked='true'] {
+  background-color: #e0e7ff;
+  border-color: #818cf8;
+  color: #3730a3;
+  font-weight: var(--font-weight-semibold);
+}
+
+.all-button[data-checked='true']:hover {
+  background-color: #c7d2fe;
 }
 
 .modal-form-footer {
@@ -195,6 +232,10 @@
   color: var(--color-text-secondary);
   background-color: var(--color-surface-secondary);
   transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
 }
 
 .tag-button:hover {
@@ -212,6 +253,17 @@
 
 .tag-button[data-checked='true']:hover {
     background-color: #c7d2fe;
+}
+
+.tag-button[data-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.tag-button[data-disabled='true']:hover {
+  border-color: var(--color-border);
+  background-color: var(--color-surface-secondary);
 }
 
 /* === Messages Legend Styles === */

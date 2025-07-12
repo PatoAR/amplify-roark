@@ -7,6 +7,11 @@ interface SessionContextType {
   authStatus: string;
   logout: () => Promise<void>;
   trackPageViewIfActive: () => void;
+  // Add activity tracking functions
+  trackPreferenceUpdate: (preferenceType: string, preferenceValue: string | string[] | boolean | number) => void;
+  trackReferralActivity: (action: 'generated' | 'shared', referralCode?: string) => void;
+  trackArticleClick: (articleId: string, articleTitle: string) => void;
+  userId?: string;
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -28,8 +33,31 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     }
   });
 
+  // Destructure activity tracking functions from sessionManager
+  const {
+    isAuthenticated,
+    isSessionActive,
+    authStatus,
+    logout,
+    trackPageViewIfActive,
+    trackPreferenceUpdate,
+    trackReferralActivity,
+    trackArticleClick,
+    userId,
+  } = sessionManager;
+
   return (
-    <SessionContext.Provider value={sessionManager}>
+    <SessionContext.Provider value={{
+      isAuthenticated,
+      isSessionActive,
+      authStatus,
+      logout,
+      trackPageViewIfActive,
+      trackPreferenceUpdate,
+      trackReferralActivity,
+      trackArticleClick,
+      userId,
+    }}>
       {children}
     </SessionContext.Provider>
   );

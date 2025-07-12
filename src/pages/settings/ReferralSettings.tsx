@@ -1,14 +1,16 @@
 import { useNavigate } from 'react-router-dom';
 import {
+  Button,
   Flex,
-  Heading,
   View,
 } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
+import { useTranslation } from '../../i18n';
 import './ReferralSettings.css';
 import Referral from '../../components/Referral/Referral';
 
 const ReferralSettings = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleBack = () => {
@@ -22,25 +24,15 @@ const ReferralSettings = () => {
       gap="1rem"
     >
       <Flex alignItems="center" gap="1rem" className="page-header">
-        <button
+        <Button
+          variation="link"
           onClick={handleBack}
           className="back-button"
         >
-          ← Back to Settings
-        </button>
+          {t('settings.backToSettings')}
+        </Button>
       </Flex>
-
       <View className="referral-content">
-        <View className="content-header">
-          <View className="content-icon">🎁</View>
-          <Heading level={2} className="content-title">
-            Invite Friends
-          </Heading>
-          <View className="content-subtitle">
-            Share your referral code and earn free months for each successful referral
-          </View>
-        </View>
-
         <Referral />
       </View>
     </Flex>

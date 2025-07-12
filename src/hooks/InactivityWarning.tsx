@@ -1,16 +1,23 @@
-import { Card, Flex, Heading, Text, Button } from '@aws-amplify/ui-react';
+import { useTranslation } from '../i18n';
+import { Button, Card, Flex, Heading, Text } from '@aws-amplify/ui-react';
+import '@aws-amplify/ui-react/styles.css';
 
 interface InactivityDialogProps {
   isOpen: boolean;
-  onConfirm: () => void; // User wants to stay logged in
-  onCancel: () => void;  // User wants to log out
   timeLeft: number;
+  onConfirm: () => void;
+  onCancel: () => void;
 }
 
-export const InactivityDialog: React.FC<InactivityDialogProps> = ({ isOpen, onConfirm, onCancel, timeLeft }) => {
+export const InactivityDialog: React.FC<InactivityDialogProps> = ({ isOpen, timeLeft, onConfirm, onCancel }) => {
+  const { t } = useTranslation();
+
   if (!isOpen) {
     return null;
   }
+
+  const minutes = Math.ceil(timeLeft / 60);
+  const message = t('inactivity.message').replace('{minutes}', minutes.toString());
 
   return (
     <div className="dialog-overlay" onClick={onConfirm} role="dialog" aria-modal="true">
@@ -21,16 +28,15 @@ export const InactivityDialog: React.FC<InactivityDialogProps> = ({ isOpen, onCo
         onClick={(e) => e.stopPropagation()} 
       >
         <Flex direction="column" gap="large">
-          <Heading level={4}>Inactivity Warning</Heading>
+          <Heading level={4}>{t('inactivity.title')}</Heading>
           
           <Text>
-            For your security, you will be logged out in less than {Math.ceil(timeLeft / 60)} minute(s).
-            Do you want to stay logged in?
+            {message}
           </Text>
 
           <Flex justifyContent="flex-end" gap="small">
-            <Button onClick={onCancel} variation="warning">Logout</Button>
-            <Button onClick={onConfirm} variation="primary" autoFocus>Stay Logged In</Button>
+            <Button onClick={onCancel} variation="warning">{t('inactivity.logout')}</Button>
+            <Button onClick={onConfirm} variation="primary" autoFocus>{t('inactivity.stayLoggedIn')}</Button>
           </Flex>
         </Flex>
       </Card>

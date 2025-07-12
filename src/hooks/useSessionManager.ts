@@ -18,7 +18,7 @@ interface UseSessionManagerOptions {
 
 export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
   const { user, authStatus, signOut } = useAuthenticator();
-  const { isTracking, startSession, endSession, trackPageView } = useActivityTracking();
+  const { isTracking, startSession, endSession, trackPageView, trackPreferenceUpdate, trackReferralActivity, trackArticleClick } = useActivityTracking();
   const sessionStateRef = useRef<SessionState>({
     isAuthenticated: false,
     isSessionActive: false,
@@ -97,12 +97,12 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
         options.onAuthError(error);
       }
     } finally {
-      // Reset logout flag after a delay to prevent immediate re-initialization
-      setTimeout(() => {
+      // Reset logout flag when authStatus becomes 'unauthenticated'
+      if (authStatus === 'unauthenticated') {
         isLoggingOutRef.current = false;
-      }, 1000);
+      }
     }
-  }, [endSession, signOut, options, createErrorContext, clearSessionTimeout]);
+  }, [endSession, signOut, options, createErrorContext, clearSessionTimeout, authStatus]);
 
   // Set up session timeout detection
   const setupSessionTimeout = useCallback(() => {
@@ -122,6 +122,11 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
   // Start session when user becomes authenticated
   useEffect(() => {
     const errorContext = createErrorContext('sessionStart');
+
+    // Prevent session re-initialization during or just after logout
+    if (isLoggingOutRef.current) {
+      return;
+    }
 
     if (authStatus === 'authenticated' && user?.userId) {
       // Only start session if not already active and not in the middle of logout
@@ -172,7 +177,14 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     return () => {
       clearSessionTimeout();
     };
-  }, [authStatus, user?.userId, startSession, performLogout, options, createErrorContext, setupSessionTimeout, clearSessionTimeout]);
+  }, [authStatus, user?.userId, startSession, setupSessionTimeout, clearSessionTimeout, performLogout, options, createErrorContext]);
+
+  // Reset logout flag when auth state is unauthenticated
+  useEffect(() => {
+    if (authStatus === 'unauthenticated') {
+      isLoggingOutRef.current = false;
+    }
+  }, [authStatus]);
 
   // Handle authentication errors - authStatus can be 'authenticated', 'unauthenticated', or 'configuring'
   useEffect(() => {
@@ -218,5 +230,9 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     // Actions
     logout,
     trackPageViewIfActive,
+    // Activity tracking functions
+    trackPreferenceUpdate,
+    trackReferralActivity,
+    trackArticleClick,
   };
 }; 

@@ -1,38 +1,40 @@
 import { useNavigate } from 'react-router-dom';
 import {
   Button,
-  Card,
   Flex,
-  Heading,
   View,
+  Heading,
+  Card,
 } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
+import { useTranslation } from '../../i18n';
 import './UserSettings.css';
 
 const UserSettings = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const settingsCards = [
     {
       id: 'password',
-      title: 'Change Password',
-      description: 'Update your account password',
+      title: t('userSettings.changePassword'),
+      description: t('userSettings.changePasswordDesc'),
       icon: '🔐',
       path: '/settings/password',
       color: 'primary'
     },
     {
       id: 'account',
-      title: 'Delete Account',
-      description: 'Permanently delete your account and all data',
+      title: t('userSettings.deleteAccount'),
+      description: t('userSettings.deleteAccountDesc'),
       icon: '🗑️',
       path: '/settings/delete-account',
       color: 'danger'
     },
     {
       id: 'referral',
-      title: 'Invite Friends',
-      description: 'Share your referral code and earn free months',
+      title: t('userSettings.inviteFriends'),
+      description: t('userSettings.inviteFriendsDesc'),
       icon: '🎁',
       path: '/settings/referral',
       color: 'success'
@@ -59,12 +61,12 @@ const UserSettings = () => {
           onClick={handleBack}
           className="back-button"
         >
-          ← Back to News Feed
+          {t('settings.backToNews')}
         </Button>
       </Flex>
 
       <Heading level={2} className="settings-main-title">
-        Settings
+        {t('userSettings.title')}
       </Heading>
       
       <Flex 
