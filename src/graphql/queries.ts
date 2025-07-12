@@ -2,7 +2,7 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
-import * as APITypes from "./API";
+import * as APITypes from "../API";
 type GeneratedQuery<InputType, OutputType> = string & {
   __generatedQueryInput: InputType;
   __generatedQueryOutput: OutputType;
@@ -206,17 +206,34 @@ export const getUserSubscription = /* GraphQL */ `query GetUserSubscription($id:
   APITypes.GetUserSubscriptionQueryVariables,
   APITypes.GetUserSubscriptionQuery
 >;
-export const listUserSubscriptions = /* GraphQL */ `
-  query ListUserSubscriptions($filter: ModelUserSubscriptionFilterInput) {
-    listUserSubscriptions(filter: $filter) {
-      items {
-        id
-        owner
-        trialEndDate
-      }
+export const listUserSubscriptions = /* GraphQL */ `query ListUserSubscriptions(
+  $filter: ModelUserSubscriptionFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listUserSubscriptions(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      owner
+      subscriptionStatus
+      trialStartDate
+      trialEndDate
+      totalFreeMonths
+      earnedFreeMonths
+      referralCodeUsed
+      referrerId
+      id
+      createdAt
+      updatedAt
+      __typename
     }
+    nextToken
+    __typename
   }
-`;
+}
+` as GeneratedQuery<
+  APITypes.ListUserSubscriptionsQueryVariables,
+  APITypes.ListUserSubscriptionsQuery
+>;
 export const getUserActivity = /* GraphQL */ `query GetUserActivity($id: ID!) {
   getUserActivity(id: $id) {
     owner
