@@ -117,7 +117,7 @@ function NewsSocketClient() {
   // Unread counter in tab
   const unreadCount = filteredMessages.filter(msg => !msg.seen).length;  
   useEffect(() => {
-    document.title = unreadCount > 0 ? `(${unreadCount}) 🔥 Live News Feed` : 'Live News Feed';
+    document.title = unreadCount > 0 ? `(${unreadCount}) 🔥 Perkins Live Feed` : 'Perkins Live Feed';
   }, [unreadCount]);
 
   return (

@@ -10,13 +10,10 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 ## CLI
 https://docs.amplify.aws/react/reference/cli-commands/
 
-1. git commit/push
-2. npx @aws-amplify/cli codegen 
-    > downloads schema from the server
-    > updates src/API.ts and graphql/files
-
-
-
+1. Run: git commit/push
+2. Download amplify_outpust.json from AWS
+3. Run: npx ampx generate graphql-client-code --format graphql-codegen --out ./src/graphql/ 
+    > generate API.ts, and graphql files based on local schema and amplify_outputs.json
 
 
 - npm run dev : local client-side development
