@@ -29,6 +29,8 @@ https://docs.amplify.aws/react/reference/cli-commands/
     > downloads schema from the server
     > updates src/API.ts and graphql/files
 
+## Define clear strategy for switching from dev to main for deployment
+
 
 # Modified text
 howard > 
