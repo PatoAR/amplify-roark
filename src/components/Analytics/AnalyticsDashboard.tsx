@@ -4,8 +4,6 @@ import { generateClient } from 'aws-amplify/api';
 import { type Schema } from '../../../amplify/data/resource';
 import './AnalyticsDashboard.css';
 
-const client = generateClient<Schema>();
-
 interface SessionStats {
   totalSessions: number;
   totalDuration: number;
@@ -44,6 +42,8 @@ export const AnalyticsDashboard = () => {
 
     setIsLoading(true);
     try {
+      const client = generateClient<Schema>();
+      
       // Calculate date range
       const now = new Date();
       const daysAgo = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;

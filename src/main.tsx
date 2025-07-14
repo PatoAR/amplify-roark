@@ -1,21 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Amplify } from "aws-amplify";
-import { BrowserRouter } from 'react-router-dom';
-import { Authenticator, Image, View, useTheme } from '@aws-amplify/ui-react';
-import App from "./App.tsx"
 import outputs from '../amplify_outputs.json';
-import { UserPreferencesProvider } from './context/UserPreferencesContext';
-import { SessionProvider } from './context/SessionContext';
-import { NewsProvider } from './context/NewsContext';
-import { LanguageProvider } from './context/LanguageContext';
-import '@aws-amplify/ui-react/styles.css';
-import "./index.css";
-import perkinsLogo from './assets/BaseLogo_v1.png'
 
-import './i18n'; // Initialize our custom translations
-
-// Configure Amplify with the correct format
+// Configure Amplify FIRST, before any other imports that might use Amplify
 Amplify.configure({
   Auth: {
     Cognito: {
@@ -37,6 +25,20 @@ Amplify.configure({
     },
   },
 });
+
+// Now import other components after Amplify is configured
+import { BrowserRouter } from 'react-router-dom';
+import { Authenticator, Image, View, useTheme } from '@aws-amplify/ui-react';
+import App from "./App.tsx"
+import { UserPreferencesProvider } from './context/UserPreferencesContext';
+import { SessionProvider } from './context/SessionContext';
+import { NewsProvider } from './context/NewsContext';
+import { LanguageProvider } from './context/LanguageContext';
+import '@aws-amplify/ui-react/styles.css';
+import "./index.css";
+import perkinsLogo from './assets/BaseLogo_v1.png'
+
+import './i18n'; // Initialize our custom translations
 
 // Custom components to pass to the Authenticator
 const customComponents = {
