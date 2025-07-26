@@ -112,10 +112,15 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
       // Add referral information if code is valid
       if (referralCode && referralValid) {
         userAttributes['custom:referralCode'] = referralCode;
-        // We'll need to get the referrer ID from the validation result
+        // Get the referrer ID from the validation result
         const validationResult = await validateReferralCode(referralCode);
-        if (validationResult.referrerId) {
+        if (validationResult.valid && validationResult.referrerId) {
           userAttributes['custom:referrerId'] = validationResult.referrerId;
+        } else {
+          // If validation fails during signup, clear the referral code
+          delete userAttributes['custom:referralCode'];
+          setError(t('signup.invalidReferralCode'));
+          return;
         }
       }
 

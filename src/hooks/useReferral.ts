@@ -5,6 +5,7 @@ import { type Schema } from '../../amplify/data/resource';
 import { useSession } from '../context/SessionContext';
 import { listReferralCodes } from '../graphql/queries';
 import { useTranslation } from '../i18n';
+import { createReferralCode } from '../graphql/mutations';
 
 interface ReferralStats {
   totalReferrals: number;
@@ -83,7 +84,22 @@ export const useReferral = () => {
     try {
       setIsLoading(true);
       setError('');
-      await loadReferralData();
+      const client = getClient();
+      // Generate a random 8-character code
+      const code = Math.random().toString(36).substring(2, 10).toUpperCase();
+      const input = {
+        owner: user.userId,
+        code,
+        isActive: true,
+        totalReferrals: 0,
+        successfulReferrals: 0,
+      };
+      await client.graphql({
+        query: createReferralCode,
+        variables: { input },
+      });
+      setReferralCode(code);
+      setReferralStats({ totalReferrals: 0, successfulReferrals: 0, earnedMonths: 0 });
     } catch (err) {
       console.error('Error generating referral code:', err);
       setError('Failed to generate referral code');

@@ -2,15 +2,18 @@
 Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fetches, processes and stores news articles in dynambodb. The articles are distributed to varios channels (whatsapp, telegram) and to this webapp via AppSync subscriptions or long-polling.
 
 ## ToDo's
-- Articles may not be real time warning
+- Invite friends stuck in PROD
 - Badge of days left not working?
+- Implement split screen as suggested by ChatGPT
+- Articles may not be real time warning
 - Lucide icons to industry display on articles
 - Global news button
-- Create interface to deliver different content  - publicity, financials, etc - fix on top, colors, etc.
+- Add email with custom domain
+
 - Modified display text
+- Create interface to deliver different content  - publicity, financials, etc - fix on top, colors, etc.
 - Open AWS account on the name of Finu, transfer domain 
 - Pay suscription
-
 
 
 ## CLI
