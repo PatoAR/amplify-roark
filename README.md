@@ -5,6 +5,7 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 - Referral process not working
     - When user receives invite, after clicking link direct to sign-up page and have email filled in
 
+- Do not show new message count on tab if user is not logged in
 - Implement split screen as suggested by ChatGPT
 - Articles may not be real time warning
 - Lucide icons to industry display on articles

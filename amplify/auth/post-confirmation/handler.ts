@@ -1,9 +1,21 @@
 import { PostConfirmationTriggerHandler } from 'aws-lambda';
 import fetch from 'node-fetch';
-import outputs from '../../../amplify_outputs.json';
 
-const APPSYNC_URL = outputs.data.url;
-const APPSYNC_API_KEY = outputs.data.api_key;
+// Get AppSync configuration from environment variables
+const APPSYNC_URL = process.env.APPSYNC_URL || process.env.API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT;
+const APPSYNC_API_KEY = process.env.APPSYNC_API_KEY || process.env.API_AMPLIFY_GRAPHQLAPIKEYOUTPUT;
+
+// Validate that required environment variables are present
+if (!APPSYNC_URL) {
+  throw new Error('AppSync URL not found in environment variables');
+}
+if (!APPSYNC_API_KEY) {
+  throw new Error('AppSync API key not found in environment variables');
+}
+
+// TypeScript now knows these are strings
+const APPSYNC_URL_SAFE = APPSYNC_URL as string;
+const APPSYNC_API_KEY_SAFE = APPSYNC_API_KEY as string;
 
 interface AppSyncResponse<T = any> {
   data?: T;
@@ -15,10 +27,10 @@ interface AppSyncResponse<T = any> {
 }
 
 async function appsyncRequest<T = any>(query: string, variables?: any): Promise<T> {
-  const response = await fetch(APPSYNC_URL, {
+  const response = await fetch(APPSYNC_URL_SAFE, {
     method: 'POST',
     headers: {
-      'x-api-key': APPSYNC_API_KEY,
+      'x-api-key': APPSYNC_API_KEY_SAFE,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ query, variables }),
