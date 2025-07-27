@@ -1,7 +1,41 @@
-import { generateClient } from 'aws-amplify/api';
-import { type Schema } from '../../data/resource';
+import fetch from 'node-fetch';
+import outputs from '../../../amplify_outputs.json';
 
-const client = generateClient<Schema>();
+const APPSYNC_URL = outputs.data.url;
+const APPSYNC_API_KEY = outputs.data.api_key;
+
+interface AppSyncResponse<T = any> {
+  data?: T;
+  errors?: Array<{
+    message: string;
+    locations?: Array<{ line: number; column: number }>;
+    path?: string[];
+  }>;
+}
+
+async function appsyncRequest<T = any>(query: string, variables?: any): Promise<T> {
+  const response = await fetch(APPSYNC_URL, {
+    method: 'POST',
+    headers: {
+      'x-api-key': APPSYNC_API_KEY,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ query, variables }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`AppSync request failed: ${response.status} ${response.statusText}`);
+  }
+
+  const result = await response.json() as AppSyncResponse<T>;
+  
+  if (result.errors) {
+    console.error('AppSync GraphQL errors:', result.errors);
+    throw new Error(`GraphQL errors: ${JSON.stringify(result.errors)}`);
+  }
+
+  return result.data as T;
+}
 
 interface ReferralEvent {
   httpMethod: string;
@@ -103,22 +137,48 @@ async function generateReferralCode(userId: string, headers: Record<string, stri
     const code = generateUniqueCode();
     
     // Check if code already exists
-    const existingCodes = await client.models.ReferralCode.list({
+    const listReferralCodesQuery = `
+      query ListReferralCodes($filter: ModelReferralCodeFilterInput) {
+        listReferralCodes(filter: $filter) {
+          items {
+            id
+            code
+          }
+        }
+      }
+    `;
+    
+    const existingCodes = await appsyncRequest(listReferralCodesQuery, {
       filter: { code: { eq: code } }
     });
     
-    if (existingCodes.data.length > 0) {
+    if (existingCodes.listReferralCodes.items.length > 0) {
       // Retry with a new code
       return await generateReferralCode(userId, headers);
     }
     
     // Create the referral code
-    const result = await client.models.ReferralCode.create({
-      owner: userId,
-      code,
-      isActive: true,
-      totalReferrals: 0,
-      successfulReferrals: 0,
+    const createReferralCodeMutation = `
+      mutation CreateReferralCode($input: CreateReferralCodeInput!) {
+        createReferralCode(input: $input) {
+          id
+          owner
+          code
+          isActive
+          totalReferrals
+          successfulReferrals
+        }
+      }
+    `;
+    
+    const result = await appsyncRequest(createReferralCodeMutation, {
+      input: {
+        owner: userId,
+        code,
+        isActive: true,
+        totalReferrals: 0,
+        successfulReferrals: 0,
+      }
     });
     
     return {
@@ -145,14 +205,27 @@ async function generateReferralCode(userId: string, headers: Record<string, stri
 
 async function validateReferralCode(code: string, headers: Record<string, string>): Promise<ReferralResponse> {
   try {
-    const result = await client.models.ReferralCode.list({
+    const listReferralCodesQuery = `
+      query ListReferralCodes($filter: ModelReferralCodeFilterInput) {
+        listReferralCodes(filter: $filter) {
+          items {
+            id
+            owner
+            code
+            isActive
+          }
+        }
+      }
+    `;
+    
+    const result = await appsyncRequest(listReferralCodesQuery, {
       filter: { 
         code: { eq: code },
         isActive: { eq: true }
       }
     });
     
-    if (result.data.length === 0) {
+    if (result.listReferralCodes.items.length === 0) {
       return {
         statusCode: 200,
         headers,
@@ -163,7 +236,7 @@ async function validateReferralCode(code: string, headers: Record<string, string
       };
     }
     
-    const referralCode = result.data[0];
+    const referralCode = result.listReferralCodes.items[0];
     return {
       statusCode: 200,
       headers,
@@ -192,26 +265,67 @@ async function validateReferralCode(code: string, headers: Record<string, string
 async function processReferral(referrerId: string, referredId: string, code: string, headers: Record<string, string>): Promise<ReferralResponse> {
   try {
     // Create referral record
-    await client.models.Referral.create({
-      referrerId,
-      referredId,
-      referralCode: code,
-      status: 'completed',
-      completedAt: new Date().toISOString(),
-      freeMonthsEarned: 3,
+    const createReferralMutation = `
+      mutation CreateReferral($input: CreateReferralInput!) {
+        createReferral(input: $input) {
+          id
+          referrerId
+          referredId
+          referralCode
+          status
+          completedAt
+          freeMonthsEarned
+        }
+      }
+    `;
+    
+    await appsyncRequest(createReferralMutation, {
+      input: {
+        referrerId,
+        referredId,
+        referralCode: code,
+        status: 'completed',
+        completedAt: new Date().toISOString(),
+        freeMonthsEarned: 3,
+      }
     });
     
     // Update referral code stats
-    const referralCodes = await client.models.ReferralCode.list({
+    const listReferralCodesQuery = `
+      query ListReferralCodes($filter: ModelReferralCodeFilterInput) {
+        listReferralCodes(filter: $filter) {
+          items {
+            id
+            totalReferrals
+            successfulReferrals
+          }
+        }
+      }
+    `;
+    
+    const referralCodes = await appsyncRequest(listReferralCodesQuery, {
       filter: { code: { eq: code } }
     });
     
-    if (referralCodes.data.length > 0) {
-      const referralCode = referralCodes.data[0];
-      await client.models.ReferralCode.update({
-        id: referralCode.id,
-        totalReferrals: (referralCode.totalReferrals || 0) + 1,
-        successfulReferrals: (referralCode.successfulReferrals || 0) + 1,
+    if (referralCodes.listReferralCodes.items.length > 0) {
+      const referralCode = referralCodes.listReferralCodes.items[0];
+      
+      const updateReferralCodeMutation = `
+        mutation UpdateReferralCode($input: UpdateReferralCodeInput!) {
+          updateReferralCode(input: $input) {
+            id
+            totalReferrals
+            successfulReferrals
+          }
+        }
+      `;
+      
+      await appsyncRequest(updateReferralCodeMutation, {
+        input: {
+          id: referralCode.id,
+          totalReferrals: (referralCode.totalReferrals || 0) + 1,
+          successfulReferrals: (referralCode.successfulReferrals || 0) + 1,
+        }
       });
     }
     
@@ -243,28 +357,60 @@ async function processReferral(referrerId: string, referredId: string, code: str
 async function extendSubscription(userId: string, headers: Record<string, string>): Promise<ReferralResponse> {
   try {
     // Get user's subscription
-    const subscriptions = await client.models.UserSubscription.list({
+    const listUserSubscriptionsQuery = `
+      query ListUserSubscriptions($filter: ModelUserSubscriptionFilterInput) {
+        listUserSubscriptions(filter: $filter) {
+          items {
+            id
+            owner
+            subscriptionStatus
+            trialStartDate
+            trialEndDate
+            totalFreeMonths
+            earnedFreeMonths
+          }
+        }
+      }
+    `;
+    
+    const subscriptions = await appsyncRequest(listUserSubscriptionsQuery, {
       filter: { owner: { eq: userId } }
     });
     
     let subscription;
-    if (subscriptions.data.length === 0) {
+    if (subscriptions.listUserSubscriptions.items.length === 0) {
       // Create new subscription if none exists
       const trialStartDate = new Date();
       const trialEndDate = new Date();
       trialEndDate.setMonth(trialEndDate.getMonth() + 3); // 3 months free trial
       
-      subscription = await client.models.UserSubscription.create({
-        owner: userId,
-        subscriptionStatus: 'free_trial',
-        trialStartDate: trialStartDate.toISOString(),
-        trialEndDate: trialEndDate.toISOString(),
-        totalFreeMonths: 3,
-        earnedFreeMonths: 3, // Bonus from referral
+      const createUserSubscriptionMutation = `
+        mutation CreateUserSubscription($input: CreateUserSubscriptionInput!) {
+          createUserSubscription(input: $input) {
+            id
+            owner
+            subscriptionStatus
+            trialStartDate
+            trialEndDate
+            totalFreeMonths
+            earnedFreeMonths
+          }
+        }
+      `;
+      
+      subscription = await appsyncRequest(createUserSubscriptionMutation, {
+        input: {
+          owner: userId,
+          subscriptionStatus: 'free_trial',
+          trialStartDate: trialStartDate.toISOString(),
+          trialEndDate: trialEndDate.toISOString(),
+          totalFreeMonths: 3,
+          earnedFreeMonths: 3, // Bonus from referral
+        }
       });
     } else {
       // Extend existing subscription
-      subscription = subscriptions.data[0];
+      subscription = subscriptions.listUserSubscriptions.items[0];
       const currentEarnedMonths = subscription.earnedFreeMonths || 0;
       const newEarnedMonths = currentEarnedMonths + 3;
       
@@ -273,10 +419,23 @@ async function extendSubscription(userId: string, headers: Record<string, string
       const newTrialEndDate = new Date(trialStartDate);
       newTrialEndDate.setMonth(newTrialEndDate.getMonth() + (subscription.totalFreeMonths || 3) + newEarnedMonths);
       
-      await client.models.UserSubscription.update({
-        id: subscription.id,
-        earnedFreeMonths: newEarnedMonths,
-        trialEndDate: newTrialEndDate.toISOString(),
+      const updateUserSubscriptionMutation = `
+        mutation UpdateUserSubscription($input: UpdateUserSubscriptionInput!) {
+          updateUserSubscription(input: $input) {
+            id
+            owner
+            earnedFreeMonths
+            trialEndDate
+          }
+        }
+      `;
+      
+      await appsyncRequest(updateUserSubscriptionMutation, {
+        input: {
+          id: subscription.id,
+          earnedFreeMonths: newEarnedMonths,
+          trialEndDate: newTrialEndDate.toISOString(),
+        }
       });
       
       return {
@@ -301,7 +460,7 @@ async function extendSubscription(userId: string, headers: Record<string, string
         message: 'Subscription extended successfully',
         data: { 
           earnedMonths: 3,
-          trialEndDate: subscription.data?.trialEndDate
+          trialEndDate: subscription.createUserSubscription?.trialEndDate
         }
       }),
     };

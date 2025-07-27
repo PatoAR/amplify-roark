@@ -1,6 +1,7 @@
 {
   "type": "module",
   "dependencies": {
-    "@aws-amplify/backend": "^1.16.1"
+    "@aws-amplify/backend": "^1.16.1",
+    "node-fetch": "^3.3.2"
   }
 }

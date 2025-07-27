@@ -1,6 +1,42 @@
 import { PostConfirmationTriggerHandler } from 'aws-lambda';
-import { generateClient } from 'aws-amplify/api';
-import { type Schema } from '../../data/resource';
+import fetch from 'node-fetch';
+import outputs from '../../../amplify_outputs.json';
+
+const APPSYNC_URL = outputs.data.url;
+const APPSYNC_API_KEY = outputs.data.api_key;
+
+interface AppSyncResponse<T = any> {
+  data?: T;
+  errors?: Array<{
+    message: string;
+    locations?: Array<{ line: number; column: number }>;
+    path?: string[];
+  }>;
+}
+
+async function appsyncRequest<T = any>(query: string, variables?: any): Promise<T> {
+  const response = await fetch(APPSYNC_URL, {
+    method: 'POST',
+    headers: {
+      'x-api-key': APPSYNC_API_KEY,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ query, variables }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`AppSync request failed: ${response.status} ${response.statusText}`);
+  }
+
+  const result = await response.json() as AppSyncResponse<T>;
+  
+  if (result.errors) {
+    console.error('AppSync GraphQL errors:', result.errors);
+    throw new Error(`GraphQL errors: ${JSON.stringify(result.errors)}`);
+  }
+
+  return result.data as T;
+}
 
 export const handler: PostConfirmationTriggerHandler = async (event) => {
   console.log('Post-confirmation trigger:', JSON.stringify(event, null, 2));
@@ -31,42 +67,108 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
         trialEndDate.setMonth(trialEndDate.getMonth() + 3); // 3 months free trial
 
         console.log(`Creating UserSubscription for user ${userId} with referral info`);
-        const userSubscription = await generateClient<Schema>().models.UserSubscription.create({
-          owner: userId,
-          subscriptionStatus: 'free_trial',
-          trialStartDate: trialStartDate.toISOString(),
-          trialEndDate: trialEndDate.toISOString(),
-          totalFreeMonths: 3,
-          earnedFreeMonths: 0,
-          referralCodeUsed: referralCode,
-          referrerId: referrerId,
+        
+        const createUserSubscriptionMutation = `
+          mutation CreateUserSubscription($input: CreateUserSubscriptionInput!) {
+            createUserSubscription(input: $input) {
+              id
+              owner
+              subscriptionStatus
+              trialStartDate
+              trialEndDate
+              totalFreeMonths
+              earnedFreeMonths
+              referralCodeUsed
+              referrerId
+            }
+          }
+        `;
+
+        const userSubscription = await appsyncRequest(createUserSubscriptionMutation, {
+          input: {
+            owner: userId,
+            subscriptionStatus: 'free_trial',
+            trialStartDate: trialStartDate.toISOString(),
+            trialEndDate: trialEndDate.toISOString(),
+            totalFreeMonths: 3,
+            earnedFreeMonths: 0,
+            referralCodeUsed: referralCode,
+            referrerId: referrerId,
+          }
         });
         console.log(`UserSubscription created successfully:`, userSubscription);
 
         // Process the referral to give the referrer their bonus
         console.log(`Creating Referral record for referrer ${referrerId}`);
-        const referral = await generateClient<Schema>().models.Referral.create({
-          referrerId,
-          referredId: userId,
-          referralCode,
-          status: 'completed',
-          completedAt: new Date().toISOString(),
-          freeMonthsEarned: 3,
+        
+        const createReferralMutation = `
+          mutation CreateReferral($input: CreateReferralInput!) {
+            createReferral(input: $input) {
+              id
+              referrerId
+              referredId
+              referralCode
+              status
+              completedAt
+              freeMonthsEarned
+            }
+          }
+        `;
+
+        const referral = await appsyncRequest(createReferralMutation, {
+          input: {
+            referrerId,
+            referredId: userId,
+            referralCode,
+            status: 'completed',
+            completedAt: new Date().toISOString(),
+            freeMonthsEarned: 3,
+          }
         });
         console.log(`Referral created successfully:`, referral);
 
         // Update referral code stats
         console.log(`Updating referral code stats for code ${referralCode}`);
-        const referralCodes = await generateClient<Schema>().models.ReferralCode.list({
+        
+        const listReferralCodesQuery = `
+          query ListReferralCodes($filter: ModelReferralCodeFilterInput) {
+            listReferralCodes(filter: $filter) {
+              items {
+                id
+                owner
+                code
+                isActive
+                totalReferrals
+                successfulReferrals
+              }
+            }
+          }
+        `;
+
+        const referralCodes = await appsyncRequest(listReferralCodesQuery, {
           filter: { code: { eq: referralCode } }
         });
 
-        if (referralCodes.data.length > 0) {
-          const referralCodeRecord = referralCodes.data[0];
-          const updatedCode = await generateClient<Schema>().models.ReferralCode.update({
-            id: referralCodeRecord.id,
-            totalReferrals: (referralCodeRecord.totalReferrals || 0) + 1,
-            successfulReferrals: (referralCodeRecord.successfulReferrals || 0) + 1,
+        if (referralCodes.listReferralCodes.items.length > 0) {
+          const referralCodeRecord = referralCodes.listReferralCodes.items[0];
+          
+          const updateReferralCodeMutation = `
+            mutation UpdateReferralCode($input: UpdateReferralCodeInput!) {
+              updateReferralCode(input: $input) {
+                id
+                code
+                totalReferrals
+                successfulReferrals
+              }
+            }
+          `;
+
+          const updatedCode = await appsyncRequest(updateReferralCodeMutation, {
+            input: {
+              id: referralCodeRecord.id,
+              totalReferrals: (referralCodeRecord.totalReferrals || 0) + 1,
+              successfulReferrals: (referralCodeRecord.successfulReferrals || 0) + 1,
+            }
           });
           console.log(`ReferralCode updated successfully:`, updatedCode);
         } else {
@@ -75,12 +177,29 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
 
         // Extend referrer's subscription
         console.log(`Extending referrer's subscription for user ${referrerId}`);
-        const referrerSubscriptions = await generateClient<Schema>().models.UserSubscription.list({
+        
+        const listReferrerSubscriptionsQuery = `
+          query ListUserSubscriptions($filter: ModelUserSubscriptionFilterInput) {
+            listUserSubscriptions(filter: $filter) {
+              items {
+                id
+                owner
+                subscriptionStatus
+                trialStartDate
+                trialEndDate
+                totalFreeMonths
+                earnedFreeMonths
+              }
+            }
+          }
+        `;
+
+        const referrerSubscriptions = await appsyncRequest(listReferrerSubscriptionsQuery, {
           filter: { owner: { eq: referrerId } }
         });
 
-        if (referrerSubscriptions.data.length > 0) {
-          const referrerSubscription = referrerSubscriptions.data[0];
+        if (referrerSubscriptions.listUserSubscriptions.items.length > 0) {
+          const referrerSubscription = referrerSubscriptions.listUserSubscriptions.items[0];
           const currentEarnedMonths = referrerSubscription.earnedFreeMonths || 0;
           const newEarnedMonths = currentEarnedMonths + 3;
 
@@ -89,10 +208,23 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
           const newTrialEndDate = new Date(trialStartDate);
           newTrialEndDate.setMonth(newTrialEndDate.getMonth() + (referrerSubscription.totalFreeMonths || 3) + newEarnedMonths);
 
-          const updatedSubscription = await generateClient<Schema>().models.UserSubscription.update({
-            id: referrerSubscription.id,
-            earnedFreeMonths: newEarnedMonths,
-            trialEndDate: newTrialEndDate.toISOString(),
+          const updateReferrerSubscriptionMutation = `
+            mutation UpdateUserSubscription($input: UpdateUserSubscriptionInput!) {
+              updateUserSubscription(input: $input) {
+                id
+                owner
+                earnedFreeMonths
+                trialEndDate
+              }
+            }
+          `;
+
+          const updatedSubscription = await appsyncRequest(updateReferrerSubscriptionMutation, {
+            input: {
+              id: referrerSubscription.id,
+              earnedFreeMonths: newEarnedMonths,
+              trialEndDate: newTrialEndDate.toISOString(),
+            }
           });
           console.log(`Referrer subscription updated successfully:`, updatedSubscription);
         } else {
@@ -113,13 +245,29 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
         const trialEndDate = new Date();
         trialEndDate.setMonth(trialEndDate.getMonth() + 3); // 3 months free trial
 
-        const userSubscription = await generateClient<Schema>().models.UserSubscription.create({
-          owner: userId,
-          subscriptionStatus: 'free_trial',
-          trialStartDate: trialStartDate.toISOString(),
-          trialEndDate: trialEndDate.toISOString(),
-          totalFreeMonths: 3,
-          earnedFreeMonths: 0,
+        const createBasicUserSubscriptionMutation = `
+          mutation CreateUserSubscription($input: CreateUserSubscriptionInput!) {
+            createUserSubscription(input: $input) {
+              id
+              owner
+              subscriptionStatus
+              trialStartDate
+              trialEndDate
+              totalFreeMonths
+              earnedFreeMonths
+            }
+          }
+        `;
+
+        const userSubscription = await appsyncRequest(createBasicUserSubscriptionMutation, {
+          input: {
+            owner: userId,
+            subscriptionStatus: 'free_trial',
+            trialStartDate: trialStartDate.toISOString(),
+            trialEndDate: trialEndDate.toISOString(),
+            totalFreeMonths: 3,
+            earnedFreeMonths: 0,
+          }
         });
 
         console.log(`UserSubscription created successfully for user ${userId}:`, userSubscription);

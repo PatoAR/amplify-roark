@@ -2,8 +2,9 @@
 Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fetches, processes and stores news articles in dynambodb. The articles are distributed to varios channels (whatsapp, telegram) and to this webapp via AppSync subscriptions or long-polling.
 
 ## ToDo's
-- Invite friends stuck in PROD
-- Badge of days left not working?
+- Referral process not working
+    - When user receives invite, after clicking link direct to sign-up page and have email filled in
+
 - Implement split screen as suggested by ChatGPT
 - Articles may not be real time warning
 - Lucide icons to industry display on articles
@@ -14,6 +15,24 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 - Create interface to deliver different content  - publicity, financials, etc - fix on top, colors, etc.
 - Open AWS account on the name of Finu, transfer domain 
 - Pay suscription
+
+
+## CI/CD
+
+# PROD - AWS
+
+# DEV - AWS
+
+# DEV - LOCAL
+    - Font-end development
+        Work on DEV branch
+        Test changes with npm run dev
+        Run: git commit/push
+        Merge into main (will redeploy PROD?)
+    - Back-end development
+
+
+
 
 
 ## CLI
@@ -38,16 +57,3 @@ https://docs.amplify.aws/react/reference/cli-commands/
     > downloads schema from the server
     > updates src/API.ts and graphql/files
 
-
-# Modified text
-howard > 
-    sends full description, content as one text variable
-    sends country codes ("Qs") as value pairs with their respective character index in text, chloc -1 if country in source definition
-
-roark > calculates text to display
-    if any of user country selected in country codes list with index -1, display first 200 characters
-
-
-# GoDaddy DNS
-ns43.domaincontrol.com
-ns44.domaincontrol.com
