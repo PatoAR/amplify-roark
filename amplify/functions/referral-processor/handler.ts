@@ -1,5 +1,17 @@
 import fetch from 'node-fetch';
 
+// Type declaration for process.env to avoid @types/node dependency
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      APPSYNC_URL?: string;
+      APPSYNC_API_KEY?: string;
+      API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT?: string;
+      API_AMPLIFY_GRAPHQLAPIKEYOUTPUT?: string;
+    }
+  }
+}
+
 // Get AppSync configuration from environment variables
 const APPSYNC_URL = process.env.APPSYNC_URL || process.env.API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT;
 const APPSYNC_API_KEY = process.env.APPSYNC_API_KEY || process.env.API_AMPLIFY_GRAPHQLAPIKEYOUTPUT;
@@ -246,7 +258,6 @@ async function processReferral(referrerId: string, referredId: string, code: str
       await appsyncRequest(updateReferralCodeMutation, {
         input: {
           id: referralCode.id,
-          totalReferrals: (referralCode.totalReferrals || 0) + 1,
           successfulReferrals: (referralCode.successfulReferrals || 0) + 1,
         }
       });

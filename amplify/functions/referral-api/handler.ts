@@ -1,5 +1,17 @@
 import fetch from 'node-fetch';
 
+// Type declaration for process.env to avoid @types/node dependency
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      APPSYNC_URL?: string;
+      APPSYNC_API_KEY?: string;
+      API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT?: string;
+      API_AMPLIFY_GRAPHQLAPIKEYOUTPUT?: string;
+    }
+  }
+}
+
 // Get AppSync configuration from environment variables
 const APPSYNC_URL = process.env.APPSYNC_URL || process.env.API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT;
 const APPSYNC_API_KEY = process.env.APPSYNC_API_KEY || process.env.API_AMPLIFY_GRAPHQLAPIKEYOUTPUT;
@@ -54,6 +66,7 @@ interface ReferralEvent {
   path: string;
   body?: string;
   headers?: Record<string, string>;
+  rawQueryString?: string; // Added for query parameters
 }
 
 interface ReferralResponse {
@@ -86,6 +99,87 @@ export const handler = async (event: ReferralEvent): Promise<ReferralResponse> =
       case 'POST':
         return await handlePostRequest(body, headers);
       case 'GET':
+        if (event.path === '/validate') {
+          // Parse query parameters from the URL
+          const url = new URL(`https://example.com${event.path}${event.rawQueryString ? '?' + event.rawQueryString : ''}`);
+          const code = url.searchParams.get('code');
+          if (!code) {
+            return {
+              statusCode: 400,
+              body: JSON.stringify({ error: 'Referral code is required' }),
+              headers: { 'Content-Type': 'application/json' }
+            };
+          }
+
+          try {
+            // Validate referral code without requiring owner authorization
+            const listReferralCodesQuery = `
+              query ListReferralCodes($filter: ModelReferralCodeFilterInput) {
+                listReferralCodes(filter: $filter) {
+                  items {
+                    id
+                    owner
+                    code
+                    isActive
+                    totalReferrals
+                    successfulReferrals
+                  }
+                }
+              }
+            `;
+
+            const referralCodes = await appsyncRequest(listReferralCodesQuery, {
+              filter: { code: { eq: code }, isActive: { eq: true } }
+            });
+
+            if (referralCodes.listReferralCodes.items.length > 0) {
+              const referralCode = referralCodes.listReferralCodes.items[0];
+              
+              // Update totalReferrals for this validation attempt
+              const updateReferralCodeMutation = `
+                mutation UpdateReferralCode($input: UpdateReferralCodeInput!) {
+                  updateReferralCode(input: $input) {
+                    id
+                    code
+                    totalReferrals
+                    successfulReferrals
+                  }
+                }
+              `;
+
+              await appsyncRequest(updateReferralCodeMutation, {
+                input: {
+                  id: referralCode.id,
+                  totalReferrals: (referralCode.totalReferrals || 0) + 1,
+                }
+              });
+
+              return {
+                statusCode: 200,
+                body: JSON.stringify({
+                  valid: true,
+                  referrerId: referralCode.owner,
+                  totalReferrals: referralCode.totalReferrals + 1,
+                  successfulReferrals: referralCode.successfulReferrals
+                }),
+                headers: { 'Content-Type': 'application/json' }
+              };
+            } else {
+              return {
+                statusCode: 200,
+                body: JSON.stringify({ valid: false }),
+                headers: { 'Content-Type': 'application/json' }
+              };
+            }
+          } catch (error) {
+            console.error('Error validating referral code:', error);
+            return {
+              statusCode: 500,
+              body: JSON.stringify({ error: 'Failed to validate referral code' }),
+              headers: { 'Content-Type': 'application/json' }
+            };
+          }
+        }
         return await handleGetRequest(event.path, headers);
       default:
         return {
@@ -335,7 +429,6 @@ async function processReferral(referrerId: string, referredId: string, code: str
       await appsyncRequest(updateReferralCodeMutation, {
         input: {
           id: referralCode.id,
-          totalReferrals: (referralCode.totalReferrals || 0) + 1,
           successfulReferrals: (referralCode.successfulReferrals || 0) + 1,
         }
       });

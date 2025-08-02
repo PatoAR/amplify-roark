@@ -20,18 +20,21 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [referralCode, setReferralCode] = useState('');
+  const [referralCode, setReferralCode] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [referralValid, setReferralValid] = useState<boolean | null>(null);
-  const [referralMessage, setReferralMessage] = useState('');
+  const [referralMessage, setReferralMessage] = useState<string>('');
+  const [validationResult, setValidationResult] = useState<{ valid: boolean; referrerId?: string } | null>(null);
+  const [referralCodeFromUrl, setReferralCodeFromUrl] = useState<boolean>(false);
 
   // Check for referral code in URL
   useEffect(() => {
     const refCode = searchParams.get('ref');
     if (refCode) {
       setReferralCode(refCode);
+      setReferralCodeFromUrl(true);
       validateReferralCodeFromUrl(refCode);
     }
   }, [searchParams]);
@@ -39,11 +42,18 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
   const validateReferralCodeFromUrl = async (code: string) => {
     try {
       const result = await validateReferralCode(code);
+      setValidationResult(result);
       setReferralValid(result.valid);
       setReferralMessage(result.valid 
         ? t('signup.validReferralCode')
         : t('signup.invalidReferralCode')
       );
+      
+      // Track that someone accessed this referral link
+      if (result.valid) {
+        // This will be handled by the validateReferralCode function
+        console.log(`Referral link accessed: ${code}`);
+      }
     } catch (err) {
       setReferralValid(false);
       setReferralMessage(t('signup.errorValidatingCode'));
@@ -52,9 +62,11 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
 
   const handleReferralCodeChange = async (value: string) => {
     setReferralCode(value);
+    setReferralCodeFromUrl(false); // Reset flag when user manually enters code
     if (value.length >= 3) {
       try {
         const result = await validateReferralCode(value);
+        setValidationResult(result);
         setReferralValid(result.valid);
         setReferralMessage(result.valid 
           ? t('signup.validReferralCode')
@@ -67,6 +79,7 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
     } else {
       setReferralValid(null);
       setReferralMessage('');
+      setValidationResult(null);
     }
   };
 
@@ -112,9 +125,8 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
       // Add referral information if code is valid
       if (referralCode && referralValid) {
         userAttributes['custom:referralCode'] = referralCode;
-        // Get the referrer ID from the validation result
-        const validationResult = await validateReferralCode(referralCode);
-        if (validationResult.valid && validationResult.referrerId) {
+        // Use stored validation result instead of re-validating
+        if (validationResult && validationResult.valid && validationResult.referrerId) {
           userAttributes['custom:referrerId'] = validationResult.referrerId;
         } else {
           // If validation fails during signup, clear the referral code
@@ -122,6 +134,10 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
           setError(t('signup.invalidReferralCode'));
           return;
         }
+      } else if (referralCode && !referralValid) {
+        // If there's a referral code but it's invalid, show error
+        setError(t('signup.invalidReferralCode'));
+        return;
       }
 
       // Validate user attributes before sending
@@ -234,7 +250,14 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
                 onChange={(e) => handleReferralCodeChange(e.target.value)}
                 placeholder={t('signup.enterReferralCode')}
                 autoComplete="off"
+                readOnly={referralCodeFromUrl}
               />
+              
+              {referralCodeFromUrl && (
+                <Text fontSize="small" color="font.secondary">
+                  {t('signup.referralCodeFromLink')}
+                </Text>
+              )}
 
               {referralMessage && (
                 <Alert

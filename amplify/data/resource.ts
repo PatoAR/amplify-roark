@@ -38,7 +38,10 @@ const schema = a.schema({
     totalReferrals: a.integer().default(0),
     successfulReferrals: a.integer().default(0),
   })
-  .authorization(allow => [allow.owner().identityClaim('sub')]),
+  .authorization(allow => [
+    allow.owner().identityClaim('sub'),
+    allow.publicApiKey().to(['read', 'update']), // Allow public read/update for validation
+  ]),
 
   // Referral Model - Track successful referrals
   Referral: a

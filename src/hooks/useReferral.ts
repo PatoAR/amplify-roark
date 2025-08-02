@@ -6,6 +6,7 @@ import { useSession } from '../context/SessionContext';
 import { listReferralCodes } from '../graphql/queries';
 import { useTranslation } from '../i18n';
 import { createReferralCode } from '../graphql/mutations';
+import { updateReferralCode } from '../graphql/mutations';
 
 interface ReferralStats {
   totalReferrals: number;
@@ -110,17 +111,24 @@ export const useReferral = () => {
 
   const validateReferralCode = async (code: string): Promise<{ valid: boolean; referrerId?: string }> => {
     try {
-      const client = getClient();
-      const result = await client.graphql({
-        query: listReferralCodes,
-        variables: { filter: { code: { eq: code }, isActive: { eq: true } } }
-      }) as any;
-      const referralCodes = result.data?.listReferralCodes?.items || [];
-      if (referralCodes.length > 0) {
-        const referralCode = referralCodes[0];
+      // Use the API endpoint instead of direct GraphQL to avoid authorization issues
+      const response = await fetch(`/api/referral/validate?code=${encodeURIComponent(code)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Validation request failed: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.valid) {
         return {
           valid: true,
-          referrerId: referralCode.owner || undefined,
+          referrerId: result.referrerId,
         };
       } else {
         return { valid: false };

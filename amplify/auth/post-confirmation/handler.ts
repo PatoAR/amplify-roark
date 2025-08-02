@@ -1,6 +1,18 @@
 import { PostConfirmationTriggerHandler } from 'aws-lambda';
 import fetch from 'node-fetch';
 
+// Type declaration for process.env to avoid @types/node dependency
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      APPSYNC_URL?: string;
+      APPSYNC_API_KEY?: string;
+      API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT?: string;
+      API_AMPLIFY_GRAPHQLAPIKEYOUTPUT?: string;
+    }
+  }
+}
+
 // Get AppSync configuration from environment variables
 const APPSYNC_URL = process.env.APPSYNC_URL || process.env.API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT;
 const APPSYNC_API_KEY = process.env.APPSYNC_API_KEY || process.env.API_AMPLIFY_GRAPHQLAPIKEYOUTPUT;
@@ -178,7 +190,8 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
           const updatedCode = await appsyncRequest(updateReferralCodeMutation, {
             input: {
               id: referralCodeRecord.id,
-              totalReferrals: (referralCodeRecord.totalReferrals || 0) + 1,
+              // Don't increment totalReferrals here - it's already incremented during validation
+              // totalReferrals: (referralCodeRecord.totalReferrals || 0) + 1,
               successfulReferrals: (referralCodeRecord.successfulReferrals || 0) + 1,
             }
           });
@@ -243,10 +256,11 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
           console.warn(`Referrer subscription not found for user: ${referrerId}`);
         }
 
-        console.log(`Referral processed successfully for user ${userId}`);
+        console.log(`Referral processing completed successfully for user ${userId}`);
       } catch (referralError) {
-        console.error('Error processing referral:', referralError);
-        // Continue with basic UserSubscription creation even if referral processing fails
+        console.error(`Error processing referral for user ${userId}:`, referralError);
+        // Don't fail the user creation if referral processing fails
+        // The user should still be created successfully
       }
     } else {
       console.log(`Creating basic UserSubscription for user ${userId} without referral`);

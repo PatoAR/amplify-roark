@@ -7,6 +7,7 @@ import PasswordSettings from "./pages/settings/PasswordSettings";
 import DeleteAccountSettings from "./pages/settings/DeleteAccountSettings";
 import ReferralSettings from "./pages/settings/ReferralSettings";
 import { AnalyticsDashboard } from "./components/Analytics/AnalyticsDashboard";
+import CustomSignUp from "./components/CustomSignUp/CustomSignUp";
 import { useSession } from './context/SessionContext';
 import { useInactivityTimer } from './hooks/useInactivityTimer';
 import { InactivityDialog } from './hooks/InactivityWarning';
@@ -158,6 +159,16 @@ export default function App() {
 
   // If user is not authenticated, show nothing (Authenticator will handle login)
   if (authStatus === 'unauthenticated') {
+    // Check if there's a referral code in the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const referralCode = urlParams.get('ref');
+    
+    // If there's a referral code, show custom signup
+    if (referralCode) {
+      return <CustomSignUp />;
+    }
+    
+    // Otherwise, let the default Authenticator handle it
     return null;
   }
 
@@ -180,6 +191,7 @@ export default function App() {
             <Route path="settings/delete-account" element={<DeleteAccountSettings />} />
             <Route path="settings/referral" element={<ReferralSettings />} />
             <Route path="analytics" element={<AnalyticsDashboard />} />
+            <Route path="signup" element={<CustomSignUp />} />
           </Route>
         </Routes>
       </div>

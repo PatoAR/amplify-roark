@@ -3,8 +3,5 @@
   "dependencies": {
     "@aws-amplify/backend": "^1.16.1",
     "node-fetch": "^3.3.2"
-  },
-  "devDependencies": {
-    "@types/node": "^20.0.0"
   }
 }
