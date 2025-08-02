@@ -6,7 +6,6 @@ import { useSession } from '../context/SessionContext';
 import { listReferralCodes } from '../graphql/queries';
 import { useTranslation } from '../i18n';
 import { createReferralCode } from '../graphql/mutations';
-import { updateReferralCode } from '../graphql/mutations';
 
 interface ReferralStats {
   totalReferrals: number;
