@@ -12,6 +12,11 @@ backend:
         - node -v
         - npm -v
         - npm install --build-from-source @parcel/watcher
+        - echo "Setting Amplify secrets for AppSync via ampx sandbox secret set"
+        - export APPSYNC_URL=$(node --input-type=module -e "import fs from 'fs'; console.log(JSON.parse(fs.readFileSync('amplify_outputs.json','utf8')).data.url)")
+        - export APPSYNC_API_KEY=$(node --input-type=module -e "import fs from 'fs'; console.log(JSON.parse(fs.readFileSync('amplify_outputs.json','utf8')).data.api_key)")
+        - npx --yes ampx sandbox secret set ROARK_APPSYNC_URL --value "$APPSYNC_URL"
+        - npx --yes ampx sandbox secret set ROARK_APPSYNC_API_KEY --value "$APPSYNC_API_KEY"
     build:
       commands:
         - npm rebuild @parcel/watcher

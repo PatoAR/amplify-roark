@@ -12,21 +12,14 @@ declare global {
   }
 }
 
-// Get AppSync configuration from environment variables
-const APPSYNC_URL = process.env.APPSYNC_URL || process.env.API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT;
-const APPSYNC_API_KEY = process.env.APPSYNC_API_KEY || process.env.API_AMPLIFY_GRAPHQLAPIKEYOUTPUT;
-
-// Validate that required environment variables are present
-if (!APPSYNC_URL) {
-  throw new Error('AppSync URL not found in environment variables');
+async function getAppSyncConfig(): Promise<{ url: string; apiKey: string }> {
+  // Values are injected via Amplify secret('...') into env at runtime
+  const url = process.env.APPSYNC_URL || process.env.API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT;
+  const apiKey = process.env.APPSYNC_API_KEY || process.env.API_AMPLIFY_GRAPHQLAPIKEYOUTPUT;
+  if (!url) throw new Error('AppSync URL not configured');
+  if (!apiKey) throw new Error('AppSync API key not configured');
+  return { url, apiKey };
 }
-if (!APPSYNC_API_KEY) {
-  throw new Error('AppSync API key not found in environment variables');
-}
-
-// TypeScript now knows these are strings
-const APPSYNC_URL_SAFE = APPSYNC_URL as string;
-const APPSYNC_API_KEY_SAFE = APPSYNC_API_KEY as string;
 
 interface AppSyncResponse<T = any> {
   data?: T;
@@ -38,10 +31,11 @@ interface AppSyncResponse<T = any> {
 }
 
 async function appsyncRequest<T = any>(query: string, variables?: any): Promise<T> {
-  const response = await fetch(APPSYNC_URL_SAFE, {
+  const { url, apiKey } = await getAppSyncConfig();
+  const response = await fetch(url, {
     method: 'POST',
     headers: {
-      'x-api-key': APPSYNC_API_KEY_SAFE,
+      'x-api-key': apiKey,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ query, variables }),

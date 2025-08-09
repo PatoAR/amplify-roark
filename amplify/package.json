@@ -2,6 +2,7 @@
   "type": "module",
   "dependencies": {
     "@aws-amplify/backend": "^1.16.1",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "@aws-sdk/client-ssm": "^3.624.0"
   }
 }
