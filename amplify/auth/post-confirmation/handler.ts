@@ -1,6 +1,8 @@
 import { PostConfirmationTriggerHandler } from 'aws-lambda';
 import fetch from 'node-fetch';
 
+let hasLoggedAppSyncEnv = false;
+
 // Type declaration for process.env to avoid @types/node dependency
 declare global {
   namespace NodeJS {
@@ -67,6 +69,12 @@ async function appsyncRequest<T = any>(query: string, variables?: any): Promise<
 
 export const handler: PostConfirmationTriggerHandler = async (event) => {
   console.log('Post-confirmation trigger:', JSON.stringify(event, null, 2));
+
+  if (!hasLoggedAppSyncEnv) {
+    const resolvedUrl = process.env.APPSYNC_URL || process.env.API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT;
+    console.log('APPSYNC_URL (resolved):', resolvedUrl);
+    hasLoggedAppSyncEnv = true;
+  }
 
   try {
     const { userAttributes } = event.request;

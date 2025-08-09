@@ -5,7 +5,7 @@ export const postConfirmation = defineFunction({
   name: 'postConfirmation',
   entry: './handler.ts',
   environment: {
-    APPSYNC_URL: (data as any).url,
-    APPSYNC_API_KEY: (data as any).apiKey,
+    APPSYNC_URL: (data as any).awsAppsyncApiEndpoint,
+    APPSYNC_API_KEY: (data as any).awsAppsyncApiKey,
   }
 }); 
