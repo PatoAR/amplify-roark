@@ -8,9 +8,9 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 - Lucide icons to industry display on articles
 - Global news button
 - Create interface to deliver different content  - publicity, financials, etc. fix on top, colors, etc.
-- Add email with custom domain
-
 - Modified display text
+
+- Add email with custom domain
 - Open AWS account on the name of Finu, transfer domain 
 - Pay suscription
 
