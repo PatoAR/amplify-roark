@@ -17,6 +17,9 @@ declare global {
 const APPSYNC_URL = process.env.APPSYNC_URL || process.env.API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT;
 const APPSYNC_API_KEY = process.env.APPSYNC_API_KEY || process.env.API_AMPLIFY_GRAPHQLAPIKEYOUTPUT;
 
+console.log('APPSYNC_URL', APPSYNC_URL);
+console.log('APPSYNC_API_KEY', APPSYNC_API_KEY);
+
 // Validate that required environment variables are present
 if (!APPSYNC_URL) {
   throw new Error('AppSync URL not found in environment variables');
