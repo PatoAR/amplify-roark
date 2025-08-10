@@ -25,6 +25,7 @@ const INDUSTRY_OPTIONS = [
 ];
 
 const COUNTRY_OPTIONS = [
+  { id: 'global', label: 'GLOBAL', code: 'global' },
   { id: 'Q414', label: 'ARG', code:'ar' },
   { id: 'Q155', label: 'BRA', code: 'br' },
   { id: 'Q298', label: 'CHL', code: 'cl' },
@@ -254,11 +255,15 @@ const HeaderNav = () => {
                   data-disabled={selectAllCountries}
                   onClick={() => handleCountryChange(country.id)}
                 >
-                  <img
-                    src={`https://flagcdn.com/w20/${country.code}.png`}
-                    alt={`${country.label} flag`}
-                    style={{ width: '20px', height: '15px', marginRight: '0.5rem' }}
-                  />
+                  {country.id === 'global' ? (
+                    <span style={{ fontSize: '16px', marginRight: '0.5rem' }}>🌍</span>
+                  ) : (
+                    <img
+                      src={`https://flagcdn.com/w20/${country.code}.png`}
+                      alt={`${country.label} flag`}
+                      style={{ width: '20px', height: '15px', marginRight: '0.5rem' }}
+                    />
+                  )}
                   {country.label}
                 </button>
               ))}

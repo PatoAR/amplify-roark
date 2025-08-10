@@ -15,6 +15,7 @@ const customTranslations = {
     'filters.countries': 'Countries',
     'filters.allIndustries': 'All Industries',
     'filters.allCountries': 'All Countries',
+    'filters.global': 'Global',
     'filters.applyFilters': 'Apply Filters',
     'filters.legend': 'Articles that match BOTH the selected industries AND countries will be shown.',
     'filters.legendIndustriesOnly': 'All articles that match ANY of the selected industries will be shown.',
@@ -172,6 +173,7 @@ const customTranslations = {
     'filters.countries': 'Países',
     'filters.allIndustries': 'Todas las Industrias',
     'filters.allCountries': 'Todos los Países',
+    'filters.global': 'Global',
     'filters.applyFilters': 'Aplicar Filtros',
     'filters.legend': 'Se mostrarán artículos que coincidan con AMBAS industrias Y países seleccionados.',
     'filters.legendIndustriesOnly': 'Se mostrarán todos los artículos que coincidan con CUALQUIERA de las industrias seleccionadas.',
@@ -270,7 +272,7 @@ const customTranslations = {
     
     // Sign Up
     'signup.title': 'Únete al Servicio de Noticias Perkins',
-    'signup.subtitle': 'Obtén 3 meses de acceso gratis a noticias de negocios personalizadas',
+    'signup.subtitle': 'Obtén 3 meses de acceso gratis a notícias de negocios personalizadas',
     'signup.email': 'Email',
     'signup.password': 'Contraseña',
     'signup.confirmPassword': 'Confirmar Contraseña',
@@ -329,6 +331,7 @@ const customTranslations = {
     'filters.countries': 'Países',
     'filters.allIndustries': 'Todas as Indústrias',
     'filters.allCountries': 'Todos os Países',
+    'filters.global': 'Global',
     'filters.applyFilters': 'Aplicar Filtros',
     'filters.legend': 'Artigos que correspondem a AMBAS indústrias E países selecionados serão mostrados.',
     'filters.legendIndustriesOnly': 'Todos os artigos que correspondem a QUALQUER uma das indústrias selecionadas serão mostrados.',

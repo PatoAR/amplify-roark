@@ -9,6 +9,7 @@ import './NewsSocketClient.css';
 
 // Constants for filtering logic
 const COUNTRY_OPTIONS = [
+  { id: 'global', label: 'GLOBAL', code: 'global' },
   { id: 'Q414', label: 'ARG', code:'ar' },
   { id: 'Q155', label: 'BRA', code: 'br' },
   { id: 'Q298', label: 'CHL', code: 'cl' },
@@ -89,7 +90,10 @@ function NewsSocketClient() {
     // Determine if the current article matches the selected filters.
     const industryMatches = !!(msg.industry && preferences.industries.includes(msg.industry));
     const articleCountryCodes = Array.isArray(msg.countries) ? msg.countries : []
-    const countryMatches = articleCountryCodes.some(code => preferences.countries.includes(code));
+    const hasGlobalSelected = preferences.countries.includes('global');
+    const countryMatches = hasGlobalSelected 
+      ? (articleCountryCodes.length === 0 || articleCountryCodes.some(code => preferences.countries.includes(code)))
+      : articleCountryCodes.some(code => preferences.countries.includes(code));
 
     // Case 1: Filters are set for BOTH Industries and Countries.
     // An article must match one of each.

@@ -3,7 +3,6 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 
 ## ToDo's
 - Implement split screen as suggested by ChatGPT
-- Global news button
 
 - Create interface to deliver different content  - publicity, financials, etc. fix on top, colors, etc.
 - Modified display text

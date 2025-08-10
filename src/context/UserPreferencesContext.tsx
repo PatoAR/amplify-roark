@@ -1,8 +1,7 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode, useRef } from 'react';
-import { useAuthenticator } from '@aws-amplify/ui-react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useSessionManager } from '../hooks/useSessionManager';
 import { generateClient } from 'aws-amplify/api';
 import { type Schema } from '../../amplify/data/resource';
-import { useSession } from './SessionContext';
 
 interface UserPreferences {
   industries: string[];
@@ -12,35 +11,40 @@ interface UserPreferences {
 interface UserPreferencesContextType {
   preferences: UserPreferences;
   savePreferences: (newPrefs: UserPreferences) => Promise<void>;
+  dismissDisclaimer: () => void;
+  isDisclaimerVisible: boolean;
   isLoading: boolean;
-  userProfileId: string | null; 
+  userProfileId: string | null;
 }
 
-// Create the context with a default value
 const UserPreferencesContext = createContext<UserPreferencesContextType | undefined>(undefined);
 
-// Create the Provider component
-export const UserPreferencesProvider = ({ children }: { children: ReactNode }) => {
-  const { user } = useAuthenticator();
-  const [preferences, setPreferences] = useState<UserPreferences>({ industries: [], countries: [] });
-  const [userProfileId, setUserProfileId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const { trackPreferenceUpdate } = useSession();
-  const clientRef = useRef<ReturnType<typeof generateClient<Schema>> | null>(null);
+interface UserPreferencesProviderProps {
+  children: ReactNode;
+}
 
-  // Initialize client when needed
-  const getClient = useCallback(() => {
-    if (!clientRef.current) {
-      clientRef.current = generateClient<Schema>();
+export const UserPreferencesProvider: React.FC<UserPreferencesProviderProps> = ({ children }) => {
+  const { userId } = useSessionManager();
+  const [preferences, setPreferences] = useState<UserPreferences>({
+    industries: [],
+    countries: []
+  });
+  const [isDisclaimerVisible, setIsDisclaimerVisible] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [userProfileId, setUserProfileId] = useState<string | null>(null);
+
+  // Reset disclaimer visibility on every login
+  useEffect(() => {
+    if (userId) {
+      setIsDisclaimerVisible(true);
     }
-    return clientRef.current;
-  }, []);
+  }, [userId]);
 
   // Function to load preferences, fetched only once here
-  const loadUserPreferences = useCallback(async (cognitoUserId: string) => {
+  const loadUserPreferences = async (cognitoUserId: string) => {
     setIsLoading(true);
     try {
-      const client = getClient();
+      const client = generateClient();
 
       const listUserProfilesQuery = /* GraphQL */ `
         query ListUserProfiles($filter: ModelUserProfileFilterInput) {
@@ -72,8 +76,8 @@ export const UserPreferencesProvider = ({ children }: { children: ReactNode }) =
         setUserProfileId(profile.id);
         console.log('✅ User preferences loaded successfully');
       } else {
-        // No profile exists, reset to default
-        setPreferences({ industries: [], countries: [] });
+              // No profile exists, reset to default
+      setPreferences({ industries: [], countries: [] });
         setUserProfileId(null);
         console.log('ℹ️ No user profile found, using default preferences');
       }
@@ -85,28 +89,28 @@ export const UserPreferencesProvider = ({ children }: { children: ReactNode }) =
     } finally {
       setIsLoading(false);
     }
-  }, [getClient]);
+  };
 
   // Effect to load preferences when user logs in
   useEffect(() => {
-    if (user?.userId) {
-      loadUserPreferences(user.userId);
+    if (userId) {
+      loadUserPreferences(userId);
     } else {
       // No user, reset to default state
       setPreferences({ industries: [], countries: [] });
       setUserProfileId(null);
       setIsLoading(false);
     }
-  }, [user, loadUserPreferences]);
+  }, [userId, loadUserPreferences]);
 
   // Function to save preferences
   const savePreferences = async (newPrefs: UserPreferences) => {
-    if (!user?.userId) {
+    if (!userId) {
       console.error("Cannot save preferences, no user is authenticated.");
       return;
     }
 
-    const client = getClient();
+    const client = generateClient();
     if (!client) {
       console.error('Cannot save preferences: Amplify client not available');
       return;
@@ -167,10 +171,10 @@ export const UserPreferencesProvider = ({ children }: { children: ReactNode }) =
       const changedCountries = newPrefs.countries.filter(country => !preferences.countries.includes(country));
       
       if (changedIndustries.length > 0) {
-        trackPreferenceUpdate('industries', changedIndustries);
+        // trackPreferenceUpdate('industries', changedIndustries); // This line was removed as per the edit hint
       }
       if (changedCountries.length > 0) {
-        trackPreferenceUpdate('countries', changedCountries);
+        // trackPreferenceUpdate('countries', changedCountries); // This line was removed as per the edit hint
       }
       
       console.log("Preferences saved successfully.");
@@ -179,7 +183,19 @@ export const UserPreferencesProvider = ({ children }: { children: ReactNode }) =
     }
   };
 
-  const value = { preferences, savePreferences, isLoading, userProfileId };
+  // Function to dismiss disclaimer (session-only, no persistence)
+  const dismissDisclaimer = () => {
+    setIsDisclaimerVisible(false);
+  };
+
+  const value: UserPreferencesContextType = {
+    preferences,
+    savePreferences,
+    dismissDisclaimer,
+    isDisclaimerVisible,
+    isLoading,
+    userProfileId
+  };
 
   return (
     <UserPreferencesContext.Provider value={value}>
