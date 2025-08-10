@@ -1,6 +1,5 @@
 // src/hooks/useInactivityTimer.ts
 import { useEffect, useRef, useCallback } from 'react';
-import { signOut } from 'aws-amplify/auth';
 import { useNavigate } from 'react-router-dom';
 
 interface UseInactivityTimerOptions {
@@ -36,12 +35,16 @@ export const useInactivityTimer = ({
     // Set the main logout timer
     logoutTimerRef.current = setTimeout(() => {
       console.log('User inactive, logging out...');
-        signOut()
-        .then(() => {
-          onLogout?.();
+      (async () => {
+        try {
+          // Delegate logout to caller (e.g., centralized SessionContext.logout)
+          await onLogout?.();
+        } catch (error) {
+          console.error('Error during inactivity logout callback:', error);
+        } finally {
           navigate('/'); // Redirect to home page
-        })
-        .catch((error:unknown) => console.error('Error signing out:', error));
+        }
+      })();
     }, timeoutInMinutes * 60 * 1000);
 
     // Set the warning timer (if specified and makes sense)

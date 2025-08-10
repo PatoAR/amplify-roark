@@ -105,8 +105,7 @@ const customTranslations = {
     'deleteAccount.confirmDelete': 'Delete Account',
     'deleteAccount.accountDeleted': 'Account deleted successfully. You will be redirected to the login page.',
     'deleteAccount.enterPassword': 'Please enter your password to confirm account deletion',
-    'deleteAccount.confirmPassword': 'Confirm Password',
-    'deleteAccount.enterPasswordToConfirm': 'Enter your password to confirm',
+    // Removed password confirmation fields from delete account flow
     'deleteAccount.deleting': 'Deleting account...',
     'deleteAccount.failedToDelete': 'Failed to delete account',
     'deleteAccount.unexpectedError': 'An unexpected error occurred while deleting account',

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { useActivityTracking } from './useActivityTracking';
 import { ErrorContext } from '../types/errors';
@@ -23,6 +23,11 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     isAuthenticated: false,
     isSessionActive: false,
   });
+  // Reactive state mirrors for consumers to re-render
+  const [isAuthenticatedState, setIsAuthenticatedState] = useState<boolean>(false);
+  const [isSessionActiveState, setIsSessionActiveState] = useState<boolean>(false);
+  const [userIdState, setUserIdState] = useState<string | undefined>(undefined);
+  const [sessionIdState, setSessionIdState] = useState<string | undefined>(undefined);
   const isLoggingOutRef = useRef<boolean>(false);
   const sessionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -140,6 +145,10 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
           userId: user.userId,
           sessionId: sessionStateRef.current.sessionId,
         };
+        setIsAuthenticatedState(true);
+        setIsSessionActiveState(true);
+        setUserIdState(user.userId);
+        setSessionIdState(sessionStateRef.current.sessionId);
         
         startSession().then(() => {
           // Set up session timeout
@@ -159,6 +168,10 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
             userId: undefined,
             sessionId: undefined,
           };
+          setIsAuthenticatedState(false);
+          setIsSessionActiveState(false);
+          setUserIdState(undefined);
+          setSessionIdState(undefined);
           if (options.onAuthError) {
             options.onAuthError(error);
           }
@@ -221,10 +234,10 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
 
   return {
     // State
-    isAuthenticated: sessionStateRef.current.isAuthenticated,
-    isSessionActive: sessionStateRef.current.isSessionActive,
-    userId: sessionStateRef.current.userId,
-    sessionId: sessionStateRef.current.sessionId,
+    isAuthenticated: isAuthenticatedState,
+    isSessionActive: isSessionActiveState,
+    userId: userIdState,
+    sessionId: sessionIdState,
     authStatus,
     
     // Actions

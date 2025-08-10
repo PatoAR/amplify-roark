@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { useSessionManager } from '../hooks/useSessionManager';
+import { useSession } from './SessionContext';
 import { generateClient } from 'aws-amplify/api';
 
 interface UserPreferences {
@@ -23,7 +23,7 @@ interface UserPreferencesProviderProps {
 }
 
 export const UserPreferencesProvider: React.FC<UserPreferencesProviderProps> = ({ children }) => {
-  const { userId } = useSessionManager();
+  const { userId } = useSession();
   const [preferences, setPreferences] = useState<UserPreferences>({
     industries: [],
     countries: []

@@ -1,4 +1,4 @@
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, ReactNode, useState } from 'react';
 import { useSessionManager } from '../hooks/useSessionManager';
 
 interface SessionContextType {
@@ -12,6 +12,8 @@ interface SessionContextType {
   trackReferralActivity: (action: 'generated' | 'shared', referralCode?: string) => void;
   trackArticleClick: (articleId: string, articleTitle: string) => void;
   userId?: string;
+  authError: Error | null;
+  clearAuthError: () => void;
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -21,6 +23,7 @@ interface SessionProviderProps {
 }
 
 export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) => {
+  const [authError, setAuthError] = useState<Error | null>(null);
   const sessionManager = useSessionManager({
     onSessionStart: (userId) => {
       console.log('✅ Session started for user:', userId);
@@ -30,6 +33,7 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     },
     onAuthError: (error) => {
       console.error('❌ Authentication error:', error);
+      setAuthError(error instanceof Error ? error : new Error('Authentication error'));
     }
   });
 
@@ -46,6 +50,8 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     userId,
   } = sessionManager;
 
+  const clearAuthError = () => setAuthError(null);
+
   return (
     <SessionContext.Provider value={{
       isAuthenticated,
@@ -57,6 +63,8 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
       trackReferralActivity,
       trackArticleClick,
       userId,
+      authError,
+      clearAuthError,
     }}>
       {children}
     </SessionContext.Provider>

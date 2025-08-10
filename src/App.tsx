@@ -17,7 +17,7 @@ import "./App.css"
 export default function App() {
   const [isWarningDialogOpen, setWarningDialogOpen] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
-  const [authError, setAuthError] = useState<Error | null>(null);
+  // Auth error is now provided by SessionContext
   const [isInitializing, setIsInitializing] = useState(true);
 
   // Use session context
@@ -26,7 +26,9 @@ export default function App() {
     isSessionActive, 
     authStatus,
     logout,
-    trackPageViewIfActive 
+    trackPageViewIfActive,
+    authError,
+    clearAuthError,
   } = useSession();
 
   // Handle inactivity timer separately (only when authenticated)
@@ -60,14 +62,14 @@ export default function App() {
     // If we have a clear authenticated state, we're ready
     if (authStatus === 'authenticated' && isAuthenticated && isSessionActive) {
       setIsInitializing(false);
-      setAuthError(null);
+      clearAuthError();
       return;
     }
 
     // If we have a clear unauthenticated state, we're ready
     if (authStatus === 'unauthenticated') {
       setIsInitializing(false);
-      setAuthError(null);
+      clearAuthError();
       return;
     }
 
@@ -120,14 +122,14 @@ export default function App() {
   };
 
   const handleAuthErrorRetry = () => {
-    setAuthError(null);
+    clearAuthError();
     setIsInitializing(true);
     // Force a page reload to reset authentication state
     window.location.reload();
   };
 
   const handleAuthErrorLogout = async () => {
-    setAuthError(null);
+    clearAuthError();
     await logout();
   };
 

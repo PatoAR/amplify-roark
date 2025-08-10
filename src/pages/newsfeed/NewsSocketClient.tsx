@@ -98,11 +98,16 @@ function NewsSocketClient() {
       };
 
       // Derive article country IDs and unknowns
-      const rawArticleCountries = Array.isArray(msg.countries) ? msg.countries : [];
-      const articleCountryIds = rawArticleCountries
+      // Normalize countries: msg.countries may be a record; convert to array of keys
+      const rawCountriesArr = Array.isArray(msg.countries)
+        ? msg.countries
+        : (msg.countries && typeof msg.countries === 'object')
+          ? Object.keys(msg.countries)
+          : [];
+      const articleCountryIds = rawCountriesArr
         .map(toCountryId)
         .filter((id): id is string => id !== null);
-      const allUnknown = rawArticleCountries.length > 0 && articleCountryIds.length === 0;
+      const allUnknown = rawCountriesArr.length > 0 && articleCountryIds.length === 0;
 
       // Selected countries (IDs only), excluding 'global'
       const selectedCountryIdSet = new Set<string>(
@@ -118,7 +123,7 @@ function NewsSocketClient() {
       // - It matches any explicitly selected country IDs, OR
       // - It has no countries, OR
       // - All its countries are unknown (not in COUNTRY_OPTIONS)
-      const hasNoCountries = rawArticleCountries.length === 0;
+      const hasNoCountries = rawCountriesArr.length === 0;
 
       countryMatches = matchesSelectedCountries || hasNoCountries || allUnknown;
 
@@ -134,8 +139,13 @@ function NewsSocketClient() {
         );
         return opt ? opt.id : null;
       };
-      const rawArticleCountries = Array.isArray(msg.countries) ? msg.countries : [];
-      const articleCountryIds = rawArticleCountries
+      // Normalize countries: msg.countries may be a record; convert to array of keys
+      const rawCountriesArr = Array.isArray(msg.countries)
+        ? msg.countries
+        : (msg.countries && typeof msg.countries === 'object')
+          ? Object.keys(msg.countries)
+          : [];
+      const articleCountryIds = rawCountriesArr
         .map(toCountryId)
         .filter((id): id is string => id !== null);
 
