@@ -11,7 +11,6 @@ let hasLoggedAppSyncEnv = false;
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
-      APPSYNC_URL?: string;
       API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT?: string;
       AWS_REGION?: string;
     }
@@ -19,7 +18,7 @@ declare global {
 }
 
 async function getAppSyncUrl(): Promise<string> {
-  const url = process.env.APPSYNC_URL || process.env.API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT;
+  const url = process.env.API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT;
   if (!url) throw new Error('AppSync URL not configured');
   return url;
 }
