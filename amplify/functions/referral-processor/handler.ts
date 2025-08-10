@@ -1,23 +1,49 @@
 import fetch from 'node-fetch';
-import { SignatureV4 } from '@aws-sdk/signature-v4';
-import { defaultProvider } from '@aws-sdk/credential-provider-node';
-import { HttpRequest } from '@aws-sdk/protocol-http';
-import { Sha256 } from '@aws-crypto/sha256-js';
+import { secret } from '@aws-amplify/backend';
 
 // Type declaration for process.env to avoid @types/node dependency
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
-      API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT?: string;
       AWS_REGION?: string;
     }
   }
 }
 
 async function getAppSyncUrl(): Promise<string> {
-  const url = process.env.API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT;
-  if (!url) throw new Error('AppSync URL not configured');
-  return url;
+  try {
+    // Use Amplify Gen 2 secrets for secure configuration
+    const urlSecret = await secret('GRAPHQL_API_URL');
+    const url = urlSecret.toString();
+    if (!url) {
+      throw new Error('GRAPHQL_API_URL secret not configured');
+    }
+    return url;
+  } catch (error) {
+    console.error('Error accessing GRAPHQL_API_URL secret:', error);
+    // Fallback to old environment variable for backward compatibility
+    const fallbackUrl = process.env.API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT;
+    if (fallbackUrl) {
+      console.log('Using fallback API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT');
+      return fallbackUrl;
+    }
+    throw new Error('AppSync URL not configured. Please set GRAPHQL_API_URL secret in Amplify console.');
+  }
+}
+
+async function getApiKey(): Promise<string> {
+  try {
+    // Use Amplify Gen 2 secrets for secure configuration
+    const apiKeySecret = await secret('GRAPHQL_API_KEY');
+    const apiKey = apiKeySecret.toString();
+    if (!apiKey) {
+      throw new Error('GRAPHQL_API_KEY secret not configured');
+    }
+    return apiKey;
+  } catch (error) {
+    console.error('Error accessing GRAPHQL_API_KEY secret:', error);
+    throw new Error('AppSync API Key not configured. Please set GRAPHQL_API_KEY secret in Amplify console.');
+  }
 }
 
 interface AppSyncResponse<T = any> {
@@ -31,37 +57,26 @@ interface AppSyncResponse<T = any> {
 
 async function appsyncRequest<T = any>(query: string, variables?: any): Promise<T> {
   const url = await getAppSyncUrl();
-  const region = process.env.AWS_REGION || extractRegionFromAppSyncUrl(url);
+  const apiKey = await getApiKey();
   const body = JSON.stringify({ query, variables });
 
-  const { hostname, pathname, protocol } = new URL(url);
-  const request = new HttpRequest({
+  console.log(`Making AppSync request to: ${url}`);
+  console.log(`Query: ${query}`);
+  console.log(`Variables: ${JSON.stringify(variables)}`);
+
+  const response = await fetch(url, {
     method: 'POST',
-    protocol,
-    hostname,
-    path: pathname,
     headers: {
-      'content-type': 'application/json',
-      host: hostname,
+      'x-api-key': apiKey,
+      'Content-Type': 'application/json',
     },
     body,
   });
 
-  const signer = new SignatureV4({
-    service: 'appsync',
-    region,
-    credentials: defaultProvider(),
-    sha256: Sha256,
-  });
-
-  const signed = await signer.sign(request);
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: signed.headers as any,
-    body,
-  });
-
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`AppSync request failed: ${response.status} ${response.statusText}`);
+    console.error(`Response body: ${errorText}`);
     throw new Error(`AppSync request failed: ${response.status} ${response.statusText}`);
   }
 
@@ -75,10 +90,7 @@ async function appsyncRequest<T = any>(query: string, variables?: any): Promise<
   return result.data as T;
 }
 
-function extractRegionFromAppSyncUrl(url: string): string {
-  const match = url.match(/appsync-api\.([a-z0-9-]+)\.amazonaws\.com/i);
-  return match?.[1] || process.env.AWS_REGION || 'us-east-1';
-}
+
 
 interface ReferralEvent {
   action: 'generate_code' | 'validate_code' | 'process_referral' | 'extend_subscription';

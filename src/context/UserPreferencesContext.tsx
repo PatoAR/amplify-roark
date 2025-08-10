@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useSessionManager } from '../hooks/useSessionManager';
 import { generateClient } from 'aws-amplify/api';
-import { type Schema } from '../../amplify/data/resource';
 
 interface UserPreferences {
   industries: string[];
