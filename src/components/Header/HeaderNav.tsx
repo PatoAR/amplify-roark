@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Menu, MenuItem, Divider, Button } from "@aws-amplify/ui-react";
 import { useNavigate } from "react-router-dom";
 import { useSession } from '../../context/SessionContext';
@@ -8,32 +8,10 @@ import { Gift, TrendingUp, Building2, HardHat, Zap, Wheat, Banknote, Stethoscope
 import { useFreeDaysRemaining } from '../../hooks/useFreeDaysRemaining';
 import { useTranslation } from '../../i18n';
 import LanguageSwitcher from '../LanguageSwitcher/LanguageSwitcher';
-
-const INDUSTRY_OPTIONS = [
-  { id: '💵 MARKETS', label: 'MARKETS', icon: TrendingUp },
-  { id: '📈 ECONOMY', label: 'ECONOMY', icon: Building2 },
-  { id: '⛏️ MINING', label: 'MINING', icon: HardHat },
-  { id: '⚡ ENERGY', label: 'ENERGY', icon: Zap },
-  { id: '🚜 AGRIBUSINESS', label: 'AGRIBUSINESS', icon: Wheat },
-  { id: '🏛️ FINANCIALS', label: 'FINANCIALS', icon: Banknote },
-  { id: '💊 HEALTHCARE', label: 'HEALTHCARE', icon: Stethoscope },
-  { id: '🏭 INDUSTRIALS', label: 'INDUSTRIALS', icon: Factory },
-  { id: '🛰️ TECH•MEDIA•TELCO', label: 'TECH•MEDIA•TELCO', icon: Satellite },
-  { id: '🛍️ RETAIL', label: 'RETAIL', icon: ShoppingBag },
-  { id: '✈️ TRAVEL•LEISURE', label: 'TRAVEL•LEISURE', icon: Plane },
-  { id: '🚂 TRANSPORTATION', label: 'TRANSPORTATION', icon: Train },
-];
-
-const COUNTRY_OPTIONS = [
-  { id: 'global', label: 'GLOBAL', code: 'global' },
-  { id: 'Q414', label: 'ARG', code:'ar' },
-  { id: 'Q155', label: 'BRA', code: 'br' },
-  { id: 'Q298', label: 'CHL', code: 'cl' },
-  { id: 'Q733', label: 'PAR', code: 'py' },
-  { id: 'Q77', label: 'URU', code: 'uy' },
-];
+import { COUNTRY_OPTIONS, INDUSTRY_OPTIONS } from '../../constants/countries';
 
 const HeaderNav = () => {
+  const { t } = useTranslation();
   const { logout } = useSession();
   const navigate = useNavigate();
   const [showFiltersModal, setShowFiltersModal] = useState(false); // State to control modal visibility
@@ -47,7 +25,7 @@ const HeaderNav = () => {
   const [selectAllCountries, setSelectAllCountries] = useState(false);
 
   
-  const handleOpenFiltersModal = () => {
+  const handleOpenFiltersModal = useCallback(() => {
     // When opening the modal, sync local state with context
     setLocalIndustries(preferences.industries);
     setLocalCountries(preferences.countries);
@@ -57,7 +35,7 @@ const HeaderNav = () => {
     setSelectAllCountries(preferences.countries.length === COUNTRY_OPTIONS.length);
     
     setShowFiltersModal(true);
-  };
+  }, [preferences.industries, preferences.countries]);
 
   // Listen for the custom event from the WelcomeScreen
   useEffect(() => {
@@ -67,19 +45,19 @@ const HeaderNav = () => {
     };
   }, [handleOpenFiltersModal]);
 
-  const handleCloseFiltersModal = () => setShowFiltersModal(false);
+  const handleCloseFiltersModal = useCallback(() => setShowFiltersModal(false), []);
 
-  const onSubmitFilters = async (event: React.FormEvent<HTMLFormElement>) => {
+  const onSubmitFilters = useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     await savePreferences({
       industries: localIndustries,
       countries: localCountries,
     });
     handleCloseFiltersModal();
-  };
+  }, [localIndustries, localCountries, savePreferences, handleCloseFiltersModal]);
   
   // Handlers for tag system
-  const handleIndustryChange = (industryId: string) => {
+  const handleIndustryChange = useCallback((industryId: string) => {
     if (selectAllIndustries) return; // Mute individual selections when "all" is selected
     
     setLocalIndustries(prev => 
@@ -87,9 +65,9 @@ const HeaderNav = () => {
         ? prev.filter(id => id !== industryId) 
         : [...prev, industryId]
     );
-  };
+  }, [selectAllIndustries]);
 
-  const handleCountryChange = (countryId: string) => {
+  const handleCountryChange = useCallback((countryId: string) => {
     if (selectAllCountries) return; // Mute individual selections when "all" is selected
     
     setLocalCountries(prev => 
@@ -97,10 +75,10 @@ const HeaderNav = () => {
         ? prev.filter(id => id !== countryId) 
         : [...prev, countryId]
     );
-  };
+  }, [selectAllCountries]);
 
   // New handlers for "all" selections
-  const handleAllIndustriesToggle = () => {
+  const handleAllIndustriesToggle = useCallback(() => {
     if (selectAllIndustries) {
       // Deselect all industries
       setLocalIndustries([]);
@@ -110,9 +88,9 @@ const HeaderNav = () => {
       setLocalIndustries(INDUSTRY_OPTIONS.map(industry => industry.id));
       setSelectAllIndustries(true);
     }
-  };
+  }, [selectAllIndustries]);
 
-  const handleAllCountriesToggle = () => {
+  const handleAllCountriesToggle = useCallback(() => {
     if (selectAllCountries) {
       // Deselect all countries
       setLocalCountries([]);
@@ -122,9 +100,9 @@ const HeaderNav = () => {
       setLocalCountries(COUNTRY_OPTIONS.map(country => country.id));
       setSelectAllCountries(true);
     }
-  };
+  }, [selectAllCountries]);
   
-  const getFilteringLegend = () => {
+  const getFilteringLegend = useCallback(() => {
     const hasIndustries = localIndustries.length > 0;
     const hasCountries = localCountries.length > 0;
     const allCountriesSelected = localCountries.length === COUNTRY_OPTIONS.length;
@@ -145,9 +123,7 @@ const HeaderNav = () => {
     }
     // This is the state where no articles will be shown after applying filters.
     return t('filters.legendNoFilters');
-  };
-
-  const { t } = useTranslation();
+  }, [localIndustries, localCountries, t]);
 
   return (
     <>
@@ -215,7 +191,22 @@ const HeaderNav = () => {
             </div>
             <div className="tag-container">
               {INDUSTRY_OPTIONS.map((industry) => {
-                const IconComponent = industry.icon;
+                // Map icon names to actual icon components
+                const iconMap: Record<string, React.ComponentType<any>> = {
+                  'TrendingUp': TrendingUp,
+                  'Building2': Building2,
+                  'HardHat': HardHat,
+                  'Zap': Zap,
+                  'Wheat': Wheat,
+                  'Banknote': Banknote,
+                  'Stethoscope': Stethoscope,
+                  'Factory': Factory,
+                  'Satellite': Satellite,
+                  'ShoppingBag': ShoppingBag,
+                  'Plane': Plane,
+                  'Train': Train
+                };
+                const IconComponent = iconMap[industry.icon] || TrendingUp;
                 return (
                   <button
                     type="button" // Important to prevent form submission on click

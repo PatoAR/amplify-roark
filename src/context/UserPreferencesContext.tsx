@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useSessionManager } from '../hooks/useSessionManager';
 import { generateClient } from 'aws-amplify/api';
 
@@ -40,7 +40,7 @@ export const UserPreferencesProvider: React.FC<UserPreferencesProviderProps> = (
   }, [userId]);
 
   // Function to load preferences, fetched only once here
-  const loadUserPreferences = async (cognitoUserId: string) => {
+  const loadUserPreferences = useCallback(async (cognitoUserId: string) => {
     setIsLoading(true);
     try {
       const client = generateClient();
@@ -75,8 +75,8 @@ export const UserPreferencesProvider: React.FC<UserPreferencesProviderProps> = (
         setUserProfileId(profile.id);
         console.log('✅ User preferences loaded successfully');
       } else {
-              // No profile exists, reset to default
-      setPreferences({ industries: [], countries: [] });
+        // No profile exists, reset to default
+        setPreferences({ industries: [], countries: [] });
         setUserProfileId(null);
         console.log('ℹ️ No user profile found, using default preferences');
       }
@@ -88,7 +88,7 @@ export const UserPreferencesProvider: React.FC<UserPreferencesProviderProps> = (
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   // Effect to load preferences when user logs in
   useEffect(() => {
@@ -103,7 +103,7 @@ export const UserPreferencesProvider: React.FC<UserPreferencesProviderProps> = (
   }, [userId, loadUserPreferences]);
 
   // Function to save preferences
-  const savePreferences = async (newPrefs: UserPreferences) => {
+  const savePreferences = useCallback(async (newPrefs: UserPreferences) => {
     if (!userId) {
       console.error("Cannot save preferences, no user is authenticated.");
       return;
@@ -163,29 +163,31 @@ export const UserPreferencesProvider: React.FC<UserPreferencesProviderProps> = (
           setUserProfileId(result.data.createUserProfile.id);
         }
       }
-      setPreferences(newPrefs); // Update state immediately for responsiveness
-      
-      // Track preference updates
-      const changedIndustries = newPrefs.industries.filter(ind => !preferences.industries.includes(ind));
-      const changedCountries = newPrefs.countries.filter(country => !preferences.countries.includes(country));
-      
-      if (changedIndustries.length > 0) {
-        // trackPreferenceUpdate('industries', changedIndustries); // This line was removed as per the edit hint
-      }
-      if (changedCountries.length > 0) {
-        // trackPreferenceUpdate('countries', changedCountries); // This line was removed as per the edit hint
-      }
+      // Update state and track preference updates in one operation
+      setPreferences(prevPrefs => {
+        const changedIndustries = newPrefs.industries.filter(ind => !prevPrefs.industries.includes(ind));
+        const changedCountries = newPrefs.countries.filter(country => !prevPrefs.countries.includes(country));
+        
+        if (changedIndustries.length > 0) {
+          // trackPreferenceUpdate('industries', changedIndustries); // This line was removed as per the edit hint
+        }
+        if (changedCountries.length > 0) {
+          // trackPreferenceUpdate('countries', changedCountries); // This line was removed as per the edit hint
+        }
+        
+        return newPrefs;
+      });
       
       console.log("Preferences saved successfully.");
     } catch (error) {
       console.error("Error saving preferences:", error);
     }
-  };
+  }, [userId, userProfileId]);
 
   // Function to dismiss disclaimer (session-only, no persistence)
-  const dismissDisclaimer = () => {
+  const dismissDisclaimer = useCallback(() => {
     setIsDisclaimerVisible(false);
-  };
+  }, []);
 
   const value: UserPreferencesContextType = {
     preferences,

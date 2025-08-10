@@ -5,17 +5,8 @@ import { useNews } from '../../context/NewsContext';
 import { useSession } from '../../context/SessionContext';
 import WelcomeScreen from '../../components/WelcomeScreen/WelcomeScreen';
 import { useTranslation } from '../../i18n';
+import { COUNTRY_OPTIONS } from '../../constants/countries';
 import './NewsSocketClient.css';
-
-// Constants for filtering logic
-const COUNTRY_OPTIONS = [
-  { id: 'global', label: 'GLOBAL', code: 'global' },
-  { id: 'Q414', label: 'ARG', code:'ar' },
-  { id: 'Q155', label: 'BRA', code: 'br' },
-  { id: 'Q298', label: 'CHL', code: 'cl' },
-  { id: 'Q733', label: 'PAR', code: 'py' },
-  { id: 'Q77', label: 'URU', code: 'uy' },
-];
 
 function formatLocalTime(timestamp?: string | null): string {
   if (!timestamp) return '';
@@ -89,32 +80,97 @@ function NewsSocketClient() {
 
     // Determine if the current article matches the selected filters.
     const industryMatches = !!(msg.industry && preferences.industries.includes(msg.industry));
-    const articleCountryCodes = Array.isArray(msg.countries) ? msg.countries : []
     const hasGlobalSelected = preferences.countries.includes('global');
-    const countryMatches = hasGlobalSelected 
-      ? (articleCountryCodes.length === 0 || articleCountryCodes.some(code => preferences.countries.includes(code)))
-      : articleCountryCodes.some(code => preferences.countries.includes(code));
+    
+    // Console log the countries variable for each article being processed (muted)
+    // console.log(`[Article Filter] Article ID: ${msg.id}, Countries:`, articleCountryCodes, 'Type:', typeof msg.countries);
+    
+    // New global option logic: when global is selected, show articles with no country value OR with country values NOT in COUNTRY_OPTIONS
+    let countryMatches = false;
+    if (hasGlobalSelected) {
+      // Helper to map any value (id or code) to a known country ID
+      const toCountryId = (value: unknown): string | null => {
+        const v = String(value).trim().toLowerCase();
+        const opt = COUNTRY_OPTIONS.find(
+          c => c.id.toLowerCase() === v || c.code.toLowerCase() === v
+        );
+        return opt ? opt.id : null;
+      };
+
+      // Derive article country IDs and unknowns
+      const rawArticleCountries = Array.isArray(msg.countries) ? msg.countries : [];
+      const articleCountryIds = rawArticleCountries
+        .map(toCountryId)
+        .filter((id): id is string => id !== null);
+      const allUnknown = rawArticleCountries.length > 0 && articleCountryIds.length === 0;
+
+      // Selected countries (IDs only), excluding 'global'
+      const selectedCountryIdSet = new Set<string>(
+        preferences.countries.filter(id => id !== 'global')
+      );
+
+      const matchesSelectedCountries = (
+        selectedCountryIdSet.size > 0 &&
+        articleCountryIds.some(id => selectedCountryIdSet.has(id))
+      );
+
+      // Article matches if:
+      // - It matches any explicitly selected country IDs, OR
+      // - It has no countries, OR
+      // - All its countries are unknown (not in COUNTRY_OPTIONS)
+      const hasNoCountries = rawArticleCountries.length === 0;
+
+      countryMatches = matchesSelectedCountries || hasNoCountries || allUnknown;
+
+      // console.log(
+      //   `[Article Filter] Global selected - hasNoCountries: ${hasNoCountries}, allUnknown: ${allUnknown}, matchesSelected (ids): ${matchesSelectedCountries}`
+      // );
+    } else {
+      // Global option not selected - only show articles matching selected country IDs
+      const toCountryId = (value: unknown): string | null => {
+        const v = String(value).trim().toLowerCase();
+        const opt = COUNTRY_OPTIONS.find(
+          c => c.id.toLowerCase() === v || c.code.toLowerCase() === v
+        );
+        return opt ? opt.id : null;
+      };
+      const rawArticleCountries = Array.isArray(msg.countries) ? msg.countries : [];
+      const articleCountryIds = rawArticleCountries
+        .map(toCountryId)
+        .filter((id): id is string => id !== null);
+
+      const selectedCountryIdSet = new Set<string>(preferences.countries);
+
+      countryMatches = selectedCountryIdSet.size > 0 && articleCountryIds.some(id => selectedCountryIdSet.has(id));
+    }
 
     // Case 1: Filters are set for BOTH Industries and Countries.
     // An article must match one of each.
     if (hasIndustryFilters && effectiveHasCountryFilters) {
-      return industryMatches && countryMatches;
+      const result = industryMatches && countryMatches;
+      // console.log(`[Article Filter] Case 1 (Both filters): Industry: ${industryMatches}, Country: ${countryMatches}, Result: ${result}`);
+      return result;
     }
 
     // Case 2: Filters are set for Industries ONLY.
     // An article only needs to match an industry.
     if (hasIndustryFilters) {
-      return industryMatches;
+      const result = industryMatches;
+      // console.log(`[Article Filter] Case 2 (Industry only): Industry: ${industryMatches}, Result: ${result}`);
+      return result;
     }
 
     // Case 3: Filters are set for Countries ONLY (but not "all countries").
     // An article only needs to match a country.
     if (effectiveHasCountryFilters) {
-      return countryMatches;
+      const result = countryMatches;
+      // console.log(`[Article Filter] Case 3 (Country only): Country: ${countryMatches}, Result: ${result}`);
+      return result;
     }
 
     // Case 4: No filters are set OR "all countries" is selected.
     // Show all articles.
+    // console.log(`[Article Filter] Case 4 (No filters): Showing all articles`);
     return true;
   });
 
@@ -148,16 +204,20 @@ function NewsSocketClient() {
       ) : (
         <div className="articles-container">
           <AnimatePresence initial={false}>
-            {filteredMessages.map((msg) => (
-              <motion.div
-                key={msg.id}
-                layout="position"
-                className={`article-card ${msg.seen ? '' : 'unseen'}`}
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10, transition: { duration: 0.3 } }}
-                transition={{ duration: 0.5 }}
-              >
+            {filteredMessages.map((msg) => {
+              // Console log the countries for each displayed article (muted)
+              // console.log(`[Displayed Article] ID: ${msg.id}, Title: ${msg.title}, Countries:`, msg.countries, 'Type:', typeof msg.countries);
+              
+              return (
+                <motion.div
+                  key={msg.id}
+                  layout="position"
+                  className={`article-card ${msg.seen ? '' : 'unseen'}`}
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10, transition: { duration: 0.3 } }}
+                  transition={{ duration: 0.5 }}
+                >
                 <a 
                   href={msg.link} 
                   onClick={(e) => handleArticleClick(e, msg.link, msg.id, msg.title)} 
@@ -196,7 +256,8 @@ function NewsSocketClient() {
                   </p>
                 </a>
               </motion.div>
-            ))}
+            );
+          })}
           </AnimatePresence>
         </div>
       )}
