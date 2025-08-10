@@ -2,11 +2,9 @@
 Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fetches, processes and stores news articles in dynambodb. The articles are distributed to varios channels (whatsapp, telegram) and to this webapp via AppSync subscriptions or long-polling.
 
 ## ToDo's
-- Do not show new message count on tab if user is not logged in
 - Implement split screen as suggested by ChatGPT
-- Articles may not be real time warning
-- Lucide icons to industry display on articles
 - Global news button
+
 - Create interface to deliver different content  - publicity, financials, etc. fix on top, colors, etc.
 - Modified display text
 

@@ -156,6 +156,9 @@ const customTranslations = {
     'userSettings.deleteAccountDesc': 'Permanently delete your account and all data',
     'userSettings.inviteFriends': 'Invite Friends',
     'userSettings.inviteFriendsDesc': 'Share your referral code and earn free months',
+    
+    // Disclaimer
+    'disclaimer.text': 'News may be delayed by several minutes depending on source publication and retrieval frequency.',
   },
   es: {
     // Menu items
@@ -310,6 +313,9 @@ const customTranslations = {
     'userSettings.deleteAccountDesc': 'Eliminar permanentemente tu cuenta y todos los datos',
     'userSettings.inviteFriends': 'Invitar Amigos',
     'userSettings.inviteFriendsDesc': 'Comparte tu código de referido y gana meses gratis',
+    
+    // Disclaimer
+    'disclaimer.text': 'Las noticias pueden retrasarse varios minutos según la publicación de la fuente y la frecuencia de actualización.',
   },
   pt: {
     // Menu items
@@ -464,6 +470,9 @@ const customTranslations = {
     'userSettings.deleteAccountDesc': 'Excluir permanentemente sua conta e todos os dados',
     'userSettings.inviteFriends': 'Convidar Amigos',
     'userSettings.inviteFriendsDesc': 'Compartilhe seu código de indicação e ganhe meses grátis',
+    
+    // Disclaimer
+    'disclaimer.text': 'As notícias podem sofrer atraso de alguns minutos, dependendo da publicação da fonte e da frequência de busca.',
   }
 };
 

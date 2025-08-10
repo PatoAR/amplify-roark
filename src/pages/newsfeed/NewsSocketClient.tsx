@@ -27,7 +27,7 @@ function NewsSocketClient() {
   const [isTabVisible, setIsTabVisible] = useState<boolean>(() => !document.hidden);
   const { preferences, isLoading, userProfileId } = useUserPreferences();
   const { articles, markArticleAsSeen } = useNews();
-  const { trackArticleClick } = useSession();
+  const { trackArticleClick, isAuthenticated } = useSession();
   const { t } = useTranslation();
 
   // Handles opening the article link to a new tab.
@@ -117,8 +117,13 @@ function NewsSocketClient() {
   // Unread counter in tab
   const unreadCount = filteredMessages.filter(msg => !msg.seen).length;  
   useEffect(() => {
-    document.title = unreadCount > 0 ? `(${unreadCount}) 🔥 Perkins Live Feed` : 'Perkins Live Feed';
-  }, [unreadCount]);
+    const baseTitle = 'Perkins Live Feed';
+    if (!isAuthenticated) {
+      document.title = baseTitle;
+      return;
+    }
+    document.title = unreadCount > 0 ? `(${unreadCount}) 🔥 ${baseTitle}` : baseTitle;
+  }, [unreadCount, isAuthenticated]);
 
   return (
     <div className="news-feed">

@@ -1,5 +1,9 @@
 import { PostConfirmationTriggerHandler } from 'aws-lambda';
 import fetch from 'node-fetch';
+import { SignatureV4 } from '@aws-sdk/signature-v4';
+import { defaultProvider } from '@aws-sdk/credential-provider-node';
+import { HttpRequest } from '@aws-sdk/protocol-http';
+import { Sha256 } from '@aws-crypto/sha256-js';
 
 let hasLoggedAppSyncEnv = false;
 
@@ -8,20 +12,16 @@ declare global {
   namespace NodeJS {
     interface ProcessEnv {
       APPSYNC_URL?: string;
-      APPSYNC_API_KEY?: string;
       API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT?: string;
-      API_AMPLIFY_GRAPHQLAPIKEYOUTPUT?: string;
+      AWS_REGION?: string;
     }
   }
 }
 
-async function getAppSyncConfig(): Promise<{ url: string; apiKey: string }> {
-  // Values are injected via Amplify secret('...') into env at runtime
+async function getAppSyncUrl(): Promise<string> {
   const url = process.env.APPSYNC_URL || process.env.API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT;
-  const apiKey = process.env.APPSYNC_API_KEY || process.env.API_AMPLIFY_GRAPHQLAPIKEYOUTPUT;
   if (!url) throw new Error('AppSync URL not configured');
-  if (!apiKey) throw new Error('AppSync API key not configured');
-  return { url, apiKey };
+  return url;
 }
 
 interface AppSyncResponse<T = any> {
@@ -34,14 +34,35 @@ interface AppSyncResponse<T = any> {
 }
 
 async function appsyncRequest<T = any>(query: string, variables?: any): Promise<T> {
-  const { url, apiKey } = await getAppSyncConfig();
+  const url = await getAppSyncUrl();
+  const region = process.env.AWS_REGION || extractRegionFromAppSyncUrl(url);
+  const body = JSON.stringify({ query, variables });
+
+  const { hostname, pathname, protocol } = new URL(url);
+  const request = new HttpRequest({
+    method: 'POST',
+    protocol,
+    hostname,
+    path: pathname,
+    headers: {
+      'content-type': 'application/json',
+      host: hostname,
+    },
+    body,
+  });
+
+  const signer = new SignatureV4({
+    service: 'appsync',
+    region,
+    credentials: defaultProvider(),
+    sha256: Sha256,
+  });
+
+  const signed = await signer.sign(request);
   const response = await fetch(url, {
     method: 'POST',
-    headers: {
-      'x-api-key': apiKey,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ query, variables }),
+    headers: signed.headers as any,
+    body,
   });
 
   if (!response.ok) {
@@ -56,6 +77,11 @@ async function appsyncRequest<T = any>(query: string, variables?: any): Promise<
   }
 
   return result.data as T;
+}
+
+function extractRegionFromAppSyncUrl(url: string): string {
+  const match = url.match(/appsync-api\.([a-z0-9-]+)\.amazonaws\.com/i);
+  return match?.[1] || process.env.AWS_REGION || 'us-east-1';
 }
 
 export const handler: PostConfirmationTriggerHandler = async (event) => {

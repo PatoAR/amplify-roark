@@ -1,4 +1,7 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
+import { postConfirmation } from "../auth/post-confirmation/resource";
+import { referralApi } from "../functions/referral-api/resource";
+import { referralProcessor } from "../functions/referral-processor/resource";
 
 const schema = a.schema({
   // Article Model
@@ -122,5 +125,10 @@ export const data = defineData({
     apiKeyAuthorizationMode: {
       expiresInDays: 30,
     },
+  },
+  functions: {
+    postConfirmation,
+    referralApi,
+    referralProcessor,
   },
 });
