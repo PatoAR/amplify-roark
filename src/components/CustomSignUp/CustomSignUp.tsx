@@ -25,7 +25,6 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
   const [success, setSuccess] = useState('');
   const [referralValid, setReferralValid] = useState<boolean | null>(null);
   const [referralMessage, setReferralMessage] = useState<string>('');
-  const [validationResult, setValidationResult] = useState<{ valid: boolean; referrerId?: string } | null>(null);
   const [referralCodeFromUrl, setReferralCodeFromUrl] = useState<boolean>(false);
   const navigate = useNavigate();
 
@@ -44,7 +43,6 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
     try {
       // For now, assume the referral code is valid if it exists
       // This will be validated on the backend during signup
-      setValidationResult({ valid: true, referrerId: 'pending' });
       setReferralValid(true);
       setReferralMessage(t('signup.validReferralCode') || 'Valid referral code detected!');
       
@@ -61,13 +59,11 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
     if (value.length >= 3) {
       // For now, assume valid if length is sufficient
       // Backend will validate during signup
-      setValidationResult({ valid: true, referrerId: 'pending' });
       setReferralValid(true);
       setReferralMessage(t('signup.validReferralCode') || 'Referral code looks valid');
     } else {
       setReferralValid(null);
       setReferralMessage('');
-      setValidationResult(null);
     }
   };
 
