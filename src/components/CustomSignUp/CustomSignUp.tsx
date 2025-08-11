@@ -132,6 +132,9 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
         },
       };
 
+      console.log('Signing up with attributes:', userAttributes);
+      console.log('SignUp options:', signUpOptions);
+
       await signUp(signUpOptions);
 
       setSuccess(t('signup.accountCreated') || 'Account created successfully!');
@@ -142,11 +145,26 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
       let authError: AuthError;
       
       if (isApiError(err)) {
-        authError = {
-          message: err.message || t('signup.errorDuringSignup') || 'Error during signup',
-          code: 'INVALID_CREDENTIALS',
-          details: errorContext,
-        };
+        // Handle specific Cognito errors
+        if (err.message?.includes('Attributes did not conform to the schema')) {
+          authError = {
+            message: 'Referral code validation error. Please try again or contact support.',
+            code: 'INVALID_CREDENTIALS',
+            details: errorContext,
+          };
+        } else if (err.message?.includes('custom:referralCode')) {
+          authError = {
+            message: 'Referral code format is invalid. Please check your code and try again.',
+            code: 'INVALID_CREDENTIALS',
+            details: errorContext,
+          };
+        } else {
+          authError = {
+            message: err.message || t('signup.errorDuringSignup') || 'Error during signup',
+            code: 'INVALID_CREDENTIALS',
+            details: errorContext,
+          };
+        }
       } else {
         authError = {
           message: t('signup.unexpectedError') || 'An unexpected error occurred',
