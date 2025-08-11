@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { signUp } from 'aws-amplify/auth';
 import { Card, Flex, Heading, Text, TextField, PasswordField, Button, Alert, View, useTheme } from '@aws-amplify/ui-react';
 import { useReferral } from '../../hooks/useReferral';
@@ -28,6 +28,7 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
   const [referralMessage, setReferralMessage] = useState<string>('');
   const [validationResult, setValidationResult] = useState<{ valid: boolean; referrerId?: string } | null>(null);
   const [referralCodeFromUrl, setReferralCodeFromUrl] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   // Check for referral code in URL
   useEffect(() => {
@@ -284,6 +285,19 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
             <Text fontSize="small" color="font.secondary">
               {t('signup.termsAgreement')}
             </Text>
+          </View>
+
+          <View textAlign="center">
+            <Button
+              variation="link"
+              onClick={() => {
+                // Navigate back to the root without referral code
+                navigate('/', { replace: true });
+              }}
+              size="small"
+            >
+              {t('signup.backToSignIn') || 'Back to Sign In'}
+            </Button>
           </View>
         </Flex>
       </Card>

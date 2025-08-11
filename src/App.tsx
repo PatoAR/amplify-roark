@@ -161,16 +161,8 @@ export default function App() {
 
   // If user is not authenticated, show nothing (Authenticator will handle login)
   if (authStatus === 'unauthenticated') {
-    // Check if there's a referral code in the URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const referralCode = urlParams.get('ref');
-    
-    // If there's a referral code, show custom signup
-    if (referralCode) {
-      return <CustomSignUp />;
-    }
-    
-    // Otherwise, let the default Authenticator handle it
+    // Referral detection is now handled in main.tsx
+    // Just let the default Authenticator handle it
     return null;
   }
 

@@ -30,6 +30,7 @@ Amplify.configure({
 import { BrowserRouter } from 'react-router-dom';
 import { Authenticator, Image, View, useTheme } from '@aws-amplify/ui-react';
 import App from "./App.tsx"
+import CustomSignUp from "./components/CustomSignUp/CustomSignUp";
 import { UserPreferencesProvider } from './context/UserPreferencesContext';
 import { SessionProvider } from './context/SessionContext';
 import { NewsProvider } from './context/NewsContext';
@@ -57,20 +58,44 @@ const customComponents = {
   },
 }
 
+// Check for referral code in URL before rendering
+const checkForReferralCode = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get('ref');
+};
+
+const referralCode = checkForReferralCode();
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <Authenticator components={customComponents}>
+    {referralCode ? (
+      // If there's a referral code, show custom signup directly
       <BrowserRouter>
         <LanguageProvider>
           <SessionProvider>
             <NewsProvider>
               <UserPreferencesProvider>
-                <App />
+                <CustomSignUp />
               </UserPreferencesProvider>
             </NewsProvider>
           </SessionProvider>
         </LanguageProvider>
       </BrowserRouter>
-    </Authenticator>
+    ) : (
+      // Otherwise, show the normal Authenticator flow
+      <Authenticator components={customComponents}>
+        <BrowserRouter>
+          <LanguageProvider>
+            <SessionProvider>
+              <NewsProvider>
+                <UserPreferencesProvider>
+                  <App />
+                </UserPreferencesProvider>
+              </NewsProvider>
+            </SessionProvider>
+          </LanguageProvider>
+        </BrowserRouter>
+      </Authenticator>
+    )}
   </React.StrictMode>
 );

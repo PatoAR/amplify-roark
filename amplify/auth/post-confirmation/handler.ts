@@ -1,50 +1,31 @@
 import { PostConfirmationTriggerHandler } from 'aws-lambda';
-import fetch from 'node-fetch';
-import { secret } from '@aws-amplify/backend';
 
 // Type declaration for process.env to avoid @types/node dependency
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
       AWS_REGION?: string;
+      GRAPHQL_API_URL?: string;
+      GRAPHQL_API_KEY?: string;
+      API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT?: string;
     }
   }
 }
 
-async function getAppSyncUrl(): Promise<string> {
-  try {
-    // Use Amplify Gen 2 secrets for secure configuration
-    const urlSecret = await secret('GRAPHQL_API_URL');
-    const url = urlSecret.toString();
-    if (!url) {
-      throw new Error('GRAPHQL_API_URL secret not configured');
-    }
-    return url;
-  } catch (error) {
-    console.error('Error accessing GRAPHQL_API_URL secret:', error);
-    // Fallback to old environment variable for backward compatibility
-    const fallbackUrl = process.env.API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT;
-    if (fallbackUrl) {
-      console.log('Using fallback API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT');
-      return fallbackUrl;
-    }
-    throw new Error('AppSync URL not configured. Please set GRAPHQL_API_URL secret in Amplify console.');
+function getAppSyncUrl(): string {
+  const url = process.env.GRAPHQL_API_URL || process.env.API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT;
+  if (!url) {
+    throw new Error('AppSync URL not configured. Ensure GRAPHQL_API_URL is set for the function.');
   }
+  return url;
 }
 
-async function getApiKey(): Promise<string> {
-  try {
-    // Use Amplify Gen 2 secrets for secure configuration
-    const apiKeySecret = await secret('GRAPHQL_API_KEY');
-    const apiKey = apiKeySecret.toString();
-    if (!apiKey) {
-      throw new Error('GRAPHQL_API_KEY secret not configured');
-    }
-    return apiKey;
-  } catch (error) {
-    console.error('Error accessing GRAPHQL_API_KEY secret:', error);
-    throw new Error('AppSync API Key not configured. Please set GRAPHQL_API_KEY secret in Amplify console.');
+function getApiKey(): string {
+  const apiKey = process.env.GRAPHQL_API_KEY;
+  if (!apiKey) {
+    throw new Error('AppSync API Key not configured. Ensure GRAPHQL_API_KEY is set for the function.');
   }
+  return apiKey;
 }
 
 interface AppSyncResponse<T = any> {
@@ -57,8 +38,8 @@ interface AppSyncResponse<T = any> {
 }
 
 async function appsyncRequest<T = any>(query: string, variables?: any): Promise<T> {
-  const url = await getAppSyncUrl();
-  const apiKey = await getApiKey();
+  const url = getAppSyncUrl();
+  const apiKey = getApiKey();
   const body = JSON.stringify({ query, variables });
 
   console.log(`Making AppSync request to: ${url}`);
