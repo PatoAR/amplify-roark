@@ -165,9 +165,7 @@ export const useReferral = () => {
           break;
 
         case 'copy':
-          await navigator.clipboard.writeText(
-            t('referral.shareMessage').replace('{code}', referralCode) + `\n\n${referralUrl}`
-          );
+          await navigator.clipboard.writeText(referralUrl);
           break;
       }
       // Track referral sharing

@@ -70,19 +70,14 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     {referralCode ? (
       // If there's a referral code, show custom signup directly
+      // Only include essential contexts that don't depend on useAuthenticator
       <BrowserRouter>
         <LanguageProvider>
-          <SessionProvider>
-            <NewsProvider>
-              <UserPreferencesProvider>
-                <CustomSignUp />
-              </UserPreferencesProvider>
-            </NewsProvider>
-          </SessionProvider>
+          <CustomSignUp />
         </LanguageProvider>
       </BrowserRouter>
     ) : (
-      // Otherwise, show the normal Authenticator flow
+      // Otherwise, show the normal Authenticator flow with all contexts
       <Authenticator components={customComponents}>
         <BrowserRouter>
           <LanguageProvider>

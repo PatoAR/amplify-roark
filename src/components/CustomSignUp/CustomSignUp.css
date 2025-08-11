@@ -7,6 +7,12 @@
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
+.auth-logo {
+  max-width: 200px;
+  height: auto;
+  margin-bottom: 1rem;
+}
+
 .signup-card {
   max-width: 500px;
   width: 100%;
