@@ -100,12 +100,6 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
         email,
       };
 
-      // Add referral information if code is present
-      if (referralCode) {
-        userAttributes['custom:referralCode'] = referralCode;
-        // The backend will validate the referral code and find the referrerId
-      }
-
       // Validate user attributes before sending
       if (!validateUserAttributes(userAttributes)) {
         const errorContext = createErrorContext('validateUserAttributes');
@@ -122,6 +116,7 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
         password,
         options: {
           userAttributes,
+          clientMetadata: referralCode ? { referralCode, referrerId: 'pending' } : undefined,
         },
       };
 

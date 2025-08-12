@@ -88,8 +88,8 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
     const userId = event.request.userAttributes.sub;
 
     // Check if user signed up with a referral code
-    const referralCode = userAttributes['custom:referralCode'];
-    const referrerId = userAttributes['custom:referrerId'];
+    const referralCode = userAttributes['custom:referralCode'] || event.request.clientMetadata?.referralCode;
+    const referrerId = userAttributes['custom:referrerId'] || event.request.clientMetadata?.referrerId;
 
     console.log(`User ${userId} signup details:`, {
       referralCode,
@@ -100,7 +100,7 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
     });
 
     if (referralCode) {
-      let finalReferrerId: string | null = referrerId;
+      let finalReferrerId: string | null = referrerId ?? null;
       
       // If we don't have a referrerId, try to find it from the referral code
       if (!referrerId || referrerId === 'pending') {
