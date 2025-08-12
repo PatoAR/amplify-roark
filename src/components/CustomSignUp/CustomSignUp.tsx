@@ -5,7 +5,7 @@ import { Card, Flex, Heading, Text, TextField, PasswordField, Button, Alert, Vie
 import { UserAttributes, SignUpOptions, validateEmail, validatePassword, validateUserAttributes } from '../../types/auth';
 import { isApiError, AuthError, ErrorContext } from '../../types/errors';
 import { useTranslation } from '../../i18n';
-import perkinsLogo from '../../assets/BaseLogo_v1.png';
+import perkinsLogo from '../../assets/BaseLogo_v1_W.png';
 import './CustomSignUp.css';
 
 interface CustomSignUpProps {
