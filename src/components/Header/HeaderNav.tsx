@@ -19,6 +19,7 @@ const HeaderNav = () => {
   const [localIndustries, setLocalIndustries] = useState(preferences.industries);
   const [localCountries, setLocalCountries] = useState(preferences.countries);
   const daysLeft = useFreeDaysRemaining();
+  const [isSaving, setIsSaving] = useState(false);
 
   // New state for "all" selections
   const [selectAllIndustries, setSelectAllIndustries] = useState(false);
@@ -49,12 +50,23 @@ const HeaderNav = () => {
 
   const onSubmitFilters = useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    await savePreferences({
-      industries: localIndustries,
-      countries: localCountries,
-    });
-    handleCloseFiltersModal();
-  }, [localIndustries, localCountries, savePreferences, handleCloseFiltersModal]);
+    
+    // Prevent multiple submissions
+    if (isSaving) return;
+    
+    setIsSaving(true);
+    try {
+      await savePreferences({
+        industries: localIndustries,
+        countries: localCountries,
+      });
+      handleCloseFiltersModal();
+    } catch (error) {
+      console.error('Error saving preferences:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [localIndustries, localCountries, savePreferences, handleCloseFiltersModal, isSaving]);
   
   // Handlers for tag system
   const handleIndustryChange = useCallback((industryId: string) => {
@@ -268,7 +280,16 @@ const HeaderNav = () => {
           
           {/* Submission button dedicated footer area */}
           <div className="modal-form-footer">
-            <Button type="submit" variation="primary" isFullWidth>{t('filters.applyFilters')}</Button>
+            <Button 
+              type="submit" 
+              variation="primary" 
+              isFullWidth 
+              isLoading={isSaving}
+              loadingText={t('filters.saving')}
+              disabled={isSaving}
+            >
+              {isSaving ? t('filters.saving') : t('filters.applyFilters')}
+            </Button>
           </div>
         </form>
       </Modal>

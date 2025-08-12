@@ -99,132 +99,239 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
       allUserAttributes: userAttributes
     });
 
-    if (referralCode && referrerId) {
-      console.log(`Processing referral: code=${referralCode}, referrerId=${referrerId}, userId=${userId}`);
-
-      try {
-        // Create UserSubscription record with referral information
-        const trialStartDate = new Date();
-        const trialEndDate = new Date();
-        trialEndDate.setMonth(trialEndDate.getMonth() + 3); // 3 months free trial
-
-        console.log(`Creating UserSubscription for user ${userId} with referral info`);
-        
-        const createUserSubscriptionMutation = `
-          mutation CreateUserSubscription($input: CreateUserSubscriptionInput!) {
-            createUserSubscription(input: $input) {
-              id
-              owner
-              subscriptionStatus
-              trialStartDate
-              trialEndDate
-              totalFreeMonths
-              earnedFreeMonths
-              referralCodeUsed
-              referrerId
-            }
-          }
-        `;
-
-        const userSubscription = await appsyncRequest(createUserSubscriptionMutation, {
-          input: {
-            owner: userId,
-            subscriptionStatus: 'free_trial',
-            trialStartDate: trialStartDate.toISOString(),
-            trialEndDate: trialEndDate.toISOString(),
-            totalFreeMonths: 3,
-            earnedFreeMonths: 0,
-            referralCodeUsed: referralCode,
-            referrerId: referrerId,
-          }
-        });
-        console.log(`UserSubscription created successfully:`, userSubscription);
-
-        // Process the referral to give the referrer their bonus
-        console.log(`Creating Referral record for referrer ${referrerId}`);
-        
-        const createReferralMutation = `
-          mutation CreateReferral($input: CreateReferralInput!) {
-            createReferral(input: $input) {
-              id
-              referrerId
-              referredId
-              referralCode
-              status
-              completedAt
-              freeMonthsEarned
-            }
-          }
-        `;
-
-        const referral = await appsyncRequest(createReferralMutation, {
-          input: {
-            referrerId,
-            referredId: userId,
-            referralCode,
-            status: 'completed',
-            completedAt: new Date().toISOString(),
-            freeMonthsEarned: 3,
-          }
-        });
-        console.log(`Referral created successfully:`, referral);
-
-        // Update referral code stats
-        console.log(`Updating referral code stats for code ${referralCode}`);
-        
-        const listReferralCodesQuery = `
-          query ListReferralCodes($filter: ModelReferralCodeFilterInput) {
-            listReferralCodes(filter: $filter) {
-              items {
-                id
-                owner
-                code
-                isActive
-                totalReferrals
-                successfulReferrals
-              }
-            }
-          }
-        `;
-
-        const referralCodes = await appsyncRequest(listReferralCodesQuery, {
-          filter: { code: { eq: referralCode } }
-        });
-
-        if (referralCodes.listReferralCodes.items.length > 0) {
-          const referralCodeRecord = referralCodes.listReferralCodes.items[0];
-          
-          const updateReferralCodeMutation = `
-            mutation UpdateReferralCode($input: UpdateReferralCodeInput!) {
-              updateReferralCode(input: $input) {
-                id
-                code
-                totalReferrals
-                successfulReferrals
+    if (referralCode) {
+      let finalReferrerId: string | null = referrerId;
+      
+      // If we don't have a referrerId, try to find it from the referral code
+      if (!referrerId || referrerId === 'pending') {
+        console.log(`Looking up referrerId for referral code: ${referralCode}`);
+        try {
+          const listReferralCodesQuery = `
+            query ListReferralCodes($filter: ModelReferralCodeFilterInput) {
+              listReferralCodes(filter: $filter) {
+                items {
+                  id
+                  owner
+                  code
+                  isActive
+                }
               }
             }
           `;
 
-          const updatedCode = await appsyncRequest(updateReferralCodeMutation, {
+          const referralCodes = await appsyncRequest(listReferralCodesQuery, {
+            filter: { code: { eq: referralCode }, isActive: { eq: true } }
+          });
+
+          if (referralCodes.listReferralCodes.items.length > 0) {
+            const referralCodeRecord = referralCodes.listReferralCodes.items[0];
+            finalReferrerId = referralCodeRecord.owner;
+            console.log(`Found referrerId: ${finalReferrerId} for referral code: ${referralCode}`);
+          } else {
+            console.warn(`Referral code not found or inactive: ${referralCode}`);
+            // Continue without referral processing
+            finalReferrerId = null;
+          }
+        } catch (lookupError) {
+          console.error(`Error looking up referrerId for referral code ${referralCode}:`, lookupError);
+          // Continue without referral processing
+          finalReferrerId = null;
+        }
+      }
+
+      if (finalReferrerId) {
+        console.log(`Processing referral: code=${referralCode}, referrerId=${finalReferrerId}, userId=${userId}`);
+
+        try {
+          // Create UserSubscription record with referral information
+          const trialStartDate = new Date();
+          const trialEndDate = new Date();
+          trialEndDate.setMonth(trialEndDate.getMonth() + 3); // 3 months free trial
+
+          console.log(`Creating UserSubscription for user ${userId} with referral info`);
+          
+          const createUserSubscriptionMutation = `
+            mutation CreateUserSubscription($input: CreateUserSubscriptionInput!) {
+              createUserSubscription(input: $input) {
+                id
+                owner
+                subscriptionStatus
+                trialStartDate
+                trialEndDate
+                totalFreeMonths
+                earnedFreeMonths
+                referralCodeUsed
+                referrerId
+              }
+            }
+          `;
+
+          const userSubscription = await appsyncRequest(createUserSubscriptionMutation, {
             input: {
-              id: referralCodeRecord.id,
-              // Don't increment totalReferrals here - it's already incremented during validation
-              // totalReferrals: (referralCodeRecord.totalReferrals || 0) + 1,
-              successfulReferrals: (referralCodeRecord.successfulReferrals || 0) + 1,
+              owner: userId,
+              subscriptionStatus: 'free_trial',
+              trialStartDate: trialStartDate.toISOString(),
+              trialEndDate: trialEndDate.toISOString(),
+              totalFreeMonths: 3,
+              earnedFreeMonths: 0,
+              referralCodeUsed: referralCode,
+              referrerId: finalReferrerId,
             }
           });
-          console.log(`ReferralCode updated successfully:`, updatedCode);
-        } else {
-          console.warn(`ReferralCode not found for code: ${referralCode}`);
-        }
+          console.log(`UserSubscription created successfully:`, userSubscription);
 
-        // Extend referrer's subscription
-        console.log(`Extending referrer's subscription for user ${referrerId}`);
+          // Process the referral to give the referrer their bonus
+          console.log(`Creating Referral record for referrer ${finalReferrerId}`);
+          
+          const createReferralMutation = `
+            mutation CreateReferral($input: CreateReferralInput!) {
+              createReferral(input: $input) {
+                id
+                referrerId
+                referredId
+                referralCode
+                status
+                completedAt
+                freeMonthsEarned
+              }
+            }
+          `;
+
+          const referral = await appsyncRequest(createReferralMutation, {
+            input: {
+              referrerId: finalReferrerId,
+              referredId: userId,
+              referralCode,
+              status: 'completed',
+              completedAt: new Date().toISOString(),
+              freeMonthsEarned: 3,
+            }
+          });
+          console.log(`Referral created successfully:`, referral);
+
+          // Update referral code stats
+          console.log(`Updating referral code stats for code ${referralCode}`);
+          
+          const listReferralCodesQuery = `
+            query ListReferralCodes($filter: ModelReferralCodeFilterInput) {
+              listReferralCodes(filter: $filter) {
+                items {
+                  id
+                  owner
+                  code
+                  isActive
+                  totalReferrals
+                  successfulReferrals
+                }
+              }
+            }
+          `;
+
+          const referralCodes = await appsyncRequest(listReferralCodesQuery, {
+            filter: { code: { eq: referralCode } }
+          });
+
+          if (referralCodes.listReferralCodes.items.length > 0) {
+            const referralCodeRecord = referralCodes.listReferralCodes.items[0];
+            
+            const updateReferralCodeMutation = `
+              mutation UpdateReferralCode($input: UpdateReferralCodeInput!) {
+                updateReferralCode(input: $input) {
+                  id
+                  code
+                  totalReferrals
+                  successfulReferrals
+                }
+              }
+            `;
+
+            const updatedCode = await appsyncRequest(updateReferralCodeMutation, {
+              input: {
+                id: referralCodeRecord.id,
+                // Don't increment totalReferrals here - it's already incremented during validation
+                // totalReferrals: (referralCodeRecord.totalReferrals || 0) + 1,
+                successfulReferrals: (referralCodeRecord.successfulReferrals || 0) + 1,
+              }
+            });
+            console.log(`ReferralCode updated successfully:`, updatedCode);
+          } else {
+            console.warn(`ReferralCode not found for code: ${referralCode}`);
+          }
+
+          // Extend referrer's subscription
+          console.log(`Extending referrer's subscription for user ${finalReferrerId}`);
+          
+          const listReferrerSubscriptionsQuery = `
+            query ListUserSubscriptions($filter: ModelUserSubscriptionFilterInput) {
+              listUserSubscriptions(filter: $filter) {
+                items {
+                  id
+                  owner
+                  subscriptionStatus
+                  trialStartDate
+                  trialEndDate
+                  totalFreeMonths
+                  earnedFreeMonths
+                }
+              }
+            }
+          `;
+
+          const referrerSubscriptions = await appsyncRequest(listReferrerSubscriptionsQuery, {
+            filter: { owner: { eq: finalReferrerId } }
+          });
+
+          if (referrerSubscriptions.listUserSubscriptions.items.length > 0) {
+            const referrerSubscription = referrerSubscriptions.listUserSubscriptions.items[0];
+            const currentEarnedMonths = referrerSubscription.earnedFreeMonths || 0;
+            const newEarnedMonths = currentEarnedMonths + 3;
+
+            // Recalculate trial end date
+            const trialStartDate = new Date(referrerSubscription.trialStartDate || new Date());
+            const newTrialEndDate = new Date(trialStartDate);
+            newTrialEndDate.setMonth(newTrialEndDate.getMonth() + (referrerSubscription.totalFreeMonths || 3) + newEarnedMonths);
+
+            const updateReferrerSubscriptionMutation = `
+              mutation UpdateUserSubscription($input: UpdateUserSubscriptionInput!) {
+                updateUserSubscription(input: $input) {
+                  id
+                  owner
+                  earnedFreeMonths
+                  trialEndDate
+                }
+              }
+            `;
+
+            const updatedSubscription = await appsyncRequest(updateReferrerSubscriptionMutation, {
+              input: {
+                id: referrerSubscription.id,
+                earnedFreeMonths: newEarnedMonths,
+                trialEndDate: newTrialEndDate.toISOString(),
+              }
+            });
+            console.log(`Referrer subscription updated successfully:`, updatedSubscription);
+          } else {
+            console.warn(`Referrer subscription not found for user: ${finalReferrerId}`);
+          }
+
+          console.log(`Referral processing completed successfully for user ${userId}`);
+        } catch (referralError) {
+          console.error(`Error processing referral for user ${userId}:`, referralError);
+          // Don't fail the user creation if referral processing fails
+          // The user should still be created successfully
+        }
+      } else {
+        console.log(`Creating basic UserSubscription for user ${userId} without referral`);
         
-        const listReferrerSubscriptionsQuery = `
-          query ListUserSubscriptions($filter: ModelUserSubscriptionFilterInput) {
-            listUserSubscriptions(filter: $filter) {
-              items {
+        try {
+          // Create UserSubscription record without referral information
+          const trialStartDate = new Date();
+          const trialEndDate = new Date();
+          trialEndDate.setMonth(trialEndDate.getMonth() + 3); // 3 months free trial
+
+          const createBasicUserSubscriptionMutation = `
+            mutation CreateUserSubscription($input: CreateUserSubscriptionInput!) {
+              createUserSubscription(input: $input) {
                 id
                 owner
                 subscriptionStatus
@@ -234,51 +341,24 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
                 earnedFreeMonths
               }
             }
-          }
-        `;
-
-        const referrerSubscriptions = await appsyncRequest(listReferrerSubscriptionsQuery, {
-          filter: { owner: { eq: referrerId } }
-        });
-
-        if (referrerSubscriptions.listUserSubscriptions.items.length > 0) {
-          const referrerSubscription = referrerSubscriptions.listUserSubscriptions.items[0];
-          const currentEarnedMonths = referrerSubscription.earnedFreeMonths || 0;
-          const newEarnedMonths = currentEarnedMonths + 3;
-
-          // Recalculate trial end date
-          const trialStartDate = new Date(referrerSubscription.trialStartDate || new Date());
-          const newTrialEndDate = new Date(trialStartDate);
-          newTrialEndDate.setMonth(newTrialEndDate.getMonth() + (referrerSubscription.totalFreeMonths || 3) + newEarnedMonths);
-
-          const updateReferrerSubscriptionMutation = `
-            mutation UpdateUserSubscription($input: UpdateUserSubscriptionInput!) {
-              updateUserSubscription(input: $input) {
-                id
-                owner
-                earnedFreeMonths
-                trialEndDate
-              }
-            }
           `;
 
-          const updatedSubscription = await appsyncRequest(updateReferrerSubscriptionMutation, {
+          const userSubscription = await appsyncRequest(createBasicUserSubscriptionMutation, {
             input: {
-              id: referrerSubscription.id,
-              earnedFreeMonths: newEarnedMonths,
-              trialEndDate: newTrialEndDate.toISOString(),
+              owner: userId,
+              subscriptionStatus: 'free_trial',
+              trialStartDate: trialStartDate.toISOString(),
+              trialEndDate: trialEndDate.toISOString(),
+              totalFreeMonths: 3,
+              earnedFreeMonths: 0,
             }
           });
-          console.log(`Referrer subscription updated successfully:`, updatedSubscription);
-        } else {
-          console.warn(`Referrer subscription not found for user: ${referrerId}`);
-        }
 
-        console.log(`Referral processing completed successfully for user ${userId}`);
-      } catch (referralError) {
-        console.error(`Error processing referral for user ${userId}:`, referralError);
-        // Don't fail the user creation if referral processing fails
-        // The user should still be created successfully
+          console.log(`UserSubscription created successfully for user ${userId}:`, userSubscription);
+        } catch (subscriptionError) {
+          console.error('Error creating UserSubscription:', subscriptionError);
+          throw subscriptionError; // Re-throw this error as it's critical
+        }
       }
     } else {
       console.log(`Creating basic UserSubscription for user ${userId} without referral`);

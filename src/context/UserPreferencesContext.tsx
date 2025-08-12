@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode, useRef } from 'react';
 import { useSession } from './SessionContext';
 import { generateClient } from 'aws-amplify/api';
 
@@ -31,6 +31,10 @@ export const UserPreferencesProvider: React.FC<UserPreferencesProviderProps> = (
   const [isDisclaimerVisible, setIsDisclaimerVisible] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [userProfileId, setUserProfileId] = useState<string | null>(null);
+  
+  // Add debouncing for rapid preference updates
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const pendingPreferencesRef = useRef<UserPreferences | null>(null);
 
   // Reset disclaimer visibility on every login
   useEffect(() => {
@@ -102,87 +106,109 @@ export const UserPreferencesProvider: React.FC<UserPreferencesProviderProps> = (
     }
   }, [userId, loadUserPreferences]);
 
-  // Function to save preferences
+  // Function to save preferences with debouncing
   const savePreferences = useCallback(async (newPrefs: UserPreferences) => {
     if (!userId) {
       console.error("Cannot save preferences, no user is authenticated.");
       return;
     }
 
-    const client = generateClient();
-    if (!client) {
-      console.error('Cannot save preferences: Amplify client not available');
-      return;
+    // Store pending preferences for debouncing
+    pendingPreferencesRef.current = newPrefs;
+
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
     }
 
-    const payload = {
-      industryPreferences: newPrefs.industries,
-      countryPreferences: newPrefs.countries,
-    };
-    try {
-      if (userProfileId) {
-        // Update existing profile
-        const updateUserProfileMutation = /* GraphQL */ `
-          mutation UpdateUserProfile($input: UpdateUserProfileInput!) {
-            updateUserProfile(input: $input) {
-              id
-              owner
-              industryPreferences
-              countryPreferences
-            }
-          }
-        `;
+    // Set new timeout for debounced save
+    saveTimeoutRef.current = setTimeout(async () => {
+      const prefsToSave = pendingPreferencesRef.current;
+      if (!prefsToSave) return;
 
-        await client.graphql({
-          query: updateUserProfileMutation,
-          variables: {
-            input: { id: userProfileId, ...payload }
-          }
-        }) as any;
-      } else {
-        // Create new profile
-        const createUserProfileMutation = /* GraphQL */ `
-          mutation CreateUserProfile($input: CreateUserProfileInput!) {
-            createUserProfile(input: $input) {
-              id
-              owner
-              industryPreferences
-              countryPreferences
-            }
-          }
-        `;
-
-        const result = await client.graphql({
-          query: createUserProfileMutation,
-          variables: {
-            input: payload
-          }
-        }) as any;
-
-        if (result.data?.createUserProfile) {
-          setUserProfileId(result.data.createUserProfile.id);
-        }
+      const client = generateClient();
+      if (!client) {
+        console.error('Cannot save preferences: Amplify client not available');
+        return;
       }
-      // Update state and track preference updates in one operation
-      setPreferences(prevPrefs => {
-        const changedIndustries = newPrefs.industries.filter(ind => !prevPrefs.industries.includes(ind));
-        const changedCountries = newPrefs.countries.filter(country => !prevPrefs.countries.includes(country));
-        
-        if (changedIndustries.length > 0) {
-          // trackPreferenceUpdate('industries', changedIndustries); // This line was removed as per the edit hint
+
+      const payload = {
+        industryPreferences: prefsToSave.industries,
+        countryPreferences: prefsToSave.countries,
+      };
+
+      try {
+        if (userProfileId) {
+          // Update existing profile
+          const updateUserProfileMutation = /* GraphQL */ `
+            mutation UpdateUserProfile($input: UpdateUserProfileInput!) {
+              updateUserProfile(input: $input) {
+                id
+                owner
+                industryPreferences
+                countryPreferences
+              }
+            }
+          `;
+
+          await client.graphql({
+            query: updateUserProfileMutation,
+            variables: {
+              input: { id: userProfileId, ...payload }
+            }
+          }) as any;
+        } else {
+          // Create new profile
+          const createUserProfileMutation = /* GraphQL */ `
+            mutation CreateUserProfile($input: CreateUserProfileInput!) {
+              createUserProfile(input: $input) {
+                id
+                owner
+                industryPreferences
+                countryPreferences
+              }
+            }
+          `;
+
+          const result = await client.graphql({
+            query: createUserProfileMutation,
+            variables: {
+              input: payload
+            }
+          }) as any;
+
+          if (result.data?.createUserProfile) {
+            setUserProfileId(result.data.createUserProfile.id);
+          }
         }
-        if (changedCountries.length > 0) {
-          // trackPreferenceUpdate('countries', changedCountries); // This line was removed as per the edit hint
-        }
+
+        // Update state efficiently by comparing with current state
+        setPreferences(prevPrefs => {
+          // Only update if there are actual changes
+          if (JSON.stringify(prevPrefs) === JSON.stringify(prefsToSave)) {
+            return prevPrefs;
+          }
+          return prefsToSave;
+        });
         
-        return newPrefs;
-      });
-      
-      console.log("Preferences saved successfully.");
-    } catch (error) {
-      console.error("Error saving preferences:", error);
-    }
+        console.log("Preferences saved successfully.");
+      } catch (error) {
+        console.error("Error saving preferences:", error);
+      } finally {
+        // Clear pending preferences after save attempt
+        pendingPreferencesRef.current = null;
+      }
+    }, 300); // 300ms debounce delay
   }, [userId, userProfileId]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Function to dismiss disclaimer (session-only, no persistence)
   const dismissDisclaimer = useCallback(() => {

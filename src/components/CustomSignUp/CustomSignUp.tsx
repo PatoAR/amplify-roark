@@ -40,25 +40,19 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
 
   // Simplified referral validation for the standalone component
   const validateReferralCodeFromUrl = async (code: string) => {
-    try {
-      // For now, assume the referral code is valid if it exists
-      // This will be validated on the backend during signup
-      setReferralValid(true);
-      setReferralMessage(t('signup.validReferralCode') || 'Valid referral code detected!');
-      
-      console.log(`Referral link accessed: ${code}`);
-    } catch (err) {
-      setReferralValid(false);
-      setReferralMessage(t('signup.errorValidatingCode') || 'Error validating referral code');
-    }
+    // Since the referral API endpoint is not available, we'll assume the code is valid
+    // and let the backend validate it during signup
+    setReferralValid(true);
+    setReferralMessage(t('signup.validReferralCode') || 'Valid referral code detected!');
+    // Don't set referrerId - let the backend handle it
+    console.log(`Referral link accessed: ${code} (will validate during signup)`);
   };
 
   const handleReferralCodeChange = async (value: string) => {
     setReferralCode(value);
     setReferralCodeFromUrl(false); // Reset flag when user manually enters code
     if (value.length >= 3) {
-      // For now, assume valid if length is sufficient
-      // Backend will validate during signup
+      // Assume valid if length is sufficient - backend will validate during signup
       setReferralValid(true);
       setReferralMessage(t('signup.validReferralCode') || 'Referral code looks valid');
     } else {
@@ -109,8 +103,7 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
       // Add referral information if code is present
       if (referralCode) {
         userAttributes['custom:referralCode'] = referralCode;
-        // The backend will validate and process the referral code
-        userAttributes['custom:referrerId'] = 'pending';
+        // The backend will validate the referral code and find the referrerId
       }
 
       // Validate user attributes before sending

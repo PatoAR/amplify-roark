@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUserPreferences } from '../../context/UserPreferencesContext';
 import { useNews } from '../../context/NewsContext';
@@ -22,8 +22,138 @@ function NewsSocketClient() {
   const { trackArticleClick, isAuthenticated } = useSession();
   const { t } = useTranslation();
 
+  // Memoize the country matching logic to avoid recreating functions on every render
+  const countryMatcher = useMemo(() => {
+    const hasGlobalSelected = preferences.countries.includes('global');
+    const selectedCountryIdSet = new Set<string>(
+      hasGlobalSelected 
+        ? preferences.countries.filter(id => id !== 'global')
+        : preferences.countries
+    );
+    
+    return {
+      hasGlobalSelected,
+      selectedCountryIdSet,
+      hasCountryFilters: preferences.countries.length > 0 && !(preferences.countries.length === COUNTRY_OPTIONS.length)
+    };
+  }, [preferences.countries]);
+
+  // Memoize the industry matching logic
+  const industryMatcher = useMemo(() => {
+    const hasIndustryFilters = preferences.industries.length > 0;
+    const industrySet = new Set(preferences.industries);
+    
+    return {
+      hasIndustryFilters,
+      industrySet
+    };
+  }, [preferences.industries]);
+
+  // Optimized filtering logic using useMemo to prevent recalculation on every render
+  const filteredMessages = useMemo(() => {
+    // While preferences are loading, show nothing to avoid a flicker of unfiltered content.
+    if (isLoading) {
+      return [];
+    }
+
+    // If the user has no profile yet (is a new user), show nothing.
+    // if (userProfileId === null) {
+    //  return [];
+    //}
+
+    // Early return if no filters are set
+    if (!industryMatcher.hasIndustryFilters && !countryMatcher.hasCountryFilters) {
+      return articles;
+    }
+
+    // Pre-compute country matching helper function
+    const toCountryId = (value: unknown): string | null => {
+      const v = String(value).trim().toLowerCase();
+      const opt = COUNTRY_OPTIONS.find(
+        c => c.id.toLowerCase() === v || c.code.toLowerCase() === v
+      );
+      return opt ? opt.id : null;
+    };
+
+    return articles.filter(msg => {
+      // Industry matching
+      const industryMatches = !industryMatcher.hasIndustryFilters || 
+        (msg.industry && industryMatcher.industrySet.has(msg.industry));
+
+      // Early return if industry doesn't match
+      if (industryMatcher.hasIndustryFilters && !industryMatches) {
+        return false;
+      }
+
+      // Country matching
+      if (countryMatcher.hasCountryFilters) {
+        let countryMatches = false;
+        
+        if (countryMatcher.hasGlobalSelected) {
+          // Global option logic: show articles with no country value OR with country values NOT in COUNTRY_OPTIONS
+          const rawCountriesArr = Array.isArray(msg.countries)
+            ? msg.countries
+            : (msg.countries && typeof msg.countries === 'object')
+              ? Object.keys(msg.countries)
+              : [];
+          
+          const articleCountryIds = rawCountriesArr
+            .map(toCountryId)
+            .filter((id): id is string => id !== null);
+          
+          const allUnknown = rawCountriesArr.length > 0 && articleCountryIds.length === 0;
+          const hasNoCountries = rawCountriesArr.length === 0;
+          
+          // Check if article matches any explicitly selected country IDs
+          const matchesSelectedCountries = countryMatcher.selectedCountryIdSet.size > 0 &&
+            articleCountryIds.some(id => countryMatcher.selectedCountryIdSet.has(id));
+          
+          countryMatches = matchesSelectedCountries || hasNoCountries || allUnknown;
+        } else {
+          // Regular country matching
+          const rawCountriesArr = Array.isArray(msg.countries)
+            ? msg.countries
+            : (msg.countries && typeof msg.countries === 'object')
+              ? Object.keys(msg.countries)
+              : [];
+          
+          const articleCountryIds = rawCountriesArr
+            .map(toCountryId)
+            .filter((id): id is string => id !== null);
+          
+          countryMatches = countryMatcher.selectedCountryIdSet.size > 0 && 
+            articleCountryIds.some(id => countryMatcher.selectedCountryIdSet.has(id));
+        }
+
+        return countryMatches;
+      }
+
+      return true;
+    });
+  }, [articles, isLoading, industryMatcher, countryMatcher]);
+
+  // Limit the number of articles rendered to prevent performance issues
+  const displayedMessages = useMemo(() => {
+    const MAX_DISPLAYED_ARTICLES = 50;
+    return filteredMessages.slice(0, MAX_DISPLAYED_ARTICLES);
+  }, [filteredMessages]);
+
+  // Show message if there are more articles than displayed
+  const hasMoreArticles = filteredMessages.length > displayedMessages.length;
+
+  // Unread counter in tab
+  const unreadCount = displayedMessages.filter(msg => !msg.seen).length;  
+  useEffect(() => {
+    const baseTitle = 'Perkins Live Feed';
+    if (!isAuthenticated) {
+      document.title = baseTitle;
+      return;
+    }
+    document.title = unreadCount > 0 ? `(${unreadCount}) 🔥 ${baseTitle}` : baseTitle;
+  }, [unreadCount, isAuthenticated]);
+
   // Handles opening the article link to a new tab.
-  const handleArticleClick = async (event: React.MouseEvent<HTMLAnchorElement>, link: string, articleId: string, articleTitle: string) => {
+  const handleArticleClick = useCallback(async (event: React.MouseEvent<HTMLAnchorElement>, link: string, articleId: string, articleTitle: string) => {
     event.preventDefault();
     
     // Track article click
@@ -34,7 +164,16 @@ function NewsSocketClient() {
     a.target = '_blank';
     a.rel = 'noopener noreferrer';
     a.click();
-  };
+  }, [trackArticleClick]);
+
+  // Optimize company click handler
+  const handleCompanyClick = useCallback((url: string) => {
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.click();
+  }, []);
 
   // Tab visibility change
   useEffect(() => {
@@ -57,144 +196,6 @@ function NewsSocketClient() {
     }
   }, [isTabVisible, articles, markArticleAsSeen]);
 
-  const filteredMessages = articles.filter(msg => {
-    // While preferences are loading, show nothing to avoid a flicker of unfiltered content.
-    if (isLoading) {
-      return false;
-    }
-
-    // If the user has no profile yet (is a new user), show nothing.
-    // if (userProfileId === null) {
-    //  return false;
-    //}
-
-    // --- Filtering Logic ---
-    const hasIndustryFilters = preferences.industries.length > 0;
-    const hasCountryFilters = preferences.countries.length > 0;
-    
-    // Check if "all countries" is selected (all available countries are selected)
-    const allCountriesSelected = preferences.countries.length === COUNTRY_OPTIONS.length;
-    
-    // When all countries are selected, treat it as having no country filters
-    const effectiveHasCountryFilters = hasCountryFilters && !allCountriesSelected;
-
-    // Determine if the current article matches the selected filters.
-    const industryMatches = !!(msg.industry && preferences.industries.includes(msg.industry));
-    const hasGlobalSelected = preferences.countries.includes('global');
-    
-    // Console log the countries variable for each article being processed (muted)
-    // console.log(`[Article Filter] Article ID: ${msg.id}, Countries:`, articleCountryCodes, 'Type:', typeof msg.countries);
-    
-    // New global option logic: when global is selected, show articles with no country value OR with country values NOT in COUNTRY_OPTIONS
-    let countryMatches = false;
-    if (hasGlobalSelected) {
-      // Helper to map any value (id or code) to a known country ID
-      const toCountryId = (value: unknown): string | null => {
-        const v = String(value).trim().toLowerCase();
-        const opt = COUNTRY_OPTIONS.find(
-          c => c.id.toLowerCase() === v || c.code.toLowerCase() === v
-        );
-        return opt ? opt.id : null;
-      };
-
-      // Derive article country IDs and unknowns
-      // Normalize countries: msg.countries may be a record; convert to array of keys
-      const rawCountriesArr = Array.isArray(msg.countries)
-        ? msg.countries
-        : (msg.countries && typeof msg.countries === 'object')
-          ? Object.keys(msg.countries)
-          : [];
-      const articleCountryIds = rawCountriesArr
-        .map(toCountryId)
-        .filter((id): id is string => id !== null);
-      const allUnknown = rawCountriesArr.length > 0 && articleCountryIds.length === 0;
-
-      // Selected countries (IDs only), excluding 'global'
-      const selectedCountryIdSet = new Set<string>(
-        preferences.countries.filter(id => id !== 'global')
-      );
-
-      const matchesSelectedCountries = (
-        selectedCountryIdSet.size > 0 &&
-        articleCountryIds.some(id => selectedCountryIdSet.has(id))
-      );
-
-      // Article matches if:
-      // - It matches any explicitly selected country IDs, OR
-      // - It has no countries, OR
-      // - All its countries are unknown (not in COUNTRY_OPTIONS)
-      const hasNoCountries = rawCountriesArr.length === 0;
-
-      countryMatches = matchesSelectedCountries || hasNoCountries || allUnknown;
-
-      // console.log(
-      //   `[Article Filter] Global selected - hasNoCountries: ${hasNoCountries}, allUnknown: ${allUnknown}, matchesSelected (ids): ${matchesSelectedCountries}`
-      // );
-    } else {
-      // Global option not selected - only show articles matching selected country IDs
-      const toCountryId = (value: unknown): string | null => {
-        const v = String(value).trim().toLowerCase();
-        const opt = COUNTRY_OPTIONS.find(
-          c => c.id.toLowerCase() === v || c.code.toLowerCase() === v
-        );
-        return opt ? opt.id : null;
-      };
-      // Normalize countries: msg.countries may be a record; convert to array of keys
-      const rawCountriesArr = Array.isArray(msg.countries)
-        ? msg.countries
-        : (msg.countries && typeof msg.countries === 'object')
-          ? Object.keys(msg.countries)
-          : [];
-      const articleCountryIds = rawCountriesArr
-        .map(toCountryId)
-        .filter((id): id is string => id !== null);
-
-      const selectedCountryIdSet = new Set<string>(preferences.countries);
-
-      countryMatches = selectedCountryIdSet.size > 0 && articleCountryIds.some(id => selectedCountryIdSet.has(id));
-    }
-
-    // Case 1: Filters are set for BOTH Industries and Countries.
-    // An article must match one of each.
-    if (hasIndustryFilters && effectiveHasCountryFilters) {
-      const result = industryMatches && countryMatches;
-      // console.log(`[Article Filter] Case 1 (Both filters): Industry: ${industryMatches}, Country: ${countryMatches}, Result: ${result}`);
-      return result;
-    }
-
-    // Case 2: Filters are set for Industries ONLY.
-    // An article only needs to match an industry.
-    if (hasIndustryFilters) {
-      const result = industryMatches;
-      // console.log(`[Article Filter] Case 2 (Industry only): Industry: ${industryMatches}, Result: ${result}`);
-      return result;
-    }
-
-    // Case 3: Filters are set for Countries ONLY (but not "all countries").
-    // An article only needs to match a country.
-    if (effectiveHasCountryFilters) {
-      const result = countryMatches;
-      // console.log(`[Article Filter] Case 3 (Country only): Country: ${countryMatches}, Result: ${result}`);
-      return result;
-    }
-
-    // Case 4: No filters are set OR "all countries" is selected.
-    // Show all articles.
-    // console.log(`[Article Filter] Case 4 (No filters): Showing all articles`);
-    return true;
-  });
-
-  // Unread counter in tab
-  const unreadCount = filteredMessages.filter(msg => !msg.seen).length;  
-  useEffect(() => {
-    const baseTitle = 'Perkins Live Feed';
-    if (!isAuthenticated) {
-      document.title = baseTitle;
-      return;
-    }
-    document.title = unreadCount > 0 ? `(${unreadCount}) 🔥 ${baseTitle}` : baseTitle;
-  }, [unreadCount, isAuthenticated]);
-
   return (
     <div className="news-feed">
       {isLoading ? (
@@ -214,7 +215,7 @@ function NewsSocketClient() {
       ) : (
         <div className="articles-container">
           <AnimatePresence initial={false}>
-            {filteredMessages.map((msg) => {
+            {displayedMessages.map((msg) => {
               // Console log the countries for each displayed article (muted)
               // console.log(`[Displayed Article] ID: ${msg.id}, Title: ${msg.title}, Countries:`, msg.countries, 'Type:', typeof msg.countries);
               
@@ -225,8 +226,9 @@ function NewsSocketClient() {
                   className={`article-card ${msg.seen ? '' : 'unseen'}`}
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10, transition: { duration: 0.3 } }}
-                  transition={{ duration: 0.5 }}
+                  exit={{ opacity: 0, y: -10, transition: { duration: 0.2 } }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  layoutId={msg.id}
                 >
                 <a 
                   href={msg.link} 
@@ -250,11 +252,7 @@ function NewsSocketClient() {
                             onClick={(e) => {
                               e.stopPropagation(); // Prevents bubbling to outer <a>
                               e.preventDefault();  // Prevents any anchor behavior just in case
-                              const a = document.createElement('a');
-                              a.href = url;
-                              a.target = '_blank';
-                              a.rel = 'noopener noreferrer';
-                              a.click();
+                              handleCompanyClick(url);
                             }}
                             title={`Google > ${name}`}
                           >
@@ -269,6 +267,13 @@ function NewsSocketClient() {
             );
           })}
           </AnimatePresence>
+          
+          {/* Show message if there are more articles */}
+          {hasMoreArticles && (
+            <div className="more-articles-message">
+              <p>{t('common.moreArticles').replace('{count}', String(filteredMessages.length - displayedMessages.length))}</p>
+            </div>
+          )}
         </div>
       )}
     </div>
