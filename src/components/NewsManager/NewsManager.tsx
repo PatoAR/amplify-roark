@@ -10,6 +10,9 @@ import { onCreateArticle } from '../../graphql/subscriptions';
 const MAX_ARTICLES_IN_MEMORY = 100;
 const WEBSOCKET_LATENCY_BUFFER = 5000; // 5 seconds
 const POLLER_INTERVAL = 60000; // 60 seconds
+// Seen cache limits to prevent unbounded growth
+const SEEN_CACHE_MAX_SIZE = 2000;
+const SEEN_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 interface Article {
   id: string;
@@ -129,7 +132,22 @@ export const NewsManager: React.FC = () => {
           seenArticlesRef.current.set(article.id, now);
         }
       });
-      
+
+      // Prune seen cache by TTL and max size
+      const nowTs = Date.now();
+      // TTL eviction
+      for (const [id, ts] of seenArticlesRef.current) {
+        if (nowTs - ts > SEEN_CACHE_TTL_MS) {
+          seenArticlesRef.current.delete(id);
+        }
+      }
+      // Size cap eviction (oldest first; Map preserves insertion order)
+      while (seenArticlesRef.current.size > SEEN_CACHE_MAX_SIZE) {
+        const oldestKey = seenArticlesRef.current.keys().next().value as string | undefined;
+        if (!oldestKey) break;
+        seenArticlesRef.current.delete(oldestKey);
+      }
+
       // Memory management trimming
       return trimmed;
     }
