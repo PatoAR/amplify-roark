@@ -97,28 +97,23 @@ export const NewsManager: React.FC = () => {
   // Cleanup function to prevent memory leaks
   const cleanupResources = useCallback(() => {
     // Idempotent cleanup
-    let cleaned = false;
     if (unsubscribeRef.current) {
       unsubscribeRef.current();
       unsubscribeRef.current = null;
-      cleaned = true;
     }
     if (pollingIntervalRef.current) {
       clearInterval(pollingIntervalRef.current);
       pollingIntervalRef.current = null;
-      cleaned = true;
     }
     if (shadowPollerRef.current) {
       clearInterval(shadowPollerRef.current);
       shadowPollerRef.current = null;
-      cleaned = true;
     }
     // Reset flags
     shadowPollerStoppedRef.current = false;
     articleIdsFromSubscriptionRef.current.clear();
     subscriptionEstablishedRef.current = false;
     appSyncHasReceivedArticlesRef.current = false;
-    // Cleanup diagnostics suppressed in production
   }, []);
 
   // Memory management: limit articles in memory while preserving seen tracking

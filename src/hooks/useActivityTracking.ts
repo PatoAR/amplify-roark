@@ -8,6 +8,7 @@ import { ErrorContext } from '../types/errors';
 export const useActivityTracking = () => {
   const { user } = useAuthenticator();
   const sessionRef = useRef<SessionInfo | null>(null);
+  const activityIdRef = useRef<string | null>(null);
   const activityRef = useRef<{ pageViews: number; interactions: number }>({ pageViews: 0, interactions: 0 });
   const [isTracking, setIsTracking] = useState(false);
   const isUnmountingRef = useRef<boolean>(false);
@@ -80,7 +81,7 @@ export const useActivityTracking = () => {
         }
       `;
 
-      await client.graphql({
+      const createResult = await client.graphql({
         query: createUserActivityMutation,
         variables: {
           input: {
@@ -93,7 +94,13 @@ export const useActivityTracking = () => {
             isActive: true,
           }
         }
-      });
+      }) as any;
+
+      // Cache activity record id to avoid future list queries
+      const created = createResult?.data?.createUserActivity;
+      if (created?.id) {
+        activityIdRef.current = created.id as string;
+      }
 
       setIsTracking(true);
       // Activity tracking session started
@@ -118,32 +125,10 @@ export const useActivityTracking = () => {
     const duration = Math.floor((endTime.getTime() - session.startTime.getTime()) / 1000);
 
     try {
-      // Find the UserActivity record via GraphQL
-      const listUserActivitiesQuery = /* GraphQL */ `
-        query ListUserActivities($filter: ModelUserActivityFilterInput) {
-          listUserActivities(filter: $filter) {
-            items {
-              id
-              sessionId
-              startTime
-              pageViews
-              interactions
-            }
-          }
-        }
-      `;
-
-      const result = await client.graphql({
-        query: listUserActivitiesQuery,
-        variables: {
-          filter: { sessionId: { eq: session.sessionId } }
-        }
-      }) as any;
-
-      if (result.data?.listUserActivities?.items?.length > 0) {
-        const activity = result.data.listUserActivities.items[0];
+      // Update the UserActivity record via GraphQL (prefer cached id)
+      const activityId = activityIdRef.current;
+      if (activityId) {
         
-        // Update the UserActivity record via GraphQL
         const updateUserActivityMutation = /* GraphQL */ `
           mutation UpdateUserActivity($input: UpdateUserActivityInput!) {
             updateUserActivity(input: $input) {
@@ -161,7 +146,7 @@ export const useActivityTracking = () => {
           query: updateUserActivityMutation,
           variables: {
             input: {
-              id: activity.id,
+              id: activityId,
               endTime: endTime.toISOString(),
               duration,
               pageViews: activityRef.current.pageViews,
@@ -170,6 +155,44 @@ export const useActivityTracking = () => {
             }
           }
         }) as any;
+      } else {
+        // Fallback: find record by sessionId if cache is missing
+        const listUserActivitiesQuery = /* GraphQL */ `
+          query ListUserActivities($filter: ModelUserActivityFilterInput) {
+            listUserActivities(filter: $filter) {
+              items { id sessionId startTime pageViews interactions }
+            }
+          }
+        `;
+
+        const result = await client.graphql({
+          query: listUserActivitiesQuery,
+          variables: { filter: { sessionId: { eq: session.sessionId } } }
+        }) as any;
+
+        if (result.data?.listUserActivities?.items?.length > 0) {
+          const activity = result.data.listUserActivities.items[0];
+          const updateUserActivityMutation = /* GraphQL */ `
+            mutation UpdateUserActivity($input: UpdateUserActivityInput!) {
+              updateUserActivity(input: $input) {
+                id endTime duration pageViews interactions isActive
+              }
+            }
+          `;
+          await client.graphql({
+            query: updateUserActivityMutation,
+            variables: {
+              input: {
+                id: activity.id,
+                endTime: endTime.toISOString(),
+                duration,
+                pageViews: activityRef.current.pageViews,
+                interactions: activityRef.current.interactions,
+                isActive: false,
+              }
+            }
+          }) as any;
+        }
       }
 
       // Activity tracking session ended
@@ -179,6 +202,7 @@ export const useActivityTracking = () => {
     } finally {
       sessionRef.current = null;
       activityRef.current = { pageViews: 0, interactions: 0 };
+      activityIdRef.current = null;
       setIsTracking(false);
     }
   }, [user?.userId, createErrorContext, getClient]);
@@ -276,47 +300,36 @@ export const useActivityTracking = () => {
       // Update session counters
       activityRef.current.interactions++;
       
-      // Update UserActivity record via GraphQL
-      const listUserActivitiesQuery = /* GraphQL */ `
-        query ListUserActivities($filter: ModelUserActivityFilterInput) {
-          listUserActivities(filter: $filter) {
-            items {
-              id
-              sessionId
-              interactions
-            }
-          }
+      // Update UserActivity interactions directly using cached id when available
+      const updateUserActivityMutation = /* GraphQL */ `
+        mutation UpdateUserActivity($input: UpdateUserActivityInput!) {
+          updateUserActivity(input: $input) { id interactions }
         }
       `;
-
-      const result = await client.graphql({
-        query: listUserActivitiesQuery,
-        variables: {
-          filter: { sessionId: { eq: sessionId } }
-        }
-      }) as any;
-
-      if (result.data?.listUserActivities?.items?.length > 0) {
-        const activity = result.data.listUserActivities.items[0];
-        
-        const updateUserActivityMutation = /* GraphQL */ `
-          mutation UpdateUserActivity($input: UpdateUserActivityInput!) {
-            updateUserActivity(input: $input) {
-              id
-              interactions
-            }
-          }
-        `;
-
+      const activityId = activityIdRef.current;
+      if (activityId) {
         await client.graphql({
           query: updateUserActivityMutation,
-          variables: {
-            input: {
-              id: activity.id,
-              interactions: activityRef.current.interactions,
-            }
-          }
+          variables: { input: { id: activityId, interactions: activityRef.current.interactions } }
         }) as any;
+      } else {
+        // Fallback: list by sessionId
+        const listUserActivitiesQuery = /* GraphQL */ `
+          query ListUserActivities($filter: ModelUserActivityFilterInput) {
+            listUserActivities(filter: $filter) { items { id sessionId interactions } }
+          }
+        `;
+        const result = await client.graphql({
+          query: listUserActivitiesQuery,
+          variables: { filter: { sessionId: { eq: sessionId } } }
+        }) as any;
+        const activity = result.data?.listUserActivities?.items?.[0];
+        if (activity?.id) {
+          await client.graphql({
+            query: updateUserActivityMutation,
+            variables: { input: { id: activity.id, interactions: activityRef.current.interactions } }
+          }) as any;
+        }
       }
 
       // Tracked event
@@ -391,12 +404,7 @@ export const useActivityTracking = () => {
     });
   }, [trackEvent, user?.userId]);
 
-  // Initialize tracking when user logs in
-  useEffect(() => {
-    if (user?.userId && !sessionRef.current) {
-      startSession();
-    }
-  }, [user?.userId, startSession]);
+  // Session is started centrally by useSessionManager; avoid duplicate starts here
 
   // Clean up session when user logs out or component unmounts
   useEffect(() => {
