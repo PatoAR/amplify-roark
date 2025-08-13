@@ -77,12 +77,12 @@ export const UserPreferencesProvider: React.FC<UserPreferencesProviderProps> = (
           countries: profile.countryPreferences?.filter(Boolean) as string[] || [],
         });
         setUserProfileId(profile.id);
-        console.log('✅ User preferences loaded successfully');
+        // User preferences loaded
       } else {
         // No profile exists, reset to default
         setPreferences({ industries: [], countries: [] });
         setUserProfileId(null);
-        console.log('ℹ️ No user profile found, using default preferences');
+        // No user profile found, using default preferences
       }
     } catch (error) {
       console.error("Failed to load user preferences:", error);
@@ -191,9 +191,9 @@ export const UserPreferencesProvider: React.FC<UserPreferencesProviderProps> = (
           return prefsToSave;
         });
         
-        console.log("Preferences saved successfully.");
+         // Preferences saved
       } catch (error) {
-        console.error("Error saving preferences:", error);
+        console.error("Error saving preferences", error);
       } finally {
         // Clear pending preferences after save attempt
         pendingPreferencesRef.current = null;

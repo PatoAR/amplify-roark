@@ -54,7 +54,7 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     const userId = sessionStateRef.current.userId;
 
     try {
-      console.log('🔄 Performing centralized logout...');
+      // Centralized logout
       isLoggingOutRef.current = true;
 
       // Clear session timeout
@@ -63,7 +63,7 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
       // 1. End activity tracking session
       if (sessionStateRef.current.isSessionActive) {
         await endSession();
-        console.log('✅ Activity session ended');
+        // Activity session ended
       }
 
       // 2. Clear session state immediately
@@ -84,20 +84,17 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
       keysToRemove.forEach(key => {
         localStorage.removeItem(key);
       });
-      console.log(`🗂️ Cleared ${keysToRemove.length} localStorage items`);
+      // Cleared localStorage
 
       // 4. Call signOut
       await signOut();
-      console.log('✅ Authentication signOut completed');
 
       // 5. Notify callback
       if (userId && options.onSessionEnd) {
         options.onSessionEnd(userId);
       }
-
-      console.log('✅ Centralized logout completed successfully');
     } catch (error) {
-      console.error('❌ Error during centralized logout:', error, errorContext);
+      console.error('Logout error', error, errorContext);
       if (options.onAuthError) {
         options.onAuthError(error);
       }
@@ -136,7 +133,7 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     if (authStatus === 'authenticated' && user?.userId) {
       // Only start session if not already active and not in the middle of logout
       if (!sessionStateRef.current.isSessionActive && !isLoggingOutRef.current) {
-        console.log('🔄 Starting session for authenticated user...');
+        // Starting session for authenticated user
         
         // Set session state immediately to prevent multiple starts
         sessionStateRef.current = {
@@ -154,13 +151,13 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
           // Set up session timeout
           setupSessionTimeout();
 
-          console.log('✅ Session started successfully');
+          // Session started
           
           if (options.onSessionStart) {
             options.onSessionStart(user.userId);
           }
         }).catch((error) => {
-          console.error('❌ Failed to start session:', error, errorContext);
+           console.error('Failed to start session', error, errorContext);
           // Reset session state on error
           sessionStateRef.current = {
             isAuthenticated: false,
@@ -180,7 +177,7 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     } else if (authStatus === 'unauthenticated') {
       // User is not authenticated, ensure session is ended
       if (sessionStateRef.current.isSessionActive) {
-        console.log('🔄 User not authenticated, ending session...');
+        // User not authenticated, ending session
         clearSessionTimeout();
         performLogout();
       }
@@ -204,7 +201,7 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     // Only end session if user is actually logging out, not during temporary auth state changes
     if (authStatus === 'unauthenticated' && sessionStateRef.current.isSessionActive && isLoggingOutRef.current) {
       const errorContext = createErrorContext('authError');
-      console.error('❌ User became unauthenticated while session was active:', errorContext);
+      console.error('User became unauthenticated while session was active', errorContext);
       
       if (options.onAuthError) {
         options.onAuthError(new Error('User authentication lost'));
@@ -213,7 +210,7 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
       // Perform logout when user becomes unauthenticated
       performLogout();
     } else if (authStatus === 'unauthenticated' && sessionStateRef.current.isSessionActive) {
-      console.log('🔍 Session manager: User unauthenticated but not logging out, skipping session end');
+       // User unauthenticated but not logging out; skipping session end
     }
 
     // Remove the redundant session start trigger to prevent multiple starts

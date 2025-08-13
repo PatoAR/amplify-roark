@@ -62,7 +62,7 @@ const HeaderNav = () => {
       });
       handleCloseFiltersModal();
     } catch (error) {
-      console.error('Error saving preferences:', error);
+      console.error('Error saving preferences', error);
     } finally {
       setIsSaving(false);
     }

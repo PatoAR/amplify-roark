@@ -217,7 +217,7 @@ function NewsSocketClient() {
           <AnimatePresence initial={false}>
             {displayedMessages.map((msg) => {
               // Console log the countries for each displayed article (muted)
-              // console.log(`[Displayed Article] ID: ${msg.id}, Title: ${msg.title}, Countries:`, msg.countries, 'Type:', typeof msg.countries);
+              // muted debug log removed
               
               return (
                 <motion.div

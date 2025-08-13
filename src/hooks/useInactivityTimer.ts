@@ -34,7 +34,7 @@ export const useInactivityTimer = ({
 
     // Set the main logout timer
     logoutTimerRef.current = setTimeout(() => {
-      console.log('User inactive, logging out...');
+      // Inactivity logout
       (async () => {
         try {
           // Delegate logout to caller (e.g., centralized SessionContext.logout)
@@ -52,7 +52,7 @@ export const useInactivityTimer = ({
     if (warningTimeMs > 0 && warningBeforeLogoutInMinutes > 0) {
       warningTimerRef.current = setTimeout(() => {
         const timeLeftSeconds = warningBeforeLogoutInMinutes * 60;
-        console.log(`Warning: Logging out in ${warningBeforeLogoutInMinutes} minutes due to inactivity.`);
+        // Inactivity warning
         onWarning?.(timeLeftSeconds);
       }, warningTimeMs);
     }

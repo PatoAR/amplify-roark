@@ -51,7 +51,7 @@ export default function App() {
 
   // Handle authentication state changes and prevent blank screens
   useEffect(() => {
-    console.log('🔍 App: Auth state changed:', { authStatus, isAuthenticated, isSessionActive });
+    // Auth state changed
     
     // If we're still configuring, keep showing loading
     if (authStatus === 'configuring') {
@@ -93,7 +93,7 @@ export default function App() {
           // Give more time for the session to start up
           setTimeout(() => {
             if (authStatus === 'authenticated' && (!isAuthenticated || !isSessionActive)) {
-              console.warn('⚠️ Authentication state still unclear after visibility change, but continuing...');
+           // Authentication state unclear after visibility change
               // Don't show error, just log the warning
             }
           }, 5000); // Wait 5 seconds instead of 2

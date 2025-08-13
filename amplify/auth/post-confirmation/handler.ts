@@ -73,15 +73,10 @@ async function appsyncRequest<T = any>(query: string, variables?: any): Promise<
 }
 
 export const handler: PostConfirmationTriggerHandler = async (event) => {
-  console.log('Post-confirmation trigger:', JSON.stringify(event, null, 2));
+  // Post-confirmation trigger invoked
 
   // Log environment check for debugging (without exposing sensitive data)
-  console.log('Environment check:', {
-    hasGraphqlUrlSecret: true, // We'll check this when calling getAppSyncUrl()
-    hasGraphqlKeySecret: true, // We'll check this when calling getApiKey()
-    hasOldUrl: !!process.env.API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT,
-    region: process.env.AWS_REGION
-  });
+  // Environment check (redacted)
 
   try {
     const { userAttributes } = event.request;
@@ -91,20 +86,14 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
     const referralCode = userAttributes['custom:referralCode'] || event.request.clientMetadata?.referralCode;
     const referrerId = userAttributes['custom:referrerId'] || event.request.clientMetadata?.referrerId;
 
-    console.log(`User ${userId} signup details:`, {
-      referralCode,
-      referrerId,
-      hasReferralCode: !!referralCode,
-      hasReferrerId: !!referrerId,
-      allUserAttributes: userAttributes
-    });
+    // Redact user details from logs
 
     if (referralCode) {
       let finalReferrerId: string | null = referrerId ?? null;
       
       // If we don't have a referrerId, try to find it from the referral code
       if (!referrerId || referrerId === 'pending') {
-        console.log(`Looking up referrerId for referral code: ${referralCode}`);
+        // Looking up referrerId for referral code
         try {
           const listReferralCodesQuery = `
             query ListReferralCodes($filter: ModelReferralCodeFilterInput) {
@@ -126,7 +115,7 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
           if (referralCodes.listReferralCodes.items.length > 0) {
             const referralCodeRecord = referralCodes.listReferralCodes.items[0];
             finalReferrerId = referralCodeRecord.owner;
-            console.log(`Found referrerId: ${finalReferrerId} for referral code: ${referralCode}`);
+            // Found referrerId for referral code
           } else {
             console.warn(`Referral code not found or inactive: ${referralCode}`);
             // Continue without referral processing
@@ -140,7 +129,7 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
       }
 
       if (finalReferrerId) {
-        console.log(`Processing referral: code=${referralCode}, referrerId=${finalReferrerId}, userId=${userId}`);
+        // Processing referral
 
         try {
           // Create UserSubscription record with referral information
@@ -148,7 +137,7 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
           const trialEndDate = new Date();
           trialEndDate.setMonth(trialEndDate.getMonth() + 3); // 3 months free trial
 
-          console.log(`Creating UserSubscription for user ${userId} with referral info`);
+          // Creating UserSubscription for user with referral info
           
           const createUserSubscriptionMutation = `
             mutation CreateUserSubscription($input: CreateUserSubscriptionInput!) {
@@ -178,10 +167,10 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
               referrerId: finalReferrerId,
             }
           });
-          console.log(`UserSubscription created successfully:`, userSubscription);
+          // UserSubscription created
 
           // Process the referral to give the referrer their bonus
-          console.log(`Creating Referral record for referrer ${finalReferrerId}`);
+          // Creating Referral record for referrer
           
           const createReferralMutation = `
             mutation CreateReferral($input: CreateReferralInput!) {
@@ -207,10 +196,10 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
               freeMonthsEarned: 3,
             }
           });
-          console.log(`Referral created successfully:`, referral);
+          // Referral created
 
           // Update referral code stats
-          console.log(`Updating referral code stats for code ${referralCode}`);
+          // Updating referral code stats
           
           const listReferralCodesQuery = `
             query ListReferralCodes($filter: ModelReferralCodeFilterInput) {
@@ -253,13 +242,13 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
                 successfulReferrals: (referralCodeRecord.successfulReferrals || 0) + 1,
               }
             });
-            console.log(`ReferralCode updated successfully:`, updatedCode);
+            // ReferralCode updated
           } else {
             console.warn(`ReferralCode not found for code: ${referralCode}`);
           }
 
           // Extend referrer's subscription
-          console.log(`Extending referrer's subscription for user ${finalReferrerId}`);
+          // Extending referrer's subscription
           
           const listReferrerSubscriptionsQuery = `
             query ListUserSubscriptions($filter: ModelUserSubscriptionFilterInput) {
@@ -309,19 +298,19 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
                 trialEndDate: newTrialEndDate.toISOString(),
               }
             });
-            console.log(`Referrer subscription updated successfully:`, updatedSubscription);
+            // Referrer subscription updated
           } else {
             console.warn(`Referrer subscription not found for user: ${finalReferrerId}`);
           }
 
-          console.log(`Referral processing completed successfully for user ${userId}`);
+          // Referral processing completed
         } catch (referralError) {
-          console.error(`Error processing referral for user ${userId}:`, referralError);
+          console.error('Error processing referral for user', referralError);
           // Don't fail the user creation if referral processing fails
           // The user should still be created successfully
         }
       } else {
-        console.log(`Creating basic UserSubscription for user ${userId} without referral`);
+        // Creating basic UserSubscription without referral
         
         try {
           // Create UserSubscription record without referral information
@@ -354,14 +343,14 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
             }
           });
 
-          console.log(`UserSubscription created successfully for user ${userId}:`, userSubscription);
+          // UserSubscription created for user
         } catch (subscriptionError) {
-          console.error('Error creating UserSubscription:', subscriptionError);
+          console.error('Error creating UserSubscription', subscriptionError);
           throw subscriptionError; // Re-throw this error as it's critical
         }
       }
     } else {
-      console.log(`Creating basic UserSubscription for user ${userId} without referral`);
+      // Creating basic UserSubscription without referral
       
       try {
         // Create UserSubscription record without referral information
@@ -394,16 +383,16 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
           }
         });
 
-        console.log(`UserSubscription created successfully for user ${userId}:`, userSubscription);
+        // UserSubscription created for user
       } catch (subscriptionError) {
-        console.error('Error creating UserSubscription:', subscriptionError);
+        console.error('Error creating UserSubscription', subscriptionError);
         throw subscriptionError; // Re-throw this error as it's critical
       }
     }
 
     return event;
   } catch (error) {
-    console.error('Error in post-confirmation trigger:', error);
+    console.error('Error in post-confirmation trigger', error);
     // Don't fail the signup process, just log the error
     return event;
   }

@@ -68,8 +68,7 @@ export const useReferral = () => {
         // Generate new referral code if none exists
         await generateReferralCode();
       }
-      // Track referral code generation
-      trackReferralActivity('generated', referralCode);
+      // Only track generation when a new code is actually created
     } catch (err) {
       console.error('Error loading referral data:', err);
       setError('Failed to load referral data');

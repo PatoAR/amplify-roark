@@ -43,7 +43,8 @@ const schema = a.schema({
   })
   .authorization(allow => [
     allow.owner().identityClaim('sub'),
-    allow.publicApiKey().to(['read', 'update']), // Allow public read/update for validation
+    // Keep public read/update for validation flows; will be tightened in a later pass
+    allow.publicApiKey().to(['read', 'update']),
   ]),
 
   // Referral Model - Track successful referrals
@@ -56,7 +57,11 @@ const schema = a.schema({
     completedAt: a.datetime(),
     freeMonthsEarned: a.integer().default(3), // Months earned by referrer
   })
-  .authorization(allow => [allow.owner().identityClaim('sub')]),
+  .authorization(allow => [
+    allow.owner().identityClaim('sub'),
+    // Allow backend (via API key) to create referral records during post-confirmation processing
+    allow.publicApiKey().to(['create', 'read'])
+  ]),
 
   // UserSubscription Model - Track subscription status and free trial
   UserSubscription: a
@@ -70,7 +75,11 @@ const schema = a.schema({
     referralCodeUsed: a.string(), // Code used during signup
     referrerId: a.string(), // ID of user who referred this user
   })
-  .authorization(allow => [allow.owner().identityClaim('sub')]),
+  .authorization(allow => [
+    allow.owner().identityClaim('sub'),
+    // Allow backend (via API key) to create/update subscriptions during post-confirmation
+    allow.publicApiKey().to(['create', 'update', 'read'])
+  ]),
 
   // UserActivity Model - Track user sessions and activity periods
   UserActivity: a

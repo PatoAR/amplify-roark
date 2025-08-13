@@ -96,10 +96,10 @@ export const useActivityTracking = () => {
       });
 
       setIsTracking(true);
-      console.log('📊 Activity tracking session started');
+      // Activity tracking session started
     } catch (error) {
       const errorContext = createErrorContext('startSession');
-      console.error('Failed to start activity session:', error, errorContext);
+      console.error('Failed to start activity session', error, errorContext);
     }
   }, [user?.userId, generateSessionId, getDeviceInfo, createErrorContext, getClient]);
 
@@ -172,10 +172,10 @@ export const useActivityTracking = () => {
         }) as any;
       }
 
-      console.log('📊 Activity tracking session ended');
+      // Activity tracking session ended
     } catch (error) {
       const errorContext = createErrorContext('endSession');
-      console.error('Failed to end activity session:', error, errorContext);
+      console.error('Failed to end activity session', error, errorContext);
     } finally {
       sessionRef.current = null;
       activityRef.current = { pageViews: 0, interactions: 0 };
@@ -187,20 +187,11 @@ export const useActivityTracking = () => {
   const safeEndSession = useCallback(async () => {
     // Only end session if user is no longer authenticated or component is unmounting
     if ((!user?.userId || isUnmountingRef.current) && sessionRef.current && shouldEndSessionRef.current) {
-      console.log('🔍 Safe end session called:', {
-        userAuthenticated: !!user?.userId,
-        isUnmounting: isUnmountingRef.current,
-        hasSession: !!sessionRef.current,
-        shouldEnd: shouldEndSessionRef.current
-      });
+      // Safe end session called
+      
       await endSession();
     } else {
-      console.log('🔍 Safe end session prevented:', {
-        userAuthenticated: !!user?.userId,
-        isUnmounting: isUnmountingRef.current,
-        hasSession: !!sessionRef.current,
-        shouldEnd: shouldEndSessionRef.current
-      });
+      // Safe end session prevented
     }
   }, [user?.userId, endSession]);
 
@@ -234,21 +225,21 @@ export const useActivityTracking = () => {
     // Validate event type
     if (!isValidEventType(event.eventType)) {
       const errorContext = createErrorContext('trackEvent');
-      console.error('Invalid event type:', event.eventType, errorContext);
+      console.error('Invalid event type', event.eventType, errorContext);
       return;
     }
 
     // Validate event data if present
     if (event.eventData && !validateEventData(event.eventData)) {
       const errorContext = createErrorContext('trackEvent');
-      console.error('Invalid event data:', event.eventData, errorContext);
+      console.error('Invalid event data', event.eventData, errorContext);
       return;
     }
 
     // Validate metadata if present
     if (event.metadata && !validateMetadata(event.metadata)) {
       const errorContext = createErrorContext('trackEvent');
-      console.error('Invalid metadata:', event.metadata, errorContext);
+      console.error('Invalid metadata', event.metadata, errorContext);
       return;
     }
 
@@ -328,10 +319,10 @@ export const useActivityTracking = () => {
         }) as any;
       }
 
-      console.log(`📊 Tracked event: ${event.eventType}`);
+      // Tracked event
     } catch (error) {
       const errorContext = createErrorContext('trackEvent');
-      console.error('Failed to track event:', error, errorContext);
+      console.error('Failed to track event', error, errorContext);
     }
   }, [user?.userId, createErrorContext, getClient]);
 

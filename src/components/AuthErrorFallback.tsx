@@ -30,7 +30,7 @@ export const AuthErrorFallback: React.FC<AuthErrorFallbackProps> = ({ error, onR
       try {
         await signOut();
       } catch (error) {
-        console.error('Error during logout:', error);
+        console.error('Error during logout', error);
         // Force reload as fallback
         window.location.reload();
       }

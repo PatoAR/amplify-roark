@@ -138,6 +138,21 @@ const customTranslations = {
     'signup.errorDuringSignup': 'An error occurred during sign up',
     'signup.unexpectedError': 'An unexpected error occurred during sign up',
     'signup.invalidUserAttributes': 'Invalid user attributes',
+
+    // Verify Email
+    'verify.subtitle': 'Enter the verification code sent to',
+    'verify.codeLabel': 'Verification Code',
+    'verify.codePlaceholder': '6-digit code',
+    'verify.submit': 'Verify Email',
+    'verify.submitting': 'Verifying...',
+    'verify.resend': 'Resend code',
+    'verify.sent': 'Verification code resent.',
+    'verify.success': 'Email verified. You can now sign in.',
+    'verify.errorInvalid': 'Invalid verification code.',
+    'verify.errorExpired': 'Verification code has expired.',
+    'verify.errorUser': 'User not found.',
+    'verify.errorResend': 'Failed to resend code.',
+    'verify.errorGeneric': 'Verification failed. Please try again.',
     
     // Inactivity Warning
     'inactivity.title': 'Inactivity Warning',
@@ -300,6 +315,21 @@ const customTranslations = {
     'signup.errorDuringSignup': 'Ocurrió un error durante el registro',
     'signup.unexpectedError': 'Ocurrió un error inesperado durante el registro',
     'signup.invalidUserAttributes': 'Atributos de usuario inválidos',
+
+    // Verify Email
+    'verify.subtitle': 'Ingresa el código de verificación enviado a',
+    'verify.codeLabel': 'Código de Verificación',
+    'verify.codePlaceholder': 'Código de 6 dígitos',
+    'verify.submit': 'Verificar Email',
+    'verify.submitting': 'Verificando...',
+    'verify.resend': 'Reenviar código',
+    'verify.sent': 'Código de verificación reenviado.',
+    'verify.success': 'Email verificado. Ya puedes iniciar sesión.',
+    'verify.errorInvalid': 'Código de verificación inválido.',
+    'verify.errorExpired': 'El código de verificación ha expirado.',
+    'verify.errorUser': 'Usuario no encontrado.',
+    'verify.errorResend': 'No se pudo reenviar el código.',
+    'verify.errorGeneric': 'La verificación falló. Inténtalo de nuevo.',
     
     // Inactivity Warning
     'inactivity.title': 'Advertencia de Inactividad',
@@ -462,6 +492,21 @@ const customTranslations = {
     'signup.errorDuringSignup': 'Ocorreu um erro durante o registro',
     'signup.unexpectedError': 'Ocorreu um erro inesperado durante o registro',
     'signup.invalidUserAttributes': 'Atributos de usuário inválidos',
+
+    // Verify Email
+    'verify.subtitle': 'Digite o código de verificação enviado para',
+    'verify.codeLabel': 'Código de Verificação',
+    'verify.codePlaceholder': 'Código de 6 dígitos',
+    'verify.submit': 'Verificar Email',
+    'verify.submitting': 'Verificando...',
+    'verify.resend': 'Reenviar código',
+    'verify.sent': 'Código de verificação reenviado.',
+    'verify.success': 'Email verificado. Você já pode entrar.',
+    'verify.errorInvalid': 'Código de verificação inválido.',
+    'verify.errorExpired': 'O código de verificação expirou.',
+    'verify.errorUser': 'Usuário não encontrado.',
+    'verify.errorResend': 'Falha ao reenviar o código.',
+    'verify.errorGeneric': 'Falha na verificação. Tente novamente.',
     
     // Inactivity Warning
     'inactivity.title': 'Aviso de Inatividade',
