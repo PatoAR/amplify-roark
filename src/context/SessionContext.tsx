@@ -4,10 +4,10 @@ import { useSessionManager } from '../hooks/useSessionManager';
 interface SessionContextType {
   isAuthenticated: boolean;
   isSessionActive: boolean;
-  authStatus: string;
   logout: () => Promise<void>;
   // Remove all activity tracking functions except basic session management
   userId?: string;
+  sessionId?: string;
   authError: Error | null;
   clearAuthError: () => void;
 }
@@ -37,9 +37,9 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
   const {
     isAuthenticated,
     isSessionActive,
-    authStatus,
     logout,
     userId,
+    sessionId,
   } = sessionManager;
 
   const clearAuthError = () => setAuthError(null);
@@ -48,9 +48,9 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     <SessionContext.Provider value={{
       isAuthenticated,
       isSessionActive,
-      authStatus,
       logout,
       userId,
+      sessionId,
       authError,
       clearAuthError,
     }}>
