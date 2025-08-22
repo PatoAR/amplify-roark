@@ -14,10 +14,16 @@ export const useActivityTracking = () => {
   const isUnmountingRef = useRef<boolean>(false);
   const shouldEndSessionRef = useRef<boolean>(false);
   const clientRef = useRef<ReturnType<typeof generateClient<Schema>> | null>(null);
+  const updateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Initialize client when needed
   const getClient = useCallback(() => {
     try {
+      // Clear any pending debounced update before finalizing
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current);
+        updateTimeoutRef.current = null;
+      }
       if (!clientRef.current) {
         clientRef.current = generateClient<Schema>();
       }
@@ -297,39 +303,33 @@ export const useActivityTracking = () => {
         }
       }) as any;
 
-      // Update session counters
+      // Update session counters and debounce write to backend
       activityRef.current.interactions++;
-      
-      // Update UserActivity interactions directly using cached id when available
-      const updateUserActivityMutation = /* GraphQL */ `
-        mutation UpdateUserActivity($input: UpdateUserActivityInput!) {
-          updateUserActivity(input: $input) { id interactions }
-        }
-      `;
-      const activityId = activityIdRef.current;
-      if (activityId) {
-        await client.graphql({
-          query: updateUserActivityMutation,
-          variables: { input: { id: activityId, interactions: activityRef.current.interactions } }
-        }) as any;
-      } else {
-        // Fallback: list by sessionId
-        const listUserActivitiesQuery = /* GraphQL */ `
-          query ListUserActivities($filter: ModelUserActivityFilterInput) {
-            listUserActivities(filter: $filter) { items { id sessionId interactions } }
+
+      const flushActivityUpdate = async () => {
+        const actId = activityIdRef.current;
+        if (!actId) return;
+        const updateUserActivityMutation = /* GraphQL */ `
+          mutation UpdateUserActivity($input: UpdateUserActivityInput!) {
+            updateUserActivity(input: $input) { id interactions pageViews }
           }
         `;
-        const result = await client.graphql({
-          query: listUserActivitiesQuery,
-          variables: { filter: { sessionId: { eq: sessionId } } }
+        const client = getClient();
+        if (!client) return;
+        await client.graphql({
+          query: updateUserActivityMutation,
+          variables: { input: { id: actId, interactions: activityRef.current.interactions, pageViews: activityRef.current.pageViews } }
         }) as any;
-        const activity = result.data?.listUserActivities?.items?.[0];
-        if (activity?.id) {
-          await client.graphql({
-            query: updateUserActivityMutation,
-            variables: { input: { id: activity.id, interactions: activityRef.current.interactions } }
-          }) as any;
-        }
+      };
+
+      if (!updateTimeoutRef.current) {
+        updateTimeoutRef.current = setTimeout(async () => {
+          try {
+            await flushActivityUpdate();
+          } finally {
+            updateTimeoutRef.current = null;
+          }
+        }, 1500);
       }
 
       // Tracked event

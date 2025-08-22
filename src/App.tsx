@@ -35,6 +35,7 @@ export default function App() {
   const { resetInactivityTimer } = useInactivityTimer({
     timeoutInMinutes: 120,
     warningBeforeLogoutInMinutes: 10,
+    enabled: isAuthenticated && isSessionActive, // Only enable when authenticated and session is active
     onLogout: async () => {
       setWarningDialogOpen(false);
       await logout();
@@ -81,6 +82,13 @@ export default function App() {
       return;
     }
   }, [authStatus, isAuthenticated, isSessionActive]);
+
+  // Reset inactivity timer when session state changes
+  useEffect(() => {
+    if (isAuthenticated && isSessionActive) {
+      resetInactivityTimer();
+    }
+  }, [isAuthenticated, isSessionActive, resetInactivityTimer]);
 
   // Handle visibility change to detect when user returns from idle
   useEffect(() => {

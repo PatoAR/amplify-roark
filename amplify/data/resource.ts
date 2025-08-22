@@ -19,7 +19,8 @@ const schema = a.schema({
     ttl: a.integer(),
   })
   .authorization((allow) => [
-    allow.publicApiKey(),
+    // Limit API key to read-only; prefer backend ingestion via functions
+    allow.publicApiKey().to(['read']),
     allow.authenticated(),
   ]),
 
@@ -43,8 +44,8 @@ const schema = a.schema({
   })
   .authorization(allow => [
     allow.owner().identityClaim('sub'),
-    // Keep public read/update for validation flows; will be tightened in a later pass
-    allow.publicApiKey().to(['read', 'update']),
+    // Public may read for validation; updates only via trusted functions
+    allow.publicApiKey().to(['read']),
   ]),
 
   // Referral Model - Track successful referrals

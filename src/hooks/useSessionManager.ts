@@ -29,7 +29,6 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
   const [userIdState, setUserIdState] = useState<string | undefined>(undefined);
   const [sessionIdState, setSessionIdState] = useState<string | undefined>(undefined);
   const isLoggingOutRef = useRef<boolean>(false);
-  const sessionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Create error context for debugging
   const createErrorContext = useCallback((action: string): ErrorContext => ({
@@ -40,14 +39,6 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     timestamp: new Date().toISOString(),
   }), [user?.userId]);
 
-  // Clear session timeout
-  const clearSessionTimeout = useCallback(() => {
-    if (sessionTimeoutRef.current) {
-      clearTimeout(sessionTimeoutRef.current);
-      sessionTimeoutRef.current = null;
-    }
-  }, []);
-
   // Centralized logout function
   const performLogout = useCallback(async () => {
     const errorContext = createErrorContext('performLogout');
@@ -56,9 +47,6 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     try {
       // Centralized logout
       isLoggingOutRef.current = true;
-
-      // Clear session timeout
-      clearSessionTimeout();
 
       // 1. End activity tracking session
       if (sessionStateRef.current.isSessionActive) {
@@ -104,22 +92,7 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
         isLoggingOutRef.current = false;
       }
     }
-  }, [endSession, signOut, options, createErrorContext, clearSessionTimeout, authStatus]);
-
-  // Set up session timeout detection
-  const setupSessionTimeout = useCallback(() => {
-    if (sessionTimeoutRef.current) {
-      clearTimeout(sessionTimeoutRef.current);
-    }
-
-    // Set a timeout to detect if session becomes stale (2 hours)
-    sessionTimeoutRef.current = setTimeout(() => {
-      if (sessionStateRef.current.isSessionActive && !isLoggingOutRef.current) {
-        console.warn('⚠️ Session timeout detected, forcing logout...');
-        performLogout();
-      }
-    }, 2 * 60 * 60 * 1000); // 2 hours
-  }, [performLogout]);
+  }, [endSession, signOut, options, createErrorContext, authStatus]);
 
   // Start session when user becomes authenticated
   useEffect(() => {
@@ -148,9 +121,6 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
         setSessionIdState(sessionStateRef.current.sessionId);
         
         startSession().then(() => {
-          // Set up session timeout
-          setupSessionTimeout();
-
           // Session started
           
           if (options.onSessionStart) {
@@ -178,16 +148,10 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
       // User is not authenticated, ensure session is ended
       if (sessionStateRef.current.isSessionActive) {
         // User not authenticated, ending session
-        clearSessionTimeout();
         performLogout();
       }
     }
-
-    // Cleanup function
-    return () => {
-      clearSessionTimeout();
-    };
-  }, [authStatus, user?.userId, startSession, setupSessionTimeout, clearSessionTimeout, performLogout, options, createErrorContext]);
+  }, [authStatus, user?.userId, startSession, performLogout, options, createErrorContext]);
 
   // Reset logout flag when auth state is unauthenticated
   useEffect(() => {

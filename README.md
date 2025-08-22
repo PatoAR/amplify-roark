@@ -1,8 +1,12 @@
 ## AWS Roark
 Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fetches, processes and stores news articles in dynambodb. The articles are distributed to varios channels (whatsapp, telegram) and to this webapp via AppSync subscriptions or long-polling.
 
+# Secondary idea: whatsapp chatbot to find help in houshold jobs (carpintero, electricista, plomero, empleada domestica, etc.)
+
 ## ToDo's
 - Implement split screen as suggested by ChatGPT
+- Which functions/processes take more resources? (graphql calls, etc)
+- Filters take too long to take effect on corporate network
 
 - Create interface to deliver different content  - publicity, financials, etc. fix on top, colors, etc.
 - Modified display text
