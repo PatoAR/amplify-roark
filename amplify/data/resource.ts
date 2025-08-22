@@ -78,7 +78,9 @@ const schema = a.schema({
   })
   .authorization(allow => [
     allow.owner().identityClaim('sub'),
-    // Allow backend (via API key) to create/update subscriptions during post-confirmation
+    // Allow Lambda functions (via IAM) to create/update subscriptions during post-confirmation
+    allow.custom('function'),
+    // Keep API key access for other backend operations
     allow.publicApiKey().to(['create', 'update', 'read'])
   ]),
 
