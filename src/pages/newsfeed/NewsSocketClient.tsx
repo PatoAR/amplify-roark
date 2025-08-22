@@ -19,7 +19,7 @@ function NewsSocketClient() {
   const [isTabVisible, setIsTabVisible] = useState<boolean>(() => !document.hidden);
   const { preferences, isLoading, userProfileId } = useUserPreferences();
   const { articles, markArticleAsSeen } = useNews();
-  const { trackArticleClick, isAuthenticated } = useSession();
+  const { isAuthenticated } = useSession();
   const { t } = useTranslation();
 
   // Memoize the country matching logic to avoid recreating functions on every render
@@ -55,11 +55,6 @@ function NewsSocketClient() {
     if (isLoading) {
       return [];
     }
-
-    // If the user has no profile yet (is a new user), show nothing.
-    // if (userProfileId === null) {
-    //  return [];
-    //}
 
     // Early return if no filters are set
     if (!industryMatcher.hasIndustryFilters && !countryMatcher.hasCountryFilters) {
@@ -153,18 +148,14 @@ function NewsSocketClient() {
   }, [unreadCount, isAuthenticated]);
 
   // Handles opening the article link to a new tab.
-  const handleArticleClick = useCallback(async (event: React.MouseEvent<HTMLAnchorElement>, link: string, articleId: string, articleTitle: string) => {
+  const handleArticleClick = useCallback(async (event: React.MouseEvent<HTMLAnchorElement>, link: string) => {
     event.preventDefault();
-    
-    // Track article click
-    trackArticleClick(articleId, articleTitle);
-    
     const a = document.createElement('a');
     a.href = link;
     a.target = '_blank';
     a.rel = 'noopener noreferrer';
     a.click();
-  }, [trackArticleClick]);
+  }, []);
 
   // Optimize company click handler
   const handleCompanyClick = useCallback((url: string) => {
@@ -232,7 +223,7 @@ function NewsSocketClient() {
                 >
                 <a 
                   href={msg.link} 
-                  onClick={(e) => handleArticleClick(e, msg.link, msg.id, msg.title)} 
+                  onClick={(e) => handleArticleClick(e, msg.link)} 
                   className="article-line-link"
                 >
                   <p className="article-line">

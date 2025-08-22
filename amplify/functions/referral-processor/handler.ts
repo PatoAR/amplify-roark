@@ -23,7 +23,7 @@ function getAppSyncUrl(): string {
 function getApiKey(): string {
   const apiKey = process.env.GRAPHQL_API_KEY;
   if (!apiKey) {
-    throw new Error('AppSync API Key not configured. Ensure GRAPHQL_API_KEY is set for the function.');
+    throw new Error('AppSync API Key not configured. Ensure GRAPHQL_API_KEY is set.');
   }
   return apiKey;
 }
@@ -72,8 +72,6 @@ async function appsyncRequest<T = any>(query: string, variables?: any): Promise<
   return result.data as T;
 }
 
-
-
 interface ReferralEvent {
   action: 'generate_code' | 'validate_code' | 'process_referral' | 'extend_subscription';
   userId?: string;
@@ -86,10 +84,13 @@ interface ReferralResponse {
   success: boolean;
   message: string;
   data?: any;
+  error?: string;
 }
 
 export const handler = async (event: ReferralEvent): Promise<ReferralResponse> => {
   try {
+    console.log('Referral processor event:', JSON.stringify(event, null, 2));
+    
     switch (event.action) {
       case 'generate_code':
         return await generateReferralCode(event.userId!);
@@ -104,12 +105,18 @@ export const handler = async (event: ReferralEvent): Promise<ReferralResponse> =
     }
   } catch (error) {
     console.error('Referral processor error:', error);
-    return { success: false, message: 'Internal server error' };
+    return { 
+      success: false, 
+      message: 'Internal server error',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
   }
 };
 
 async function generateReferralCode(userId: string): Promise<ReferralResponse> {
   try {
+    console.log('Generating referral code for user:', userId);
+    
     // Generate a unique 8-character code
     const code = generateUniqueCode();
     
@@ -158,6 +165,8 @@ async function generateReferralCode(userId: string): Promise<ReferralResponse> {
       }
     });
     
+    console.log('Referral code generated successfully:', result.createReferralCode);
+    
     return {
       success: true,
       message: 'Referral code generated successfully',
@@ -165,12 +174,18 @@ async function generateReferralCode(userId: string): Promise<ReferralResponse> {
     };
   } catch (error) {
     console.error('Error generating referral code:', error);
-    return { success: false, message: 'Failed to generate referral code' };
+    return { 
+      success: false, 
+      message: 'Failed to generate referral code',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
   }
 }
 
 async function validateReferralCode(code: string): Promise<ReferralResponse> {
   try {
+    console.log('Validating referral code:', code);
+    
     const listReferralCodesQuery = `
       query ListReferralCodes($filter: ModelReferralCodeFilterInput) {
         listReferralCodes(filter: $filter) {
@@ -196,6 +211,8 @@ async function validateReferralCode(code: string): Promise<ReferralResponse> {
     }
     
     const referralCode = result.listReferralCodes.items[0];
+    console.log('Referral code validated successfully:', referralCode);
+    
     return {
       success: true,
       message: 'Valid referral code',
@@ -206,12 +223,18 @@ async function validateReferralCode(code: string): Promise<ReferralResponse> {
     };
   } catch (error) {
     console.error('Error validating referral code:', error);
-    return { success: false, message: 'Failed to validate referral code' };
+    return { 
+      success: false, 
+      message: 'Failed to validate referral code',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
   }
 }
 
 async function processReferral(referrerId: string, referredId: string, code: string): Promise<ReferralResponse> {
   try {
+    console.log('Processing referral:', { referrerId, referredId, code });
+    
     // Create referral record
     const createReferralMutation = `
       mutation CreateReferral($input: CreateReferralInput!) {
@@ -262,6 +285,7 @@ async function processReferral(referrerId: string, referredId: string, code: str
         mutation UpdateReferralCode($input: UpdateReferralCodeInput!) {
           updateReferralCode(input: $input) {
             id
+            code
             totalReferrals
             successfulReferrals
           }
@@ -279,6 +303,8 @@ async function processReferral(referrerId: string, referredId: string, code: str
     // Extend referrer's subscription
     await extendSubscription(referrerId);
     
+    console.log('Referral processed successfully');
+    
     return {
       success: true,
       message: 'Referral processed successfully',
@@ -286,12 +312,18 @@ async function processReferral(referrerId: string, referredId: string, code: str
     };
   } catch (error) {
     console.error('Error processing referral:', error);
-    return { success: false, message: 'Failed to process referral' };
+    return { 
+      success: false, 
+      message: 'Failed to process referral',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
   }
 }
 
 async function extendSubscription(userId: string): Promise<ReferralResponse> {
   try {
+    console.log('Extending subscription for user:', userId);
+    
     // Get user's subscription
     const listUserSubscriptionsQuery = `
       query ListUserSubscriptions($filter: ModelUserSubscriptionFilterInput) {
@@ -394,7 +426,11 @@ async function extendSubscription(userId: string): Promise<ReferralResponse> {
     };
   } catch (error) {
     console.error('Error extending subscription:', error);
-    return { success: false, message: 'Failed to extend subscription' };
+    return { 
+      success: false, 
+      message: 'Failed to extend subscription',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
   }
 }
 

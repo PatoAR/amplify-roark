@@ -5,15 +5,15 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 
 ## ToDo's
 - Implement split screen as suggested by ChatGPT
-- Which functions/processes take more resources? (graphql calls, etc)
-- Filters take too long to take effect on corporate network
 
-- Create interface to deliver different content  - publicity, financials, etc. fix on top, colors, etc.
+- Create interface to deliver different content  - publicity, financials, etc. fix on top, colors, etc. Open content page on the right
 - Modified display text
 
 - Add email with custom domain
-- Open AWS account on the name of Finu, transfer domain 
 - Pay suscription
+
+- Open AWS account on the name of Finu, transfer domain 
+
 
 
 ## CI/CD

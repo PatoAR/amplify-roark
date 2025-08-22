@@ -78,10 +78,10 @@ const schema = a.schema({
   })
   .authorization(allow => [
     allow.owner().identityClaim('sub'),
-    // Allow Lambda functions (via IAM) to create/update subscriptions during post-confirmation
-    allow.custom('function'),
-    // Keep API key access for other backend operations
-    allow.publicApiKey().to(['create', 'update', 'read'])
+    // Allow Lambda functions (via API key) to create/update subscriptions during post-confirmation
+    allow.publicApiKey().to(['create', 'update', 'read']),
+    // Allow IAM roles for Lambda functions
+    allow.custom('function')
   ]),
 
   // UserActivity Model - Track user sessions and activity periods

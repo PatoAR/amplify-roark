@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { generateClient } from 'aws-amplify/api';
 import { type Schema } from '../../amplify/data/resource';
-import { useSession } from '../context/SessionContext';
 import { listReferralCodes } from '../graphql/queries';
 import { useTranslation } from '../i18n';
 import { createReferralCode } from '../graphql/mutations';
@@ -24,7 +23,8 @@ export const useReferral = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
-  const { trackReferralActivity } = useSession();
+  // Remove activity tracking to reduce AWS resource consumption
+  // const { trackReferralActivity } = useSession();
   const clientRef = useRef<ReturnType<typeof generateClient<Schema>> | null>(null);
 
   // Initialize client when needed
@@ -167,8 +167,8 @@ export const useReferral = () => {
           await navigator.clipboard.writeText(referralUrl);
           break;
       }
-      // Track referral sharing
-      trackReferralActivity('shared', referralCode);
+      // Remove referral activity tracking to reduce AWS resource consumption
+      // trackReferralActivity('shared', referralCode);
     } catch (err) {
       console.error('Error sharing referral link:', err);
       setError('Failed to share referral link');

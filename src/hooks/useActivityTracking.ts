@@ -2,35 +2,20 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { generateClient } from 'aws-amplify/api';
 import { type Schema } from '../../amplify/data/resource';
-import { ActivityEvent, SessionInfo, EventData, isValidEventType, validateEventData, validateMetadata } from '../types/activity';
-import { ErrorContext } from '../types/errors';
+import { ActivityEvent, SessionInfo, isValidEventType, validateEventData, validateMetadata } from '../types/activity';
 
 export const useActivityTracking = () => {
   const { user } = useAuthenticator();
   const sessionRef = useRef<SessionInfo | null>(null);
-  const activityIdRef = useRef<string | null>(null);
-  const activityRef = useRef<{ pageViews: number; interactions: number }>({ pageViews: 0, interactions: 0 });
   const [isTracking, setIsTracking] = useState(false);
-  const isUnmountingRef = useRef<boolean>(false);
-  const shouldEndSessionRef = useRef<boolean>(false);
   const clientRef = useRef<ReturnType<typeof generateClient<Schema>> | null>(null);
-  const updateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Initialize client when needed
   const getClient = useCallback(() => {
-    try {
-      // Clear any pending debounced update before finalizing
-      if (updateTimeoutRef.current) {
-        clearTimeout(updateTimeoutRef.current);
-        updateTimeoutRef.current = null;
-      }
-      if (!clientRef.current) {
-        clientRef.current = generateClient<Schema>();
-      }
-      return clientRef.current;
-    } catch (e) {
-      throw new Error('Amplify client could not be initialized. Ensure Amplify.configure() is called before using any Amplify APIs.');
+    if (!clientRef.current) {
+      clientRef.current = generateClient<Schema>();
     }
+    return clientRef.current;
   }, []);
 
   // Generate unique session ID
@@ -38,28 +23,13 @@ export const useActivityTracking = () => {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }, []);
 
-  // Get device information
+  // Get minimal device information
   const getDeviceInfo = useCallback(() => {
-    const { platform, language } = navigator;
-    const { width, height } = screen;
-    return JSON.stringify({
-      platform,
-      language,
-      screenSize: `${width}x${height}`,
-      viewport: `${window.innerWidth}x${window.innerHeight}`,
-    });
+    const { platform } = navigator;
+    return JSON.stringify({ platform });
   }, []);
 
-  // Create error context for better debugging
-  const createErrorContext = useCallback((action: string): ErrorContext => ({
-    component: 'useActivityTracking',
-    action,
-    userId: user?.userId,
-    sessionId: sessionRef.current?.sessionId,
-    timestamp: new Date().toISOString(),
-  }), [user?.userId]);
-
-  // Start a new session
+  // Start a new session (only on login)
   const startSession = useCallback(async () => {
     if (!user?.userId) return;
 
@@ -76,6 +46,7 @@ export const useActivityTracking = () => {
     };
 
     try {
+      // Create UserActivity record
       const createUserActivityMutation = /* GraphQL */ `
         mutation CreateUserActivity($input: CreateUserActivityInput!) {
           createUserActivity(input: $input) {
@@ -87,7 +58,7 @@ export const useActivityTracking = () => {
         }
       `;
 
-      const createResult = await client.graphql({
+      const result = await client.graphql({
         query: createUserActivityMutation,
         variables: {
           input: {
@@ -98,151 +69,76 @@ export const useActivityTracking = () => {
             pageViews: 0,
             interactions: 0,
             isActive: true,
+            owner: user.userId,
           }
         }
       }) as any;
 
-      // Cache activity record id to avoid future list queries
-      const created = createResult?.data?.createUserActivity;
-      if (created?.id) {
-        activityIdRef.current = created.id as string;
+      if (result.data?.createUserActivity) {
+        setIsTracking(true);
+        // Track login event
+        await trackEvent({
+          eventType: 'login',
+          eventData: { userId: user.userId, timestamp: new Date().toISOString() },
+          metadata: { userAgent, platform: navigator.platform }
+        });
       }
-
-      setIsTracking(true);
-      // Activity tracking session started
     } catch (error) {
-      const errorContext = createErrorContext('startSession');
-      console.error('Failed to start activity session', error, errorContext);
+      console.error('Failed to start activity session', error);
     }
-  }, [user?.userId, generateSessionId, getDeviceInfo, createErrorContext, getClient]);
+  }, [user?.userId, getClient, generateSessionId, getDeviceInfo]);
 
-  // End current session
+  // End session (only on logout)
   const endSession = useCallback(async () => {
     if (!sessionRef.current || !user?.userId) return;
 
-    const client = getClient();
-    if (!client) {
-      console.error('Cannot end session: Amplify client not available');
-      return;
-    }
-
-    const session = sessionRef.current;
-    const endTime = new Date();
-    const duration = Math.floor((endTime.getTime() - session.startTime.getTime()) / 1000);
-
     try {
-      // Update the UserActivity record via GraphQL (prefer cached id)
-      const activityId = activityIdRef.current;
-      if (activityId) {
-        
+      const client = getClient();
+      
+      // Track logout event first
+      await trackEvent({
+        eventType: 'logout',
+        eventData: { userId: user.userId, timestamp: new Date().toISOString() },
+        metadata: { userAgent: navigator.userAgent, platform: navigator.platform }
+      });
+
+      // Update UserActivity to mark session as ended
+      if (sessionRef.current) {
         const updateUserActivityMutation = /* GraphQL */ `
           mutation UpdateUserActivity($input: UpdateUserActivityInput!) {
             updateUserActivity(input: $input) {
               id
               endTime
               duration
-              pageViews
-              interactions
               isActive
             }
           }
         `;
 
+        const endTime = new Date();
+        const duration = Math.floor((endTime.getTime() - sessionRef.current.startTime.getTime()) / 1000);
+
         await client.graphql({
           query: updateUserActivityMutation,
           variables: {
             input: {
-              id: activityId,
+              id: sessionRef.current.sessionId,
               endTime: endTime.toISOString(),
               duration,
-              pageViews: activityRef.current.pageViews,
-              interactions: activityRef.current.interactions,
               isActive: false,
             }
           }
         }) as any;
-      } else {
-        // Fallback: find record by sessionId if cache is missing
-        const listUserActivitiesQuery = /* GraphQL */ `
-          query ListUserActivities($filter: ModelUserActivityFilterInput) {
-            listUserActivities(filter: $filter) {
-              items { id sessionId startTime pageViews interactions }
-            }
-          }
-        `;
-
-        const result = await client.graphql({
-          query: listUserActivitiesQuery,
-          variables: { filter: { sessionId: { eq: session.sessionId } } }
-        }) as any;
-
-        if (result.data?.listUserActivities?.items?.length > 0) {
-          const activity = result.data.listUserActivities.items[0];
-          const updateUserActivityMutation = /* GraphQL */ `
-            mutation UpdateUserActivity($input: UpdateUserActivityInput!) {
-              updateUserActivity(input: $input) {
-                id endTime duration pageViews interactions isActive
-              }
-            }
-          `;
-          await client.graphql({
-            query: updateUserActivityMutation,
-            variables: {
-              input: {
-                id: activity.id,
-                endTime: endTime.toISOString(),
-                duration,
-                pageViews: activityRef.current.pageViews,
-                interactions: activityRef.current.interactions,
-                isActive: false,
-              }
-            }
-          }) as any;
-        }
       }
-
-      // Activity tracking session ended
     } catch (error) {
-      const errorContext = createErrorContext('endSession');
-      console.error('Failed to end activity session', error, errorContext);
+      console.error('Failed to end activity session', error);
     } finally {
       sessionRef.current = null;
-      activityRef.current = { pageViews: 0, interactions: 0 };
-      activityIdRef.current = null;
       setIsTracking(false);
     }
-  }, [user?.userId, createErrorContext, getClient]);
+  }, [user?.userId, getClient]);
 
-  // Safe end session - only ends if user is actually logging out
-  const safeEndSession = useCallback(async () => {
-    // Only end session if user is no longer authenticated or component is unmounting
-    if ((!user?.userId || isUnmountingRef.current) && sessionRef.current && shouldEndSessionRef.current) {
-      // Safe end session called
-      
-      await endSession();
-    } else {
-      // Safe end session prevented
-    }
-  }, [user?.userId, endSession]);
-
-  // Track if component is unmounting
-  useEffect(() => {
-    return () => {
-      isUnmountingRef.current = true;
-      shouldEndSessionRef.current = true;
-    };
-  }, []);
-
-  // Track when user becomes unauthenticated
-  useEffect(() => {
-    if (!user?.userId && sessionRef.current) {
-      shouldEndSessionRef.current = true;
-    } else if (user?.userId) {
-      shouldEndSessionRef.current = false;
-    }
-  }, [user?.userId]);
-
-  // Track a specific event
+  // Track only login/logout events
   const trackEvent = useCallback(async (event: ActivityEvent) => {
     if (!sessionRef.current || !user?.userId) return;
 
@@ -254,22 +150,19 @@ export const useActivityTracking = () => {
 
     // Validate event type
     if (!isValidEventType(event.eventType)) {
-      const errorContext = createErrorContext('trackEvent');
-      console.error('Invalid event type', event.eventType, errorContext);
+      console.error('Invalid event type', event.eventType);
       return;
     }
 
     // Validate event data if present
     if (event.eventData && !validateEventData(event.eventData)) {
-      const errorContext = createErrorContext('trackEvent');
-      console.error('Invalid event data', event.eventData, errorContext);
+      console.error('Invalid event data', event.eventData);
       return;
     }
 
     // Validate metadata if present
     if (event.metadata && !validateMetadata(event.metadata)) {
-      const errorContext = createErrorContext('trackEvent');
-      console.error('Invalid metadata', event.metadata, errorContext);
+      console.error('Invalid metadata', event.metadata);
       return;
     }
 
@@ -296,122 +189,25 @@ export const useActivityTracking = () => {
             eventType: event.eventType,
             eventData: event.eventData ? JSON.stringify(event.eventData) : undefined,
             timestamp: new Date().toISOString(),
-            pageUrl: event.pageUrl || window.location.pathname,
-            elementId: event.elementId,
+            pageUrl: window.location.pathname,
+            elementId: `event-${event.eventType}`,
             metadata: event.metadata ? JSON.stringify(event.metadata) : undefined,
+            owner: user.userId,
           }
         }
       }) as any;
 
-      // Update session counters and debounce write to backend
-      activityRef.current.interactions++;
-
-      const flushActivityUpdate = async () => {
-        const actId = activityIdRef.current;
-        if (!actId) return;
-        const updateUserActivityMutation = /* GraphQL */ `
-          mutation UpdateUserActivity($input: UpdateUserActivityInput!) {
-            updateUserActivity(input: $input) { id interactions pageViews }
-          }
-        `;
-        const client = getClient();
-        if (!client) return;
-        await client.graphql({
-          query: updateUserActivityMutation,
-          variables: { input: { id: actId, interactions: activityRef.current.interactions, pageViews: activityRef.current.pageViews } }
-        }) as any;
-      };
-
-      if (!updateTimeoutRef.current) {
-        updateTimeoutRef.current = setTimeout(async () => {
-          try {
-            await flushActivityUpdate();
-          } finally {
-            updateTimeoutRef.current = null;
-          }
-        }, 1500);
-      }
-
-      // Tracked event
+      console.log(`Tracked ${event.eventType} event`);
     } catch (error) {
-      const errorContext = createErrorContext('trackEvent');
-      console.error('Failed to track event', error, errorContext);
+      console.error('Failed to track event', error);
     }
-  }, [user?.userId, createErrorContext, getClient]);
-
-  // Track page view
-  const trackPageView = useCallback(async (pageUrl?: string) => {
-    // Only track if session is active and user is authenticated
-    if (!isTracking || !sessionRef.current || !user?.userId) return;
-
-    activityRef.current.pageViews++;
-    
-    const eventData: EventData = { pageViews: activityRef.current.pageViews };
-    
-    await trackEvent({
-      eventType: 'page_view',
-      pageUrl: pageUrl || window.location.pathname,
-      eventData,
-    });
-  }, [trackEvent, user?.userId, isTracking]);
-
-  // Track article click
-  const trackArticleClick = useCallback(async (articleId: string, articleTitle: string) => {
-    if (!user?.userId) return;
-    
-    const eventData: EventData = { articleId, articleTitle };
-    
-    await trackEvent({
-      eventType: 'article_click',
-      elementId: `article-${articleId}`,
-      eventData,
-    });
-  }, [trackEvent, user?.userId]);
-
-  // Track filter change
-  const trackFilterChange = useCallback(async (filterType: string, filterValue: string) => {
-    if (!user?.userId) return;
-    
-    const eventData: EventData = { filterType, filterValue };
-    
-    await trackEvent({
-      eventType: 'filter_change',
-      eventData,
-    });
-  }, [trackEvent, user?.userId]);
-
-  // Track preference update
-  const trackPreferenceUpdate = useCallback(async (preferenceType: string, preferenceValue: string | string[] | boolean | number) => {
-    if (!user?.userId) return;
-    
-    const eventData: EventData = { preferenceType, preferenceValue };
-    
-    await trackEvent({
-      eventType: 'preference_update',
-      eventData,
-    });
-  }, [trackEvent, user?.userId]);
-
-  // Track referral activity
-  const trackReferralActivity = useCallback(async (action: 'generated' | 'shared', referralCode?: string) => {
-    if (!user?.userId) return;
-    
-    const eventData: EventData = { referralCode };
-    
-    await trackEvent({
-      eventType: action === 'generated' ? 'referral_generated' : 'referral_shared',
-      eventData,
-    });
-  }, [trackEvent, user?.userId]);
-
-  // Session is started centrally by useSessionManager; avoid duplicate starts here
+  }, [user?.userId, getClient]);
 
   // Clean up session when user logs out or component unmounts
   useEffect(() => {
     const handleBeforeUnload = () => {
-      // Only end session if user is not authenticated
       if (!user?.userId) {
-        safeEndSession();
+        endSession();
       }
     };
 
@@ -419,30 +215,16 @@ export const useActivityTracking = () => {
     
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      // Only end session if component is actually unmounting and user is not authenticated
-      if (isUnmountingRef.current && !user?.userId) {
-        safeEndSession();
+      if (!user?.userId) {
+        endSession();
       }
     };
-  }, [safeEndSession, user?.userId]);
-
-  // Track initial page view
-  useEffect(() => {
-    if (isTracking && user?.userId) {
-      trackPageView();
-    }
-  }, [isTracking, trackPageView, user?.userId]);
+  }, [endSession, user?.userId]);
 
   return {
     isTracking,
     trackEvent,
-    trackPageView,
-    trackArticleClick,
-    trackFilterChange,
-    trackPreferenceUpdate,
-    trackReferralActivity,
     startSession,
     endSession,
-    safeEndSession,
   };
 }; 

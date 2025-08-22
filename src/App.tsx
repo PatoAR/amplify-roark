@@ -26,7 +26,6 @@ export default function App() {
     isSessionActive, 
     authStatus,
     logout,
-    trackPageViewIfActive,
     authError,
     clearAuthError,
   } = useSession();
@@ -45,8 +44,8 @@ export default function App() {
       setWarningDialogOpen(true);
     },
     onActivity: () => {
-      // Track user activity when inactivity timer is reset
-      trackPageViewIfActive();
+      // Remove activity tracking to reduce AWS resource consumption
+      // trackPageViewIfActive();
     }
   });
 
