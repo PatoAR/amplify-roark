@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route} from "react-router-dom";
+import { useAuthenticator } from '@aws-amplify/ui-react';
 import Layout from "./components/Layout/Layout";
 import NewsSocketClient from "./pages/newsfeed/NewsSocketClient";
 import UserSettings from "./pages/settings/UserSettings";
@@ -20,11 +21,13 @@ export default function App() {
   // Auth error is now provided by SessionContext
   const [isInitializing, setIsInitializing] = useState(true);
 
+  // Get authStatus directly from authenticator
+  const { authStatus } = useAuthenticator();
+
   // Use session context
   const { 
     isAuthenticated, 
     isSessionActive, 
-    authStatus,
     logout,
     authError,
     clearAuthError,
