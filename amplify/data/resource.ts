@@ -19,8 +19,8 @@ const schema = a.schema({
     ttl: a.integer(),
   })
   .authorization((allow) => [
-    // Limit API key to read-only; prefer backend ingestion via functions
-    allow.publicApiKey().to(['read']),
+    // Allow API keys to create articles for backend ingestion
+    allow.publicApiKey().to(['read', 'create']),
     allow.authenticated(),
   ]),
 
