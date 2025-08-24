@@ -4,8 +4,6 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 # Secondary idea: whatsapp chatbot to find help in houshold jobs (carpintero, electricista, plomero, empleada domestica, etc.)
 
 ## ToDo's
-- Implement split screen as suggested by ChatGPT
-
 - Create interface to deliver different content  - publicity, financials, etc. fix on top, colors, etc. Open content page on the right
 - Modified display text
 

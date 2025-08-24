@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuthenticator } from '@aws-amplify/ui-react';
 import { useUserPreferences } from '../../context/UserPreferencesContext';
 import { useNews } from '../../context/NewsContext';
 import { useSession } from '../../context/SessionContext';
@@ -20,6 +21,7 @@ function NewsSocketClient() {
   const { preferences, isLoading, userProfileId } = useUserPreferences();
   const { articles, markArticleAsSeen } = useNews();
   const { isAuthenticated } = useSession();
+  const { authStatus } = useAuthenticator();
   const { t } = useTranslation();
 
   // Memoize the country matching logic to avoid recreating functions on every render
@@ -140,12 +142,27 @@ function NewsSocketClient() {
   const unreadCount = displayedMessages.filter(msg => !msg.seen).length;  
   useEffect(() => {
     const baseTitle = 'Perkins Live Feed';
-    if (!isAuthenticated) {
+    if (!isAuthenticated || authStatus === 'unauthenticated') {
       document.title = baseTitle;
       return;
     }
     document.title = unreadCount > 0 ? `(${unreadCount}) 🔥 ${baseTitle}` : baseTitle;
-  }, [unreadCount, isAuthenticated]);
+  }, [unreadCount, isAuthenticated, authStatus]);
+
+  // Additional effect to ensure document title is reset when authentication state changes
+  useEffect(() => {
+    const baseTitle = 'Perkins Live Feed';
+    if (!isAuthenticated || authStatus === 'unauthenticated') {
+      document.title = baseTitle;
+    }
+  }, [isAuthenticated, authStatus]);
+
+  // Cleanup effect to reset document title when component unmounts
+  useEffect(() => {
+    return () => {
+      document.title = 'Perkins Live Feed';
+    };
+  }, []);
 
   // Handles opening the article link to a new tab.
   const handleArticleClick = useCallback(async (event: React.MouseEvent<HTMLAnchorElement>, link: string) => {
