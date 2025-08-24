@@ -45,7 +45,7 @@ const schema = a.schema({
   .authorization(allow => [
     allow.owner().identityClaim('sub'),
     // Public may read for validation; updates only via trusted functions
-    allow.publicApiKey().to(['read']),
+    allow.publicApiKey().to(['read', 'update']),
   ]),
 
   // Referral Model - Track successful referrals
