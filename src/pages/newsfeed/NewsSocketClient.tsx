@@ -1,9 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuthenticator } from '@aws-amplify/ui-react';
 import { useUserPreferences } from '../../context/UserPreferencesContext';
 import { useNews } from '../../context/NewsContext';
-import { useSession } from '../../context/SessionContext';
 import WelcomeScreen from '../../components/WelcomeScreen/WelcomeScreen';
 import { useTranslation } from '../../i18n';
 import { COUNTRY_OPTIONS } from '../../constants/countries';
@@ -20,7 +18,6 @@ function NewsSocketClient() {
   const [isTabVisible, setIsTabVisible] = useState<boolean>(() => !document.hidden);
   const { preferences, isLoading, userProfileId } = useUserPreferences();
   const { articles, markArticleAsSeen } = useNews();
-  const { isAuthenticated } = useSession();
   const { t } = useTranslation();
 
   // Memoize the country matching logic to avoid recreating functions on every render

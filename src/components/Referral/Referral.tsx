@@ -8,7 +8,6 @@ import {
   View,
   Alert,
   Badge,
-  Divider,
   useTheme,
 } from '@aws-amplify/ui-react';
 import { useReferral } from '../../hooks/useReferral';
@@ -20,7 +19,6 @@ const Referral: React.FC = () => {
   const { tokens } = useTheme();
   const { t } = useTranslation();
   const {
-    referralCode,
     referralStats,
     isLoading,
     error,
