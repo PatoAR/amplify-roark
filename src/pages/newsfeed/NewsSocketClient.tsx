@@ -2,7 +2,6 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUserPreferences } from '../../context/UserPreferencesContext';
 import { useNews } from '../../context/NewsContext';
-import { useSession } from '../../context/SessionContext';
 import WelcomeScreen from '../../components/WelcomeScreen/WelcomeScreen';
 import { useTranslation } from '../../i18n';
 import { COUNTRY_OPTIONS } from '../../constants/countries';
