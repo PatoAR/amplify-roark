@@ -1,20 +1,12 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUserPreferences } from '../../context/UserPreferencesContext';
 import { useNews } from '../../context/NewsContext';
 import { useSession } from '../../context/SessionContext';
 import WelcomeScreen from '../../components/WelcomeScreen/WelcomeScreen';
 import { useTranslation } from '../../i18n';
+import { COUNTRY_OPTIONS } from '../../constants/countries';
 import './NewsSocketClient.css';
-
-// Constants for filtering logic
-const COUNTRY_OPTIONS = [
-  { id: 'Q414', label: 'ARG', code:'ar' },
-  { id: 'Q155', label: 'BRA', code: 'br' },
-  { id: 'Q298', label: 'CHL', code: 'cl' },
-  { id: 'Q733', label: 'PAR', code: 'py' },
-  { id: 'Q77', label: 'URU', code: 'uy' },
-];
 
 function formatLocalTime(timestamp?: string | null): string {
   if (!timestamp) return '';
@@ -27,28 +19,151 @@ function NewsSocketClient() {
   const [isTabVisible, setIsTabVisible] = useState<boolean>(() => !document.hidden);
   const { preferences, isLoading, userProfileId } = useUserPreferences();
   const { articles, markArticleAsSeen } = useNews();
-  const { trackArticleClick } = useSession();
   const { t } = useTranslation();
 
+  // Memoize the country matching logic to avoid recreating functions on every render
+  const countryMatcher = useMemo(() => {
+    const hasGlobalSelected = preferences.countries.includes('global');
+    const selectedCountryIdSet = new Set<string>(
+      hasGlobalSelected 
+        ? preferences.countries.filter(id => id !== 'global')
+        : preferences.countries
+    );
+    
+    return {
+      hasGlobalSelected,
+      selectedCountryIdSet,
+      hasCountryFilters: preferences.countries.length > 0 && !(preferences.countries.length === COUNTRY_OPTIONS.length)
+    };
+  }, [preferences.countries]);
+
+  // Memoize the industry matching logic
+  const industryMatcher = useMemo(() => {
+    const hasIndustryFilters = preferences.industries.length > 0;
+    const industrySet = new Set(preferences.industries);
+    
+    return {
+      hasIndustryFilters,
+      industrySet
+    };
+  }, [preferences.industries]);
+
+  // Optimized filtering logic using useMemo to prevent recalculation on every render
+  const filteredMessages = useMemo(() => {
+    // While preferences are loading, show nothing to avoid a flicker of unfiltered content.
+    if (isLoading) {
+      return [];
+    }
+
+    // Early return if no filters are set
+    if (!industryMatcher.hasIndustryFilters && !countryMatcher.hasCountryFilters) {
+      return articles;
+    }
+
+    // Pre-compute country matching helper function
+    const toCountryId = (value: unknown): string | null => {
+      const v = String(value).trim().toLowerCase();
+      const opt = COUNTRY_OPTIONS.find(
+        c => c.id.toLowerCase() === v || c.code.toLowerCase() === v
+      );
+      return opt ? opt.id : null;
+    };
+
+    return articles.filter(msg => {
+      // Industry matching
+      const industryMatches = !industryMatcher.hasIndustryFilters || 
+        (msg.industry && industryMatcher.industrySet.has(msg.industry));
+
+      // Early return if industry doesn't match
+      if (industryMatcher.hasIndustryFilters && !industryMatches) {
+        return false;
+      }
+
+      // Country matching
+      if (countryMatcher.hasCountryFilters) {
+        let countryMatches = false;
+        
+        if (countryMatcher.hasGlobalSelected) {
+          // Global option logic: show articles with no country value OR with country values NOT in COUNTRY_OPTIONS
+          const rawCountriesArr = Array.isArray(msg.countries)
+            ? msg.countries
+            : (msg.countries && typeof msg.countries === 'object')
+              ? Object.keys(msg.countries)
+              : [];
+          
+          const articleCountryIds = rawCountriesArr
+            .map(toCountryId)
+            .filter((id): id is string => id !== null);
+          
+          const allUnknown = rawCountriesArr.length > 0 && articleCountryIds.length === 0;
+          const hasNoCountries = rawCountriesArr.length === 0;
+          
+          // Check if article matches any explicitly selected country IDs
+          const matchesSelectedCountries = countryMatcher.selectedCountryIdSet.size > 0 &&
+            articleCountryIds.some(id => countryMatcher.selectedCountryIdSet.has(id));
+          
+          countryMatches = matchesSelectedCountries || hasNoCountries || allUnknown;
+        } else {
+          // Regular country matching
+          const rawCountriesArr = Array.isArray(msg.countries)
+            ? msg.countries
+            : (msg.countries && typeof msg.countries === 'object')
+              ? Object.keys(msg.countries)
+              : [];
+          
+          const articleCountryIds = rawCountriesArr
+            .map(toCountryId)
+            .filter((id): id is string => id !== null);
+          
+          countryMatches = countryMatcher.selectedCountryIdSet.size > 0 && 
+            articleCountryIds.some(id => countryMatcher.selectedCountryIdSet.has(id));
+        }
+
+        return countryMatches;
+      }
+
+      return true;
+    });
+  }, [articles, isLoading, industryMatcher, countryMatcher]);
+
+  // Limit the number of articles rendered to prevent performance issues
+  const displayedMessages = useMemo(() => {
+    const MAX_DISPLAYED_ARTICLES = 50;
+    return filteredMessages.slice(0, MAX_DISPLAYED_ARTICLES);
+  }, [filteredMessages]);
+
+  // Show message if there are more articles than displayed
+  const hasMoreArticles = filteredMessages.length > displayedMessages.length;
+
+  // Tab visibility change
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      setIsTabVisible(!document.hidden);
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
   // Handles opening the article link to a new tab.
-  const handleArticleClick = async (event: React.MouseEvent<HTMLAnchorElement>, link: string, articleId: string, articleTitle: string) => {
+  const handleArticleClick = useCallback(async (event: React.MouseEvent<HTMLAnchorElement>, link: string) => {
     event.preventDefault();
-    
-    // Track article click
-    trackArticleClick(articleId, articleTitle);
-    
     const a = document.createElement('a');
     a.href = link;
     a.target = '_blank';
     a.rel = 'noopener noreferrer';
     a.click();
-  };
+  }, []);
 
-  // Tab visibility change
-  useEffect(() => {
-    const handleVisibilityChange = () => setIsTabVisible(!document.hidden);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  // Optimize company click handler
+  const handleCompanyClick = useCallback((url: string) => {
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.click();
   }, []);
 
   // Timer for new messages
@@ -64,61 +179,6 @@ function NewsSocketClient() {
       return () => clearTimeout(timer);
     }
   }, [isTabVisible, articles, markArticleAsSeen]);
-
-  const filteredMessages = articles.filter(msg => {
-    // While preferences are loading, show nothing to avoid a flicker of unfiltered content.
-    if (isLoading) {
-      return false;
-    }
-
-    // If the user has no profile yet (is a new user), show nothing.
-    // if (userProfileId === null) {
-    //  return false;
-    //}
-
-    // --- Filtering Logic ---
-    const hasIndustryFilters = preferences.industries.length > 0;
-    const hasCountryFilters = preferences.countries.length > 0;
-    
-    // Check if "all countries" is selected (all available countries are selected)
-    const allCountriesSelected = preferences.countries.length === COUNTRY_OPTIONS.length;
-    
-    // When all countries are selected, treat it as having no country filters
-    const effectiveHasCountryFilters = hasCountryFilters && !allCountriesSelected;
-
-    // Determine if the current article matches the selected filters.
-    const industryMatches = !!(msg.industry && preferences.industries.includes(msg.industry));
-    const articleCountryCodes = Array.isArray(msg.countries) ? msg.countries : []
-    const countryMatches = articleCountryCodes.some(code => preferences.countries.includes(code));
-
-    // Case 1: Filters are set for BOTH Industries and Countries.
-    // An article must match one of each.
-    if (hasIndustryFilters && effectiveHasCountryFilters) {
-      return industryMatches && countryMatches;
-    }
-
-    // Case 2: Filters are set for Industries ONLY.
-    // An article only needs to match an industry.
-    if (hasIndustryFilters) {
-      return industryMatches;
-    }
-
-    // Case 3: Filters are set for Countries ONLY (but not "all countries").
-    // An article only needs to match a country.
-    if (effectiveHasCountryFilters) {
-      return countryMatches;
-    }
-
-    // Case 4: No filters are set OR "all countries" is selected.
-    // Show all articles.
-    return true;
-  });
-
-  // Unread counter in tab
-  const unreadCount = filteredMessages.filter(msg => !msg.seen).length;  
-  useEffect(() => {
-    document.title = unreadCount > 0 ? `(${unreadCount}) 🔥 Perkins Live Feed` : 'Perkins Live Feed';
-  }, [unreadCount]);
 
   return (
     <div className="news-feed">
@@ -139,19 +199,24 @@ function NewsSocketClient() {
       ) : (
         <div className="articles-container">
           <AnimatePresence initial={false}>
-            {filteredMessages.map((msg) => (
-              <motion.div
-                key={msg.id}
-                layout="position"
-                className={`article-card ${msg.seen ? '' : 'unseen'}`}
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10, transition: { duration: 0.3 } }}
-                transition={{ duration: 0.5 }}
-              >
+            {displayedMessages.map((msg) => {
+              // Console log the countries for each displayed article (muted)
+              // muted debug log removed
+              
+              return (
+                <motion.div
+                  key={msg.id}
+                  layout="position"
+                  className={`article-card ${msg.seen ? '' : 'unseen'}`}
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10, transition: { duration: 0.2 } }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  layoutId={msg.id}
+                >
                 <a 
                   href={msg.link} 
-                  onClick={(e) => handleArticleClick(e, msg.link, msg.id, msg.title)} 
+                  onClick={(e) => handleArticleClick(e, msg.link)} 
                   className="article-line-link"
                 >
                   <p className="article-line">
@@ -171,11 +236,7 @@ function NewsSocketClient() {
                             onClick={(e) => {
                               e.stopPropagation(); // Prevents bubbling to outer <a>
                               e.preventDefault();  // Prevents any anchor behavior just in case
-                              const a = document.createElement('a');
-                              a.href = url;
-                              a.target = '_blank';
-                              a.rel = 'noopener noreferrer';
-                              a.click();
+                              handleCompanyClick(url);
                             }}
                             title={`Google > ${name}`}
                           >
@@ -187,8 +248,16 @@ function NewsSocketClient() {
                   </p>
                 </a>
               </motion.div>
-            ))}
+            );
+          })}
           </AnimatePresence>
+          
+          {/* Show message if there are more articles */}
+          {hasMoreArticles && (
+            <div className="more-articles-message">
+              <p>{t('common.moreArticles').replace('{count}', String(filteredMessages.length - displayedMessages.length))}</p>
+            </div>
+          )}
         </div>
       )}
     </div>

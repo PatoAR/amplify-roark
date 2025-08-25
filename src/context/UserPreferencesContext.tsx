@@ -1,8 +1,6 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode, useRef } from 'react';
-import { useAuthenticator } from '@aws-amplify/ui-react';
-import { generateClient } from 'aws-amplify/api';
-import { type Schema } from '../../amplify/data/resource';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode, useRef } from 'react';
 import { useSession } from './SessionContext';
+import { generateClient } from 'aws-amplify/api';
 
 interface UserPreferences {
   industries: string[];
@@ -12,35 +10,44 @@ interface UserPreferences {
 interface UserPreferencesContextType {
   preferences: UserPreferences;
   savePreferences: (newPrefs: UserPreferences) => Promise<void>;
+  dismissDisclaimer: () => void;
+  isDisclaimerVisible: boolean;
   isLoading: boolean;
-  userProfileId: string | null; 
+  userProfileId: string | null;
 }
 
-// Create the context with a default value
 const UserPreferencesContext = createContext<UserPreferencesContextType | undefined>(undefined);
 
-// Create the Provider component
-export const UserPreferencesProvider = ({ children }: { children: ReactNode }) => {
-  const { user } = useAuthenticator();
-  const [preferences, setPreferences] = useState<UserPreferences>({ industries: [], countries: [] });
-  const [userProfileId, setUserProfileId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const { trackPreferenceUpdate } = useSession();
-  const clientRef = useRef<ReturnType<typeof generateClient<Schema>> | null>(null);
+interface UserPreferencesProviderProps {
+  children: ReactNode;
+}
 
-  // Initialize client when needed
-  const getClient = useCallback(() => {
-    if (!clientRef.current) {
-      clientRef.current = generateClient<Schema>();
+export const UserPreferencesProvider: React.FC<UserPreferencesProviderProps> = ({ children }) => {
+  const { userId } = useSession();
+  const [preferences, setPreferences] = useState<UserPreferences>({
+    industries: [],
+    countries: []
+  });
+  const [isDisclaimerVisible, setIsDisclaimerVisible] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [userProfileId, setUserProfileId] = useState<string | null>(null);
+  
+  // Add debouncing for rapid preference updates
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const pendingPreferencesRef = useRef<UserPreferences | null>(null);
+
+  // Reset disclaimer visibility on every login
+  useEffect(() => {
+    if (userId) {
+      setIsDisclaimerVisible(true);
     }
-    return clientRef.current;
-  }, []);
+  }, [userId]);
 
   // Function to load preferences, fetched only once here
   const loadUserPreferences = useCallback(async (cognitoUserId: string) => {
     setIsLoading(true);
     try {
-      const client = getClient();
+      const client = generateClient();
 
       const listUserProfilesQuery = /* GraphQL */ `
         query ListUserProfiles($filter: ModelUserProfileFilterInput) {
@@ -70,12 +77,12 @@ export const UserPreferencesProvider = ({ children }: { children: ReactNode }) =
           countries: profile.countryPreferences?.filter(Boolean) as string[] || [],
         });
         setUserProfileId(profile.id);
-        console.log('✅ User preferences loaded successfully');
+        // User preferences loaded
       } else {
         // No profile exists, reset to default
         setPreferences({ industries: [], countries: [] });
         setUserProfileId(null);
-        console.log('ℹ️ No user profile found, using default preferences');
+        // No user profile found, using default preferences
       }
     } catch (error) {
       console.error("Failed to load user preferences:", error);
@@ -85,101 +92,137 @@ export const UserPreferencesProvider = ({ children }: { children: ReactNode }) =
     } finally {
       setIsLoading(false);
     }
-  }, [getClient]);
+  }, []);
 
   // Effect to load preferences when user logs in
   useEffect(() => {
-    if (user?.userId) {
-      loadUserPreferences(user.userId);
+    if (userId) {
+      loadUserPreferences(userId);
     } else {
       // No user, reset to default state
       setPreferences({ industries: [], countries: [] });
       setUserProfileId(null);
       setIsLoading(false);
     }
-  }, [user, loadUserPreferences]);
+  }, [userId, loadUserPreferences]);
 
-  // Function to save preferences
-  const savePreferences = async (newPrefs: UserPreferences) => {
-    if (!user?.userId) {
+  // Function to save preferences with debouncing
+  const savePreferences = useCallback(async (newPrefs: UserPreferences) => {
+    if (!userId) {
       console.error("Cannot save preferences, no user is authenticated.");
       return;
     }
 
-    const client = getClient();
-    if (!client) {
-      console.error('Cannot save preferences: Amplify client not available');
-      return;
+    // Store pending preferences for debouncing
+    pendingPreferencesRef.current = newPrefs;
+
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
     }
 
-    const payload = {
-      industryPreferences: newPrefs.industries,
-      countryPreferences: newPrefs.countries,
-    };
-    try {
-      if (userProfileId) {
-        // Update existing profile
-        const updateUserProfileMutation = /* GraphQL */ `
-          mutation UpdateUserProfile($input: UpdateUserProfileInput!) {
-            updateUserProfile(input: $input) {
-              id
-              owner
-              industryPreferences
-              countryPreferences
+    // Set new timeout for debounced save
+    saveTimeoutRef.current = setTimeout(async () => {
+      const prefsToSave = pendingPreferencesRef.current;
+      if (!prefsToSave) return;
+
+      const client = generateClient();
+      if (!client) {
+        console.error('Cannot save preferences: Amplify client not available');
+        return;
+      }
+
+      const payload = {
+        industryPreferences: prefsToSave.industries,
+        countryPreferences: prefsToSave.countries,
+      };
+
+      try {
+        if (userProfileId) {
+          // Update existing profile
+          const updateUserProfileMutation = /* GraphQL */ `
+            mutation UpdateUserProfile($input: UpdateUserProfileInput!) {
+              updateUserProfile(input: $input) {
+                id
+                owner
+                industryPreferences
+                countryPreferences
+              }
             }
-          }
-        `;
+          `;
 
-        await client.graphql({
-          query: updateUserProfileMutation,
-          variables: {
-            input: { id: userProfileId, ...payload }
-          }
-        }) as any;
-      } else {
-        // Create new profile
-        const createUserProfileMutation = /* GraphQL */ `
-          mutation CreateUserProfile($input: CreateUserProfileInput!) {
-            createUserProfile(input: $input) {
-              id
-              owner
-              industryPreferences
-              countryPreferences
+          await client.graphql({
+            query: updateUserProfileMutation,
+            variables: {
+              input: { id: userProfileId, ...payload }
             }
-          }
-        `;
+          }) as any;
+        } else {
+          // Create new profile
+          const createUserProfileMutation = /* GraphQL */ `
+            mutation CreateUserProfile($input: CreateUserProfileInput!) {
+              createUserProfile(input: $input) {
+                id
+                owner
+                industryPreferences
+                countryPreferences
+              }
+            }
+          `;
 
-        const result = await client.graphql({
-          query: createUserProfileMutation,
-          variables: {
-            input: payload
-          }
-        }) as any;
+          const result = await client.graphql({
+            query: createUserProfileMutation,
+            variables: {
+              input: payload
+            }
+          }) as any;
 
-        if (result.data?.createUserProfile) {
-          setUserProfileId(result.data.createUserProfile.id);
+          if (result.data?.createUserProfile) {
+            setUserProfileId(result.data.createUserProfile.id);
+          }
         }
-      }
-      setPreferences(newPrefs); // Update state immediately for responsiveness
-      
-      // Track preference updates
-      const changedIndustries = newPrefs.industries.filter(ind => !preferences.industries.includes(ind));
-      const changedCountries = newPrefs.countries.filter(country => !preferences.countries.includes(country));
-      
-      if (changedIndustries.length > 0) {
-        trackPreferenceUpdate('industries', changedIndustries);
-      }
-      if (changedCountries.length > 0) {
-        trackPreferenceUpdate('countries', changedCountries);
-      }
-      
-      console.log("Preferences saved successfully.");
-    } catch (error) {
-      console.error("Error saving preferences:", error);
-    }
-  };
 
-  const value = { preferences, savePreferences, isLoading, userProfileId };
+        // Update state efficiently by comparing with current state
+        setPreferences(prevPrefs => {
+          // Only update if there are actual changes
+          if (JSON.stringify(prevPrefs) === JSON.stringify(prefsToSave)) {
+            return prevPrefs;
+          }
+          return prefsToSave;
+        });
+        
+         // Preferences saved
+      } catch (error) {
+        console.error("Error saving preferences", error);
+      } finally {
+        // Clear pending preferences after save attempt
+        pendingPreferencesRef.current = null;
+      }
+    }, 300); // 300ms debounce delay
+  }, [userId, userProfileId]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Function to dismiss disclaimer (session-only, no persistence)
+  const dismissDisclaimer = useCallback(() => {
+    setIsDisclaimerVisible(false);
+  }, []);
+
+  const value: UserPreferencesContextType = {
+    preferences,
+    savePreferences,
+    dismissDisclaimer,
+    isDisclaimerVisible,
+    isLoading,
+    userProfileId
+  };
 
   return (
     <UserPreferencesContext.Provider value={value}>

@@ -12,6 +12,7 @@ export interface SignUpOptions {
   password: string;
   options: {
     userAttributes: UserAttributes;
+    clientMetadata?: Record<string, string>;
   };
 }
 

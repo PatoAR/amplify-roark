@@ -2,9 +2,9 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { generateClient } from 'aws-amplify/api';
 import { type Schema } from '../../amplify/data/resource';
-import { useSession } from '../context/SessionContext';
 import { listReferralCodes } from '../graphql/queries';
 import { useTranslation } from '../i18n';
+import { createReferralCode } from '../graphql/mutations';
 
 interface ReferralStats {
   totalReferrals: number;
@@ -23,7 +23,8 @@ export const useReferral = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
-  const { trackReferralActivity } = useSession();
+  // Remove activity tracking to reduce AWS resource consumption
+  // const { trackReferralActivity } = useSession();
   const clientRef = useRef<ReturnType<typeof generateClient<Schema>> | null>(null);
 
   // Initialize client when needed
@@ -67,8 +68,7 @@ export const useReferral = () => {
         // Generate new referral code if none exists
         await generateReferralCode();
       }
-      // Track referral code generation
-      trackReferralActivity('generated', referralCode);
+      // Only track generation when a new code is actually created
     } catch (err) {
       console.error('Error loading referral data:', err);
       setError('Failed to load referral data');
@@ -83,7 +83,22 @@ export const useReferral = () => {
     try {
       setIsLoading(true);
       setError('');
-      await loadReferralData();
+      const client = getClient();
+      // Generate a random 8-character code
+      const code = Math.random().toString(36).substring(2, 10).toUpperCase();
+      const input = {
+        owner: user.userId,
+        code,
+        isActive: true,
+        totalReferrals: 0,
+        successfulReferrals: 0,
+      };
+      await client.graphql({
+        query: createReferralCode,
+        variables: { input },
+      });
+      setReferralCode(code);
+      setReferralStats({ totalReferrals: 0, successfulReferrals: 0, earnedMonths: 0 });
     } catch (err) {
       console.error('Error generating referral code:', err);
       setError('Failed to generate referral code');
@@ -94,17 +109,24 @@ export const useReferral = () => {
 
   const validateReferralCode = async (code: string): Promise<{ valid: boolean; referrerId?: string }> => {
     try {
-      const client = getClient();
-      const result = await client.graphql({
-        query: listReferralCodes,
-        variables: { filter: { code: { eq: code }, isActive: { eq: true } } }
-      }) as any;
-      const referralCodes = result.data?.listReferralCodes?.items || [];
-      if (referralCodes.length > 0) {
-        const referralCode = referralCodes[0];
+      // Use the API endpoint instead of direct GraphQL to avoid authorization issues
+      const response = await fetch(`/api/referral/validate?code=${encodeURIComponent(code)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Validation request failed: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.valid) {
         return {
           valid: true,
-          referrerId: referralCode.owner || undefined,
+          referrerId: result.referrerId,
         };
       } else {
         return { valid: false };
@@ -142,13 +164,11 @@ export const useReferral = () => {
           break;
 
         case 'copy':
-          await navigator.clipboard.writeText(
-            t('referral.shareMessage').replace('{code}', referralCode) + `\n\n${referralUrl}`
-          );
+          await navigator.clipboard.writeText(referralUrl);
           break;
       }
-      // Track referral sharing
-      trackReferralActivity('shared', referralCode);
+      // Remove referral activity tracking to reduce AWS resource consumption
+      // trackReferralActivity('shared', referralCode);
     } catch (err) {
       console.error('Error sharing referral link:', err);
       setError('Failed to share referral link');

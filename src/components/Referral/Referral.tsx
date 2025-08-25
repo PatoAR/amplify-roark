@@ -8,10 +8,10 @@ import {
   View,
   Alert,
   Badge,
-  Divider,
   useTheme,
 } from '@aws-amplify/ui-react';
 import { useReferral } from '../../hooks/useReferral';
+import { useFreeDaysRemaining } from '../../hooks/useFreeDaysRemaining';
 import { useTranslation } from '../../i18n';
 import './Referral.css';
 
@@ -19,13 +19,13 @@ const Referral: React.FC = () => {
   const { tokens } = useTheme();
   const { t } = useTranslation();
   const {
-    referralCode,
     referralStats,
     isLoading,
     error,
     shareReferralLink,
     refreshData,
   } = useReferral();
+  const daysLeft = useFreeDaysRemaining();
 
   const [copied, setCopied] = useState(false);
   const [shareSuccess, setShareSuccess] = useState<string>('');
@@ -38,7 +38,7 @@ const Referral: React.FC = () => {
       setTimeout(() => setCopied(false), 2000);
       setTimeout(() => setShareSuccess(''), 3000);
     } catch (err) {
-      console.error('Failed to copy link:', err);
+      console.error(t('referral.errorCopyLink'), err);
     }
   };
 
@@ -48,7 +48,7 @@ const Referral: React.FC = () => {
       setShareSuccess(t('referral.openingWhatsApp'));
       setTimeout(() => setShareSuccess(''), 3000);
     } catch (err) {
-      console.error('Failed to share via WhatsApp:', err);
+      console.error(t('referral.errorWhatsApp'), err);
     }
   };
 
@@ -58,7 +58,7 @@ const Referral: React.FC = () => {
       setShareSuccess(t('referral.openingEmail'));
       setTimeout(() => setShareSuccess(''), 3000);
     } catch (err) {
-      console.error('Failed to share via email:', err);
+      console.error(t('referral.errorEmail'), err);
     }
   };
 
@@ -75,13 +75,37 @@ const Referral: React.FC = () => {
   return (
     <Card className="referral-card">
       <Flex direction="column" gap={tokens.space.large}>
+        {/* Free Access Info Card */}
+        <Card className="free-access-info">
+          <Flex direction="column" gap={tokens.space.small}>
+            <Heading level={5} className="free-access-title">
+              {t('referral.freeAccessStatus')}
+            </Heading>
+            <Flex justifyContent="center" gap={tokens.space.large} wrap="wrap" alignItems="center">
+              <View className={`days-remaining ${(daysLeft || 0) > 30 ? 'high' : 'low'}`}>
+                <Text fontSize="large" fontWeight="bold" color="font.primary">
+                  {daysLeft || 0}
+                </Text>
+                <Text fontSize="small" color="font.secondary">
+                  {t('referral.daysRemaining')}
+                </Text>
+              </View>
+              <View className="expiration-info">
+                <Text fontSize="medium" fontWeight="semibold" color="font.primary">
+                  {t('referral.freeAccessUntil')}
+                </Text>
+                <Text fontSize="medium" fontWeight="bold" color="font.primary">
+                  {new Date(Date.now() + (daysLeft || 0) * 24 * 60 * 60 * 1000).toLocaleDateString()}
+                </Text>
+              </View>
+            </Flex>
+          </Flex>
+        </Card>
+
         <View>
           <Heading level={4} className="referral-title">
             {t('referral.title')}
           </Heading>
-          <Text className="referral-subtitle">
-            {t('referral.subtitle')}
-          </Text>
         </View>
 
         {error && (
@@ -96,35 +120,12 @@ const Referral: React.FC = () => {
           </Alert>
         )}
 
-        {/* Referral Code Section */}
-        <Card className="referral-code-section">
-          <Flex direction="column" gap={tokens.space.medium}>
-            <Heading level={5}>{t('referral.yourCode')}</Heading>
-            <Flex alignItems="center" gap={tokens.space.small}>
-              <Badge variation="info" size="large" className="referral-code-badge">
-                {referralCode || t('common.loading')}
-              </Badge>
-              <Button
-                size="small"
-                variation="link"
-                onClick={handleCopyLink}
-                disabled={copied}
-              >
-                {copied ? t('referral.copied') : t('referral.copyCode')}
-              </Button>
-            </Flex>
-            <Text fontSize="small" color="font.secondary">
-              {t('referral.shareCodeHint')}
-            </Text>
-          </Flex>
-        </Card>
-
         {/* Share Options */}
         <Card className="share-options-section">
-          <Heading level={5} marginBottom={tokens.space.small}>
+          <Heading level={5} marginBottom={tokens.space.medium}>
             {t('referral.shareTitle')}
           </Heading>
-          <Flex gap={tokens.space.small} wrap="wrap">
+          <Flex gap={tokens.space.medium} wrap="wrap">
             <Button
               variation="primary"
               onClick={handleShareWhatsApp}
@@ -149,40 +150,7 @@ const Referral: React.FC = () => {
           </Flex>
         </Card>
 
-        {/* Referral Statistics */}
-        <Card className="stats-section">
-          <Heading level={5} marginBottom={tokens.space.medium}>
-            {t('referral.statsTitle')}
-          </Heading>
-          <Flex gap={tokens.space.large} wrap="wrap">
-            <View className="stat-item">
-              <Text fontSize="large" fontWeight="bold" color="font.primary">
-                {referralStats.successfulReferrals}
-              </Text>
-              <Text fontSize="small" color="font.secondary">
-                {t('referral.successfulReferrals')}
-              </Text>
-            </View>
-            <View className="stat-item">
-              <Text fontSize="large" fontWeight="bold" color="font.primary">
-                {referralStats.earnedMonths}
-              </Text>
-              <Text fontSize="small" color="font.secondary">
-                {t('referral.monthsEarned')}
-              </Text>
-            </View>
-            <View className="stat-item">
-              <Text fontSize="large" fontWeight="bold" color="font.primary">
-                {referralStats.totalReferrals}
-              </Text>
-              <Text fontSize="small" color="font.secondary">
-                {t('referral.totalReferrals')}
-              </Text>
-            </View>
-          </Flex>
-        </Card>
-
-        {/* How It Works */}
+        {/* How It Works - Moved up */}
         <Card className="how-it-works-section">
           <Heading level={5} marginBottom={tokens.space.medium}>
             {t('referral.howItWorks')}
@@ -197,26 +165,47 @@ const Referral: React.FC = () => {
               <Text>{t('referral.step2')}</Text>
             </Flex>
             <Flex gap={tokens.space.small} alignItems="flex-start">
-              <Badge variation="success" size="small">3</Badge>
-              <Text>{t('referral.step3')}</Text>
-            </Flex>
-            <Flex gap={tokens.space.small} alignItems="flex-start">
               <Badge variation="success" size="small">4</Badge>
               <Text>{t('referral.step4')}</Text>
             </Flex>
           </Flex>
         </Card>
 
-        <Divider />
-
-        {/* Refresh Button */}
-        <Button
-          onClick={refreshData}
-          isLoading={isLoading}
-          loadingText={t('referral.refreshing')}
-        >
-          {t('referral.refreshStats')}
-        </Button>
+        {/* Referral Statistics */}
+        <Card className="stats-section">
+          <Flex justifyContent="space-between" alignItems="center" marginBottom={tokens.space.medium}>
+            <Heading level={5}>
+              {t('referral.statsTitle')}
+            </Heading>
+            <Button
+              size="small"
+              onClick={refreshData}
+              isLoading={isLoading}
+              loadingText={t('referral.refreshing')}
+              className="refresh-pill"
+            >
+              {t('referral.refreshStats')}
+            </Button>
+          </Flex>
+          <Flex justifyContent="center" gap={tokens.space.medium} wrap="wrap">
+            <View className="stat-pill">
+              <Text fontSize="small" color="font.secondary">
+                {t('referral.successfulReferrals')}
+              </Text>
+              <Text fontSize="large" fontWeight="bold" color="font.primary">
+                {referralStats.successfulReferrals}
+              </Text>
+            </View>
+            <View className="stat-pill">
+              <Text fontSize="small" color="font.secondary">
+                {t('referral.monthsEarned')}
+              </Text>
+              <Text fontSize="large" fontWeight="bold" color="font.primary">
+                {referralStats.earnedMonths}
+              </Text>
+            </View>
+          </Flex>
+        </Card>
       </Flex>
     </Card>
   );

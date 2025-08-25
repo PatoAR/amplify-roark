@@ -1,4 +1,7 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
+import { postConfirmation } from "../auth/post-confirmation/resource";
+import { referralApi } from "../functions/referral-api/resource";
+import { referralProcessor } from "../functions/referral-processor/resource";
 
 const schema = a.schema({
   // Article Model
@@ -16,7 +19,8 @@ const schema = a.schema({
     ttl: a.integer(),
   })
   .authorization((allow) => [
-    allow.publicApiKey(),
+    // Allow API keys to create articles for backend ingestion
+    allow.publicApiKey().to(['read', 'create']),
     allow.authenticated(),
   ]),
 
@@ -38,7 +42,11 @@ const schema = a.schema({
     totalReferrals: a.integer().default(0),
     successfulReferrals: a.integer().default(0),
   })
-  .authorization(allow => [allow.owner().identityClaim('sub')]),
+  .authorization(allow => [
+    allow.owner().identityClaim('sub'),
+    // Public may read for validation; updates only via trusted functions
+    allow.publicApiKey().to(['read', 'update']),
+  ]),
 
   // Referral Model - Track successful referrals
   Referral: a
@@ -50,7 +58,11 @@ const schema = a.schema({
     completedAt: a.datetime(),
     freeMonthsEarned: a.integer().default(3), // Months earned by referrer
   })
-  .authorization(allow => [allow.owner().identityClaim('sub')]),
+  .authorization(allow => [
+    allow.owner().identityClaim('sub'),
+    // Allow backend (via API key) to create referral records during post-confirmation processing
+    allow.publicApiKey().to(['create', 'read'])
+  ]),
 
   // UserSubscription Model - Track subscription status and free trial
   UserSubscription: a
@@ -64,7 +76,11 @@ const schema = a.schema({
     referralCodeUsed: a.string(), // Code used during signup
     referrerId: a.string(), // ID of user who referred this user
   })
-  .authorization(allow => [allow.owner().identityClaim('sub')]),
+  .authorization(allow => [
+    allow.owner().identityClaim('sub'),
+    // Allow Lambda functions (via API key) to create/update subscriptions during post-confirmation
+    allow.publicApiKey().to(['create', 'update', 'read'])
+  ]),
 
   // UserActivity Model - Track user sessions and activity periods
   UserActivity: a
@@ -120,4 +136,9 @@ export const data = defineData({
       expiresInDays: 30,
     },
   },
+  functions: {
+    postConfirmation,
+    referralApi,
+    referralProcessor,
+  }
 });

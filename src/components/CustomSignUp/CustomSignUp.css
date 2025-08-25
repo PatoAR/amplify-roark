@@ -4,13 +4,17 @@
   align-items: center;
   min-height: 100vh;
   padding: 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.auth-logo {
+  max-width: 200px;
+  height: auto;
 }
 
 .signup-card {
   max-width: 500px;
   width: 100%;
-  padding: 2rem;
+  padding: 0rem 2rem;
   background: white;
   border-radius: 16px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);

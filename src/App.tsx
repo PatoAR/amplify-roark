@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route} from "react-router-dom";
+import { useAuthenticator } from '@aws-amplify/ui-react';
 import Layout from "./components/Layout/Layout";
 import NewsSocketClient from "./pages/newsfeed/NewsSocketClient";
 import UserSettings from "./pages/settings/UserSettings";
@@ -7,6 +8,7 @@ import PasswordSettings from "./pages/settings/PasswordSettings";
 import DeleteAccountSettings from "./pages/settings/DeleteAccountSettings";
 import ReferralSettings from "./pages/settings/ReferralSettings";
 import { AnalyticsDashboard } from "./components/Analytics/AnalyticsDashboard";
+import CustomSignUp from "./components/CustomSignUp/CustomSignUp";
 import { useSession } from './context/SessionContext';
 import { useInactivityTimer } from './hooks/useInactivityTimer';
 import { InactivityDialog } from './hooks/InactivityWarning';
@@ -16,22 +18,26 @@ import "./App.css"
 export default function App() {
   const [isWarningDialogOpen, setWarningDialogOpen] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
-  const [authError, setAuthError] = useState<Error | null>(null);
+  // Auth error is now provided by SessionContext
   const [isInitializing, setIsInitializing] = useState(true);
+
+  // Get authStatus directly from authenticator
+  const { authStatus } = useAuthenticator();
 
   // Use session context
   const { 
     isAuthenticated, 
     isSessionActive, 
-    authStatus,
     logout,
-    trackPageViewIfActive 
+    authError,
+    clearAuthError,
   } = useSession();
 
   // Handle inactivity timer separately (only when authenticated)
   const { resetInactivityTimer } = useInactivityTimer({
     timeoutInMinutes: 120,
     warningBeforeLogoutInMinutes: 10,
+    enabled: isAuthenticated && isSessionActive, // Only enable when authenticated and session is active
     onLogout: async () => {
       setWarningDialogOpen(false);
       await logout();
@@ -41,14 +47,14 @@ export default function App() {
       setWarningDialogOpen(true);
     },
     onActivity: () => {
-      // Track user activity when inactivity timer is reset
-      trackPageViewIfActive();
+      // Remove activity tracking to reduce AWS resource consumption
+      // trackPageViewIfActive();
     }
   });
 
   // Handle authentication state changes and prevent blank screens
   useEffect(() => {
-    console.log('🔍 App: Auth state changed:', { authStatus, isAuthenticated, isSessionActive });
+    // Auth state changed
     
     // If we're still configuring, keep showing loading
     if (authStatus === 'configuring') {
@@ -59,14 +65,14 @@ export default function App() {
     // If we have a clear authenticated state, we're ready
     if (authStatus === 'authenticated' && isAuthenticated && isSessionActive) {
       setIsInitializing(false);
-      setAuthError(null);
+      clearAuthError();
       return;
     }
 
     // If we have a clear unauthenticated state, we're ready
     if (authStatus === 'unauthenticated') {
       setIsInitializing(false);
-      setAuthError(null);
+      clearAuthError();
       return;
     }
 
@@ -79,6 +85,13 @@ export default function App() {
     }
   }, [authStatus, isAuthenticated, isSessionActive]);
 
+  // Reset inactivity timer when session state changes
+  useEffect(() => {
+    if (isAuthenticated && isSessionActive) {
+      resetInactivityTimer();
+    }
+  }, [isAuthenticated, isSessionActive, resetInactivityTimer]);
+
   // Handle visibility change to detect when user returns from idle
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -90,7 +103,7 @@ export default function App() {
           // Give more time for the session to start up
           setTimeout(() => {
             if (authStatus === 'authenticated' && (!isAuthenticated || !isSessionActive)) {
-              console.warn('⚠️ Authentication state still unclear after visibility change, but continuing...');
+           // Authentication state unclear after visibility change
               // Don't show error, just log the warning
             }
           }, 5000); // Wait 5 seconds instead of 2
@@ -119,14 +132,14 @@ export default function App() {
   };
 
   const handleAuthErrorRetry = () => {
-    setAuthError(null);
+    clearAuthError();
     setIsInitializing(true);
     // Force a page reload to reset authentication state
     window.location.reload();
   };
 
   const handleAuthErrorLogout = async () => {
-    setAuthError(null);
+    clearAuthError();
     await logout();
   };
 
@@ -158,6 +171,8 @@ export default function App() {
 
   // If user is not authenticated, show nothing (Authenticator will handle login)
   if (authStatus === 'unauthenticated') {
+    // Referral detection is now handled in main.tsx
+    // Just let the default Authenticator handle it
     return null;
   }
 
@@ -180,6 +195,7 @@ export default function App() {
             <Route path="settings/delete-account" element={<DeleteAccountSettings />} />
             <Route path="settings/referral" element={<ReferralSettings />} />
             <Route path="analytics" element={<AnalyticsDashboard />} />
+            <Route path="signup" element={<CustomSignUp />} />
           </Route>
         </Routes>
       </div>

@@ -1,57 +1,21 @@
-// Activity tracking specific types
+// Simplified activity tracking types - only login/logout
 
 export interface EventData {
-  // Page view specific data
-  pageViews?: number;
-  
-  // Article click specific data
-  articleId?: string;
-  articleTitle?: string;
-  
-  // Filter change specific data
-  filterType?: string;
-  filterValue?: string;
-  
-  // Preference update specific data
-  preferenceType?: string;
-  preferenceValue?: string | string[] | boolean | number;
-  
-  // Referral specific data
-  referralCode?: string;
-  
-  // Search specific data
-  searchQuery?: string;
-  searchResults?: number;
-  
-  // Generic data
-  [key: string]: unknown;
+  // Only essential data for login/logout
+  userId?: string;
+  timestamp?: string;
 }
 
 export interface EventMetadata {
-  // Device information
+  // Device information (minimal)
   userAgent?: string;
-  screenSize?: string;
-  viewport?: string;
-  
-  // Session information
-  sessionId?: string;
-  userId?: string;
-  
-  // Performance metrics
-  loadTime?: number;
-  responseTime?: number;
-  
-  // Generic metadata
-  [key: string]: unknown;
+  platform?: string;
 }
 
 export interface ActivityEvent {
-  eventType: 'page_view' | 'article_click' | 'article_share' | 'filter_change' | 
-            'preference_update' | 'referral_generated' | 'referral_shared' | 
-            'settings_accessed' | 'search_performed' | 'logout' | 'login';
+  // Only login and logout events
+  eventType: 'login' | 'logout';
   eventData?: EventData;
-  pageUrl?: string;
-  elementId?: string;
   metadata?: EventMetadata;
 }
 
@@ -62,19 +26,9 @@ export interface SessionInfo {
   userAgent: string;
 }
 
-export interface ActivityCounters {
-  pageViews: number;
-  interactions: number;
-}
-
-// Validation functions
+// Simplified validation
 export const isValidEventType = (eventType: string): eventType is ActivityEvent['eventType'] => {
-  const validTypes = [
-    'page_view', 'article_click', 'article_share', 'filter_change',
-    'preference_update', 'referral_generated', 'referral_shared',
-    'settings_accessed', 'search_performed', 'logout', 'login'
-  ];
-  return validTypes.includes(eventType);
+  return eventType === 'login' || eventType === 'logout';
 };
 
 export const validateEventData = (data: unknown): data is EventData => {

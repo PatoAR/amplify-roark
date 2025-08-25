@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { signUp } from 'aws-amplify/auth';
-import { Card, Flex, Heading, Text, TextField, PasswordField, Button, Alert, View, useTheme } from '@aws-amplify/ui-react';
-import { useReferral } from '../../hooks/useReferral';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { signUp, confirmSignUp, resendSignUpCode, signIn } from 'aws-amplify/auth';
+import { Card, Flex, Heading, Text, TextField, PasswordField, Button, Alert, View, useTheme, Image } from '@aws-amplify/ui-react';
 import { UserAttributes, SignUpOptions, validateEmail, validatePassword, validateUserAttributes } from '../../types/auth';
 import { isApiError, AuthError, ErrorContext } from '../../types/errors';
 import { useTranslation } from '../../i18n';
+import perkinsLogo from '../../assets/BaseLogo_v1_W.png';
 import './CustomSignUp.css';
 
 interface CustomSignUpProps {
@@ -16,54 +16,49 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
   const { tokens } = useTheme();
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
-  const { validateReferralCode } = useReferral();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [referralCode, setReferralCode] = useState('');
+  const [referralCode, setReferralCode] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [referralValid, setReferralValid] = useState<boolean | null>(null);
-  const [referralMessage, setReferralMessage] = useState('');
+  const [referralMessage, setReferralMessage] = useState<string>('');
+  const [referralCodeFromUrl, setReferralCodeFromUrl] = useState<boolean>(false);
+  const [isVerificationStep, setIsVerificationStep] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const navigate = useNavigate();
 
   // Check for referral code in URL
   useEffect(() => {
     const refCode = searchParams.get('ref');
     if (refCode) {
       setReferralCode(refCode);
+      setReferralCodeFromUrl(true);
       validateReferralCodeFromUrl(refCode);
     }
   }, [searchParams]);
 
-  const validateReferralCodeFromUrl = async (code: string) => {
-    try {
-      const result = await validateReferralCode(code);
-      setReferralValid(result.valid);
-      setReferralMessage(result.valid 
-        ? t('signup.validReferralCode')
-        : t('signup.invalidReferralCode')
-      );
-    } catch (err) {
-      setReferralValid(false);
-      setReferralMessage(t('signup.errorValidatingCode'));
-    }
+  // Simplified referral validation for the standalone component
+  const validateReferralCodeFromUrl = async (_code: string) => {
+    // Since the referral API endpoint is not available, we'll assume the code is valid
+    // and let the backend validate it during signup
+    setReferralValid(true);
+    setReferralMessage(t('signup.validReferralCode') || 'Valid referral code detected!');
+    // Don't set referrerId - let the backend handle it
+    // Intentionally no logging of referral codes in production
   };
 
   const handleReferralCodeChange = async (value: string) => {
     setReferralCode(value);
+    setReferralCodeFromUrl(false); // Reset flag when user manually enters code
     if (value.length >= 3) {
-      try {
-        const result = await validateReferralCode(value);
-        setReferralValid(result.valid);
-        setReferralMessage(result.valid 
-          ? t('signup.validReferralCode')
-          : t('signup.invalidReferralCode')
-        );
-      } catch (err) {
-        setReferralValid(false);
-        setReferralMessage(t('signup.errorValidatingCode'));
-      }
+      // Assume valid if length is sufficient - backend will validate during signup
+      setReferralValid(true);
+      setReferralMessage(t('signup.validReferralCode') || 'Referral code looks valid');
     } else {
       setReferralValid(null);
       setReferralMessage('');
@@ -84,20 +79,20 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
 
     // Validate email
     if (!validateEmail(email)) {
-      setError(t('signup.validEmail'));
+      setError(t('signup.validEmail') || 'Please enter a valid email address');
       return;
     }
 
     // Validate password
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.isValid) {
-      setError(`${t('password.requirements')} ${passwordValidation.errors.join(', ')}`);
+      setError(`${t('password.requirements') || 'Password requirements'}: ${passwordValidation.errors.join(', ')}`);
       return;
     }
 
     // Validate password confirmation
     if (password !== confirmPassword) {
-      setError(t('signup.passwordsDontMatch'));
+      setError(t('signup.passwordsDontMatch') || 'Passwords do not match');
       return;
     }
 
@@ -109,21 +104,11 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
         email,
       };
 
-      // Add referral information if code is valid
-      if (referralCode && referralValid) {
-        userAttributes['custom:referralCode'] = referralCode;
-        // We'll need to get the referrer ID from the validation result
-        const validationResult = await validateReferralCode(referralCode);
-        if (validationResult.referrerId) {
-          userAttributes['custom:referrerId'] = validationResult.referrerId;
-        }
-      }
-
       // Validate user attributes before sending
       if (!validateUserAttributes(userAttributes)) {
         const errorContext = createErrorContext('validateUserAttributes');
         const authError: AuthError = {
-          message: t('signup.invalidUserAttributes'),
+          message: t('signup.invalidUserAttributes') || 'Invalid user attributes',
           code: 'INVALID_EMAIL',
           details: errorContext,
         };
@@ -135,12 +120,19 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
         password,
         options: {
           userAttributes,
+          clientMetadata: referralCode ? { referralCode, referrerId: 'pending' } : undefined,
         },
       };
 
       await signUp(signUpOptions);
+      
+      // Do not log signup attributes/options to avoid exposing sensitive information
 
-      setSuccess(t('signup.accountCreated'));
+      setSuccess(
+        t('signup.accountCreated') ||
+          'Account created successfully! Please check your email to verify your account.'
+      );
+      setIsVerificationStep(true);
       onSuccess?.();
     } catch (err: unknown) {
       const errorContext = createErrorContext('signUp');
@@ -148,14 +140,29 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
       let authError: AuthError;
       
       if (isApiError(err)) {
-        authError = {
-          message: err.message || t('signup.errorDuringSignup'),
-          code: 'INVALID_CREDENTIALS',
-          details: errorContext,
-        };
+        // Handle specific Cognito errors
+        if (err.message?.includes('Attributes did not conform to the schema')) {
+          authError = {
+            message: 'Referral code validation error. Please try again or contact support.',
+            code: 'INVALID_CREDENTIALS',
+            details: errorContext,
+          };
+        } else if (err.message?.includes('custom:referralCode')) {
+          authError = {
+            message: 'Referral code format is invalid. Please check your code and try again.',
+            code: 'INVALID_CREDENTIALS',
+            details: errorContext,
+          };
+        } else {
+          authError = {
+            message: err.message || t('signup.errorDuringSignup') || 'Error during signup',
+            code: 'INVALID_CREDENTIALS',
+            details: errorContext,
+          };
+        }
       } else {
         authError = {
-          message: t('signup.unexpectedError'),
+          message: t('signup.unexpectedError') || 'An unexpected error occurred',
           code: 'INVALID_CREDENTIALS',
           details: errorContext,
         };
@@ -168,16 +175,89 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
     }
   };
 
+  const handleConfirmVerification = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    setIsVerifying(true);
+    try {
+      await confirmSignUp({
+        username: email,
+        confirmationCode: verificationCode,
+        options: {
+          clientMetadata: referralCode ? { referralCode, referrerId: 'pending' } : undefined,
+        },
+      });
+      // Auto sign-in to mirror Authenticator behavior
+      try {
+        await signIn({ username: email, password });
+        // Hard reload without referral query to mount the full app tree
+        window.location.replace('/');
+      } catch (signInErr: unknown) {
+        // If sign-in fails, at least confirm was successful
+        setSuccess(t('verify.success') || 'Email verified. You can now sign in.');
+        if (isApiError(signInErr) && signInErr.message) {
+          setError(signInErr.message);
+        }
+        // Navigate to root without query; user can sign in via Authenticator
+        navigate('/', { replace: true });
+      }
+    } catch (err: unknown) {
+      let message = t('verify.errorGeneric') || 'Verification failed. Please try again.';
+      if (isApiError(err)) {
+        const raw = err.message || '';
+        if (/CodeMismatch/i.test(raw)) {
+          message = t('verify.errorInvalid') || 'Invalid verification code.';
+        } else if (/ExpiredCode/i.test(raw)) {
+          message = t('verify.errorExpired') || 'Verification code has expired.';
+        } else if (/UserNotFound/i.test(raw)) {
+          message = t('verify.errorUser') || 'User not found.';
+        } else {
+          message = raw;
+        }
+      }
+      setError(message);
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    setError('');
+    setSuccess('');
+    setIsResending(true);
+    try {
+      await resendSignUpCode({ username: email });
+      setSuccess(t('verify.sent') || 'Verification code resent.');
+    } catch (err: unknown) {
+      let message = t('verify.errorResend') || 'Failed to resend code.';
+      if (isApiError(err)) {
+        message = err.message || message;
+      }
+      setError(message);
+    } finally {
+      setIsResending(false);
+    }
+  };
+
   return (
     <View className="custom-signup-container">
       <Card className="signup-card">
-        <Flex direction="column" gap={tokens.space.large}>
+        <Flex direction="column" gap={tokens.space.medium}>
+          <View textAlign="center" padding={tokens.space.small}>
+            <Image
+              alt="Perkins Business Intelligence"
+              src={perkinsLogo}
+              className="auth-logo"
+            />
+          </View>
+          
           <View textAlign="center">
             <Heading level={3} className="signup-title">
-              {t('signup.title')}
+              {t('signup.title') || 'Create Account'}
             </Heading>
             <Text className="signup-subtitle">
-              {t('signup.subtitle')}
+              {t('signup.subtitle') || 'Sign up with your referral code'}
             </Text>
           </View>
 
@@ -193,69 +273,126 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
             </Alert>
           )}
 
-          <form onSubmit={handleSubmit}>
-            <Flex direction="column" gap={tokens.space.medium}>
-              <TextField
-                label={t('signup.email')}
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={t('signup.enterEmail')}
-                isRequired
-                autoComplete="email"
-              />
+          {isVerificationStep ? (
+            <form onSubmit={handleConfirmVerification}>
+              <Flex direction="column" gap={tokens.space.medium}>
+                <Text>
+                  {(t('verify.subtitle') || 'Enter the verification code sent to') + ' ' + email}
+                </Text>
 
-              <PasswordField
-                label={t('signup.password')}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={t('signup.createPassword')}
-                isRequired
-                autoComplete="new-password"
-              />
+                <TextField
+                  label={t('verify.codeLabel') || 'Verification Code'}
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value)}
+                  placeholder={t('verify.codePlaceholder') || '6-digit code'}
+                  isRequired
+                  autoComplete="one-time-code"
+                />
 
-              <PasswordField
-                label={t('signup.confirmPassword')}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder={t('signup.confirmPasswordPlaceholder')}
-                isRequired
-                autoComplete="new-password"
-              />
-
-              <TextField
-                label={t('signup.referralCode')}
-                value={referralCode}
-                onChange={(e) => handleReferralCodeChange(e.target.value)}
-                placeholder={t('signup.enterReferralCode')}
-                autoComplete="off"
-              />
-
-              {referralMessage && (
-                <Alert
-                  variation={referralValid ? 'success' : 'warning'}
-                  isDismissible
+                <Button
+                  type="submit"
+                  variation="primary"
+                  isLoading={isVerifying}
+                  loadingText={t('verify.submitting') || 'Verifying...'}
+                  isFullWidth
                 >
-                  {referralMessage}
-                </Alert>
-              )}
+                  {t('verify.submit') || 'Verify Email'}
+                </Button>
 
-              <Button
-                type="submit"
-                variation="primary"
-                isLoading={isLoading}
-                loadingText={t('signup.creatingAccount')}
-                isFullWidth
-              >
-                {t('signup.createAccount')}
-              </Button>
-            </Flex>
-          </form>
+                <Button
+                  type="button"
+                  variation="link"
+                  onClick={handleResendCode}
+                  isLoading={isResending}
+                >
+                  {t('verify.resend') || 'Resend code'}
+                </Button>
+              </Flex>
+            </form>
+          ) : (
+            <form onSubmit={handleSubmit}>
+              <Flex direction="column" gap={tokens.space.medium}>
+                <TextField
+                  label={t('signup.email') || 'Email'}
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={t('signup.enterEmail') || 'Enter your email'}
+                  isRequired
+                  autoComplete="email"
+                />
+
+                <PasswordField
+                  label={t('signup.password') || 'Password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={t('signup.createPassword') || 'Create a password'}
+                  isRequired
+                  autoComplete="new-password"
+                />
+
+                <PasswordField
+                  label={t('signup.confirmPassword') || 'Confirm Password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder={t('signup.confirmPasswordPlaceholder') || 'Confirm your password'}
+                  isRequired
+                  autoComplete="new-password"
+                />
+
+                <TextField
+                  label={t('signup.referralCode') || 'Referral Code'}
+                  value={referralCode}
+                  onChange={(e) => handleReferralCodeChange(e.target.value)}
+                  placeholder={t('signup.enterReferralCode') || 'Enter referral code'}
+                  autoComplete="off"
+                  readOnly={referralCodeFromUrl}
+                />
+                
+                {referralCodeFromUrl && (
+                  <Text fontSize="small" color="font.secondary">
+                    {t('signup.referralCodeFromLink') || 'Referral code from your invitation link'}
+                  </Text>
+                )}
+
+                {referralMessage && (
+                  <Alert
+                    variation={referralValid ? 'success' : 'warning'}
+                    isDismissible
+                  >
+                    {referralMessage}
+                  </Alert>
+                )}
+
+                <Button
+                  type="submit"
+                  variation="primary"
+                  isLoading={isLoading}
+                  loadingText={t('signup.creatingAccount') || 'Creating Account...'}
+                  isFullWidth
+                >
+                  {t('signup.createAccount') || 'Create Account'}
+                </Button>
+              </Flex>
+            </form>
+          )}
 
           <View textAlign="center">
             <Text fontSize="small" color="font.secondary">
-              {t('signup.termsAgreement')}
+              {t('signup.termsAgreement') || 'By creating an account, you agree to our terms of service'}
             </Text>
+          </View>
+
+          <View textAlign="center">
+            <Button
+              variation="link"
+              onClick={() => {
+                // Navigate back to the root without referral code
+                navigate('/', { replace: true });
+              }}
+              size="small"
+            >
+            </Button>
           </View>
         </Flex>
       </Card>

@@ -1,17 +1,15 @@
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, ReactNode, useState } from 'react';
 import { useSessionManager } from '../hooks/useSessionManager';
 
 interface SessionContextType {
   isAuthenticated: boolean;
   isSessionActive: boolean;
-  authStatus: string;
   logout: () => Promise<void>;
-  trackPageViewIfActive: () => void;
-  // Add activity tracking functions
-  trackPreferenceUpdate: (preferenceType: string, preferenceValue: string | string[] | boolean | number) => void;
-  trackReferralActivity: (action: 'generated' | 'shared', referralCode?: string) => void;
-  trackArticleClick: (articleId: string, articleTitle: string) => void;
+  // Remove all activity tracking functions except basic session management
   userId?: string;
+  sessionId?: string;
+  authError: Error | null;
+  clearAuthError: () => void;
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -21,6 +19,7 @@ interface SessionProviderProps {
 }
 
 export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) => {
+  const [authError, setAuthError] = useState<Error | null>(null);
   const sessionManager = useSessionManager({
     onSessionStart: (userId) => {
       console.log('✅ Session started for user:', userId);
@@ -30,33 +29,30 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     },
     onAuthError: (error) => {
       console.error('❌ Authentication error:', error);
+      setAuthError(error instanceof Error ? error : new Error('Authentication error'));
     }
   });
 
-  // Destructure activity tracking functions from sessionManager
+  // Only keep essential session management
   const {
     isAuthenticated,
     isSessionActive,
-    authStatus,
     logout,
-    trackPageViewIfActive,
-    trackPreferenceUpdate,
-    trackReferralActivity,
-    trackArticleClick,
     userId,
+    sessionId,
   } = sessionManager;
+
+  const clearAuthError = () => setAuthError(null);
 
   return (
     <SessionContext.Provider value={{
       isAuthenticated,
       isSessionActive,
-      authStatus,
       logout,
-      trackPageViewIfActive,
-      trackPreferenceUpdate,
-      trackReferralActivity,
-      trackArticleClick,
       userId,
+      sessionId,
+      authError,
+      clearAuthError,
     }}>
       {children}
     </SessionContext.Provider>

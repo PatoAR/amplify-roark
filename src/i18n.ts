@@ -15,7 +15,9 @@ const customTranslations = {
     'filters.countries': 'Countries',
     'filters.allIndustries': 'All Industries',
     'filters.allCountries': 'All Countries',
+    'filters.global': 'Global',
     'filters.applyFilters': 'Apply Filters',
+    'filters.saving': 'Saving...',
     'filters.legend': 'Articles that match BOTH the selected industries AND countries will be shown.',
     'filters.legendIndustriesOnly': 'All articles that match ANY of the selected industries will be shown.',
     'filters.legendCountriesOnly': 'All articles that match ANY of the selected countries will be shown.',
@@ -50,6 +52,7 @@ const customTranslations = {
     'common.confirm': 'Confirm',
     'common.delete': 'Delete',
     'common.edit': 'Edit',
+    'common.moreArticles': 'Showing first 50 articles. There are {count} more articles available.',
     
     // Referral
     'referral.title': '🎁 Invite Friends & Earn Free Months',
@@ -79,7 +82,13 @@ const customTranslations = {
     'referral.openingEmail': 'Opening email client...',
     'referral.shareMessage': 'Join Perkins News Service and get 3 months free! Use my referral code: {code}',
     'referral.emailSubject': 'Join Perkins News Service - 3 Months Free!',
-    'referral.emailBody': 'Hi!\n\nI\'m using Perkins News Service and thought you might be interested. It\'s a great way to stay updated with business news.\n\nYou can get 3 months of free access using my referral code: {code}\n\nSign up here: {url}\n\nBest regards!',
+    'referral.emailBody': 'Hi!\n\nI\'m using Perkins News Service and thought you might be interested. It\'s a great way to stay updated with business news.\n\nYou can get 3 months of free access using my referral code: {code}\n\nCheck it out: {link}',
+    'referral.freeAccessStatus': 'Your Free Access Status',
+    'referral.daysRemaining': 'Days Remaining',
+    'referral.freeAccessUntil': 'Free access until',
+    'referral.errorCopyLink': 'Failed to copy link:',
+    'referral.errorWhatsApp': 'Failed to share via WhatsApp:',
+    'referral.errorEmail': 'Failed to share via email:',
     
     // Password
     'password.title': 'Change Password',
@@ -104,8 +113,7 @@ const customTranslations = {
     'deleteAccount.confirmDelete': 'Delete Account',
     'deleteAccount.accountDeleted': 'Account deleted successfully. You will be redirected to the login page.',
     'deleteAccount.enterPassword': 'Please enter your password to confirm account deletion',
-    'deleteAccount.confirmPassword': 'Confirm Password',
-    'deleteAccount.enterPasswordToConfirm': 'Enter your password to confirm',
+    // Removed password confirmation fields from delete account flow
     'deleteAccount.deleting': 'Deleting account...',
     'deleteAccount.failedToDelete': 'Failed to delete account',
     'deleteAccount.unexpectedError': 'An unexpected error occurred while deleting account',
@@ -130,10 +138,27 @@ const customTranslations = {
     'signup.validReferralCode': '✅ Valid referral code! You\'ll get 3 months of free access.',
     'signup.invalidReferralCode': '❌ Invalid referral code. You can still sign up for 3 months free.',
     'signup.errorValidatingCode': '❌ Error validating referral code.',
+    'signup.referralCodeFromLink': 'Referral code from your invitation link',
+    'signup.backToSignIn': 'Back to Sign In',
     'signup.termsAgreement': 'By creating an account, you agree to our Terms of Service and Privacy Policy',
     'signup.errorDuringSignup': 'An error occurred during sign up',
     'signup.unexpectedError': 'An unexpected error occurred during sign up',
     'signup.invalidUserAttributes': 'Invalid user attributes',
+
+    // Verify Email
+    'verify.subtitle': 'Enter the verification code sent to',
+    'verify.codeLabel': 'Verification Code',
+    'verify.codePlaceholder': '6-digit code',
+    'verify.submit': 'Verify Email',
+    'verify.submitting': 'Verifying...',
+    'verify.resend': 'Resend code',
+    'verify.sent': 'Verification code resent.',
+    'verify.success': 'Email verified. You can now sign in.',
+    'verify.errorInvalid': 'Invalid verification code.',
+    'verify.errorExpired': 'Verification code has expired.',
+    'verify.errorUser': 'User not found.',
+    'verify.errorResend': 'Failed to resend code.',
+    'verify.errorGeneric': 'Verification failed. Please try again.',
     
     // Inactivity Warning
     'inactivity.title': 'Inactivity Warning',
@@ -156,6 +181,9 @@ const customTranslations = {
     'userSettings.deleteAccountDesc': 'Permanently delete your account and all data',
     'userSettings.inviteFriends': 'Invite Friends',
     'userSettings.inviteFriendsDesc': 'Share your referral code and earn free months',
+    
+    // Disclaimer
+    'disclaimer.text': 'News may be delayed by several minutes depending on source publication and retrieval frequency.',
   },
   es: {
     // Menu items
@@ -169,7 +197,9 @@ const customTranslations = {
     'filters.countries': 'Países',
     'filters.allIndustries': 'Todas las Industrias',
     'filters.allCountries': 'Todos los Países',
+    'filters.global': 'Global',
     'filters.applyFilters': 'Aplicar Filtros',
+    'filters.saving': 'Guardando...',
     'filters.legend': 'Se mostrarán artículos que coincidan con AMBAS industrias Y países seleccionados.',
     'filters.legendIndustriesOnly': 'Se mostrarán todos los artículos que coincidan con CUALQUIERA de las industrias seleccionadas.',
     'filters.legendCountriesOnly': 'Se mostrarán todos los artículos que coincidan con CUALQUIERA de los países seleccionados.',
@@ -204,6 +234,7 @@ const customTranslations = {
     'common.confirm': 'Confirmar',
     'common.delete': 'Eliminar',
     'common.edit': 'Editar',
+    'common.moreArticles': 'Mostrando los primeros 50 artículos. Hay {count} artículos más disponibles.',
     
     // Referral
     'referral.title': '🎁 Invitar Amigos y Ganar Meses Gratis',
@@ -231,9 +262,15 @@ const customTranslations = {
     'referral.linkCopied': '¡Enlace de referido copiado al portapapeles!',
     'referral.openingWhatsApp': 'Abriendo WhatsApp...',
     'referral.openingEmail': 'Abriendo cliente de email...',
-    'referral.shareMessage': '¡Únete al Servicio de Noticias Perkins y obtén 3 meses gratis! Usa mi código de referido: {code}',
-    'referral.emailSubject': '¡Únete al Servicio de Noticias Perkins - 3 Meses Gratis!',
-    'referral.emailBody': '¡Hola!\n\nEstoy usando el Servicio de Noticias Perkins y pensé que te podría interesar. Es una excelente manera de mantenerse actualizado con noticias de negocios.\n\nPuedes obtener 3 meses de acceso gratis usando mi código de referido: {code}\n\nRegístrate aquí: {url}\n\n¡Saludos!',
+    'referral.shareMessage': '¡Únete al Servicio de Notícias Perkins y obtén 3 meses gratis! Usa mi código de referido: {code}',
+    'referral.emailSubject': '¡Únete al Servicio de Notícias Perkins - 3 Meses Gratis!',
+    'referral.emailBody': '¡Hola!\n\nEstoy usando el Servicio de Notícias Perkins y pensé que te podría interesar. Es una excelente manera de mantenerse actualizado con noticias de negocios.\n\nPuedes obtener 3 meses de acceso gratis usando mi código de referido: {code}\n\nMíralo aquí: {link}',
+    'referral.freeAccessStatus': 'Tu Estado de Acceso Gratis',
+    'referral.daysRemaining': 'Días Restantes',
+    'referral.freeAccessUntil': 'Acceso gratis hasta',
+    'referral.errorCopyLink': 'Error al copiar enlace:',
+    'referral.errorWhatsApp': 'Error al compartir via WhatsApp:',
+    'referral.errorEmail': 'Error al compartir via email:',
     
     // Password
     'password.title': 'Cambiar Contraseña',
@@ -258,16 +295,15 @@ const customTranslations = {
     'deleteAccount.confirmDelete': 'Eliminar Cuenta',
     'deleteAccount.accountDeleted': 'Cuenta eliminada exitosamente. Serás redirigido a la página de inicio de sesión.',
     'deleteAccount.enterPassword': 'Por favor ingresa tu contraseña para confirmar la eliminación de la cuenta',
-    'deleteAccount.confirmPassword': 'Confirmar Contraseña',
-    'deleteAccount.enterPasswordToConfirm': 'Ingresa tu contraseña para confirmar',
+    // Removed password confirmation fields from delete account flow
     'deleteAccount.deleting': 'Eliminando cuenta...',
     'deleteAccount.failedToDelete': 'Error al eliminar la cuenta',
     'deleteAccount.unexpectedError': 'Ocurrió un error inesperado al eliminar la cuenta',
-    'deleteAccount.loseAccess': 'Al eliminar tu cuenta, perderás acceso a todos tus feeds de noticias personalizados, preferencias y beneficios de referidos.',
+    'deleteAccount.loseAccess': 'Al eliminar tu cuenta, perderás acceso a todos tus feeds de notícias personalizados, preferencias y beneficios de referidos.',
     
     // Sign Up
-    'signup.title': 'Únete al Servicio de Noticias Perkins',
-    'signup.subtitle': 'Obtén 3 meses de acceso gratis a noticias de negocios personalizadas',
+    'signup.title': 'Únete al Servicio de Notícias Perkins',
+    'signup.subtitle': 'Obtén 3 meses de acesso grátis a notícias de negócios personalizadas',
     'signup.email': 'Email',
     'signup.password': 'Contraseña',
     'signup.confirmPassword': 'Confirmar Contraseña',
@@ -284,10 +320,27 @@ const customTranslations = {
     'signup.validReferralCode': '✅ ¡Código de referido válido! Obtendrás 3 meses de acceso gratis.',
     'signup.invalidReferralCode': '❌ Código de referido inválido. Aún puedes registrarte por 3 meses gratis.',
     'signup.errorValidatingCode': '❌ Error al validar código de referido.',
+    'signup.referralCodeFromLink': 'Código de referido de tu enlace de invitación',
+    'signup.backToSignIn': 'Volver al Inicio de Sesión',
     'signup.termsAgreement': 'Al crear una cuenta, aceptas nuestros Términos de Servicio y Política de Privacidad',
     'signup.errorDuringSignup': 'Ocurrió un error durante el registro',
     'signup.unexpectedError': 'Ocurrió un error inesperado durante el registro',
     'signup.invalidUserAttributes': 'Atributos de usuario inválidos',
+
+    // Verify Email
+    'verify.subtitle': 'Ingresa el código de verificación enviado a',
+    'verify.codeLabel': 'Código de Verificación',
+    'verify.codePlaceholder': 'Código de 6 dígitos',
+    'verify.submit': 'Verificar Email',
+    'verify.submitting': 'Verificando...',
+    'verify.resend': 'Reenviar código',
+    'verify.sent': 'Código de verificación reenviado.',
+    'verify.success': 'Email verificado. Ya puedes iniciar sesión.',
+    'verify.errorInvalid': 'Código de verificación inválido.',
+    'verify.errorExpired': 'El código de verificación ha expirado.',
+    'verify.errorUser': 'Usuario no encontrado.',
+    'verify.errorResend': 'No se pudo reenviar el código.',
+    'verify.errorGeneric': 'La verificación falló. Inténtalo de nuevo.',
     
     // Inactivity Warning
     'inactivity.title': 'Advertencia de Inactividad',
@@ -310,6 +363,9 @@ const customTranslations = {
     'userSettings.deleteAccountDesc': 'Eliminar permanentemente tu cuenta y todos los datos',
     'userSettings.inviteFriends': 'Invitar Amigos',
     'userSettings.inviteFriendsDesc': 'Comparte tu código de referido y gana meses gratis',
+    
+    // Disclaimer
+    'disclaimer.text': 'Las notícias pueden retrasarse varios minutos según la publicación de la fonte y la frequência de busca.',
   },
   pt: {
     // Menu items
@@ -323,7 +379,9 @@ const customTranslations = {
     'filters.countries': 'Países',
     'filters.allIndustries': 'Todas as Indústrias',
     'filters.allCountries': 'Todos os Países',
+    'filters.global': 'Global',
     'filters.applyFilters': 'Aplicar Filtros',
+    'filters.saving': 'Salvando...',
     'filters.legend': 'Artigos que correspondem a AMBAS indústrias E países selecionados serão mostrados.',
     'filters.legendIndustriesOnly': 'Todos os artigos que correspondem a QUALQUER uma das indústrias selecionadas serão mostrados.',
     'filters.legendCountriesOnly': 'Todos os artigos que correspondem a QUALQUER um dos países selecionados serão mostrados.',
@@ -358,6 +416,7 @@ const customTranslations = {
     'common.confirm': 'Confirmar',
     'common.delete': 'Excluir',
     'common.edit': 'Editar',
+    'common.moreArticles': 'Mostrando os primeiros 50 artigos. Há {count} artigos mais disponíveis.',
     
     // Referral
     'referral.title': '🎁 Convidar Amigos e Ganhar Meses Grátis',
@@ -387,7 +446,13 @@ const customTranslations = {
     'referral.openingEmail': 'Abrindo cliente de email...',
     'referral.shareMessage': 'Junte-se ao Serviço de Notícias Perkins e ganhe 3 meses grátis! Use meu código de indicação: {code}',
     'referral.emailSubject': 'Junte-se ao Serviço de Notícias Perkins - 3 Meses Grátis!',
-    'referral.emailBody': 'Olá!\n\nEstou usando o Serviço de Notícias Perkins e pensei que você poderia se interessar. É uma ótima maneira de se manter atualizado com notícias de negócios.\n\nVocê pode obter 3 meses de acesso grátis usando meu código de indicação: {code}\n\nRegistre-se aqui: {url}\n\nAtenciosamente!',
+    'referral.emailBody': 'Olá!\n\nEstou usando o Serviço de Notícias Perkins e pensei que você poderia se interessar. É uma ótima maneira de se manter atualizado com notícias de negócios.\n\nVocê pode obter 3 meses de acesso grátis usando meu código de indicação: {code}\n\nConfira aqui: {link}',
+    'referral.freeAccessStatus': 'Seu Status de Acesso Grátis',
+    'referral.daysRemaining': 'Dias Restantes',
+    'referral.freeAccessUntil': 'Acesso grátis até',
+    'referral.errorCopyLink': 'Erro ao copiar link:',
+    'referral.errorWhatsApp': 'Erro ao compartilhar via WhatsApp:',
+    'referral.errorEmail': 'Erro ao compartilhar via email:',
     
     // Password
     'password.title': 'Alterar Senha',
@@ -438,10 +503,27 @@ const customTranslations = {
     'signup.validReferralCode': '✅ Código de indicação válido! Você ganhará 3 meses de acesso grátis.',
     'signup.invalidReferralCode': '❌ Código de indicação inválido. Você ainda pode se registrar por 3 meses grátis.',
     'signup.errorValidatingCode': '❌ Erro ao validar código de indicação.',
+    'signup.referralCodeFromLink': 'Código de indicação do seu link de convite',
+    'signup.backToSignIn': 'Voltar ao Login',
     'signup.termsAgreement': 'Ao criar uma conta, você concorda com nossos Termos de Serviço e Política de Privacidade',
     'signup.errorDuringSignup': 'Ocorreu um erro durante o registro',
     'signup.unexpectedError': 'Ocorreu um erro inesperado durante o registro',
     'signup.invalidUserAttributes': 'Atributos de usuário inválidos',
+
+    // Verify Email
+    'verify.subtitle': 'Digite o código de verificação enviado para',
+    'verify.codeLabel': 'Código de Verificação',
+    'verify.codePlaceholder': 'Código de 6 dígitos',
+    'verify.submit': 'Verificar Email',
+    'verify.submitting': 'Verificando...',
+    'verify.resend': 'Reenviar código',
+    'verify.sent': 'Código de verificação reenviado.',
+    'verify.success': 'Email verificado. Você já pode entrar.',
+    'verify.errorInvalid': 'Código de verificação inválido.',
+    'verify.errorExpired': 'O código de verificação expirou.',
+    'verify.errorUser': 'Usuário não encontrado.',
+    'verify.errorResend': 'Falha ao reenviar o código.',
+    'verify.errorGeneric': 'Falha na verificação. Tente novamente.',
     
     // Inactivity Warning
     'inactivity.title': 'Aviso de Inatividade',
@@ -464,6 +546,9 @@ const customTranslations = {
     'userSettings.deleteAccountDesc': 'Excluir permanentemente sua conta e todos os dados',
     'userSettings.inviteFriends': 'Convidar Amigos',
     'userSettings.inviteFriendsDesc': 'Compartilhe seu código de indicação e ganhe meses grátis',
+    
+    // Disclaimer
+    'disclaimer.text': 'As notícias podem sofrer atraso de alguns minutos, dependendo da publicação da fonte e da frequência de busca.',
   }
 };
 

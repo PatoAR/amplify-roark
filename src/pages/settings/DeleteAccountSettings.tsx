@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { deleteUser } from 'aws-amplify/auth';
-import { Card, Flex, Heading, Text, PasswordField, Button, Alert } from '@aws-amplify/ui-react';
+import { Card, Flex, Heading, Text, Button, Alert } from '@aws-amplify/ui-react';
 import { isApiError, AuthError, ErrorContext } from '../../types/errors';
 import { useTranslation } from '../../i18n';
 import './DeleteAccountSettings.css';
@@ -9,7 +9,6 @@ import './DeleteAccountSettings.css';
 const DeleteAccountSettings = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -28,11 +27,6 @@ const DeleteAccountSettings = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
-
-    if (!password) {
-      setError(t('deleteAccount.enterPassword'));
-      return;
-    }
 
     setIsLoading(true);
 
@@ -111,15 +105,6 @@ const DeleteAccountSettings = () => {
 
             <form onSubmit={handleDeleteAccount}>
               <Flex direction="column" gap="medium">
-                <PasswordField
-                  label={t('deleteAccount.confirmPassword')}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder={t('deleteAccount.enterPasswordToConfirm')}
-                  isRequired
-                  autoComplete="current-password"
-                />
-
                 <Button
                   type="submit"
                   variation="destructive"
