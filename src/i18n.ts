@@ -82,7 +82,13 @@ const customTranslations = {
     'referral.openingEmail': 'Opening email client...',
     'referral.shareMessage': 'Join Perkins News Service and get 3 months free! Use my referral code: {code}',
     'referral.emailSubject': 'Join Perkins News Service - 3 Months Free!',
-    'referral.emailBody': 'Hi!\n\nI\'m using Perkins News Service and thought you might be interested. It\'s a great way to stay updated with business news.\n\nYou can get 3 months of free access using my referral code: {code}\n\nSign up here: {url}\n\nBest regards!',
+    'referral.emailBody': 'Hi!\n\nI\'m using Perkins News Service and thought you might be interested. It\'s a great way to stay updated with business news.\n\nYou can get 3 months of free access using my referral code: {code}\n\nCheck it out: {link}',
+    'referral.freeAccessStatus': 'Your Free Access Status',
+    'referral.daysRemaining': 'Days Remaining',
+    'referral.freeAccessUntil': 'Free access until',
+    'referral.errorCopyLink': 'Failed to copy link:',
+    'referral.errorWhatsApp': 'Failed to share via WhatsApp:',
+    'referral.errorEmail': 'Failed to share via email:',
     
     // Password
     'password.title': 'Change Password',
@@ -258,7 +264,13 @@ const customTranslations = {
     'referral.openingEmail': 'Abriendo cliente de email...',
     'referral.shareMessage': '¡Únete al Servicio de Notícias Perkins y obtén 3 meses gratis! Usa mi código de referido: {code}',
     'referral.emailSubject': '¡Únete al Servicio de Notícias Perkins - 3 Meses Gratis!',
-    'referral.emailBody': '¡Hola!\n\nEstoy usando el Servicio de Notícias Perkins y pensé que te podría interesar. Es una excelente manera de mantenerse actualizado con noticias de negocios.\n\nPuedes obtener 3 meses de acceso gratis usando mi código de referido: {code}\n\nRegístrate aquí: {url}\n\n¡Saludos!',
+    'referral.emailBody': '¡Hola!\n\nEstoy usando el Servicio de Notícias Perkins y pensé que te podría interesar. Es una excelente manera de mantenerse actualizado con noticias de negocios.\n\nPuedes obtener 3 meses de acceso gratis usando mi código de referido: {code}\n\nMíralo aquí: {link}',
+    'referral.freeAccessStatus': 'Tu Estado de Acceso Gratis',
+    'referral.daysRemaining': 'Días Restantes',
+    'referral.freeAccessUntil': 'Acceso gratis hasta',
+    'referral.errorCopyLink': 'Error al copiar enlace:',
+    'referral.errorWhatsApp': 'Error al compartir via WhatsApp:',
+    'referral.errorEmail': 'Error al compartir via email:',
     
     // Password
     'password.title': 'Cambiar Contraseña',
@@ -283,8 +295,7 @@ const customTranslations = {
     'deleteAccount.confirmDelete': 'Eliminar Cuenta',
     'deleteAccount.accountDeleted': 'Cuenta eliminada exitosamente. Serás redirigido a la página de inicio de sesión.',
     'deleteAccount.enterPassword': 'Por favor ingresa tu contraseña para confirmar la eliminación de la cuenta',
-    'deleteAccount.confirmPassword': 'Confirmar Contraseña',
-    'deleteAccount.enterPasswordToConfirm': 'Ingresa tu contraseña para confirmar',
+    // Removed password confirmation fields from delete account flow
     'deleteAccount.deleting': 'Eliminando cuenta...',
     'deleteAccount.failedToDelete': 'Error al eliminar la cuenta',
     'deleteAccount.unexpectedError': 'Ocurrió un error inesperado al eliminar la cuenta',
@@ -435,7 +446,13 @@ const customTranslations = {
     'referral.openingEmail': 'Abrindo cliente de email...',
     'referral.shareMessage': 'Junte-se ao Serviço de Notícias Perkins e ganhe 3 meses grátis! Use meu código de indicação: {code}',
     'referral.emailSubject': 'Junte-se ao Serviço de Notícias Perkins - 3 Meses Grátis!',
-    'referral.emailBody': 'Olá!\n\nEstou usando o Serviço de Notícias Perkins e pensei que você poderia se interessar. É uma ótima maneira de se manter atualizado com notícias de negócios.\n\nVocê pode obter 3 meses de acesso grátis usando meu código de indicação: {code}\n\nRegistre-se aqui: {url}\n\nAtenciosamente!',
+    'referral.emailBody': 'Olá!\n\nEstou usando o Serviço de Notícias Perkins e pensei que você poderia se interessar. É uma ótima maneira de se manter atualizado com notícias de negócios.\n\nVocê pode obter 3 meses de acesso grátis usando meu código de indicação: {code}\n\nConfira aqui: {link}',
+    'referral.freeAccessStatus': 'Seu Status de Acesso Grátis',
+    'referral.daysRemaining': 'Dias Restantes',
+    'referral.freeAccessUntil': 'Acesso grátis até',
+    'referral.errorCopyLink': 'Erro ao copiar link:',
+    'referral.errorWhatsApp': 'Erro ao compartilhar via WhatsApp:',
+    'referral.errorEmail': 'Erro ao compartilhar via email:',
     
     // Password
     'password.title': 'Alterar Senha',

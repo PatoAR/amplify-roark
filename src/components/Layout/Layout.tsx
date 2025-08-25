@@ -2,6 +2,7 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import Header from "../Header/Header";
 import { NewsManager } from "../NewsManager/NewsManager";
+import { TabTitleUpdater } from "./TabTitleUpdater";
 import "./Layout.css";
 import { useTranslation } from "../../i18n";
 import { useUserPreferences } from "../../context/UserPreferencesContext";
@@ -20,6 +21,7 @@ const Layout = () => {
       <div className="layout-container">
         <Header />
         <NewsManager />
+        <TabTitleUpdater />
         <div className="page-container">
           <Outlet />
         </div>
@@ -31,6 +33,7 @@ const Layout = () => {
     <div className="layout-container">
       <Header />
       <NewsManager />
+      <TabTitleUpdater />
       <div className="page-container">
         <Outlet />
       </div>

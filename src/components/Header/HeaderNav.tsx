@@ -142,31 +142,12 @@ const HeaderNav = () => {
       {/* Invite Friends Icon with Badge */}
       <div
         className="invite-friends-icon"
-        style={{ position: 'relative', cursor: 'pointer', display: 'inline-block', marginRight: 16 }}
         onClick={() => navigate('/settings/referral')}
         title={t('menu.inviteFriends')}
       >
         <Gift size={24} />
         {typeof daysLeft === 'number' && daysLeft > 0 && (
-          <span
-            style={{
-              position: 'absolute',
-              top: -6,
-              right: -6,
-              background: 'red',
-              color: 'white',
-              borderRadius: '50%',
-              fontSize: 12,
-              minWidth: 18,
-              height: 18,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '0 5px',
-              fontWeight: 600,
-              boxShadow: '0 0 0 2px white',
-            }}
-          >
+          <span className={`days-counter ${daysLeft > 30 ? 'high' : 'low'}`}>
             {daysLeft}
           </span>
         )}

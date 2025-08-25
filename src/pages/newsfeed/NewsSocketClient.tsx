@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { useUserPreferences } from '../../context/UserPreferencesContext';
@@ -21,7 +21,6 @@ function NewsSocketClient() {
   const { preferences, isLoading, userProfileId } = useUserPreferences();
   const { articles, markArticleAsSeen } = useNews();
   const { isAuthenticated } = useSession();
-  const { authStatus } = useAuthenticator();
   const { t } = useTranslation();
 
   // Memoize the country matching logic to avoid recreating functions on every render
@@ -138,29 +137,15 @@ function NewsSocketClient() {
   // Show message if there are more articles than displayed
   const hasMoreArticles = filteredMessages.length > displayedMessages.length;
 
-  // Unread counter in tab
-  const unreadCount = displayedMessages.filter(msg => !msg.seen).length;  
+  // Tab visibility change
   useEffect(() => {
-    const baseTitle = 'Perkins Live Feed';
-    if (!isAuthenticated || authStatus === 'unauthenticated') {
-      document.title = baseTitle;
-      return;
-    }
-    document.title = unreadCount > 0 ? `(${unreadCount}) 🔥 ${baseTitle}` : baseTitle;
-  }, [unreadCount, isAuthenticated, authStatus]);
+    const handleVisibilityChange = () => {
+      setIsTabVisible(!document.hidden);
+    };
 
-  // Additional effect to ensure document title is reset when authentication state changes
-  useEffect(() => {
-    const baseTitle = 'Perkins Live Feed';
-    if (!isAuthenticated || authStatus === 'unauthenticated') {
-      document.title = baseTitle;
-    }
-  }, [isAuthenticated, authStatus]);
-
-  // Cleanup effect to reset document title when component unmounts
-  useEffect(() => {
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
-      document.title = 'Perkins Live Feed';
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
@@ -181,13 +166,6 @@ function NewsSocketClient() {
     a.target = '_blank';
     a.rel = 'noopener noreferrer';
     a.click();
-  }, []);
-
-  // Tab visibility change
-  useEffect(() => {
-    const handleVisibilityChange = () => setIsTabVisible(!document.hidden);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
   // Timer for new messages

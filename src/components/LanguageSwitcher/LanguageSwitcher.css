@@ -16,7 +16,12 @@
   background-color: var(--color-surface-secondary);
   transition: all var(--transition-normal);
   min-width: 40px;
+  height: 36px; /* Match the height of the three-line menu */
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .language-icon-button:hover {
@@ -87,6 +92,7 @@
   .language-icon-button {
     min-width: 35px;
     padding: var(--space-xs);
+    height: 32px; /* Slightly smaller height for mobile but still consistent */
   }
   
   .language-dropdown {
