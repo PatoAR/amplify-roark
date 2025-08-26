@@ -28,35 +28,14 @@ Amplify.configure({
 
 // Now import other components after Amplify is configured
 import { BrowserRouter } from 'react-router-dom';
-import { Authenticator, Image, View, useTheme } from '@aws-amplify/ui-react';
-import App from "./App.tsx"
 import CustomSignUp from "./components/CustomSignUp/CustomSignUp";
-import { UserPreferencesProvider } from './context/UserPreferencesContext';
-import { SessionProvider } from './context/SessionContext';
-import { NewsProvider } from './context/NewsContext';
+import LandingPage from "./components/LandingPage";
 import { LanguageProvider } from './context/LanguageContext';
-import '@aws-amplify/ui-react/styles.css';
 import "./index.css";
-import perkinsLogo from './assets/BaseLogo_v1.png'
 
 import './i18n'; // Initialize our custom translations
 
-// Custom components to pass to the Authenticator
-const customComponents = {
-  Header() {
-    const { tokens } = useTheme();
 
-    return (
-      <View textAlign="center" padding={tokens.space.large}>
-        <Image
-          alt="Perkins Business Intelligence"
-          src={perkinsLogo}
-          className="auth-logo"
-        />
-      </View>
-    );
-  },
-}
 
 // Check for referral code in URL before rendering
 const checkForReferralCode = () => {
@@ -77,20 +56,12 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </LanguageProvider>
       </BrowserRouter>
     ) : (
-      // Otherwise, show the normal Authenticator flow with all contexts
-      <Authenticator components={customComponents}>
-        <BrowserRouter>
-          <LanguageProvider>
-            <SessionProvider>
-              <NewsProvider>
-                <UserPreferencesProvider>
-                  <App />
-                </UserPreferencesProvider>
-              </NewsProvider>
-            </SessionProvider>
-          </LanguageProvider>
-        </BrowserRouter>
-      </Authenticator>
+      // Otherwise, show the landing page with Authenticator integration
+      <BrowserRouter>
+        <LanguageProvider>
+          <LandingPage />
+        </LanguageProvider>
+      </BrowserRouter>
     )}
   </React.StrictMode>
 );
