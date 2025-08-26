@@ -199,6 +199,9 @@ export const NewsManager: React.FC = () => {
       const result = await client.graphql({ query: listArticles });
       const articles: Article[] = (result as any).data?.listArticles?.items || [];
       console.log(`[NewsManager] Initial articles fetched: ${articles.length} articles from server`);
+      
+
+      
       // Initial articles fetched
       
       const formatted = articles.map(a => ({
@@ -306,6 +309,9 @@ export const NewsManager: React.FC = () => {
         next: ({ data }: { data: any }) => {
           if (!isComponentMountedRef.current) return;
           const newArticle = data.onCreateArticle;
+          
+
+          
           if (newArticle && !isArticleSeen(newArticle.id)) {
             console.log(`[NewsManager] AppSync subscription received new article: ${newArticle.id}`);
             // Mark subscription as established only when we receive the first article

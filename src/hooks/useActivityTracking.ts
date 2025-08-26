@@ -75,6 +75,8 @@ export const useActivityTracking = () => {
       }) as any;
 
       if (result.data?.createUserActivity) {
+        // Store the actual database record ID, not just the sessionId
+        sessionRef.current.recordId = result.data.createUserActivity.id;
         setIsTracking(true);
         // Track login event
         await trackEvent({
@@ -103,7 +105,7 @@ export const useActivityTracking = () => {
       });
 
       // Update UserActivity to mark session as ended
-      if (sessionRef.current) {
+      if (sessionRef.current && sessionRef.current.recordId) {
         const updateUserActivityMutation = /* GraphQL */ `
           mutation UpdateUserActivity($input: UpdateUserActivityInput!) {
             updateUserActivity(input: $input) {
@@ -122,7 +124,7 @@ export const useActivityTracking = () => {
           query: updateUserActivityMutation,
           variables: {
             input: {
-              id: sessionRef.current.sessionId,
+              id: sessionRef.current.recordId, // Use the actual database record ID
               endTime: endTime.toISOString(),
               duration,
               isActive: false,
@@ -226,5 +228,6 @@ export const useActivityTracking = () => {
     trackEvent,
     startSession,
     endSession,
+    currentSessionId: sessionRef.current?.sessionId,
   };
 }; 
