@@ -24,6 +24,7 @@ export interface SessionInfo {
   startTime: Date;
   deviceInfo: string;
   userAgent: string;
+  recordId?: string; // Add the actual database record ID
 }
 
 // Simplified validation

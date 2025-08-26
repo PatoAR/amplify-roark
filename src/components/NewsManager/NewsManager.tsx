@@ -200,16 +200,7 @@ export const NewsManager: React.FC = () => {
       const articles: Article[] = (result as any).data?.listArticles?.items || [];
       console.log(`[NewsManager] Initial articles fetched: ${articles.length} articles from server`);
       
-      // Debug logging to understand the data structure
-      if (articles.length > 0) {
-        const firstArticle = articles[0];
-        console.log('[NewsManager] First article from initial fetch:', firstArticle);
-        console.log('[NewsManager] First article ID:', firstArticle.id);
-        console.log('[NewsManager] First article ID type:', typeof firstArticle.id);
-        console.log('[NewsManager] First article ID length:', firstArticle.id?.length || 'undefined');
-        console.log('[NewsManager] First article ID looks like URL:', firstArticle.id?.startsWith('http') ? 'YES' : 'NO');
-        console.log('[NewsManager] First article ID looks like UUID:', /^[0-9a-f]{32}$/i.test(firstArticle.id) ? 'YES' : 'NO');
-      }
+
       
       // Initial articles fetched
       
@@ -319,19 +310,10 @@ export const NewsManager: React.FC = () => {
           if (!isComponentMountedRef.current) return;
           const newArticle = data.onCreateArticle;
           
-          // Debug logging to understand the data structure
-          console.log('[NewsManager] AppSync subscription raw data:', data);
-          console.log('[NewsManager] AppSync subscription newArticle object:', newArticle);
-          console.log('[NewsManager] AppSync subscription newArticle type:', typeof newArticle);
-          console.log('[NewsManager] AppSync subscription newArticle keys:', newArticle ? Object.keys(newArticle) : 'null');
+
           
           if (newArticle && !isArticleSeen(newArticle.id)) {
             console.log(`[NewsManager] AppSync subscription received new article: ${newArticle.id}`);
-            console.log(`[NewsManager] Article ID type: ${typeof newArticle.id}`);
-            console.log(`[NewsManager] Article ID length: ${newArticle.id?.length || 'undefined'}`);
-            console.log(`[NewsManager] Article ID looks like URL: ${newArticle.id?.startsWith('http') ? 'YES' : 'NO'}`);
-            console.log(`[NewsManager] Article ID looks like UUID: ${/^[0-9a-f]{32}$/i.test(newArticle.id) ? 'YES' : 'NO'}`);
-            
             // Mark subscription as established only when we receive the first article
             if (!subscriptionEstablishedRef.current) {
               subscriptionEstablishedRef.current = true;
