@@ -2,14 +2,12 @@
 Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fetches, processes and stores news articles in dynambodb. The articles are distributed to varios channels (whatsapp, telegram) and to this webapp via AppSync subscriptions or long-polling.
 
 ## ToDo's
-- What happens when zero days are reached?
-- Prevent users from deleting account and creating a new one to get free days
+- Trial expiration logic
+- Teach users how to use split screen
 - Create interface to deliver different content  - publicity, financials, etc. fix on top, colors, etc.
 - Modified display text
-
 - Add support / sponsorship email with custom domain
 - Pay suscription
-
 - Open AWS account on the name of Finu, transfer domain 
 
 ## CI/CD

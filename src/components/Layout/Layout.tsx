@@ -43,9 +43,9 @@ const Layout = () => {
           <button
             className="disclaimer-dismiss-btn"
             onClick={dismissDisclaimer}
-            aria-label="Understood"
+            aria-label={t('disclaimer.understood')}
           >
-            Understood
+            {t('disclaimer.understood')}
           </button>
         </div>
       </div>

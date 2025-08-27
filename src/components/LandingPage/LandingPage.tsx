@@ -1,7 +1,30 @@
 import React, { useState } from 'react';
+import { Authenticator } from '@aws-amplify/ui-react';
+import { useTheme, Image, View } from '@aws-amplify/ui-react';
 import perkinsLogo from '../../assets/BaseLogo_v1_W.png';
-import AuthWrapper from '../AuthWrapper';
+import App from '../../App';
+import { UserPreferencesProvider } from '../../context/UserPreferencesContext';
+import { SessionProvider } from '../../context/SessionContext';
+import { NewsProvider } from '../../context/NewsContext';
+import '@aws-amplify/ui-react/styles.css';
 import './LandingPage.css';
+
+// Custom components to pass to the Authenticator
+const customComponents = {
+  Header() {
+    const { tokens } = useTheme();
+
+    return (
+      <View textAlign="center" padding={tokens.space.large}>
+        <Image
+          alt="Perkins Business Intelligence"
+          src={perkinsLogo}
+          className="auth-logo"
+        />
+      </View>
+    );
+  },
+};
 
 const LandingPage: React.FC = () => {
   const [showAuth, setShowAuth] = useState(false);
@@ -17,9 +40,22 @@ const LandingPage: React.FC = () => {
     setShowAuth(true);
   };
 
-  // If user wants to authenticate, show the auth wrapper
+  // If user wants to authenticate, show the authenticator
   if (showAuth) {
-    return <AuthWrapper initialAuthState={authMode === 'signup' ? 'signUp' : 'signIn'} />;
+    return (
+      <Authenticator 
+        components={customComponents}
+        initialState={authMode === 'signup' ? 'signUp' : 'signIn'}
+      >
+        <SessionProvider>
+          <NewsProvider>
+            <UserPreferencesProvider>
+              <App />
+            </UserPreferencesProvider>
+          </NewsProvider>
+        </SessionProvider>
+      </Authenticator>
+    );
   }
 
   return (
@@ -40,9 +76,6 @@ const LandingPage: React.FC = () => {
 
       <main className="landing-main">
         <section className="hero-section">
-          <h1 className="hero-title">
-            Perkins Intel
-          </h1>
           <p className="hero-subtitle">
             Hybrid real + artificial intelligence platform for business intelligence
           </p>

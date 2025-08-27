@@ -158,7 +158,7 @@ export const useReferral = () => {
         case 'email':
           const emailSubject = encodeURIComponent(t('referral.emailSubject'));
           const emailBody = encodeURIComponent(
-            t('referral.emailBody').replace('{code}', referralCode).replace('{url}', referralUrl)
+            t('referral.emailBody').replace('{code}', referralCode).replace('{link}', referralUrl)
           );
           window.location.href = `mailto:?subject=${emailSubject}&body=${emailBody}`;
           break;

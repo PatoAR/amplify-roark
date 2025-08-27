@@ -184,6 +184,7 @@ const customTranslations = {
     
     // Disclaimer
     'disclaimer.text': 'News may be delayed by several minutes depending on source publication and retrieval frequency.',
+    'disclaimer.understood': 'Understood',
   },
   es: {
     // Menu items
@@ -366,6 +367,7 @@ const customTranslations = {
     
     // Disclaimer
     'disclaimer.text': 'Las notícias pueden retrasarse varios minutos según la publicación de la fonte y la frequência de busca.',
+    'disclaimer.understood': 'Entendido',
   },
   pt: {
     // Menu items
@@ -549,6 +551,7 @@ const customTranslations = {
     
     // Disclaimer
     'disclaimer.text': 'As notícias podem sofrer atraso de alguns minutos, dependendo da publicação da fonte e da frequência de busca.',
+    'disclaimer.understood': 'Entendi',
   }
 };
 

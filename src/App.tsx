@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route} from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import Layout from "./components/Layout/Layout";
 import NewsSocketClient from "./pages/newsfeed/NewsSocketClient";
@@ -9,6 +9,7 @@ import DeleteAccountSettings from "./pages/settings/DeleteAccountSettings";
 import ReferralSettings from "./pages/settings/ReferralSettings";
 import { AnalyticsDashboard } from "./components/Analytics/AnalyticsDashboard";
 import CustomSignUp from "./components/CustomSignUp/CustomSignUp";
+import LandingPage from "./components/LandingPage";
 import { useSession } from './context/SessionContext';
 import { useInactivityTimer } from './hooks/useInactivityTimer';
 import { InactivityDialog } from './hooks/InactivityWarning';
@@ -169,11 +170,9 @@ export default function App() {
     );
   }
 
-  // If user is not authenticated, show nothing (Authenticator will handle login)
+  // If user is not authenticated, show landing page
   if (authStatus === 'unauthenticated') {
-    // Referral detection is now handled in main.tsx
-    // Just let the default Authenticator handle it
-    return null;
+    return <LandingPage />;
   }
 
   // If authStatus is authenticated, allow the app to run even if session state is unclear

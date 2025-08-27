@@ -11,13 +11,10 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-xl) var(--space-2xl);
-  background-color: var(--color-surface);
-  border-bottom: var(--border-width) solid var(--color-border);
-  box-shadow: var(--shadow-sm);
 }
 
 .landing-logo img {
-  height: 40px;
+  height: 80px;
   width: auto;
 }
 
@@ -36,6 +33,10 @@
   transition: all var(--transition-normal);
   background: none;
   color: var(--color-text-primary);
+}
+
+.auth-btn-secondary {
+  border-color: #666666; /* Darker border for sign-in button */
 }
 
 .auth-btn-primary {
@@ -68,15 +69,6 @@
 .hero-section {
   text-align: center;
   margin-bottom: var(--space-3xl);
-  padding: var(--space-3xl) 0;
-}
-
-.hero-title {
-  font-size: var(--font-size-4xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-  margin-bottom: var(--space-lg);
-  line-height: var(--line-height-tight);
 }
 
 .hero-subtitle {
@@ -193,8 +185,6 @@
   padding: var(--space-2xl);
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
-  border-top: var(--border-width) solid var(--color-border);
-  background-color: var(--color-surface);
 }
 
 /* Auth Logo */
@@ -212,12 +202,12 @@
     padding: var(--space-lg);
   }
   
-  .landing-main {
-    padding: var(--space-2xl) var(--space-lg);
+  .landing-logo img {
+    height: 60px;
   }
   
-  .hero-title {
-    font-size: var(--font-size-3xl);
+  .landing-main {
+    padding: var(--space-2xl) var(--space-lg);
   }
   
   .hero-subtitle {
