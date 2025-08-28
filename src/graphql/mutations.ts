@@ -479,3 +479,66 @@ export const deleteUserEvent = /* GraphQL */ `mutation DeleteUserEvent(
   APITypes.DeleteUserEventMutationVariables,
   APITypes.DeleteUserEventMutation
 >;
+export const createDeletedUserEmail = /* GraphQL */ `mutation CreateDeletedUserEmail(
+  $input: CreateDeletedUserEmailInput!
+  $condition: ModelDeletedUserEmailConditionInput
+) {
+  createDeletedUserEmail(input: $input, condition: $condition) {
+    email
+    deletedAt
+    originalUserId
+    subscriptionStatus
+    deletionReason
+    id
+    createdAt
+    updatedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateDeletedUserEmailMutationVariables,
+  APITypes.CreateDeletedUserEmailMutation
+>;
+export const updateDeletedUserEmail = /* GraphQL */ `mutation UpdateDeletedUserEmail(
+  $input: UpdateDeletedUserEmailInput!
+  $condition: ModelDeletedUserEmailConditionInput
+) {
+  updateDeletedUserEmail(input: $input, condition: $condition) {
+    email
+    deletedAt
+    originalUserId
+    subscriptionStatus
+    deletionReason
+    id
+    createdAt
+    updatedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateDeletedUserEmailMutationVariables,
+  APITypes.UpdateDeletedUserEmailMutation
+>;
+export const deleteDeletedUserEmail = /* GraphQL */ `mutation DeleteDeletedUserEmail(
+  $input: DeleteDeletedUserEmailInput!
+  $condition: ModelDeletedUserEmailConditionInput
+) {
+  deleteDeletedUserEmail(input: $input, condition: $condition) {
+    email
+    deletedAt
+    originalUserId
+    subscriptionStatus
+    deletionReason
+    id
+    createdAt
+    updatedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteDeletedUserEmailMutationVariables,
+  APITypes.DeleteDeletedUserEmailMutation
+>;

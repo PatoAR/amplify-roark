@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import Header from "../Header/Header";
 import { NewsManager } from "../NewsManager/NewsManager";
 import { TabTitleUpdater } from "./TabTitleUpdater";
+import OptimalUsageModal from "../OptimalUsageModal";
 import "./Layout.css";
 import { useTranslation } from "../../i18n";
 import { useUserPreferences } from "../../context/UserPreferencesContext";
@@ -14,6 +15,16 @@ export interface LayoutProps {
 const Layout = () => {
   const { t } = useTranslation();
   const { isDisclaimerVisible, dismissDisclaimer } = useUserPreferences();
+  const [showOptimalUsageModal, setShowOptimalUsageModal] = useState(false);
+
+  // Check if user has opted to not see the modal again
+  useEffect(() => {
+    const modalHidden = localStorage.getItem('perkins-optimal-usage-modal-hidden');
+    if (!modalHidden) {
+      // Show the modal immediately on login as the first thing users see
+      setShowOptimalUsageModal(true);
+    }
+  }, []);
 
   // Don't show disclaimer if user has dismissed it
   if (!isDisclaimerVisible) {
@@ -25,6 +36,10 @@ const Layout = () => {
         <div className="page-container">
           <Outlet />
         </div>
+        <OptimalUsageModal
+          show={showOptimalUsageModal}
+          onClose={() => setShowOptimalUsageModal(false)}
+        />
       </div>
     );
   }
@@ -49,6 +64,10 @@ const Layout = () => {
           </button>
         </div>
       </div>
+      <OptimalUsageModal
+        show={showOptimalUsageModal}
+        onClose={() => setShowOptimalUsageModal(false)}
+      />
     </div>
   );
 };
