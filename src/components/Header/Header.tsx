@@ -2,7 +2,7 @@ import { Flex } from "@aws-amplify/ui-react";
 import { Link } from "react-router-dom";
 import "./Header.css";
 
-import Logo from "../../assets/BaseLogo_v2.png";
+import Logo from "/PerkinsLogo_Base_Gray.png";
 import HeaderNav from "./HeaderNav";
 import HeaderSearchBar from "./HeaderSearchBar";
 

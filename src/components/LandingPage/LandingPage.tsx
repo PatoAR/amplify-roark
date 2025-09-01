@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Authenticator } from '@aws-amplify/ui-react';
 import { useTheme, Image, View } from '@aws-amplify/ui-react';
-import perkinsLogo from '../../assets/BaseLogo_v1_W.png';
+import perkinsLogo from '/PerkinsLogo_Base_Gray.png';
 import App from '../../App';
 import { UserPreferencesProvider } from '../../context/UserPreferencesContext';
 import { SessionProvider } from '../../context/SessionContext';
