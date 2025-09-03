@@ -501,6 +501,55 @@ export type DeleteUserEventInput = {
   id: string,
 };
 
+export type CreateDeletedUserEmailInput = {
+  email: string,
+  deletedAt: string,
+  originalUserId?: string | null,
+  subscriptionStatus?: string | null,
+  deletionReason?: string | null,
+  id?: string | null,
+};
+
+export type ModelDeletedUserEmailConditionInput = {
+  email?: ModelStringInput | null,
+  deletedAt?: ModelStringInput | null,
+  originalUserId?: ModelStringInput | null,
+  subscriptionStatus?: ModelStringInput | null,
+  deletionReason?: ModelStringInput | null,
+  and?: Array< ModelDeletedUserEmailConditionInput | null > | null,
+  or?: Array< ModelDeletedUserEmailConditionInput | null > | null,
+  not?: ModelDeletedUserEmailConditionInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  owner?: ModelStringInput | null,
+};
+
+export type DeletedUserEmail = {
+  __typename: "DeletedUserEmail",
+  email: string,
+  deletedAt: string,
+  originalUserId?: string | null,
+  subscriptionStatus?: string | null,
+  deletionReason?: string | null,
+  id: string,
+  createdAt: string,
+  updatedAt: string,
+  owner?: string | null,
+};
+
+export type UpdateDeletedUserEmailInput = {
+  email?: string | null,
+  deletedAt?: string | null,
+  originalUserId?: string | null,
+  subscriptionStatus?: string | null,
+  deletionReason?: string | null,
+  id: string,
+};
+
+export type DeleteDeletedUserEmailInput = {
+  id: string,
+};
+
 export type ModelArticleFilterInput = {
   timestamp?: ModelStringInput | null,
   source?: ModelStringInput | null,
@@ -674,6 +723,27 @@ export type ModelUserEventConnection = {
   nextToken?: string | null,
 };
 
+export type ModelDeletedUserEmailFilterInput = {
+  email?: ModelStringInput | null,
+  deletedAt?: ModelStringInput | null,
+  originalUserId?: ModelStringInput | null,
+  subscriptionStatus?: ModelStringInput | null,
+  deletionReason?: ModelStringInput | null,
+  id?: ModelIDInput | null,
+  createdAt?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+  and?: Array< ModelDeletedUserEmailFilterInput | null > | null,
+  or?: Array< ModelDeletedUserEmailFilterInput | null > | null,
+  not?: ModelDeletedUserEmailFilterInput | null,
+  owner?: ModelStringInput | null,
+};
+
+export type ModelDeletedUserEmailConnection = {
+  __typename: "ModelDeletedUserEmailConnection",
+  items:  Array<DeletedUserEmail | null >,
+  nextToken?: string | null,
+};
+
 export type ModelSubscriptionArticleFilterInput = {
   timestamp?: ModelSubscriptionStringInput | null,
   source?: ModelSubscriptionStringInput | null,
@@ -826,6 +896,20 @@ export type ModelSubscriptionUserEventFilterInput = {
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionUserEventFilterInput | null > | null,
   or?: Array< ModelSubscriptionUserEventFilterInput | null > | null,
+  owner?: ModelStringInput | null,
+};
+
+export type ModelSubscriptionDeletedUserEmailFilterInput = {
+  email?: ModelSubscriptionStringInput | null,
+  deletedAt?: ModelSubscriptionStringInput | null,
+  originalUserId?: ModelSubscriptionStringInput | null,
+  subscriptionStatus?: ModelSubscriptionStringInput | null,
+  deletionReason?: ModelSubscriptionStringInput | null,
+  id?: ModelSubscriptionIDInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionDeletedUserEmailFilterInput | null > | null,
+  or?: Array< ModelSubscriptionDeletedUserEmailFilterInput | null > | null,
   owner?: ModelStringInput | null,
 };
 
@@ -1279,6 +1363,66 @@ export type DeleteUserEventMutation = {
   } | null,
 };
 
+export type CreateDeletedUserEmailMutationVariables = {
+  input: CreateDeletedUserEmailInput,
+  condition?: ModelDeletedUserEmailConditionInput | null,
+};
+
+export type CreateDeletedUserEmailMutation = {
+  createDeletedUserEmail?:  {
+    __typename: "DeletedUserEmail",
+    email: string,
+    deletedAt: string,
+    originalUserId?: string | null,
+    subscriptionStatus?: string | null,
+    deletionReason?: string | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+    owner?: string | null,
+  } | null,
+};
+
+export type UpdateDeletedUserEmailMutationVariables = {
+  input: UpdateDeletedUserEmailInput,
+  condition?: ModelDeletedUserEmailConditionInput | null,
+};
+
+export type UpdateDeletedUserEmailMutation = {
+  updateDeletedUserEmail?:  {
+    __typename: "DeletedUserEmail",
+    email: string,
+    deletedAt: string,
+    originalUserId?: string | null,
+    subscriptionStatus?: string | null,
+    deletionReason?: string | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+    owner?: string | null,
+  } | null,
+};
+
+export type DeleteDeletedUserEmailMutationVariables = {
+  input: DeleteDeletedUserEmailInput,
+  condition?: ModelDeletedUserEmailConditionInput | null,
+};
+
+export type DeleteDeletedUserEmailMutation = {
+  deleteDeletedUserEmail?:  {
+    __typename: "DeletedUserEmail",
+    email: string,
+    deletedAt: string,
+    originalUserId?: string | null,
+    subscriptionStatus?: string | null,
+    deletionReason?: string | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+    owner?: string | null,
+  } | null,
+};
+
 export type GetArticleQueryVariables = {
   id: string,
 };
@@ -1602,6 +1746,50 @@ export type ListUserEventsQuery = {
       id: string,
       createdAt: string,
       updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type GetDeletedUserEmailQueryVariables = {
+  id: string,
+};
+
+export type GetDeletedUserEmailQuery = {
+  getDeletedUserEmail?:  {
+    __typename: "DeletedUserEmail",
+    email: string,
+    deletedAt: string,
+    originalUserId?: string | null,
+    subscriptionStatus?: string | null,
+    deletionReason?: string | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+    owner?: string | null,
+  } | null,
+};
+
+export type ListDeletedUserEmailsQueryVariables = {
+  filter?: ModelDeletedUserEmailFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListDeletedUserEmailsQuery = {
+  listDeletedUserEmails?:  {
+    __typename: "ModelDeletedUserEmailConnection",
+    items:  Array< {
+      __typename: "DeletedUserEmail",
+      email: string,
+      deletedAt: string,
+      originalUserId?: string | null,
+      subscriptionStatus?: string | null,
+      deletionReason?: string | null,
+      id: string,
+      createdAt: string,
+      updatedAt: string,
+      owner?: string | null,
     } | null >,
     nextToken?: string | null,
   } | null,
@@ -2051,5 +2239,65 @@ export type OnDeleteUserEventSubscription = {
     id: string,
     createdAt: string,
     updatedAt: string,
+  } | null,
+};
+
+export type OnCreateDeletedUserEmailSubscriptionVariables = {
+  filter?: ModelSubscriptionDeletedUserEmailFilterInput | null,
+  owner?: string | null,
+};
+
+export type OnCreateDeletedUserEmailSubscription = {
+  onCreateDeletedUserEmail?:  {
+    __typename: "DeletedUserEmail",
+    email: string,
+    deletedAt: string,
+    originalUserId?: string | null,
+    subscriptionStatus?: string | null,
+    deletionReason?: string | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+    owner?: string | null,
+  } | null,
+};
+
+export type OnUpdateDeletedUserEmailSubscriptionVariables = {
+  filter?: ModelSubscriptionDeletedUserEmailFilterInput | null,
+  owner?: string | null,
+};
+
+export type OnUpdateDeletedUserEmailSubscription = {
+  onUpdateDeletedUserEmail?:  {
+    __typename: "DeletedUserEmail",
+    email: string,
+    deletedAt: string,
+    originalUserId?: string | null,
+    subscriptionStatus?: string | null,
+    deletionReason?: string | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+    owner?: string | null,
+  } | null,
+};
+
+export type OnDeleteDeletedUserEmailSubscriptionVariables = {
+  filter?: ModelSubscriptionDeletedUserEmailFilterInput | null,
+  owner?: string | null,
+};
+
+export type OnDeleteDeletedUserEmailSubscription = {
+  onDeleteDeletedUserEmail?:  {
+    __typename: "DeletedUserEmail",
+    email: string,
+    deletedAt: string,
+    originalUserId?: string | null,
+    subscriptionStatus?: string | null,
+    deletionReason?: string | null,
+    id: string,
+    createdAt: string,
+    updatedAt: string,
+    owner?: string | null,
   } | null,
 };

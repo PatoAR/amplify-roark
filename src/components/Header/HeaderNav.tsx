@@ -9,6 +9,7 @@ import { useFreeDaysRemaining } from '../../hooks/useFreeDaysRemaining';
 import { useTranslation } from '../../i18n';
 import LanguageSwitcher from '../LanguageSwitcher/LanguageSwitcher';
 import { COUNTRY_OPTIONS, INDUSTRY_OPTIONS } from '../../constants/countries';
+import "./HeaderNav.css";
 
 const HeaderNav = () => {
   const { t } = useTranslation();
@@ -210,6 +211,7 @@ const HeaderNav = () => {
                     onClick={() => handleIndustryChange(industry.id)}
                   >
                     <IconComponent size={16} />
+                    {industry.icon}
                     {industry.label}
                   </button>
                 );

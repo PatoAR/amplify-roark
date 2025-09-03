@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { deleteUser } from 'aws-amplify/auth';
+import { deleteUser, getCurrentUser } from 'aws-amplify/auth';
+import { generateClient } from 'aws-amplify/api';
+import { type Schema } from '../../../amplify/data/resource';
 import { Card, Flex, Heading, Text, Button, Alert } from '@aws-amplify/ui-react';
 import { isApiError, AuthError, ErrorContext } from '../../types/errors';
 import { useTranslation } from '../../i18n';
@@ -31,6 +33,25 @@ const DeleteAccountSettings = () => {
     setIsLoading(true);
 
     try {
+      // Get current user info before deletion
+      const currentUser = await getCurrentUser();
+      const client = generateClient<Schema>();
+      
+      // Record the deleted email to prevent recreation
+      try {
+        await client.models.DeletedUserEmail.create({
+          email: currentUser.username, // Email is stored as username
+          deletedAt: new Date().toISOString(),
+          originalUserId: currentUser.userId,
+          subscriptionStatus: 'deleted',
+          deletionReason: 'User initiated deletion'
+        });
+      } catch (recordError) {
+        console.warn('Failed to record deleted email:', recordError);
+        // Don't fail the deletion if recording fails
+      }
+
+      // Delete the user account
       await deleteUser();
       setSuccess(t('deleteAccount.accountDeleted'));
       

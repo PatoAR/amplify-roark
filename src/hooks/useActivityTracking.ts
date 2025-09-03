@@ -97,12 +97,19 @@ export const useActivityTracking = () => {
     try {
       const client = getClient();
       
-      // Track logout event first
-      await trackEvent({
-        eventType: 'logout',
-        eventData: { userId: user.userId, timestamp: new Date().toISOString() },
-        metadata: { userAgent: navigator.userAgent, platform: navigator.platform }
-      });
+      // Track logout event first (only if we still have valid session data)
+      if (sessionRef.current && user?.userId) {
+        try {
+          await trackEvent({
+            eventType: 'logout',
+            eventData: { userId: user.userId, timestamp: new Date().toISOString() },
+            metadata: { userAgent: navigator.userAgent, platform: navigator.platform }
+          });
+        } catch (trackError) {
+          // Log but don't fail the logout process if event tracking fails
+          console.log('Logout event tracking failed (this is normal during logout):', trackError);
+        }
+      }
 
       // Update UserActivity to mark session as ended
       if (sessionRef.current && sessionRef.current.recordId) {
@@ -201,7 +208,12 @@ export const useActivityTracking = () => {
 
       console.log(`Tracked ${event.eventType} event`);
     } catch (error) {
-      console.error('Failed to track event', error);
+      // Don't log as error for logout events during session cleanup
+      if (event.eventType === 'logout') {
+        console.log('Logout event tracking failed (normal during logout):', error);
+      } else {
+        console.error('Failed to track event', error);
+      }
     }
   }, [user?.userId, getClient]);
 

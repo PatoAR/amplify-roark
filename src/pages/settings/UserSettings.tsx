@@ -1,10 +1,12 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import {
   Button,
   Flex,
   View,
   Heading,
   Card,
+  Alert,
 } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import { useTranslation } from '../../i18n';
@@ -13,32 +15,36 @@ import './UserSettings.css';
 const UserSettings = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [showSuccessBanner, setShowSuccessBanner] = useState(false);
+
 
   const settingsCards = [
     {
       id: 'password',
-      title: t('userSettings.changePassword'),
-      description: t('userSettings.changePasswordDesc'),
+      title: t('settings.changePassword'),
+      description: t('settings.changePasswordDesc'),
       icon: '🔐',
       path: '/settings/password',
       color: 'primary'
     },
     {
       id: 'account',
-      title: t('userSettings.deleteAccount'),
-      description: t('userSettings.deleteAccountDesc'),
+      title: t('settings.deleteAccount'),
+      description: t('settings.deleteAccountDesc'),
       icon: '🗑️',
       path: '/settings/delete-account',
       color: 'danger'
     },
     {
       id: 'referral',
-      title: t('userSettings.inviteFriends'),
-      description: t('userSettings.inviteFriendsDesc'),
+      title: t('settings.inviteFriends'),
+      description: t('settings.inviteFriendsDesc'),
       icon: '🎁',
       path: '/settings/referral',
       color: 'success'
-    }
+    },
+
   ];
 
   const handleCardClick = (path: string) => {
@@ -47,6 +53,22 @@ const UserSettings = () => {
 
   const handleBack = () => {
     navigate('/');
+  };
+
+  // Check for success parameter and show banner
+  useEffect(() => {
+    const successParam = searchParams.get('success');
+    if (successParam === 'password-changed') {
+      setShowSuccessBanner(true);
+      // Clear the URL parameter
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('success');
+      window.history.replaceState({}, '', newUrl.toString());
+    }
+  }, [searchParams]);
+
+  const handleDismissBanner = () => {
+    setShowSuccessBanner(false);
   };
 
   return (
@@ -66,8 +88,14 @@ const UserSettings = () => {
       </Flex>
 
       <Heading level={2} className="settings-main-title">
-        {t('userSettings.title')}
+        {t('settings.title')}
       </Heading>
+      
+      {showSuccessBanner && (
+        <Alert variation="success" isDismissible onDismiss={handleDismissBanner}>
+          {t('password.passwordUpdated')}
+        </Alert>
+      )}
       
       <Flex 
         direction="row" 

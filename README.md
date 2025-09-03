@@ -1,16 +1,14 @@
 ## AWS Roark
 Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fetches, processes and stores news articles in dynambodb. The articles are distributed to varios channels (whatsapp, telegram) and to this webapp via AppSync subscriptions or long-polling.
+np
 
 ## ToDo's
-- Frontpage
-- What happens when zero days are reached?
-- Prevent users from deleting account and creating a new one to get free days
+- Trial expiration logic
 - Create interface to deliver different content  - publicity, financials, etc. fix on top, colors, etc.
 - Modified display text
 
-- Add email with custom domain
+- Add support / sponsorship email with custom domain
 - Pay suscription
-
 - Open AWS account on the name of Finu, transfer domain 
 
 ## CI/CD
@@ -35,7 +33,10 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
             >> updates src/API.ts and graphql/files
 
 # PROD - AWS
-        Merge dev into main (will redeploy PROD?)
+        Merge dev into main
+        git checkout main
+        git merge appsync / dev
+        git push origin main
 
 
 ## CLI

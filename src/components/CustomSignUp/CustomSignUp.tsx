@@ -5,7 +5,8 @@ import { Card, Flex, Heading, Text, TextField, PasswordField, Button, Alert, Vie
 import { UserAttributes, SignUpOptions, validateEmail, validatePassword, validateUserAttributes } from '../../types/auth';
 import { isApiError, AuthError, ErrorContext } from '../../types/errors';
 import { useTranslation } from '../../i18n';
-import perkinsLogo from '../../assets/BaseLogo_v1_W.png';
+import { useEmailValidation } from '../../hooks/useEmailValidation';
+import perkinsLogo from '/PerkinsLogo_Base_White.png';
 import './CustomSignUp.css';
 
 interface CustomSignUpProps {
@@ -31,6 +32,9 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const navigate = useNavigate();
+
+  // Email validation hook
+  const { isEmailBlocked, blockReason, checkEmail } = useEmailValidation();
 
   // Check for referral code in URL
   useEffect(() => {
@@ -80,6 +84,13 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
     // Validate email
     if (!validateEmail(email)) {
       setError(t('signup.validEmail') || 'Please enter a valid email address');
+      return;
+    }
+
+    // Check if email was previously deleted
+    const isEmailAllowed = await checkEmail(email);
+    if (!isEmailAllowed) {
+      setError(blockReason || 'This email cannot be used for account creation.');
       return;
     }
 
@@ -320,7 +331,17 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
                   placeholder={t('signup.enterEmail') || 'Enter your email'}
                   isRequired
                   autoComplete="email"
+                  hasError={isEmailBlocked}
+                  errorMessage={isEmailBlocked ? blockReason : undefined}
                 />
+
+                {isEmailBlocked && (
+                  <Alert variation="error" isDismissible>
+                    <Text>
+                      <strong>Email Blocked:</strong> {blockReason}
+                    </Text>
+                  </Alert>
+                )}
 
                 <PasswordField
                   label={t('signup.password') || 'Password'}

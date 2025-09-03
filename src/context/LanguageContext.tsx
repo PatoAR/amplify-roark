@@ -39,7 +39,12 @@ const detectBrowserLanguage = (): string => {
 
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [currentLanguage, setCurrentLanguage] = useState(() => {
-    // Initialize with browser language detection
+    // First try to get saved language from localStorage
+    const savedLanguage = localStorage.getItem('userLanguage');
+    if (savedLanguage && ['en', 'es', 'pt'].includes(savedLanguage)) {
+      return savedLanguage;
+    }
+    // Fall back to browser language detection
     return detectBrowserLanguage();
   });
   
@@ -72,6 +77,8 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     setCurrentLanguage(language);
     setLanguageVersion(prev => prev + 1);
     I18n.setLanguage(language);
+    // Save language preference to localStorage
+    localStorage.setItem('userLanguage', language);
   };
 
   return (

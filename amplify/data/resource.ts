@@ -124,6 +124,22 @@ const schema = a.schema({
     metadata: a.string(), // Additional metadata as JSON string
   })
   .authorization(allow => [allow.owner().identityClaim('sub')]),
+
+  // DeletedUserEmail Model - Track deleted account emails to prevent recreation
+  DeletedUserEmail: a
+  .model({
+    email: a.string().required(), // The deleted email address
+    deletedAt: a.datetime().required(), // When the account was deleted
+    originalUserId: a.string(), // Original user ID for reference
+    subscriptionStatus: a.string(), // What subscription they had
+    deletionReason: a.string(), // Why they deleted (optional)
+  })
+  .authorization(allow => [
+    // Allow public API key for checking during signup
+    allow.publicApiKey().to(['create', 'read']),
+    // Allow authenticated users to read their own deletion record
+    allow.owner().identityClaim('sub').to(['read'])
+  ]),
 });
 
 export type Schema = ClientSchema<typeof schema>;

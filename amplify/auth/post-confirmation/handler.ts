@@ -78,6 +78,37 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
   try {
     const { userAttributes } = event.request;
     const userId = event.request.userAttributes.sub;
+    const userEmail = userAttributes.email;
+
+    // Check if email was previously deleted (additional safeguard)
+    try {
+      const checkDeletedEmailQuery = `
+        query ListDeletedUserEmails($filter: ModelDeletedUserEmailFilterInput) {
+          listDeletedUserEmails(filter: $filter) {
+            items {
+              id
+              email
+              deletedAt
+              deletionReason
+            }
+          }
+        }
+      `;
+
+      const deletedEmails = await appsyncRequest(checkDeletedEmailQuery, {
+        filter: { email: { eq: userEmail } }
+      });
+
+      if (deletedEmails.listDeletedUserEmails.items.length > 0) {
+        console.warn(`User ${userId} attempted to recreate account with previously deleted email: ${userEmail}`);
+        // Note: We don't block here as the account is already created
+        // This is just for logging and monitoring purposes
+        // The main prevention happens during signup in the frontend
+      }
+    } catch (deletedEmailCheckError) {
+      console.warn('Error checking deleted email history:', deletedEmailCheckError);
+      // Don't fail the process if this check fails
+    }
 
     // Check if user signed up with a referral code
     const referralCode = userAttributes['custom:referralCode'] || event.request.clientMetadata?.referralCode;

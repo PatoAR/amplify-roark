@@ -336,3 +336,47 @@ export const listUserEvents = /* GraphQL */ `query ListUserEvents(
   APITypes.ListUserEventsQueryVariables,
   APITypes.ListUserEventsQuery
 >;
+export const getDeletedUserEmail = /* GraphQL */ `query GetDeletedUserEmail($id: ID!) {
+  getDeletedUserEmail(id: $id) {
+    email
+    deletedAt
+    originalUserId
+    subscriptionStatus
+    deletionReason
+    id
+    createdAt
+    updatedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetDeletedUserEmailQueryVariables,
+  APITypes.GetDeletedUserEmailQuery
+>;
+export const listDeletedUserEmails = /* GraphQL */ `query ListDeletedUserEmails(
+  $filter: ModelDeletedUserEmailFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listDeletedUserEmails(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      email
+      deletedAt
+      originalUserId
+      subscriptionStatus
+      deletionReason
+      id
+      createdAt
+      updatedAt
+      owner
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListDeletedUserEmailsQueryVariables,
+  APITypes.ListDeletedUserEmailsQuery
+>;

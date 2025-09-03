@@ -15,7 +15,6 @@ const PasswordSettings = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   const createErrorContext = (action: string): ErrorContext => ({
     component: 'PasswordSettings',
@@ -30,7 +29,6 @@ const PasswordSettings = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
 
     // Validate new password
     const passwordValidation = validatePassword(newPassword);
@@ -53,10 +51,8 @@ const PasswordSettings = () => {
         newPassword: newPassword,
       });
 
-      setSuccess(t('password.passwordUpdated'));
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
+      // Redirect to settings page with success message
+      navigate('/settings?success=password-changed');
     } catch (err: unknown) {
       const errorContext = createErrorContext('changePassword');
       
@@ -110,11 +106,6 @@ const PasswordSettings = () => {
               </Alert>
             )}
 
-            {success && (
-              <Alert variation="success" isDismissible>
-                {success}
-              </Alert>
-            )}
 
             <form onSubmit={handleSubmit}>
               <Flex direction="column" gap="medium">

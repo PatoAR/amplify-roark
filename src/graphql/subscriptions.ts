@@ -470,3 +470,66 @@ export const onDeleteUserEvent = /* GraphQL */ `subscription OnDeleteUserEvent(
   APITypes.OnDeleteUserEventSubscriptionVariables,
   APITypes.OnDeleteUserEventSubscription
 >;
+export const onCreateDeletedUserEmail = /* GraphQL */ `subscription OnCreateDeletedUserEmail(
+  $filter: ModelSubscriptionDeletedUserEmailFilterInput
+  $owner: String
+) {
+  onCreateDeletedUserEmail(filter: $filter, owner: $owner) {
+    email
+    deletedAt
+    originalUserId
+    subscriptionStatus
+    deletionReason
+    id
+    createdAt
+    updatedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateDeletedUserEmailSubscriptionVariables,
+  APITypes.OnCreateDeletedUserEmailSubscription
+>;
+export const onUpdateDeletedUserEmail = /* GraphQL */ `subscription OnUpdateDeletedUserEmail(
+  $filter: ModelSubscriptionDeletedUserEmailFilterInput
+  $owner: String
+) {
+  onUpdateDeletedUserEmail(filter: $filter, owner: $owner) {
+    email
+    deletedAt
+    originalUserId
+    subscriptionStatus
+    deletionReason
+    id
+    createdAt
+    updatedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateDeletedUserEmailSubscriptionVariables,
+  APITypes.OnUpdateDeletedUserEmailSubscription
+>;
+export const onDeleteDeletedUserEmail = /* GraphQL */ `subscription OnDeleteDeletedUserEmail(
+  $filter: ModelSubscriptionDeletedUserEmailFilterInput
+  $owner: String
+) {
+  onDeleteDeletedUserEmail(filter: $filter, owner: $owner) {
+    email
+    deletedAt
+    originalUserId
+    subscriptionStatus
+    deletionReason
+    id
+    createdAt
+    updatedAt
+    owner
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteDeletedUserEmailSubscriptionVariables,
+  APITypes.OnDeleteDeletedUserEmailSubscription
+>;

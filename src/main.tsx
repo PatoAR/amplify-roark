@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import { Amplify } from "aws-amplify";
 import outputs from '../amplify_outputs.json';
@@ -28,35 +28,80 @@ Amplify.configure({
 
 // Now import other components after Amplify is configured
 import { BrowserRouter } from 'react-router-dom';
-import { Authenticator, Image, View, useTheme } from '@aws-amplify/ui-react';
-import App from "./App.tsx"
 import CustomSignUp from "./components/CustomSignUp/CustomSignUp";
-import { UserPreferencesProvider } from './context/UserPreferencesContext';
-import { SessionProvider } from './context/SessionContext';
-import { NewsProvider } from './context/NewsContext';
+import LandingPage from "./components/LandingPage";
+import AuthWrapper from "./components/AuthWrapper";
 import { LanguageProvider } from './context/LanguageContext';
-import '@aws-amplify/ui-react/styles.css';
 import "./index.css";
-import perkinsLogo from './assets/BaseLogo_v1.png'
 
 import './i18n'; // Initialize our custom translations
 
-// Custom components to pass to the Authenticator
-const customComponents = {
-  Header() {
-    const { tokens } = useTheme();
+// Main app component that handles authentication routing
+const MainApp: React.FC = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Check authentication status and listen for changes
+  useEffect(() => {
+    let unsubscribe: (() => void) | undefined;
+    
+    const setupAuth = async () => {
+      try {
+        // Check if user is authenticated using Amplify
+        const { getCurrentUser } = await import('aws-amplify/auth');
+        const user = await getCurrentUser();
+        setIsAuthenticated(!!user);
+      } catch {
+        setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
+      }
+      
+      // Set up a listener for authentication state changes
+      try {
+        const { Hub } = await import('aws-amplify/utils');
+        unsubscribe = Hub.listen('auth', (data) => {
+          if (data.payload.event === 'signedIn') {
+            setIsAuthenticated(true);
+          } else if (data.payload.event === 'signedOut') {
+            setIsAuthenticated(false);
+          }
+        });
+      } catch (error) {
+        console.error('Failed to set up auth listener:', error);
+      }
+    };
+    
+    setupAuth();
+    
+    // Cleanup function
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, []);
 
+  if (isLoading) {
     return (
-      <View textAlign="center" padding={tokens.space.large}>
-        <Image
-          alt="Perkins Business Intelligence"
-          src={perkinsLogo}
-          className="auth-logo"
-        />
-      </View>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        fontSize: '18px'
+      }}>
+        Loading...
+      </div>
     );
-  },
-}
+  }
+
+  if (isAuthenticated) {
+    return <AuthWrapper />;
+  } else {
+    return <LandingPage />;
+  }
+};
 
 // Check for referral code in URL before rendering
 const checkForReferralCode = () => {
@@ -77,20 +122,12 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </LanguageProvider>
       </BrowserRouter>
     ) : (
-      // Otherwise, show the normal Authenticator flow with all contexts
-      <Authenticator components={customComponents}>
-        <BrowserRouter>
-          <LanguageProvider>
-            <SessionProvider>
-              <NewsProvider>
-                <UserPreferencesProvider>
-                  <App />
-                </UserPreferencesProvider>
-              </NewsProvider>
-            </SessionProvider>
-          </LanguageProvider>
-        </BrowserRouter>
-      </Authenticator>
+      // Otherwise, show the main app with authentication routing
+      <BrowserRouter>
+        <LanguageProvider>
+          <MainApp />
+        </LanguageProvider>
+      </BrowserRouter>
     )}
   </React.StrictMode>
 );

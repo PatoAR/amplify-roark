@@ -35,11 +35,26 @@ const customTranslations = {
     'settings.backToNews': '← Back to News Feed',
     'settings.backToSettings': '← Back to Settings',
     
+
+    
     // Welcome
     'welcome.title': 'Welcome to Perkins News',
     'welcome.subtitle': 'To get started, personalize your news feed by selecting the industries and countries that matter most to you.',
     'welcome.button': 'Personalize Your Feed',
     'welcome.hint': 'You can always change these settings later from the main menu.',
+    
+    // Optimal Usage
+    'optimalUsage.title': 'Optimal User Experience',
+    'optimalUsage.splitScreen.title': '1. Enable Split Screen',
+    'optimalUsage.splitScreen.description': 'For the best experience on desktop or laptop, use your browser\'s split screen feature. This allows you to view the article list and read articles simultaneously.',
+    'optimalUsage.splitScreen.imageAlt': 'Split screen browser feature',
+    'optimalUsage.articleSize.title': '2. Adjust Article List Size',
+    'optimalUsage.articleSize.description': 'Set the article list on the left to about one-third of your screen width. This provides the perfect balance between browsing articles and reading content.',
+    'optimalUsage.openRight.title': '3. Use "Open on Right" Option',
+    'optimalUsage.openRight.description': 'Once split screen is enabled, look for the "open on right" option in your browser\'s navigation bar. This will open articles in the right panel for optimal reading.',
+    'optimalUsage.openRight.imageAlt': 'Open on right browser option',
+    'optimalUsage.tip': 'These settings will give you the most efficient workflow for consuming news content on the Perkins platform.',
+    'optimalUsage.dontShowAgain': 'Don\'t show this message again',
     
     // Common
     'common.loading': 'Loading...',
@@ -173,17 +188,11 @@ const customTranslations = {
     'authError.tryAgain': 'Try Again',
     'authError.logout': 'Logout',
     
-    // User Settings
-    'userSettings.title': 'Settings',
-    'userSettings.changePassword': 'Change Password',
-    'userSettings.changePasswordDesc': 'Update your account password',
-    'userSettings.deleteAccount': 'Delete Account',
-    'userSettings.deleteAccountDesc': 'Permanently delete your account and all data',
-    'userSettings.inviteFriends': 'Invite Friends',
-    'userSettings.inviteFriendsDesc': 'Share your referral code and earn free months',
+
     
     // Disclaimer
     'disclaimer.text': 'News may be delayed by several minutes depending on source publication and retrieval frequency.',
+    'disclaimer.understood': 'Understood',
   },
   es: {
     // Menu items
@@ -355,17 +364,11 @@ const customTranslations = {
     'authError.tryAgain': 'Intentar de Nuevo',
     'authError.logout': 'Cerrar Sesión',
     
-    // User Settings
-    'userSettings.title': 'Configuración',
-    'userSettings.changePassword': 'Cambiar Contraseña',
-    'userSettings.changePasswordDesc': 'Actualizar la contraseña de tu cuenta',
-    'userSettings.deleteAccount': 'Eliminar Cuenta',
-    'userSettings.deleteAccountDesc': 'Eliminar permanentemente tu cuenta y todos los datos',
-    'userSettings.inviteFriends': 'Invitar Amigos',
-    'userSettings.inviteFriendsDesc': 'Comparte tu código de referido y gana meses gratis',
+
     
     // Disclaimer
     'disclaimer.text': 'Las notícias pueden retrasarse varios minutos según la publicación de la fonte y la frequência de busca.',
+    'disclaimer.understood': 'Entendido',
   },
   pt: {
     // Menu items
@@ -538,17 +541,11 @@ const customTranslations = {
     'authError.tryAgain': 'Tentar Novamente',
     'authError.logout': 'Sair',
     
-    // User Settings
-    'userSettings.title': 'Configurações',
-    'userSettings.changePassword': 'Alterar Senha',
-    'userSettings.changePasswordDesc': 'Atualizar a senha da sua conta',
-    'userSettings.deleteAccount': 'Excluir Conta',
-    'userSettings.deleteAccountDesc': 'Excluir permanentemente sua conta e todos os dados',
-    'userSettings.inviteFriends': 'Convidar Amigos',
-    'userSettings.inviteFriendsDesc': 'Compartilhe seu código de indicação e ganhe meses grátis',
+
     
     // Disclaimer
     'disclaimer.text': 'As notícias podem sofrer atraso de alguns minutos, dependendo da publicação da fonte e da frequência de busca.',
+    'disclaimer.understood': 'Entendi',
   }
 };
 
