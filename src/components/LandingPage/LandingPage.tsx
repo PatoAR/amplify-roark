@@ -77,7 +77,7 @@ const LandingPage: React.FC = () => {
       <main className="landing-main">
         <section className="hero-section">
           <p className="hero-subtitle">
-            Hybrid real + artificial intelligence platform for business intelligence
+            From Data to Clarity: Hybrid Intelligence for Business Leaders
           </p>
           <p className="hero-description">
             Permanently sourcing and processing business, markets, and company information 
@@ -89,7 +89,7 @@ const LandingPage: React.FC = () => {
           <div className="features-grid">
             <div className="feature-card">
               <div className="feature-icon">📊</div>
-              <h3 className="feature-title">Real-time Intelligence</h3>
+              <h3 className="feature-title">Real Intelligence</h3>
               <p className="feature-description">
                 Continuous monitoring of news articles, regulatory reports, company newswires, 
                 statistical data, and financial filings.
@@ -128,7 +128,7 @@ const LandingPage: React.FC = () => {
         <section className="cta-section">
           <h2 className="cta-title">Ready to transform your business intelligence?</h2>
           <p className="cta-description">
-            Join Perkins Intel and gain access to the most comprehensive, real-time 
+            Join Perkins and gain access to the most comprehensive, real-time 
             business intelligence platform available.
           </p>
           <button className="cta-button" onClick={handleSignUp}>

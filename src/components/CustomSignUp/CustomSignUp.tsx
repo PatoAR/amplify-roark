@@ -6,7 +6,7 @@ import { UserAttributes, SignUpOptions, validateEmail, validatePassword, validat
 import { isApiError, AuthError, ErrorContext } from '../../types/errors';
 import { useTranslation } from '../../i18n';
 import { useEmailValidation } from '../../hooks/useEmailValidation';
-import perkinsLogo from '../../assets/BaseLogo_v1_W.png';
+import perkinsLogo from '/PerkinsLogo_Base_White.png';
 import './CustomSignUp.css';
 
 interface CustomSignUpProps {
