@@ -77,7 +77,7 @@ const LandingPage: React.FC = () => {
       <main className="landing-main">
         <section className="hero-section">
           <p className="hero-subtitle">
-            From Data to Clarity: Hybrid Intelligence for Business Leaders
+            From Data to Clarity: Hybrid Intelligence on Business & Markets
           </p>
           <p className="hero-description">
             Permanently sourcing and processing business, markets, and company information 
@@ -128,8 +128,7 @@ const LandingPage: React.FC = () => {
         <section className="cta-section">
           <h2 className="cta-title">Ready to transform your business intelligence?</h2>
           <p className="cta-description">
-            Join Perkins and gain access to the most comprehensive, real-time 
-            business intelligence platform available.
+            Gain access to Perkins comprehensive business intelligence platform.
           </p>
           <button className="cta-button" onClick={handleSignUp}>
             Get Started Today

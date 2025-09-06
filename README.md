@@ -1,6 +1,5 @@
 ## AWS Roark
 Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fetches, processes and stores news articles in dynambodb. The articles are distributed to varios channels (whatsapp, telegram) and to this webapp via AppSync subscriptions or long-polling.
-np
 
 ## ToDo's
 - Trial expiration logic

@@ -211,7 +211,6 @@ const HeaderNav = () => {
                     onClick={() => handleIndustryChange(industry.id)}
                   >
                     <IconComponent size={16} />
-                    {industry.icon}
                     {industry.label}
                   </button>
                 );

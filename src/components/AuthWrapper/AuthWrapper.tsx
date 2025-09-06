@@ -2,7 +2,7 @@ import React from 'react';
 import { Authenticator } from '@aws-amplify/ui-react';
 import { useTheme, Image, View } from '@aws-amplify/ui-react';
 import App from '../../App';
-import perkinsLogo from '/PerkinsLogo_Base_White.png';
+import perkinsLogo from '/PerkinsLogo_Base_Gray.png';
 import { UserPreferencesProvider } from '../../context/UserPreferencesContext';
 import { SessionProvider } from '../../context/SessionContext';
 import { NewsProvider } from '../../context/NewsContext';

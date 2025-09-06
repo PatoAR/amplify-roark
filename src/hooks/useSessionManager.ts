@@ -49,6 +49,9 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
         sessionId: undefined,
       };
 
+      // Small delay to ensure state is cleared
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       // Clear localStorage (except UI preferences)
       const keysToPreserve = ['theme', 'language'];
       const keysToRemove = Object.keys(localStorage).filter(
@@ -79,9 +82,16 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     }
   }, [endSession, signOut, options, authStatus]);
 
+  // Wrapper for startSession that checks logout state
+  const safeStartSession = useCallback(async () => {
+    if (!isLoggingOutRef.current) {
+      return startSession();
+    }
+  }, [startSession]);
+
   // Start session when user becomes authenticated
   useEffect(() => {
-    if (user?.userId && !sessionStateRef.current.isAuthenticated) {
+    if (user?.userId && !sessionStateRef.current.isAuthenticated && !isLoggingOutRef.current) {
       sessionStateRef.current = {
         isAuthenticated: true,
         isSessionActive: true,
@@ -94,7 +104,7 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
       setUserIdState(user.userId);
 
       // Start activity tracking
-      startSession().then(() => {
+      safeStartSession().then(() => {
         if (sessionStateRef.current.sessionId) {
           setSessionIdState(sessionStateRef.current.sessionId);
         }
@@ -104,22 +114,14 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
         options.onSessionStart(user.userId);
       }
     }
-  }, [user?.userId, startSession, options]);
+  }, [user?.userId, safeStartSession, options]);
 
   // Handle logout
   useEffect(() => {
-    if (authStatus === 'unauthenticated' && sessionStateRef.current.isAuthenticated) {
+    if (authStatus === 'unauthenticated' && sessionStateRef.current.isAuthenticated && !isLoggingOutRef.current) {
       performLogout();
     }
   }, [authStatus, performLogout]);
-
-  // Update state when session changes
-  useEffect(() => {
-    setIsAuthenticatedState(sessionStateRef.current.isAuthenticated);
-    setIsSessionActiveState(sessionStateRef.current.isSessionActive);
-    setUserIdState(sessionStateRef.current.userId);
-    setSessionIdState(sessionStateRef.current.sessionId);
-  }, [sessionStateRef.current]);
 
   return {
     isAuthenticated: isAuthenticatedState,

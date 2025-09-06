@@ -2,7 +2,14 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { generateClient } from 'aws-amplify/api';
 import { type Schema } from '../../amplify/data/resource';
-import { ActivityEvent, SessionInfo, isValidEventType, validateEventData, validateMetadata } from '../types/activity';
+
+interface SessionInfo {
+  sessionId: string;
+  startTime: Date;
+  deviceInfo: string;
+  userAgent: string;
+  recordId?: string;
+}
 
 export const useActivityTracking = () => {
   const { user } = useAuthenticator();
@@ -31,7 +38,7 @@ export const useActivityTracking = () => {
 
   // Start a new session (only on login)
   const startSession = useCallback(async () => {
-    if (!user?.userId) return;
+    if (!user?.userId || sessionRef.current) return;
 
     const client = getClient();
     const sessionId = generateSessionId();
@@ -66,8 +73,6 @@ export const useActivityTracking = () => {
             startTime: sessionRef.current.startTime.toISOString(),
             deviceInfo,
             userAgent,
-            pageViews: 0,
-            interactions: 0,
             isActive: true,
             owner: user.userId,
           }
@@ -78,12 +83,6 @@ export const useActivityTracking = () => {
         // Store the actual database record ID, not just the sessionId
         sessionRef.current.recordId = result.data.createUserActivity.id;
         setIsTracking(true);
-        // Track login event
-        await trackEvent({
-          eventType: 'login',
-          eventData: { userId: user.userId, timestamp: new Date().toISOString() },
-          metadata: { userAgent, platform: navigator.platform }
-        });
       }
     } catch (error) {
       console.error('Failed to start activity session', error);
@@ -97,20 +96,6 @@ export const useActivityTracking = () => {
     try {
       const client = getClient();
       
-      // Track logout event first (only if we still have valid session data)
-      if (sessionRef.current && user?.userId) {
-        try {
-          await trackEvent({
-            eventType: 'logout',
-            eventData: { userId: user.userId, timestamp: new Date().toISOString() },
-            metadata: { userAgent: navigator.userAgent, platform: navigator.platform }
-          });
-        } catch (trackError) {
-          // Log but don't fail the logout process if event tracking fails
-          console.log('Logout event tracking failed (this is normal during logout):', trackError);
-        }
-      }
-
       // Update UserActivity to mark session as ended
       if (sessionRef.current && sessionRef.current.recordId) {
         const updateUserActivityMutation = /* GraphQL */ `
@@ -147,76 +132,6 @@ export const useActivityTracking = () => {
     }
   }, [user?.userId, getClient]);
 
-  // Track only login/logout events
-  const trackEvent = useCallback(async (event: ActivityEvent) => {
-    if (!sessionRef.current || !user?.userId) return;
-
-    const client = getClient();
-    if (!client) {
-      console.error('Cannot track event: Amplify client not available');
-      return;
-    }
-
-    // Validate event type
-    if (!isValidEventType(event.eventType)) {
-      console.error('Invalid event type', event.eventType);
-      return;
-    }
-
-    // Validate event data if present
-    if (event.eventData && !validateEventData(event.eventData)) {
-      console.error('Invalid event data', event.eventData);
-      return;
-    }
-
-    // Validate metadata if present
-    if (event.metadata && !validateMetadata(event.metadata)) {
-      console.error('Invalid metadata', event.metadata);
-      return;
-    }
-
-    const { sessionId } = sessionRef.current;
-    
-    try {
-      // Create UserEvent via GraphQL
-      const createUserEventMutation = /* GraphQL */ `
-        mutation CreateUserEvent($input: CreateUserEventInput!) {
-          createUserEvent(input: $input) {
-            id
-            sessionId
-            eventType
-            timestamp
-          }
-        }
-      `;
-
-      await client.graphql({
-        query: createUserEventMutation,
-        variables: {
-          input: {
-            sessionId,
-            eventType: event.eventType,
-            eventData: event.eventData ? JSON.stringify(event.eventData) : undefined,
-            timestamp: new Date().toISOString(),
-            pageUrl: window.location.pathname,
-            elementId: `event-${event.eventType}`,
-            metadata: event.metadata ? JSON.stringify(event.metadata) : undefined,
-            owner: user.userId,
-          }
-        }
-      }) as any;
-
-      console.log(`Tracked ${event.eventType} event`);
-    } catch (error) {
-      // Don't log as error for logout events during session cleanup
-      if (event.eventType === 'logout') {
-        console.log('Logout event tracking failed (normal during logout):', error);
-      } else {
-        console.error('Failed to track event', error);
-      }
-    }
-  }, [user?.userId, getClient]);
-
   // Clean up session when user logs out or component unmounts
   useEffect(() => {
     const handleBeforeUnload = () => {
@@ -237,7 +152,6 @@ export const useActivityTracking = () => {
 
   return {
     isTracking,
-    trackEvent,
     startSession,
     endSession,
     currentSessionId: sessionRef.current?.sessionId,

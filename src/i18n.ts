@@ -35,8 +35,6 @@ const customTranslations = {
     'settings.backToNews': '← Back to News Feed',
     'settings.backToSettings': '← Back to Settings',
     
-
-    
     // Welcome
     'welcome.title': 'Welcome to Perkins News',
     'welcome.subtitle': 'To get started, personalize your news feed by selecting the industries and countries that matter most to you.',
@@ -95,9 +93,9 @@ const customTranslations = {
     'referral.linkCopied': 'Referral link copied to clipboard!',
     'referral.openingWhatsApp': 'Opening WhatsApp...',
     'referral.openingEmail': 'Opening email client...',
-    'referral.shareMessage': 'Join Perkins News Service and get 3 months free! Use my referral code: {code}',
-    'referral.emailSubject': 'Join Perkins News Service - 3 Months Free!',
-    'referral.emailBody': 'Hi!\n\nI\'m using Perkins News Service and thought you might be interested. It\'s a great way to stay updated with business news.\n\nYou can get 3 months of free access using my referral code: {code}\n\nCheck it out: {link}',
+    'referral.shareMessage': 'Join Perkins and get 3 months free! Use my referral code: {code}',
+    'referral.emailSubject': 'Join Perkins - 3 Months Free!',
+    'referral.emailBody': 'Hi!\n\nI\'m using Perkins and thought you might be interested. It\'s a great way to stay updated with tailored business and markets intelligence.\n\nYou can get 3 months of free access using my referral code: {code}\n\nCheck it out: {link}',
     'referral.freeAccessStatus': 'Your Free Access Status',
     'referral.daysRemaining': 'Days Remaining',
     'referral.freeAccessUntil': 'Free access until',
@@ -128,15 +126,14 @@ const customTranslations = {
     'deleteAccount.confirmDelete': 'Delete Account',
     'deleteAccount.accountDeleted': 'Account deleted successfully. You will be redirected to the login page.',
     'deleteAccount.enterPassword': 'Please enter your password to confirm account deletion',
-    // Removed password confirmation fields from delete account flow
     'deleteAccount.deleting': 'Deleting account...',
     'deleteAccount.failedToDelete': 'Failed to delete account',
     'deleteAccount.unexpectedError': 'An unexpected error occurred while deleting account',
     'deleteAccount.loseAccess': 'By deleting your account, you will lose access to all your personalized news feeds, preferences, and referral benefits.',
     
     // Sign Up
-    'signup.title': 'Join Perkins News Service',
-    'signup.subtitle': 'Get 3 months of free access to personalized business news',
+    'signup.title': 'You have been invited to join Perkins',
+    'signup.subtitle': 'Gain 3 months of unlimited access to Perkins\ncomprehensive business intelligence platform.',
     'signup.email': 'Email',
     'signup.password': 'Password',
     'signup.confirmPassword': 'Confirm Password',
@@ -161,6 +158,7 @@ const customTranslations = {
     'signup.invalidUserAttributes': 'Invalid user attributes',
 
     // Verify Email
+    'verify.title': 'Verify your email',
     'verify.subtitle': 'Enter the verification code sent to',
     'verify.codeLabel': 'Verification Code',
     'verify.codePlaceholder': '6-digit code',
@@ -187,8 +185,6 @@ const customTranslations = {
     'authError.technicalDetails': 'Technical Details',
     'authError.tryAgain': 'Try Again',
     'authError.logout': 'Logout',
-    
-
     
     // Disclaimer
     'disclaimer.text': 'News may be delayed by several minutes depending on source publication and retrieval frequency.',
@@ -232,6 +228,19 @@ const customTranslations = {
     'welcome.button': 'Personalizar tu Feed',
     'welcome.hint': 'Siempre puedes cambiar esta configuración más tarde desde el menú principal.',
     
+    // Optimal Usage
+    'optimalUsage.title': 'Experiencia de Usuario Óptima',
+    'optimalUsage.splitScreen.title': '1. Habilitar Pantalla Dividida',
+    'optimalUsage.splitScreen.description': 'Para la mejor experiencia en escritorio o portátil, usa la función de pantalla dividida de tu navegador. Esto te permite ver la lista de artículos y leer artículos simultáneamente.',
+    'optimalUsage.splitScreen.imageAlt': 'Función de pantalla dividida del navegador',
+    'optimalUsage.articleSize.title': '2. Ajustar Tamaño de Lista de Artículos',
+    'optimalUsage.articleSize.description': 'Establece la lista de artículos en la izquierda a aproximadamente un tercio del ancho de tu pantalla. Esto proporciona el equilibrio perfecto entre navegar artículos y leer contenido.',
+    'optimalUsage.openRight.title': '3. Usar Opción "Abrir a la Derecha"',
+    'optimalUsage.openRight.description': 'Una vez que la pantalla dividida esté habilitada, busca la opción "abrir a la derecha" en la barra de navegación de tu navegador. Esto abrirá artículos en el panel derecho para una lectura óptima.',
+    'optimalUsage.openRight.imageAlt': 'Opción abrir a la derecha del navegador',
+    'optimalUsage.tip': 'Estos ajustes te darán el flujo de trabajo más eficiente para consumir contenido de noticias en la plataforma Perkins.',
+    'optimalUsage.dontShowAgain': 'No mostrar este mensaje de nuevo',
+    
     // Common
     'common.loading': 'Cargando...',
     'common.noArticles': 'No hay artículos que coincidan con tus filtros actuales.',
@@ -271,9 +280,9 @@ const customTranslations = {
     'referral.linkCopied': '¡Enlace de referido copiado al portapapeles!',
     'referral.openingWhatsApp': 'Abriendo WhatsApp...',
     'referral.openingEmail': 'Abriendo cliente de email...',
-    'referral.shareMessage': '¡Únete al Servicio de Notícias Perkins y obtén 3 meses gratis! Usa mi código de referido: {code}',
-    'referral.emailSubject': '¡Únete al Servicio de Notícias Perkins - 3 Meses Gratis!',
-    'referral.emailBody': '¡Hola!\n\nEstoy usando el Servicio de Notícias Perkins y pensé que te podría interesar. Es una excelente manera de mantenerse actualizado con noticias de negocios.\n\nPuedes obtener 3 meses de acceso gratis usando mi código de referido: {code}\n\nMíralo aquí: {link}',
+    'referral.shareMessage': '¡Únete a Perkins y obtén 3 meses gratis! Usa mi código de referido: {code}',
+    'referral.emailSubject': '¡Únete a Perkins - 3 Meses Gratis!',
+    'referral.emailBody': '¡Hola!\n\nEstoy usando Perkins y pensé que te podría interesar. Es una excelente manera de mantenerse actualizado con inteligencia empresarial y de mercados personalizada.\n\nPuedes obtener 3 meses de acceso gratis usando mi código de referido: {code}\n\nMíralo aquí: {link}',
     'referral.freeAccessStatus': 'Tu Estado de Acceso Gratis',
     'referral.daysRemaining': 'Días Restantes',
     'referral.freeAccessUntil': 'Acceso gratis hasta',
@@ -304,15 +313,14 @@ const customTranslations = {
     'deleteAccount.confirmDelete': 'Eliminar Cuenta',
     'deleteAccount.accountDeleted': 'Cuenta eliminada exitosamente. Serás redirigido a la página de inicio de sesión.',
     'deleteAccount.enterPassword': 'Por favor ingresa tu contraseña para confirmar la eliminación de la cuenta',
-    // Removed password confirmation fields from delete account flow
     'deleteAccount.deleting': 'Eliminando cuenta...',
     'deleteAccount.failedToDelete': 'Error al eliminar la cuenta',
     'deleteAccount.unexpectedError': 'Ocurrió un error inesperado al eliminar la cuenta',
-    'deleteAccount.loseAccess': 'Al eliminar tu cuenta, perderás acceso a todos tus feeds de notícias personalizados, preferencias y beneficios de referidos.',
+    'deleteAccount.loseAccess': 'Al eliminar tu cuenta, perderás acceso a todos tus feeds de noticias personalizados, preferencias y beneficios de referidos.',
     
     // Sign Up
-    'signup.title': 'Únete al Servicio de Notícias Perkins',
-    'signup.subtitle': 'Obtén 3 meses de acesso grátis a notícias de negócios personalizadas',
+    'signup.title': 'Has sido invitado a unirte a Perkins',
+    'signup.subtitle': 'Obtén 3 meses de acceso ilimitado a la plataforma integral de inteligencia empresarial de Perkins.',
     'signup.email': 'Email',
     'signup.password': 'Contraseña',
     'signup.confirmPassword': 'Confirmar Contraseña',
@@ -337,6 +345,7 @@ const customTranslations = {
     'signup.invalidUserAttributes': 'Atributos de usuario inválidos',
 
     // Verify Email
+    'verify.title': 'Verificar tu email',
     'verify.subtitle': 'Ingresa el código de verificación enviado a',
     'verify.codeLabel': 'Código de Verificación',
     'verify.codePlaceholder': 'Código de 6 dígitos',
@@ -364,10 +373,8 @@ const customTranslations = {
     'authError.tryAgain': 'Intentar de Nuevo',
     'authError.logout': 'Cerrar Sesión',
     
-
-    
     // Disclaimer
-    'disclaimer.text': 'Las notícias pueden retrasarse varios minutos según la publicación de la fonte y la frequência de busca.',
+    'disclaimer.text': 'Las noticias pueden retrasarse varios minutos según la publicación de la fuente y la frecuencia de búsqueda.',
     'disclaimer.understood': 'Entendido',
   },
   pt: {
@@ -398,7 +405,7 @@ const customTranslations = {
     'settings.deleteAccount': 'Excluir Conta',
     'settings.deleteAccountDesc': 'Excluir permanentemente sua conta e todos os dados',
     'settings.inviteFriends': 'Convidar Amigos',
-    'settings.inviteFriendsDesc': 'Compartilhe seu código de indicação e ganhe meses grátis',
+    'settings.inviteFriendsDesc': 'Compartilhe seu código de referido e ganhe meses grátis',
     'settings.backToNews': '← Voltar ao Feed de Notícias',
     'settings.backToSettings': '← Voltar às Configurações',
     
@@ -407,6 +414,19 @@ const customTranslations = {
     'welcome.subtitle': 'Para começar, personalize seu feed de notícias selecionando as indústrias e países que mais importam para você.',
     'welcome.button': 'Personalizar seu Feed',
     'welcome.hint': 'Você sempre pode alterar essas configurações mais tarde no menu principal.',
+    
+    // Optimal Usage
+    'optimalUsage.title': 'Experiência de Usuário Otimizada',
+    'optimalUsage.splitScreen.title': '1. Habilitar Tela Dividida',
+    'optimalUsage.splitScreen.description': 'Para a melhor experiência em desktop ou laptop, use o recurso de tela dividida do seu navegador. Isso permite que você visualize a lista de artigos e leia artigos simultaneamente.',
+    'optimalUsage.splitScreen.imageAlt': 'Recurso de tela dividida do navegador',
+    'optimalUsage.articleSize.title': '2. Ajustar Tamanho da Lista de Artigos',
+    'optimalUsage.articleSize.description': 'Defina a lista de artigos à esquerda para aproximadamente um terço da largura da sua tela. Isso fornece o equilíbrio perfeito entre navegar artigos e ler conteúdo.',
+    'optimalUsage.openRight.title': '3. Usar Opção "Abrir à Direita"',
+    'optimalUsage.openRight.description': 'Uma vez que a tela dividida esteja habilitada, procure pela opção "abrir à direita" na barra de navegação do seu navegador. Isso abrirá artigos no painel direito para leitura otimizada.',
+    'optimalUsage.openRight.imageAlt': 'Opção abrir à direita do navegador',
+    'optimalUsage.tip': 'Essas configurações lhe darão o fluxo de trabalho mais eficiente para consumir conteúdo de notícias na plataforma Perkins.',
+    'optimalUsage.dontShowAgain': 'Não mostrar esta mensagem novamente',
     
     // Common
     'common.loading': 'Carregando...',
@@ -423,33 +443,33 @@ const customTranslations = {
     
     // Referral
     'referral.title': '🎁 Convidar Amigos e Ganhar Meses Grátis',
-    'referral.subtitle': 'Compartilhe seu código de indicação com amigos e ganhe 3 meses adicionais de acesso grátis para cada indicação bem-sucedida!',
-    'referral.loading': 'Carregando informações de indicação...',
-    'referral.yourCode': 'Seu Código de Indicação',
+    'referral.subtitle': 'Compartilhe seu código de referido com amigos e ganhe 3 meses adicionais de acesso grátis para cada referido bem-sucedido!',
+    'referral.loading': 'Carregando informações de referido...',
+    'referral.yourCode': 'Seu Código de Referido',
     'referral.copyCode': 'Copiar',
     'referral.copied': 'Copiado!',
     'referral.shareCodeHint': 'Compartilhe este código com amigos para ganhar meses grátis',
-    'referral.shareTitle': 'Compartilhar seu Link de Indicação',
+    'referral.shareTitle': 'Compartilhar seu Link de Referido',
     'referral.whatsapp': '📱 WhatsApp',
     'referral.email': '📧 Email',
     'referral.copyLink': '📋 Copiar Link',
-    'referral.statsTitle': 'Suas Estatísticas de Indicação',
-    'referral.successfulReferrals': 'Indicações Bem-sucedidas',
+    'referral.statsTitle': 'Suas Estatísticas de Referido',
+    'referral.successfulReferrals': 'Referidos Bem-sucedidos',
     'referral.monthsEarned': 'Meses Ganhos',
-    'referral.totalReferrals': 'Total de Indicações',
+    'referral.totalReferrals': 'Total de Referidos',
     'referral.howItWorks': 'Como Funciona',
-    'referral.step1': 'Compartilhe seu código de indicação com amigos via WhatsApp, email, ou copie o link',
+    'referral.step1': 'Compartilhe seu código de referido com amigos via WhatsApp, email, ou copie o link',
     'referral.step2': 'Quando eles se registrarem usando seu código, ganham 3 meses de acesso grátis',
-    'referral.step3': 'Você ganha 3 meses adicionais de acesso grátis para cada indicação bem-sucedida',
+    'referral.step3': 'Você ganha 3 meses adicionais de acesso grátis para cada referido bem-sucedido',
     'referral.step4': 'Acompanhe seu progresso e ganhos nas estatísticas acima',
     'referral.refreshStats': 'Atualizar Estatísticas',
     'referral.refreshing': 'Atualizando...',
-    'referral.linkCopied': 'Link de indicação copiado para a área de transferência!',
+    'referral.linkCopied': 'Link de referido copiado para a área de transferência!',
     'referral.openingWhatsApp': 'Abrindo WhatsApp...',
     'referral.openingEmail': 'Abrindo cliente de email...',
-    'referral.shareMessage': 'Junte-se ao Serviço de Notícias Perkins e ganhe 3 meses grátis! Use meu código de indicação: {code}',
-    'referral.emailSubject': 'Junte-se ao Serviço de Notícias Perkins - 3 Meses Grátis!',
-    'referral.emailBody': 'Olá!\n\nEstou usando o Serviço de Notícias Perkins e pensei que você poderia se interessar. É uma ótima maneira de se manter atualizado com notícias de negócios.\n\nVocê pode obter 3 meses de acesso grátis usando meu código de indicação: {code}\n\nConfira aqui: {link}',
+    'referral.shareMessage': 'Junte-se ao Perkins e ganhe 3 meses grátis! Use meu código de referido: {code}',
+    'referral.emailSubject': 'Junte-se ao Perkins - 3 Meses Grátis!',
+    'referral.emailBody': 'Olá!\n\nEstou usando Perkins e pensei que você poderia se interessar. É uma ótima maneira de se manter atualizado com inteligência empresarial e de mercados personalizada.\n\nVocê pode obter 3 meses de acesso grátis usando meu código de referido: {code}\n\nConfira aqui: {link}',
     'referral.freeAccessStatus': 'Seu Status de Acesso Grátis',
     'referral.daysRemaining': 'Dias Restantes',
     'referral.freeAccessUntil': 'Acesso grátis até',
@@ -480,33 +500,31 @@ const customTranslations = {
     'deleteAccount.confirmDelete': 'Excluir Conta',
     'deleteAccount.accountDeleted': 'Conta excluída com sucesso. Você será redirecionado para a página de login.',
     'deleteAccount.enterPassword': 'Por favor, digite sua senha para confirmar a exclusão da conta',
-    'deleteAccount.confirmPassword': 'Confirmar Senha',
-    'deleteAccount.enterPasswordToConfirm': 'Digite sua senha para confirmar',
     'deleteAccount.deleting': 'Excluindo conta...',
     'deleteAccount.failedToDelete': 'Erro ao excluir conta',
     'deleteAccount.unexpectedError': 'Ocorreu um erro inesperado ao excluir a conta',
-    'deleteAccount.loseAccess': 'Ao excluir sua conta, você perderá acesso a todos os seus feeds de notícias personalizados, preferências e benefícios de indicação.',
+    'deleteAccount.loseAccess': 'Ao excluir sua conta, você perderá acesso a todos os seus feeds de notícias personalizados, preferências e benefícios de referido.',
     
     // Sign Up
-    'signup.title': 'Junte-se ao Serviço de Notícias Perkins',
-    'signup.subtitle': 'Obtenha 3 meses de acesso grátis a notícias de negócios personalizadas',
+    'signup.title': 'Você foi convidado a se juntar ao Perkins',
+    'signup.subtitle': 'Obtenha 3 meses de acesso ilimitado à plataforma abrangente de inteligência empresarial do Perkins.',
     'signup.email': 'Email',
     'signup.password': 'Senha',
     'signup.confirmPassword': 'Confirmar Senha',
-    'signup.referralCode': 'Código de Indicação (Opcional)',
+    'signup.referralCode': 'Código de Referido (Opcional)',
     'signup.enterEmail': 'Digite seu email',
     'signup.createPassword': 'Crie uma senha',
     'signup.confirmPasswordPlaceholder': 'Confirme sua senha',
-    'signup.enterReferralCode': 'Digite código de indicação se tiver um',
+    'signup.enterReferralCode': 'Digite código de referido se tiver um',
     'signup.createAccount': 'Criar Conta',
     'signup.creatingAccount': 'Criando conta...',
     'signup.accountCreated': 'Conta criada com sucesso! Por favor, verifique seu email para confirmar sua conta.',
     'signup.validEmail': 'Por favor, digite um email válido',
     'signup.passwordsDontMatch': 'As senhas não coincidem',
-    'signup.validReferralCode': '✅ Código de indicação válido! Você ganhará 3 meses de acesso grátis.',
-    'signup.invalidReferralCode': '❌ Código de indicação inválido. Você ainda pode se registrar por 3 meses grátis.',
-    'signup.errorValidatingCode': '❌ Erro ao validar código de indicação.',
-    'signup.referralCodeFromLink': 'Código de indicação do seu link de convite',
+    'signup.validReferralCode': '✅ Código de referido válido! Você ganhará 3 meses de acesso grátis.',
+    'signup.invalidReferralCode': '❌ Código de referido inválido. Você ainda pode se registrar por 3 meses grátis.',
+    'signup.errorValidatingCode': '❌ Erro ao validar código de referido.',
+    'signup.referralCodeFromLink': 'Código de referido do seu link de convite',
     'signup.backToSignIn': 'Voltar ao Login',
     'signup.termsAgreement': 'Ao criar uma conta, você concorda com nossos Termos de Serviço e Política de Privacidade',
     'signup.errorDuringSignup': 'Ocorreu um erro durante o registro',
@@ -514,6 +532,7 @@ const customTranslations = {
     'signup.invalidUserAttributes': 'Atributos de usuário inválidos',
 
     // Verify Email
+    'verify.title': 'Verificar seu email',
     'verify.subtitle': 'Digite o código de verificação enviado para',
     'verify.codeLabel': 'Código de Verificação',
     'verify.codePlaceholder': 'Código de 6 dígitos',
@@ -540,8 +559,6 @@ const customTranslations = {
     'authError.technicalDetails': 'Detalhes Técnicos',
     'authError.tryAgain': 'Tentar Novamente',
     'authError.logout': 'Sair',
-    
-
     
     // Disclaimer
     'disclaimer.text': 'As notícias podem sofrer atraso de alguns minutos, dependendo da publicação da fonte e da frequência de busca.',
