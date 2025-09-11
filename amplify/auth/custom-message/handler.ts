@@ -11,12 +11,12 @@ export const handler: CustomMessageTriggerHandler = async (event) => {
       referralMessage = `
         <p>You signed up using a referral code: <strong>${referralCode}</strong></p>
         <p><b>You'll get 3 months of free access!</b></p>
-        <p>Invite friends and get 3 additional months for each successful referral!</p>
+        <p><b>Keep Perkins free forever through referrals!</b> Invite friends and earn 3 additional months for each successful referral, or subscribe for unlimited access without referrals.</p>
       `;
     } else {
       referralMessage = `
         <p><b>You'll get 3 months of free access!</b></p>
-        <p>Invite friends and get 3 additional months for each successful referral!</p>
+        <p><b>Keep Perkins free forever through referrals!</b> Invite friends and earn 3 additional months for each successful referral, or subscribe for unlimited access without referrals.</p>
       `;
     }
 

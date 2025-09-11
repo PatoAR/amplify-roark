@@ -19,7 +19,7 @@ const HeaderNav = () => {
   const { preferences, savePreferences } = useUserPreferences();
   const [localIndustries, setLocalIndustries] = useState(preferences.industries);
   const [localCountries, setLocalCountries] = useState(preferences.countries);
-  const daysLeft = useFreeDaysRemaining();
+  const { daysLeft } = useFreeDaysRemaining();
   const [isSaving, setIsSaving] = useState(false);
 
   // New state for "all" selections
@@ -149,7 +149,7 @@ const HeaderNav = () => {
         <Gift size={24} />
         {typeof daysLeft === 'number' && daysLeft > 0 && (
           <span className={`days-counter ${daysLeft > 30 ? 'high' : 'low'}`}>
-            {daysLeft}
+            {daysLeft > 99 ? '+' : daysLeft}
           </span>
         )}
       </div>

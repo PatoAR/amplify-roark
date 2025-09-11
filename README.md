@@ -2,13 +2,26 @@
 Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fetches, processes and stores news articles in dynambodb. The articles are distributed to varios channels (whatsapp, telegram) and to this webapp via AppSync subscriptions or long-polling.
 
 ## ToDo's
-- Trial expiration logic
-- Create interface to deliver different content  - publicity, financials, etc. fix on top, colors, etc.
-- Modified display text
-
-- Add support / sponsorship email with custom domain
-- Pay suscription
+- Create interface to deliver different content.
+    Categories
+    > NEWS
+    > STATS
+    > SPONSOR
+    Attributes
+    - Title
+    - Subtitle
+    - Call to action button (text, link)
+    - Duration (seconds on screen top)
+    - Filters (country, industry, company)
+    - CSS?
+- Modified display text 
+- Custom info email for user contact
+- Finu SA trademark
+- Implement subscription workflow
 - Open AWS account on the name of Finu, transfer domain 
+
+- Stop servicing Telegram / Whatsapp
+- Native IOS / Android App
 
 ## CI/CD
 
@@ -31,14 +44,14 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
             >> downloads schema from the server
             >> updates src/API.ts and graphql/files
 
-# PROD - AWS
-        Merge dev into main
+# PROD - AWS - merge dev into main
         git checkout main
         git merge appsync / dev
         git push origin main
 
-
-## CLI
-https://docs.amplify.aws/react/reference/cli-commands/
-
-
+## Tests
+- Login / Logout
+- First time login instructions
+- Inactivity logout
+- Referrals
+- Access days left - dynamic getting close to cero on days

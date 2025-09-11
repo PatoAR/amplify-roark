@@ -2,6 +2,7 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { postConfirmation } from "../auth/post-confirmation/resource";
 import { referralApi } from "../functions/referral-api/resource";
 import { referralProcessor } from "../functions/referral-processor/resource";
+import { subscriptionManager } from "../functions/subscription-manager/resource";
 
 const schema = a.schema({
   // Article Model
@@ -86,6 +87,17 @@ const schema = a.schema({
       autoRenew: a.boolean().default(false),
       cancelledAt: a.datetime(),
       cancellationReason: a.string(),
+      // New fields for enhanced subscription management
+      subscriptionStatus: a.string(), // 'free_trial', 'active', 'expired', 'cancelled'
+      trialStartDate: a.datetime(),
+      trialEndDate: a.datetime(),
+      totalFreeMonths: a.integer().default(3),
+      earnedFreeMonths: a.integer().default(0),
+      referralCodeUsed: a.string(),
+      referrerId: a.string(),
+      gracePeriodEndDate: a.datetime(),
+      lastWarningSent: a.datetime(),
+      upgradeOffers: a.string(), // JSON string with offer history
     })
     .authorization(allow => [allow.owner().identityClaim('sub')]),
 });
@@ -104,5 +116,6 @@ export const data = defineData({
     postConfirmation,
     referralApi,
     referralProcessor,
+    subscriptionManager,
   }
 });

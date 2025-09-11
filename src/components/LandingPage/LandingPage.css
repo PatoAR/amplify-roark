@@ -87,6 +87,19 @@
   line-height: var(--line-height-relaxed);
 }
 
+.hero-value-prop {
+  font-size: var(--font-size-base);
+  color: var(--color-primary);
+  max-width: 600px;
+  margin: var(--space-lg) auto 0;
+  line-height: var(--line-height-relaxed);
+  text-align: center;
+  background-color: rgba(var(--color-primary-rgb), 0.1);
+  padding: var(--space-md);
+  border-radius: var(--border-radius-md);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+}
+
 /* Features Section */
 .features-section {
   margin-bottom: var(--space-3xl);

@@ -38,6 +38,7 @@ const customTranslations = {
     // Welcome
     'welcome.title': 'Welcome to Perkins News',
     'welcome.subtitle': 'To get started, personalize your news feed by selecting the industries and countries that matter most to you.',
+    'welcome.referralIntro': 'Perkins can be free forever through our referral program - invite friends to earn free months!',
     'welcome.button': 'Personalize Your Feed',
     'welcome.hint': 'You can always change these settings later from the main menu.',
     
@@ -65,11 +66,15 @@ const customTranslations = {
     'common.confirm': 'Confirm',
     'common.delete': 'Delete',
     'common.edit': 'Edit',
-    'common.moreArticles': 'Showing first 50 articles. There are {count} more articles available.',
+    'common.moreArticles': 'Showing {displayed} articles. There are {count} more articles available.',
+    'common.loadMore': 'Load More Articles',
     
     // Referral
-    'referral.title': '🎁 Invite Friends & Earn Free Months',
-    'referral.subtitle': 'Share your referral code with friends and get 3 additional months of free access for each successful referral!',
+    'referral.title': '🎁 Keep Perkins Free Forever',
+    'referral.subtitle': 'Earn 3 months free for each friend you invite - keep Perkins free through referrals, or subscribe for unlimited access',
+    'referral.alwaysFreeTitle': '🎁 Keep Perkins Free Forever',
+    'referral.sustainableAccess': 'Earn 3 months free for each friend you invite - keep Perkins free through referrals',
+    'referral.subscriptionAlternative': 'Or subscribe for unlimited access without referrals',
     'referral.loading': 'Loading referral information...',
     'referral.yourCode': 'Your Referral Code',
     'referral.copyCode': 'Copy',
@@ -93,15 +98,20 @@ const customTranslations = {
     'referral.linkCopied': 'Referral link copied to clipboard!',
     'referral.openingWhatsApp': 'Opening WhatsApp...',
     'referral.openingEmail': 'Opening email client...',
-    'referral.shareMessage': 'Join Perkins and get 3 months free! Use my referral code: {code}',
-    'referral.emailSubject': 'Join Perkins - 3 Months Free!',
-    'referral.emailBody': 'Hi!\n\nI\'m using Perkins and thought you might be interested. It\'s a great way to stay updated with tailored business and markets intelligence.\n\nYou can get 3 months of free access using my referral code: {code}\n\nCheck it out: {link}',
+    'referral.shareMessage': 'Join Perkins - Always Free Through Referrals! Use my referral code: {code}',
+    'referral.emailSubject': 'Join Perkins - Always Free Through Referrals!',
+    'referral.emailBody': 'Hi!\n\nI\'m using Perkins and thought you might be interested. It\'s a great way to stay updated with tailored business and markets intelligence.\n\nPerkins can be free forever through our referral program! You can get 3 months of free access using my referral code: {code}\n\nCheck it out: {link}',
     'referral.freeAccessStatus': 'Your Free Access Status',
     'referral.daysRemaining': 'Days Remaining',
     'referral.freeAccessUntil': 'Free access until',
     'referral.errorCopyLink': 'Failed to copy link:',
     'referral.errorWhatsApp': 'Failed to share via WhatsApp:',
     'referral.errorEmail': 'Failed to share via email:',
+    
+    // Subscription
+    'subscription.referralAlternative': 'Prefer to keep it free? Invite friends instead',
+    'subscription.chooseAccessMethod': 'Choose Your Access Method',
+    'subscription.referralOrSubscribe': 'Keep Perkins free through referrals, or subscribe for unlimited access',
     
     // Password
     'password.title': 'Change Password',
@@ -133,7 +143,7 @@ const customTranslations = {
     
     // Sign Up
     'signup.title': 'You have been invited to join Perkins',
-    'signup.subtitle': 'Gain 3 months of unlimited access to Perkins\ncomprehensive business intelligence platform.',
+    'signup.subtitle': 'Gain 3 months of unlimited access to Perkins\ncomprehensive business intelligence platform.\n\nKeep Perkins free forever through referrals, or subscribe for unlimited access.',
     'signup.email': 'Email',
     'signup.password': 'Password',
     'signup.confirmPassword': 'Confirm Password',
@@ -178,6 +188,8 @@ const customTranslations = {
     'inactivity.message': 'For your security, you will be logged out in less than {minutes} minute(s). Do you want to stay logged in?',
     'inactivity.logout': 'Logout',
     'inactivity.stayLoggedIn': 'Stay Logged In',
+    'inactivity.logoutTitle': 'Session Expired',
+    'inactivity.logoutMessage': 'You have been automatically logged out due to inactivity. Please sign in again to continue.',
     
     // Auth Error
     'authError.title': 'Authentication Error',
@@ -252,7 +264,8 @@ const customTranslations = {
     'common.confirm': 'Confirmar',
     'common.delete': 'Eliminar',
     'common.edit': 'Editar',
-    'common.moreArticles': 'Mostrando los primeros 50 artículos. Hay {count} artículos más disponibles.',
+    'common.moreArticles': 'Mostrando {displayed} artículos. Hay {count} artículos más disponibles.',
+    'common.loadMore': 'Cargar Más Artículos',
     
     // Referral
     'referral.title': '🎁 Invitar Amigos y Ganar Meses Gratis',
@@ -365,6 +378,8 @@ const customTranslations = {
     'inactivity.message': 'Por tu seguridad, serás desconectado en menos de {minutes} minuto(s). ¿Quieres mantenerte conectado?',
     'inactivity.logout': 'Cerrar Sesión',
     'inactivity.stayLoggedIn': 'Mantenerse Conectado',
+    'inactivity.logoutTitle': 'Sesión Expirada',
+    'inactivity.logoutMessage': 'Has sido desconectado automáticamente por inactividad. Por favor, inicia sesión nuevamente para continuar.',
     
     // Auth Error
     'authError.title': 'Error de Autenticación',
@@ -439,7 +454,8 @@ const customTranslations = {
     'common.confirm': 'Confirmar',
     'common.delete': 'Excluir',
     'common.edit': 'Editar',
-    'common.moreArticles': 'Mostrando os primeiros 50 artigos. Há {count} artigos mais disponíveis.',
+    'common.moreArticles': 'Mostrando {displayed} artigos. Há {count} artigos mais disponíveis.',
+    'common.loadMore': 'Carregar Mais Artigos',
     
     // Referral
     'referral.title': '🎁 Convidar Amigos e Ganhar Meses Grátis',
@@ -552,6 +568,8 @@ const customTranslations = {
     'inactivity.message': 'Por sua segurança, você será desconectado em menos de {minutes} minuto(s). Você quer permanecer conectado?',
     'inactivity.logout': 'Sair',
     'inactivity.stayLoggedIn': 'Permanecer Conectado',
+    'inactivity.logoutTitle': 'Sessão Expirada',
+    'inactivity.logoutMessage': 'Você foi desconectado automaticamente por inatividade. Por favor, faça login novamente para continuar.',
     
     // Auth Error
     'authError.title': 'Erro de Autenticação',

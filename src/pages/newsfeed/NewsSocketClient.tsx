@@ -5,6 +5,8 @@ import { useNews } from '../../context/NewsContext';
 import WelcomeScreen from '../../components/WelcomeScreen/WelcomeScreen';
 import { useTranslation } from '../../i18n';
 import { COUNTRY_OPTIONS } from '../../constants/countries';
+import { useSubscriptionManager } from '../../hooks/useSubscriptionManager';
+import { GracePeriodBanner } from '../../components/GracePeriodBanner';
 import './NewsSocketClient.css';
 
 function formatLocalTime(timestamp?: string | null): string {
@@ -16,9 +18,17 @@ function formatLocalTime(timestamp?: string | null): string {
 
 function NewsSocketClient() {
   const [isTabVisible, setIsTabVisible] = useState<boolean>(() => !document.hidden);
+  const [displayedCount, setDisplayedCount] = useState<number>(50);
   const { preferences, isLoading, userProfileId } = useUserPreferences();
   const { articles, markArticleAsSeen } = useNews();
   const { t } = useTranslation();
+  
+  // Subscription management
+  const {
+    isInGracePeriod,
+    gracePeriodDaysRemaining,
+    isExpired,
+  } = useSubscriptionManager();
 
   // Memoize the country matching logic to avoid recreating functions on every render
   const countryMatcher = useMemo(() => {
@@ -127,9 +137,8 @@ function NewsSocketClient() {
 
   // Limit the number of articles rendered to prevent performance issues
   const displayedMessages = useMemo(() => {
-    const MAX_DISPLAYED_ARTICLES = 50;
-    return filteredMessages.slice(0, MAX_DISPLAYED_ARTICLES);
-  }, [filteredMessages]);
+    return filteredMessages.slice(0, displayedCount);
+  }, [filteredMessages, displayedCount]);
 
   // Show message if there are more articles than displayed
   const hasMoreArticles = filteredMessages.length > displayedMessages.length;
@@ -179,8 +188,23 @@ function NewsSocketClient() {
     }
   }, [isTabVisible, articles, markArticleAsSeen]);
 
+  const handleActNow = () => {
+    window.location.href = '/settings/referral';
+  };
+
+  const handleLoadMore = () => {
+    setDisplayedCount(prev => prev + 50);
+  };
+
   return (
     <div className="news-feed">
+      {/* Grace Period Banner */}
+      {isInGracePeriod && (
+        <GracePeriodBanner
+          gracePeriodDaysRemaining={gracePeriodDaysRemaining}
+          onActNow={handleActNow}
+        />
+      )}
       {isLoading ? (
         <p className="no-news">{t('common.loadingPreferences')}</p>
       
@@ -254,7 +278,12 @@ function NewsSocketClient() {
           {/* Show message if there are more articles */}
           {hasMoreArticles && (
             <div className="more-articles-message">
-              <p>{t('common.moreArticles').replace('{count}', String(filteredMessages.length - displayedMessages.length))}</p>
+              <p>{t('common.moreArticles')
+                .replace('{displayed}', String(displayedMessages.length))
+                .replace('{count}', String(filteredMessages.length - displayedMessages.length))}</p>
+              <button className="load-more-button" onClick={handleLoadMore}>
+                {t('common.loadMore')}
+              </button>
             </div>
           )}
         </div>

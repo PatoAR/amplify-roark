@@ -12,13 +12,12 @@ import CustomSignUp from "./components/CustomSignUp/CustomSignUp";
 import LandingPage from "./components/LandingPage";
 import { useSession } from './context/SessionContext';
 import { useInactivityTimer } from './hooks/useInactivityTimer';
-import { InactivityDialog } from './hooks/InactivityWarning';
 import { AuthErrorFallback } from './components/AuthErrorFallback';
+import { useSubscriptionManager } from './hooks/useSubscriptionManager';
+import { GracePeriodExpiredModal } from './components/GracePeriodExpiredModal';
 import "./App.css"
 
 export default function App() {
-  const [isWarningDialogOpen, setWarningDialogOpen] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(0);
   // Auth error is now provided by SessionContext
   const [isInitializing, setIsInitializing] = useState(true);
 
@@ -34,18 +33,22 @@ export default function App() {
     clearAuthError,
   } = useSession();
 
+  // Initialize subscription status globally for debugging
+  const subscriptionManager = useSubscriptionManager();
+  
+  // Check if user is expired and needs to see the grace period expired modal
+  // Only show if user is authenticated and actually expired (not just authentication timing)
+  const shouldShowExpiredModal = subscriptionManager.isExpired && 
+                                 isAuthenticated && 
+                                 subscriptionManager.daysRemaining === 0 &&
+                                 !subscriptionManager.isInGracePeriod;
+
   // Handle inactivity timer separately (only when authenticated)
   const { resetInactivityTimer } = useInactivityTimer({
-    timeoutInMinutes: 120,
-    warningBeforeLogoutInMinutes: 10,
+    timeoutInMinutes: 120, // 2 hours
     enabled: isAuthenticated && isSessionActive, // Only enable when authenticated and session is active
     onLogout: async () => {
-      setWarningDialogOpen(false);
       await logout();
-    },
-    onWarning: (time) => {
-      setTimeLeft(time);
-      setWarningDialogOpen(true);
     },
     onActivity: () => {
       // Remove activity tracking to reduce AWS resource consumption
@@ -93,6 +96,7 @@ export default function App() {
     }
   }, [isAuthenticated, isSessionActive, resetInactivityTimer]);
 
+
   // Handle visibility change to detect when user returns from idle
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -121,16 +125,6 @@ export default function App() {
 
   // Remove the periodic health check as it's too aggressive
   // The session manager will handle authentication state properly
-
-  const handleStayLoggedIn = () => {
-    setWarningDialogOpen(false);
-    resetInactivityTimer();
-  };
-
-  const handleImmediateLogout = async () => {
-    setWarningDialogOpen(false);
-    await logout();
-  };
 
   const handleAuthErrorRetry = () => {
     clearAuthError();
@@ -180,12 +174,11 @@ export default function App() {
   if (authStatus === 'authenticated') {
     return (
       <div>
-        <InactivityDialog
-          isOpen={isWarningDialogOpen}
-          timeLeft={timeLeft}
-          onConfirm={handleStayLoggedIn}
-          onCancel={handleImmediateLogout}
+        {/* Grace Period Expired Modal */}
+        <GracePeriodExpiredModal
+          isOpen={shouldShowExpiredModal}
         />
+        
         <Routes>
           <Route path="/" element={<Layout />} >
             <Route index element={<NewsSocketClient />} />

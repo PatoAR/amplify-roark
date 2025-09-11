@@ -67,7 +67,7 @@ function normalizeCompanies(companies: string | Record<string, string> | null | 
 }
 
 export const NewsManager: React.FC = () => {
-  const { user } = useAuthenticator();
+  const { user, authStatus } = useAuthenticator();
   const { articles, setArticles, addArticle, isInitialized, setIsInitialized, seenArticlesRef } = useNews();
   const clientRef = useRef<ReturnType<typeof generateClient<Schema>> | null>(null);
 
@@ -425,36 +425,43 @@ export const NewsManager: React.FC = () => {
 
   // Initialize when user changes
   useEffect(() => {
-    if (isInitializingRef.current) {
-      console.log('[NewsManager] Already initializing, skipping');
-      return;
-    }
-    if (!user?.userId) {
-      console.log('[NewsManager] No user ID, skipping initialization');
-      return;
-    }
-    // Check if user actually changed
-    if (previousUserIdRef.current === user.userId) {
-      console.log('[NewsManager] User ID unchanged, skipping initialization');
-      return;
-    }
+    console.log(`[NewsManager] useEffect triggered - authStatus: ${authStatus}, userId: ${user?.userId}, isInitializing: ${isInitializingRef.current}, previousUserId: ${previousUserIdRef.current}`);
     
-    console.log(`[NewsManager] User changed from ${previousUserIdRef.current || 'none'} to ${user.userId}, initializing...`);
-    previousUserIdRef.current = user.userId;
-    isComponentMountedRef.current = true;
-    isInitializingRef.current = true;
-    cleanupResources();
-    // Initializing for user
-    const initialize = async () => {
-      console.log('[NewsManager] Starting initialization sequence...');
-      await fetchInitialArticles();
-      if (isComponentMountedRef.current) {
-        trySubscribe();
+    // Add a small delay to prevent rapid re-initialization
+    const timeoutId = setTimeout(() => {
+      if (isInitializingRef.current) {
+        console.log('[NewsManager] Already initializing, skipping');
+        return;
       }
-      console.log('[NewsManager] Initialization sequence completed');
-    };
-    initialize();
+      if (authStatus !== 'authenticated' || !user?.userId) {
+        console.log('[NewsManager] User not authenticated or no user ID, skipping initialization');
+        return;
+      }
+      // Check if user actually changed
+      if (previousUserIdRef.current === user.userId) {
+        console.log('[NewsManager] User ID unchanged, skipping initialization');
+        return;
+      }
+    
+      console.log(`[NewsManager] User changed from ${previousUserIdRef.current || 'none'} to ${user.userId}, initializing...`);
+      previousUserIdRef.current = user.userId;
+      isComponentMountedRef.current = true;
+      isInitializingRef.current = true;
+      cleanupResources();
+      // Initializing for user
+      const initialize = async () => {
+        console.log('[NewsManager] Starting initialization sequence...');
+        await fetchInitialArticles();
+        if (isComponentMountedRef.current) {
+          trySubscribe();
+        }
+        console.log('[NewsManager] Initialization sequence completed');
+      };
+      initialize();
+    }, 100); // 100ms delay to prevent rapid re-initialization
+
     return () => {
+      clearTimeout(timeoutId);
       console.log('[NewsManager] Cleanup: component unmounted or user changed');
       isComponentMountedRef.current = false;
       isInitializingRef.current = false;
@@ -464,7 +471,7 @@ export const NewsManager: React.FC = () => {
       cleanupResources();
       // Component unmounted or user changed
     };
-  }, [user?.userId]); // Only depend on user ID, not the callback functions
+  }, [user?.userId, authStatus]); // Depend on user ID and auth status
 
   // This component doesn't render anything, it just manages the news state
   return null;
