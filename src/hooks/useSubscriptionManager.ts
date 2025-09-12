@@ -47,24 +47,32 @@ export function useSubscriptionManager() {
     setUpgradeError(null);
 
     try {
-      const client = generateClient<Schema>();
-      
-      // Call the subscription manager function
-      const result = await client.functions.subscriptionManager.invoke({
-        planId,
-        userId,
+      // Call the subscription manager function via HTTP
+      const response = await fetch('/api/subscription-manager', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          planId,
+          userId,
+        }),
       });
 
-      const response = result.payload as SubscriptionUpgradeResult;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json() as SubscriptionUpgradeResult;
       
-      if (response.success) {
+      if (result.success) {
         // Refresh subscription status
         window.location.reload(); // Simple refresh for now
       } else {
-        setUpgradeError(response.message || 'Upgrade failed');
+        setUpgradeError(result.message || 'Upgrade failed');
       }
 
-      return response;
+      return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       setUpgradeError(errorMessage);
