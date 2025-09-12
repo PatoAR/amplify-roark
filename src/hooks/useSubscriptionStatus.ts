@@ -111,18 +111,6 @@ export function useSubscriptionStatus(): SubscriptionStatus {
           canCreateContent = false;
         }
 
-        const finalStatus = {
-          status,
-          daysRemaining: Math.max(0, diffInDays),
-          isExpired,
-          isInGracePeriod,
-          gracePeriodDaysRemaining,
-          canAccessContent,
-          canCreateContent,
-          trialEndDate,
-          subscriptionType: subscription.subscriptionType,
-        };
-        
         // Debug logging removed to reduce console noise
         
         setSubscriptionStatus(prev => {

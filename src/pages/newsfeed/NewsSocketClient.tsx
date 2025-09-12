@@ -27,7 +27,6 @@ function NewsSocketClient() {
   const {
     isInGracePeriod,
     gracePeriodDaysRemaining,
-    isExpired,
   } = useSubscriptionManager();
 
   // Memoize the country matching logic to avoid recreating functions on every render
