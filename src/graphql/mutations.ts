@@ -342,8 +342,6 @@ export const createUserActivity = /* GraphQL */ `mutation CreateUserActivity(
     startTime
     endTime
     duration
-    pageViews
-    interactions
     deviceInfo
     userAgent
     ipAddress
@@ -368,8 +366,6 @@ export const updateUserActivity = /* GraphQL */ `mutation UpdateUserActivity(
     startTime
     endTime
     duration
-    pageViews
-    interactions
     deviceInfo
     userAgent
     ipAddress
@@ -394,8 +390,6 @@ export const deleteUserActivity = /* GraphQL */ `mutation DeleteUserActivity(
     startTime
     endTime
     duration
-    pageViews
-    interactions
     deviceInfo
     userAgent
     ipAddress
@@ -409,75 +403,6 @@ export const deleteUserActivity = /* GraphQL */ `mutation DeleteUserActivity(
 ` as GeneratedMutation<
   APITypes.DeleteUserActivityMutationVariables,
   APITypes.DeleteUserActivityMutation
->;
-export const createUserEvent = /* GraphQL */ `mutation CreateUserEvent(
-  $input: CreateUserEventInput!
-  $condition: ModelUserEventConditionInput
-) {
-  createUserEvent(input: $input, condition: $condition) {
-    owner
-    sessionId
-    eventType
-    eventData
-    timestamp
-    pageUrl
-    elementId
-    metadata
-    id
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.CreateUserEventMutationVariables,
-  APITypes.CreateUserEventMutation
->;
-export const updateUserEvent = /* GraphQL */ `mutation UpdateUserEvent(
-  $input: UpdateUserEventInput!
-  $condition: ModelUserEventConditionInput
-) {
-  updateUserEvent(input: $input, condition: $condition) {
-    owner
-    sessionId
-    eventType
-    eventData
-    timestamp
-    pageUrl
-    elementId
-    metadata
-    id
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.UpdateUserEventMutationVariables,
-  APITypes.UpdateUserEventMutation
->;
-export const deleteUserEvent = /* GraphQL */ `mutation DeleteUserEvent(
-  $input: DeleteUserEventInput!
-  $condition: ModelUserEventConditionInput
-) {
-  deleteUserEvent(input: $input, condition: $condition) {
-    owner
-    sessionId
-    eventType
-    eventData
-    timestamp
-    pageUrl
-    elementId
-    metadata
-    id
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedMutation<
-  APITypes.DeleteUserEventMutationVariables,
-  APITypes.DeleteUserEventMutation
 >;
 export const createDeletedUserEmail = /* GraphQL */ `mutation CreateDeletedUserEmail(
   $input: CreateDeletedUserEmailInput!

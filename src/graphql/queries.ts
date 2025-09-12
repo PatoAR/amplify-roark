@@ -241,8 +241,6 @@ export const getUserActivity = /* GraphQL */ `query GetUserActivity($id: ID!) {
     startTime
     endTime
     duration
-    pageViews
-    interactions
     deviceInfo
     userAgent
     ipAddress
@@ -269,8 +267,6 @@ export const listUserActivities = /* GraphQL */ `query ListUserActivities(
       startTime
       endTime
       duration
-      pageViews
-      interactions
       deviceInfo
       userAgent
       ipAddress
@@ -287,54 +283,6 @@ export const listUserActivities = /* GraphQL */ `query ListUserActivities(
 ` as GeneratedQuery<
   APITypes.ListUserActivitiesQueryVariables,
   APITypes.ListUserActivitiesQuery
->;
-export const getUserEvent = /* GraphQL */ `query GetUserEvent($id: ID!) {
-  getUserEvent(id: $id) {
-    owner
-    sessionId
-    eventType
-    eventData
-    timestamp
-    pageUrl
-    elementId
-    metadata
-    id
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.GetUserEventQueryVariables,
-  APITypes.GetUserEventQuery
->;
-export const listUserEvents = /* GraphQL */ `query ListUserEvents(
-  $filter: ModelUserEventFilterInput
-  $limit: Int
-  $nextToken: String
-) {
-  listUserEvents(filter: $filter, limit: $limit, nextToken: $nextToken) {
-    items {
-      owner
-      sessionId
-      eventType
-      eventData
-      timestamp
-      pageUrl
-      elementId
-      metadata
-      id
-      createdAt
-      updatedAt
-      __typename
-    }
-    nextToken
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.ListUserEventsQueryVariables,
-  APITypes.ListUserEventsQuery
 >;
 export const getDeletedUserEmail = /* GraphQL */ `query GetDeletedUserEmail($id: ID!) {
   getDeletedUserEmail(id: $id) {

@@ -357,8 +357,6 @@ export type CreateUserActivityInput = {
   startTime: string,
   endTime?: string | null,
   duration?: number | null,
-  pageViews?: number | null,
-  interactions?: number | null,
   deviceInfo?: string | null,
   userAgent?: string | null,
   ipAddress?: string | null,
@@ -372,8 +370,6 @@ export type ModelUserActivityConditionInput = {
   startTime?: ModelStringInput | null,
   endTime?: ModelStringInput | null,
   duration?: ModelIntInput | null,
-  pageViews?: ModelIntInput | null,
-  interactions?: ModelIntInput | null,
   deviceInfo?: ModelStringInput | null,
   userAgent?: ModelStringInput | null,
   ipAddress?: ModelStringInput | null,
@@ -392,8 +388,6 @@ export type UserActivity = {
   startTime: string,
   endTime?: string | null,
   duration?: number | null,
-  pageViews?: number | null,
-  interactions?: number | null,
   deviceInfo?: string | null,
   userAgent?: string | null,
   ipAddress?: string | null,
@@ -409,8 +403,6 @@ export type UpdateUserActivityInput = {
   startTime?: string | null,
   endTime?: string | null,
   duration?: number | null,
-  pageViews?: number | null,
-  interactions?: number | null,
   deviceInfo?: string | null,
   userAgent?: string | null,
   ipAddress?: string | null,
@@ -419,85 +411,6 @@ export type UpdateUserActivityInput = {
 };
 
 export type DeleteUserActivityInput = {
-  id: string,
-};
-
-export type CreateUserEventInput = {
-  owner?: string | null,
-  sessionId: string,
-  eventType?: UserEventEventType | null,
-  eventData?: string | null,
-  timestamp: string,
-  pageUrl?: string | null,
-  elementId?: string | null,
-  metadata?: string | null,
-  id?: string | null,
-};
-
-export enum UserEventEventType {
-  page_view = "page_view",
-  article_click = "article_click",
-  article_share = "article_share",
-  filter_change = "filter_change",
-  preference_update = "preference_update",
-  referral_generated = "referral_generated",
-  referral_shared = "referral_shared",
-  settings_accessed = "settings_accessed",
-  search_performed = "search_performed",
-  logout = "logout",
-  login = "login",
-}
-
-
-export type ModelUserEventConditionInput = {
-  owner?: ModelStringInput | null,
-  sessionId?: ModelStringInput | null,
-  eventType?: ModelUserEventEventTypeInput | null,
-  eventData?: ModelStringInput | null,
-  timestamp?: ModelStringInput | null,
-  pageUrl?: ModelStringInput | null,
-  elementId?: ModelStringInput | null,
-  metadata?: ModelStringInput | null,
-  and?: Array< ModelUserEventConditionInput | null > | null,
-  or?: Array< ModelUserEventConditionInput | null > | null,
-  not?: ModelUserEventConditionInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-};
-
-export type ModelUserEventEventTypeInput = {
-  eq?: UserEventEventType | null,
-  ne?: UserEventEventType | null,
-};
-
-export type UserEvent = {
-  __typename: "UserEvent",
-  owner?: string | null,
-  sessionId: string,
-  eventType?: UserEventEventType | null,
-  eventData?: string | null,
-  timestamp: string,
-  pageUrl?: string | null,
-  elementId?: string | null,
-  metadata?: string | null,
-  id: string,
-  createdAt: string,
-  updatedAt: string,
-};
-
-export type UpdateUserEventInput = {
-  owner?: string | null,
-  sessionId?: string | null,
-  eventType?: UserEventEventType | null,
-  eventData?: string | null,
-  timestamp?: string | null,
-  pageUrl?: string | null,
-  elementId?: string | null,
-  metadata?: string | null,
-  id: string,
-};
-
-export type DeleteUserEventInput = {
   id: string,
 };
 
@@ -680,8 +593,6 @@ export type ModelUserActivityFilterInput = {
   startTime?: ModelStringInput | null,
   endTime?: ModelStringInput | null,
   duration?: ModelIntInput | null,
-  pageViews?: ModelIntInput | null,
-  interactions?: ModelIntInput | null,
   deviceInfo?: ModelStringInput | null,
   userAgent?: ModelStringInput | null,
   ipAddress?: ModelStringInput | null,
@@ -697,29 +608,6 @@ export type ModelUserActivityFilterInput = {
 export type ModelUserActivityConnection = {
   __typename: "ModelUserActivityConnection",
   items:  Array<UserActivity | null >,
-  nextToken?: string | null,
-};
-
-export type ModelUserEventFilterInput = {
-  owner?: ModelStringInput | null,
-  sessionId?: ModelStringInput | null,
-  eventType?: ModelUserEventEventTypeInput | null,
-  eventData?: ModelStringInput | null,
-  timestamp?: ModelStringInput | null,
-  pageUrl?: ModelStringInput | null,
-  elementId?: ModelStringInput | null,
-  metadata?: ModelStringInput | null,
-  id?: ModelIDInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelUserEventFilterInput | null > | null,
-  or?: Array< ModelUserEventFilterInput | null > | null,
-  not?: ModelUserEventFilterInput | null,
-};
-
-export type ModelUserEventConnection = {
-  __typename: "ModelUserEventConnection",
-  items:  Array<UserEvent | null >,
   nextToken?: string | null,
 };
 
@@ -869,8 +757,6 @@ export type ModelSubscriptionUserActivityFilterInput = {
   startTime?: ModelSubscriptionStringInput | null,
   endTime?: ModelSubscriptionStringInput | null,
   duration?: ModelSubscriptionIntInput | null,
-  pageViews?: ModelSubscriptionIntInput | null,
-  interactions?: ModelSubscriptionIntInput | null,
   deviceInfo?: ModelSubscriptionStringInput | null,
   userAgent?: ModelSubscriptionStringInput | null,
   ipAddress?: ModelSubscriptionStringInput | null,
@@ -880,22 +766,6 @@ export type ModelSubscriptionUserActivityFilterInput = {
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionUserActivityFilterInput | null > | null,
   or?: Array< ModelSubscriptionUserActivityFilterInput | null > | null,
-  owner?: ModelStringInput | null,
-};
-
-export type ModelSubscriptionUserEventFilterInput = {
-  sessionId?: ModelSubscriptionStringInput | null,
-  eventType?: ModelSubscriptionStringInput | null,
-  eventData?: ModelSubscriptionStringInput | null,
-  timestamp?: ModelSubscriptionStringInput | null,
-  pageUrl?: ModelSubscriptionStringInput | null,
-  elementId?: ModelSubscriptionStringInput | null,
-  metadata?: ModelSubscriptionStringInput | null,
-  id?: ModelSubscriptionIDInput | null,
-  createdAt?: ModelSubscriptionStringInput | null,
-  updatedAt?: ModelSubscriptionStringInput | null,
-  and?: Array< ModelSubscriptionUserEventFilterInput | null > | null,
-  or?: Array< ModelSubscriptionUserEventFilterInput | null > | null,
   owner?: ModelStringInput | null,
 };
 
@@ -1235,8 +1105,6 @@ export type CreateUserActivityMutation = {
     startTime: string,
     endTime?: string | null,
     duration?: number | null,
-    pageViews?: number | null,
-    interactions?: number | null,
     deviceInfo?: string | null,
     userAgent?: string | null,
     ipAddress?: string | null,
@@ -1260,8 +1128,6 @@ export type UpdateUserActivityMutation = {
     startTime: string,
     endTime?: string | null,
     duration?: number | null,
-    pageViews?: number | null,
-    interactions?: number | null,
     deviceInfo?: string | null,
     userAgent?: string | null,
     ipAddress?: string | null,
@@ -1285,78 +1151,10 @@ export type DeleteUserActivityMutation = {
     startTime: string,
     endTime?: string | null,
     duration?: number | null,
-    pageViews?: number | null,
-    interactions?: number | null,
     deviceInfo?: string | null,
     userAgent?: string | null,
     ipAddress?: string | null,
     isActive?: boolean | null,
-    id: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type CreateUserEventMutationVariables = {
-  input: CreateUserEventInput,
-  condition?: ModelUserEventConditionInput | null,
-};
-
-export type CreateUserEventMutation = {
-  createUserEvent?:  {
-    __typename: "UserEvent",
-    owner?: string | null,
-    sessionId: string,
-    eventType?: UserEventEventType | null,
-    eventData?: string | null,
-    timestamp: string,
-    pageUrl?: string | null,
-    elementId?: string | null,
-    metadata?: string | null,
-    id: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type UpdateUserEventMutationVariables = {
-  input: UpdateUserEventInput,
-  condition?: ModelUserEventConditionInput | null,
-};
-
-export type UpdateUserEventMutation = {
-  updateUserEvent?:  {
-    __typename: "UserEvent",
-    owner?: string | null,
-    sessionId: string,
-    eventType?: UserEventEventType | null,
-    eventData?: string | null,
-    timestamp: string,
-    pageUrl?: string | null,
-    elementId?: string | null,
-    metadata?: string | null,
-    id: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type DeleteUserEventMutationVariables = {
-  input: DeleteUserEventInput,
-  condition?: ModelUserEventConditionInput | null,
-};
-
-export type DeleteUserEventMutation = {
-  deleteUserEvent?:  {
-    __typename: "UserEvent",
-    owner?: string | null,
-    sessionId: string,
-    eventType?: UserEventEventType | null,
-    eventData?: string | null,
-    timestamp: string,
-    pageUrl?: string | null,
-    elementId?: string | null,
-    metadata?: string | null,
     id: string,
     createdAt: string,
     updatedAt: string,
@@ -1661,8 +1459,6 @@ export type GetUserActivityQuery = {
     startTime: string,
     endTime?: string | null,
     duration?: number | null,
-    pageViews?: number | null,
-    interactions?: number | null,
     deviceInfo?: string | null,
     userAgent?: string | null,
     ipAddress?: string | null,
@@ -1689,60 +1485,10 @@ export type ListUserActivitiesQuery = {
       startTime: string,
       endTime?: string | null,
       duration?: number | null,
-      pageViews?: number | null,
-      interactions?: number | null,
       deviceInfo?: string | null,
       userAgent?: string | null,
       ipAddress?: string | null,
       isActive?: boolean | null,
-      id: string,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetUserEventQueryVariables = {
-  id: string,
-};
-
-export type GetUserEventQuery = {
-  getUserEvent?:  {
-    __typename: "UserEvent",
-    owner?: string | null,
-    sessionId: string,
-    eventType?: UserEventEventType | null,
-    eventData?: string | null,
-    timestamp: string,
-    pageUrl?: string | null,
-    elementId?: string | null,
-    metadata?: string | null,
-    id: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type ListUserEventsQueryVariables = {
-  filter?: ModelUserEventFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListUserEventsQuery = {
-  listUserEvents?:  {
-    __typename: "ModelUserEventConnection",
-    items:  Array< {
-      __typename: "UserEvent",
-      owner?: string | null,
-      sessionId: string,
-      eventType?: UserEventEventType | null,
-      eventData?: string | null,
-      timestamp: string,
-      pageUrl?: string | null,
-      elementId?: string | null,
-      metadata?: string | null,
       id: string,
       createdAt: string,
       updatedAt: string,
@@ -2114,8 +1860,6 @@ export type OnCreateUserActivitySubscription = {
     startTime: string,
     endTime?: string | null,
     duration?: number | null,
-    pageViews?: number | null,
-    interactions?: number | null,
     deviceInfo?: string | null,
     userAgent?: string | null,
     ipAddress?: string | null,
@@ -2139,8 +1883,6 @@ export type OnUpdateUserActivitySubscription = {
     startTime: string,
     endTime?: string | null,
     duration?: number | null,
-    pageViews?: number | null,
-    interactions?: number | null,
     deviceInfo?: string | null,
     userAgent?: string | null,
     ipAddress?: string | null,
@@ -2164,78 +1906,10 @@ export type OnDeleteUserActivitySubscription = {
     startTime: string,
     endTime?: string | null,
     duration?: number | null,
-    pageViews?: number | null,
-    interactions?: number | null,
     deviceInfo?: string | null,
     userAgent?: string | null,
     ipAddress?: string | null,
     isActive?: boolean | null,
-    id: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type OnCreateUserEventSubscriptionVariables = {
-  filter?: ModelSubscriptionUserEventFilterInput | null,
-  owner?: string | null,
-};
-
-export type OnCreateUserEventSubscription = {
-  onCreateUserEvent?:  {
-    __typename: "UserEvent",
-    owner?: string | null,
-    sessionId: string,
-    eventType?: UserEventEventType | null,
-    eventData?: string | null,
-    timestamp: string,
-    pageUrl?: string | null,
-    elementId?: string | null,
-    metadata?: string | null,
-    id: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type OnUpdateUserEventSubscriptionVariables = {
-  filter?: ModelSubscriptionUserEventFilterInput | null,
-  owner?: string | null,
-};
-
-export type OnUpdateUserEventSubscription = {
-  onUpdateUserEvent?:  {
-    __typename: "UserEvent",
-    owner?: string | null,
-    sessionId: string,
-    eventType?: UserEventEventType | null,
-    eventData?: string | null,
-    timestamp: string,
-    pageUrl?: string | null,
-    elementId?: string | null,
-    metadata?: string | null,
-    id: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type OnDeleteUserEventSubscriptionVariables = {
-  filter?: ModelSubscriptionUserEventFilterInput | null,
-  owner?: string | null,
-};
-
-export type OnDeleteUserEventSubscription = {
-  onDeleteUserEvent?:  {
-    __typename: "UserEvent",
-    owner?: string | null,
-    sessionId: string,
-    eventType?: UserEventEventType | null,
-    eventData?: string | null,
-    timestamp: string,
-    pageUrl?: string | null,
-    elementId?: string | null,
-    metadata?: string | null,
     id: string,
     createdAt: string,
     updatedAt: string,
