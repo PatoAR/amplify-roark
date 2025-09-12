@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { generateClient } from 'aws-amplify/api';
-import { type Schema } from '../../amplify/data/resource';
+import { type Schema } from '../../../amplify/data/resource';
 import './AnalyticsDashboard.css';
 
 interface SessionStats {

@@ -51,10 +51,8 @@ export function useSubscriptionManager() {
       
       // Call the subscription manager function
       const result = await client.functions.subscriptionManager.invoke({
-        payload: {
-          planId,
-          userId,
-        },
+        planId,
+        userId,
       });
 
       const response = result.payload as SubscriptionUpgradeResult;

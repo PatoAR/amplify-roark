@@ -110,8 +110,6 @@ export function useSubscriptionStatus(): SubscriptionStatus {
           canAccessContent = false;
           canCreateContent = false;
         }
-
-        // Debug logging removed to reduce console noise
         
         setSubscriptionStatus(prev => {
           // Only update if the status actually changed

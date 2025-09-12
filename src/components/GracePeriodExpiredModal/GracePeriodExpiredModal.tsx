@@ -26,7 +26,6 @@ export const GracePeriodExpiredModal: React.FC<GracePeriodExpiredModalProps> = (
   const { tokens } = useTheme();
   const {
     upgradeSubscription,
-    isUpgrading,
     upgradeError,
   } = useSubscriptionManager();
 
