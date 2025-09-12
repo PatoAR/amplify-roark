@@ -180,6 +180,12 @@ const LandingPage: React.FC = () => {
 
       <footer className="landing-footer">
         <p>&copy; 2024 Perkins Intel. All rights reserved.</p>
+        <p className="contact-info">
+          Need help? Contact us at{' '}
+          <a href="mailto:info@perkinsintel.com" className="contact-email">
+            info@perkinsintel.com
+          </a>
+        </p>
       </footer>
     </div>
   );

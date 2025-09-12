@@ -14,11 +14,11 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
     - Duration (seconds on screen top)
     - Filters (country, industry, company)
     - CSS?
-- Modified display text 
-- Custom info email for user contact
+- Modified display text
+
 - Open (MPago) business account for Finu
-- Implement subscription workflow
 - Open AWS account on the name of Finu, transfer domain 
+- Implement subscription workflow
 - Legal disclaimers
 
 - Stop servicing Telegram / Whatsapp

@@ -277,12 +277,14 @@ function NewsSocketClient() {
           {/* Show message if there are more articles */}
           {hasMoreArticles && (
             <div className="more-articles-message">
-              <p>{t('common.moreArticles')
-                .replace('{displayed}', String(displayedMessages.length))
-                .replace('{count}', String(filteredMessages.length - displayedMessages.length))}</p>
-              <button className="load-more-button" onClick={handleLoadMore}>
-                {t('common.loadMore')}
-              </button>
+              <p>
+                {t('common.moreArticles')
+                  .replace('{displayed}', String(displayedMessages.length))
+                  .replace('{count}', String(filteredMessages.length - displayedMessages.length))}
+                <button className="disclaimer-dismiss-btn" onClick={handleLoadMore}>
+                  {t('common.loadMore')}
+                </button>
+              </p>
             </div>
           )}
         </div>

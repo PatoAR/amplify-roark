@@ -200,6 +200,24 @@
   font-size: var(--font-size-sm);
 }
 
+.contact-info {
+  margin-top: var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.contact-email {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: color var(--transition-normal);
+}
+
+.contact-email:hover {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
+}
+
 /* Auth Logo */
 .auth-logo {
   height: 60px;

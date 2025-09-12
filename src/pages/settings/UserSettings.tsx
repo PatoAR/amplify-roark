@@ -7,6 +7,7 @@ import {
   Heading,
   Card,
   Alert,
+  Text,
 } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import { useTranslation } from '../../i18n';
@@ -123,6 +124,24 @@ const UserSettings = () => {
           </Card>
         ))}
       </Flex>
+
+      {/* Contact Information */}
+      <View className="contact-section">
+        <Text fontSize="small" color="font.secondary" textAlign="center">
+          Need help? Contact us at{' '}
+          <a 
+            href="mailto:info@perkinsintel.com" 
+            className="contact-email"
+            style={{ 
+              color: 'var(--color-font-primary)', 
+              textDecoration: 'none',
+              fontWeight: '500'
+            }}
+          >
+            info@perkinsintel.com
+          </a>
+        </Text>
+      </View>
     </Flex>
   );
 };

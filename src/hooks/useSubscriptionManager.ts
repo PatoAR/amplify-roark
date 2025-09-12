@@ -1,8 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import { generateClient } from 'aws-amplify/api';
 import { useSession } from '../context/SessionContext';
 import { useSubscriptionStatus } from './useSubscriptionStatus';
-import { type Schema } from '../../amplify/data/resource';
 
 interface SubscriptionUpgradeResult {
   success: boolean;
