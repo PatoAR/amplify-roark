@@ -7,21 +7,22 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
     > NEWS
     > STATS
     > SPONSOR
-    Attributes
-    - Title
-    - Subtitle
+    Attributes (additional)
     - Call to action button (text, link)
     - Duration (seconds on screen top)
-    - Filters (country, industry, company)
     - CSS?
 - Modified display text
+- Special campaigns, invitation links with codes that give extended (6mo) access
+- Increase by 50% industry filter options
+    MECE:
+    Mutually Exclusive → no overlaps between categories.
+    Collectively Exhaustive → together they cover the entire universe of possibilities.
 
 - Open (MPago) business account for Finu
 - Open AWS account on the name of Finu, transfer domain 
 - Implement subscription workflow
 - Legal disclaimers
 
-- Stop servicing Telegram / Whatsapp
 - Native IOS / Android App
 
 ## CI/CD
@@ -56,3 +57,4 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 - Inactivity logout
 - Referrals
 - Access days left - dynamic getting close to cero on days
+- Deleted emails
