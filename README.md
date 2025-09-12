@@ -16,9 +16,10 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
     - CSS?
 - Modified display text 
 - Custom info email for user contact
-- Finu SA trademark
+- Open (MPago) business account for Finu
 - Implement subscription workflow
 - Open AWS account on the name of Finu, transfer domain 
+- Legal disclaimers
 
 - Stop servicing Telegram / Whatsapp
 - Native IOS / Android App
