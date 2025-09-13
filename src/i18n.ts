@@ -112,6 +112,77 @@ const customTranslations = {
     'subscription.referralAlternative': 'Prefer to keep it free? Invite friends instead',
     'subscription.chooseAccessMethod': 'Choose Your Access Method',
     'subscription.referralOrSubscribe': 'Keep Perkins free through referrals, or subscribe for unlimited access',
+    'subscription.continueAccess': 'Continue Your Access',
+    'subscription.trialEnded': 'Your free trial has ended. Keep Perkins free through referrals, or subscribe for unlimited access.',
+    'subscription.daysRemaining': 'You have {days} days remaining. Keep Perkins free through referrals, or subscribe for unlimited access.',
+    'subscription.keepItFree': 'Keep it Free:',
+    'subscription.keepItFreeText': 'Prefer to keep Perkins free? Invite friends instead and earn 3 months free for each successful referral!',
+    'subscription.limitedTime': 'Limited Time:',
+    'subscription.limitedTimeText': 'Get 50% off your first month with any plan!',
+    'subscription.choosePlan': 'Choose Your Plan',
+    'subscription.mostPopular': 'Most Popular',
+    'subscription.saveWithAnnual': 'Save {discount}% with annual billing',
+    'subscription.upgradeNow': 'Upgrade Now',
+    'subscription.maybeLater': 'Maybe Later',
+    'subscription.moneyBackGuarantee': 'All plans include a 30-day money-back guarantee. Cancel anytime.',
+    'subscription.processing': 'Processing...',
+    
+    // Landing Page
+    'landing.signIn': 'Sign In',
+    'landing.signUp': 'Sign Up',
+    'landing.heroSubtitle': 'From Data to Clarity: Hybrid Intelligence on Business & Markets',
+    'landing.heroDescription': 'Permanently sourcing and processing business, markets, and company information from across the web to deliver meaningful insights when you need them most.',
+    'landing.feature1Title': 'Real Intelligence',
+    'landing.feature1Description': 'Continuous monitoring of news articles, regulatory reports, company newswires, statistical data, and financial filings.',
+    'landing.feature2Title': 'AI-Powered Processing',
+    'landing.feature2Description': 'Advanced artificial intelligence that transforms raw data into actionable business insights and market intelligence.',
+    'landing.feature3Title': 'Timely Delivery',
+    'landing.feature3Description': 'Information reaches you when it matters most, ensuring you never miss critical business opportunities or risks.',
+    'landing.feature4Title': 'Meaningful Insights',
+    'landing.feature4Description': 'Data is processed and presented in a way that makes sense for your business decisions and strategic planning.',
+    'landing.feature5Title': 'Customized Content',
+    'landing.feature5Description': 'Tailor your news feed to your specific industry and geographic focus. Perkins learns your preferences to deliver only the most relevant business intelligence.',
+    'landing.feature6Title': 'Always Free Through Referrals',
+    'landing.feature6Description': 'Keep Perkins free forever by inviting friends. Earn 3 months of free access for each successful referral, or subscribe for unlimited access without referrals.',
+    'landing.ctaTitle': 'Ready to transform your business intelligence?',
+    'landing.ctaDescription': 'Gain access to Perkins comprehensive business intelligence platform. Keep it free through referrals or subscribe for unlimited access.',
+    'landing.getStarted': 'Get Started Today',
+    'landing.copyright': '© 2024 Perkins Intel. All rights reserved.',
+    'landing.contactHelp': 'Need help? Contact us at',
+    
+    // Referral Component
+    'referral.gracePeriodDays': 'Grace Period Days',
+    'referral.gracePeriodUntil': 'Grace Period Until',
+    'referral.continueAccess': 'Continue Access',
+    'referral.upgradeNow': 'Upgrade Now',
+    'referral.subscriptionUpgraded': 'Subscription upgraded successfully!',
+    'referral.preferUnlimited': 'Prefer unlimited access without referrals?',
+    
+    // Settings
+    'settings.contactHelp': 'Need help? Contact us at',
+    
+    // Grace Period Banner
+    'gracePeriod.title': 'Grace Period Active',
+    'gracePeriod.message': 'Your earned free days have been used. You have {days} days of limited access remaining. Keep Perkins free by inviting friends, or subscribe for unlimited access.',
+    'gracePeriod.actNow': 'Act Now',
+    
+    // Grace Period Expired Modal
+    'graceExpired.title': 'Access Expired',
+    'graceExpired.message': 'Your grace period has ended. Choose an option below to restore your access.',
+    'graceExpired.chooseAction': 'Choose Your Action',
+    'graceExpired.inviteFriends': 'Invite Friends',
+    'graceExpired.inviteFriendsDesc': 'Earn free access by inviting friends to join. Each successful referral extends your access.',
+    'graceExpired.noCost': 'No cost required',
+    'graceExpired.unlimitedReferrals': 'Unlimited referrals',
+    'graceExpired.upgradeToPaid': 'Upgrade to Paid',
+    'graceExpired.upgradeDesc': 'Get unlimited access with our premium subscription plans.',
+    'graceExpired.unlimitedAccess': 'Unlimited access',
+    'graceExpired.prioritySupport': 'Priority support',
+    'graceExpired.advancedFeatures': 'Advanced features',
+    'graceExpired.needHelp': 'Need help? Contact our support team for assistance.',
+    'graceExpired.maybeLater': 'Maybe Later',
+    'graceExpired.free': 'Free',
+    'graceExpired.premium': 'Premium',
     
     // Password
     'password.title': 'Change Password',
@@ -391,6 +462,80 @@ const customTranslations = {
     // Disclaimer
     'disclaimer.text': 'Las noticias pueden retrasarse varios minutos según la publicación de la fuente y la frecuencia de búsqueda.',
     'disclaimer.understood': 'Entendido',
+    
+    // Landing Page
+    'landing.signIn': 'Iniciar Sesión',
+    'landing.signUp': 'Registrarse',
+    'landing.heroSubtitle': 'De Datos a Claridad: Inteligencia Híbrida en Negocios y Mercados',
+    'landing.heroDescription': 'Obteniendo y procesando permanentemente información empresarial, de mercados y de empresas de toda la web para entregar insights significativos cuando más los necesitas.',
+    'landing.feature1Title': 'Inteligencia Real',
+    'landing.feature1Description': 'Monitoreo continuo de artículos de noticias, reportes regulatorios, comunicados de empresas, datos estadísticos y archivos financieros.',
+    'landing.feature2Title': 'Procesamiento con IA',
+    'landing.feature2Description': 'Inteligencia artificial avanzada que transforma datos en bruto en insights empresariales accionables e inteligencia de mercados.',
+    'landing.feature3Title': 'Entrega Oportuna',
+    'landing.feature3Description': 'La información te llega cuando más importa, asegurando que nunca pierdas oportunidades empresariales críticas o riesgos.',
+    'landing.feature4Title': 'Insights Significativos',
+    'landing.feature4Description': 'Los datos se procesan y presentan de manera que tenga sentido para tus decisiones empresariales y planificación estratégica.',
+    'landing.feature5Title': 'Contenido Personalizado',
+    'landing.feature5Description': 'Personaliza tu feed de noticias según tu industria específica y enfoque geográfico. Perkins aprende tus preferencias para entregar solo la inteligencia empresarial más relevante.',
+    'landing.feature6Title': 'Siempre Gratis a Través de Referidos',
+    'landing.feature6Description': 'Mantén Perkins gratis para siempre invitando amigos. Gana 3 meses de acceso gratis por cada referido exitoso, o suscríbete para acceso ilimitado sin referidos.',
+    'landing.ctaTitle': '¿Listo para transformar tu inteligencia empresarial?',
+    'landing.ctaDescription': 'Obtén acceso a la plataforma integral de inteligencia empresarial de Perkins. Manténla gratis a través de referidos o suscríbete para acceso ilimitado.',
+    'landing.getStarted': 'Comenzar Hoy',
+    'landing.copyright': '© 2024 Perkins Intel. Todos los derechos reservados.',
+    'landing.contactHelp': '¿Necesitas ayuda? Contáctanos en',
+    
+    // Subscription Modal
+    'subscription.continueAccess': 'Continuar tu Acceso',
+    'subscription.chooseAccessMethod': 'Elige tu Método de Acceso',
+    'subscription.trialEnded': 'Tu prueba gratuita ha terminado. Mantén Perkins gratis a través de referidos, o suscríbete para acceso ilimitado.',
+    'subscription.daysRemaining': 'Tienes {days} días restantes. Mantén Perkins gratis a través de referidos, o suscríbete para acceso ilimitado.',
+    'subscription.keepItFree': 'Manténlo Gratis:',
+    'subscription.keepItFreeText': '¿Prefieres mantener Perkins gratis? ¡Invita amigos en su lugar y gana 3 meses gratis por cada referido exitoso!',
+    'subscription.limitedTime': 'Tiempo Limitado:',
+    'subscription.limitedTimeText': '¡Obtén 50% de descuento en tu primer mes con cualquier plan!',
+    'subscription.choosePlan': 'Elige tu Plan',
+    'subscription.mostPopular': 'Más Popular',
+    'subscription.saveWithAnnual': 'Ahorra {discount}% con facturación anual',
+    'subscription.upgradeNow': 'Actualizar Ahora',
+    'subscription.maybeLater': 'Tal Vez Después',
+    'subscription.moneyBackGuarantee': 'Todos los planes incluyen garantía de devolución de dinero de 30 días. Cancela en cualquier momento.',
+    'subscription.processing': 'Procesando...',
+    
+    // Referral Component
+    'referral.gracePeriodDays': 'Días de Período de Gracia',
+    'referral.gracePeriodUntil': 'Período de Gracia Hasta',
+    'referral.continueAccess': 'Continuar Acceso',
+    'referral.upgradeNow': 'Actualizar Ahora',
+    'referral.subscriptionUpgraded': '¡Suscripción actualizada exitosamente!',
+    'referral.preferUnlimited': '¿Prefieres acceso ilimitado sin referidos?',
+    
+    // Settings
+    'settings.contactHelp': '¿Necesitas ayuda? Contáctanos en',
+    
+    // Grace Period Banner
+    'gracePeriod.title': 'Período de Gracia Activo',
+    'gracePeriod.message': 'Tus días gratis ganados han sido utilizados. Tienes {days} días de acceso limitado restantes. Mantén Perkins gratis invitando amigos, o suscríbete para acceso ilimitado.',
+    'gracePeriod.actNow': 'Actuar Ahora',
+    
+    // Grace Period Expired Modal
+    'graceExpired.title': 'Acceso Expirado',
+    'graceExpired.message': 'Tu período de gracia ha terminado. Elige una opción a continuación para restaurar tu acceso.',
+    'graceExpired.chooseAction': 'Elige tu Acción',
+    'graceExpired.inviteFriends': 'Invitar Amigos',
+    'graceExpired.inviteFriendsDesc': 'Gana acceso gratis invitando amigos a unirse. Cada referido exitoso extiende tu acceso.',
+    'graceExpired.noCost': 'Sin costo requerido',
+    'graceExpired.unlimitedReferrals': 'Referidos ilimitados',
+    'graceExpired.upgradeToPaid': 'Actualizar a Pago',
+    'graceExpired.upgradeDesc': 'Obtén acceso ilimitado con nuestros planes de suscripción premium.',
+    'graceExpired.unlimitedAccess': 'Acceso ilimitado',
+    'graceExpired.prioritySupport': 'Soporte prioritario',
+    'graceExpired.advancedFeatures': 'Características avanzadas',
+    'graceExpired.needHelp': '¿Necesitas ayuda? Contacta a nuestro equipo de soporte para asistencia.',
+    'graceExpired.maybeLater': 'Tal Vez Después',
+    'graceExpired.free': 'Gratis',
+    'graceExpired.premium': 'Premium',
   },
   pt: {
     // Menu items
@@ -581,6 +726,80 @@ const customTranslations = {
     // Disclaimer
     'disclaimer.text': 'As notícias podem sofrer atraso de alguns minutos, dependendo da publicação da fonte e da frequência de busca.',
     'disclaimer.understood': 'Entendi',
+    
+    // Landing Page
+    'landing.signIn': 'Entrar',
+    'landing.signUp': 'Cadastrar',
+    'landing.heroSubtitle': 'De Dados à Clareza: Inteligência Híbrida em Negócios e Mercados',
+    'landing.heroDescription': 'Obtendo e processando permanentemente informações empresariais, de mercados e de empresas de toda a web para entregar insights significativos quando você mais precisa.',
+    'landing.feature1Title': 'Inteligência Real',
+    'landing.feature1Description': 'Monitoramento contínuo de artigos de notícias, relatórios regulatórios, comunicados de empresas, dados estatísticos e arquivos financeiros.',
+    'landing.feature2Title': 'Processamento com IA',
+    'landing.feature2Description': 'Inteligência artificial avançada que transforma dados brutos em insights empresariais acionáveis e inteligência de mercados.',
+    'landing.feature3Title': 'Entrega Oportuna',
+    'landing.feature3Description': 'A informação chega até você quando mais importa, garantindo que você nunca perca oportunidades empresariais críticas ou riscos.',
+    'landing.feature4Title': 'Insights Significativos',
+    'landing.feature4Description': 'Os dados são processados e apresentados de forma que faça sentido para suas decisões empresariais e planejamento estratégico.',
+    'landing.feature5Title': 'Conteúdo Personalizado',
+    'landing.feature5Description': 'Personalize seu feed de notícias de acordo com sua indústria específica e foco geográfico. Perkins aprende suas preferências para entregar apenas a inteligência empresarial mais relevante.',
+    'landing.feature6Title': 'Sempre Grátis Através de Referidos',
+    'landing.feature6Description': 'Mantenha Perkins grátis para sempre convidando amigos. Ganhe 3 meses de acesso grátis para cada referido bem-sucedido, ou assine para acesso ilimitado sem referidos.',
+    'landing.ctaTitle': 'Pronto para transformar sua inteligência empresarial?',
+    'landing.ctaDescription': 'Obtenha acesso à plataforma abrangente de inteligência empresarial do Perkins. Mantenha grátis através de referidos ou assine para acesso ilimitado.',
+    'landing.getStarted': 'Começar Hoje',
+    'landing.copyright': '© 2024 Perkins Intel. Todos os direitos reservados.',
+    'landing.contactHelp': 'Precisa de ajuda? Entre em contato conosco em',
+    
+    // Subscription Modal
+    'subscription.continueAccess': 'Continuar seu Acesso',
+    'subscription.chooseAccessMethod': 'Escolha seu Método de Acesso',
+    'subscription.trialEnded': 'Seu teste gratuito terminou. Mantenha Perkins grátis através de referidos, ou assine para acesso ilimitado.',
+    'subscription.daysRemaining': 'Você tem {days} dias restantes. Mantenha Perkins grátis através de referidos, ou assine para acesso ilimitado.',
+    'subscription.keepItFree': 'Mantenha Grátis:',
+    'subscription.keepItFreeText': 'Prefere manter Perkins grátis? Convide amigos em vez disso e ganhe 3 meses grátis para cada referido bem-sucedido!',
+    'subscription.limitedTime': 'Tempo Limitado:',
+    'subscription.limitedTimeText': 'Obtenha 50% de desconto no seu primeiro mês com qualquer plano!',
+    'subscription.choosePlan': 'Escolha seu Plano',
+    'subscription.mostPopular': 'Mais Popular',
+    'subscription.saveWithAnnual': 'Economize {discount}% com cobrança anual',
+    'subscription.upgradeNow': 'Atualizar Agora',
+    'subscription.maybeLater': 'Talvez Depois',
+    'subscription.moneyBackGuarantee': 'Todos os planos incluem garantia de devolução do dinheiro de 30 dias. Cancele a qualquer momento.',
+    'subscription.processing': 'Processando...',
+    
+    // Referral Component
+    'referral.gracePeriodDays': 'Dias de Período de Graça',
+    'referral.gracePeriodUntil': 'Período de Graça Até',
+    'referral.continueAccess': 'Continuar Acesso',
+    'referral.upgradeNow': 'Atualizar Agora',
+    'referral.subscriptionUpgraded': 'Assinatura atualizada com sucesso!',
+    'referral.preferUnlimited': 'Prefere acesso ilimitado sem referidos?',
+    
+    // Settings
+    'settings.contactHelp': 'Precisa de ajuda? Entre em contato conosco em',
+    
+    // Grace Period Banner
+    'gracePeriod.title': 'Período de Graça Ativo',
+    'gracePeriod.message': 'Seus dias grátis ganhos foram utilizados. Você tem {days} dias de acesso limitado restantes. Mantenha Perkins grátis convidando amigos, ou assine para acesso ilimitado.',
+    'gracePeriod.actNow': 'Agir Agora',
+    
+    // Grace Period Expired Modal
+    'graceExpired.title': 'Acesso Expirado',
+    'graceExpired.message': 'Seu período de graça terminou. Escolha uma opção abaixo para restaurar seu acesso.',
+    'graceExpired.chooseAction': 'Escolha sua Ação',
+    'graceExpired.inviteFriends': 'Convidar Amigos',
+    'graceExpired.inviteFriendsDesc': 'Ganhe acesso grátis convidando amigos para se juntar. Cada referido bem-sucedido estende seu acesso.',
+    'graceExpired.noCost': 'Sem custo necessário',
+    'graceExpired.unlimitedReferrals': 'Referidos ilimitados',
+    'graceExpired.upgradeToPaid': 'Atualizar para Pago',
+    'graceExpired.upgradeDesc': 'Obtenha acesso ilimitado com nossos planos de assinatura premium.',
+    'graceExpired.unlimitedAccess': 'Acesso ilimitado',
+    'graceExpired.prioritySupport': 'Suporte prioritário',
+    'graceExpired.advancedFeatures': 'Recursos avançados',
+    'graceExpired.needHelp': 'Precisa de ajuda? Entre em contato com nossa equipe de suporte para assistência.',
+    'graceExpired.maybeLater': 'Talvez Depois',
+    'graceExpired.free': 'Grátis',
+    'graceExpired.premium': 'Premium',
   }
 };
 
@@ -593,11 +812,5 @@ export const t = (key: string): string => {
   return I18n.get(key) || key;
 };
 
-// Hook to use translations
-export const useTranslation = () => {
-  return {
-    t: (key: string): string => {
-      return t(key);
-    }
-  };
-}; 
+// Re-export the enhanced useTranslation hook
+export { useTranslation } from './hooks/useTranslation'; 

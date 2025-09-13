@@ -8,9 +8,9 @@ export const COUNTRY_OPTIONS = [
 ];
 
 export const INDUSTRY_OPTIONS = [
-  { id: '💵 MARKETS', label: 'FINANCIAL MARKETS', icon: 'TrendingUp' },
+  { id: '💵 MARKETS', label: 'MARKETS', icon: 'TrendingUp' },
   { id: '📈 ECONOMY', label: 'ECONOMY', icon: 'Building2' },
-  { id: '⛏️ MINING', label: 'MINING', icon: 'Pickaxe' }, // Pickaxe exists in lucide
+  { id: '⛏️ MINING', label: 'MINING', icon: 'Pickaxe' },
   { id: '⚡ ENERGY', label: 'ENERGY', icon: 'Zap' },
   { id: '🚜 AGRIBUSINESS', label: 'AGRIBUSINESS', icon: 'Wheat' },
   { id: '🏛️ FINANCIALS', label: 'FINANCIAL SERVICES', icon: 'Banknote' },
@@ -18,12 +18,12 @@ export const INDUSTRY_OPTIONS = [
   { id: '💊 HEALTHCARE', label: 'HEALTHCARE', icon: 'Stethoscope' },
   { id: '🏭 INDUSTRIALS', label: 'INDUSTRIALS', icon: 'Factory' },
   { id: '💻 TECHNOLOGY', label: 'TECHNOLOGY', icon: 'Cpu' },
-  { id: '🎬 MEDIA•ENTERTAINMENT', label: 'MEDIA & ENTERTAINMENT', icon: 'Clapperboard' },
+  { id: '🎬 MEDIA•ENTERTAINMENT', label: 'MEDIA & ENTERTAINMENT', icon: 'Video' },
   { id: '📡 TELECOM', label: 'TELECOMMUNICATIONS', icon: 'Satellite' },
   { id: '🛍️ RETAIL', label: 'RETAIL & CONSUMER GOODS', icon: 'ShoppingBag' },
   { id: '✈️ TRAVEL•LEISURE', label: 'TRAVEL & LEISURE', icon: 'Plane' },
   { id: '🚂 TRANSPORT•LOGISTICS', label: 'TRANSPORTATION & LOGISTICS', icon: 'Truck' },
-  { id: '🏗️ UTILITIES•INFRA', label: 'UTILITIES & INFRASTRUCTURE', icon: 'Construction' }, // lucide: Wrench/Building/Construction
+  { id: '🏗️ UTILITIES•INFRA', label: 'UTILITIES & INFRASTRUCTURE', icon: 'HardHat' },
   { id: '🚗 AUTOMOTIVE•MOBILITY', label: 'AUTOMOTIVE & MOBILITY', icon: 'Car' },
   { id: '🎓 EDUCATION', label: 'EDUCATION & TRAINING', icon: 'GraduationCap' },
   { id: '🌱 ESG•SUSTAINABILITY', label: 'ESG & SUSTAINABILITY', icon: 'Leaf' },

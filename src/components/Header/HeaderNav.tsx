@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useSession } from '../../context/SessionContext';
 import Modal from './Modal'
 import { useUserPreferences } from '../../context/UserPreferencesContext';
-import { Gift, TrendingUp, Building2, HardHat, Zap, Wheat, Banknote, Stethoscope, Factory, Satellite, ShoppingBag, Plane, Train } from 'lucide-react';
+import { Gift, TrendingUp, Building2, HardHat, Pickaxe, Zap, Wheat, Banknote, Stethoscope, Factory, Satellite, ShoppingBag, Plane, Train, Home, Cpu, Video, Truck, Car, GraduationCap, Leaf } from 'lucide-react';
 import { useFreeDaysRemaining } from '../../hooks/useFreeDaysRemaining';
 import { useTranslation } from '../../i18n';
 import LanguageSwitcher from '../LanguageSwitcher/LanguageSwitcher';
@@ -198,7 +198,15 @@ const HeaderNav = () => {
                   'Satellite': Satellite,
                   'ShoppingBag': ShoppingBag,
                   'Plane': Plane,
-                  'Train': Train
+                  'Train': Train,
+                  'Home': Home,
+                  'Cpu': Cpu,
+                  'Video': Video,
+                  'Truck': Truck,
+                  'Car': Car,
+                  'GraduationCap': GraduationCap,
+                  'Leaf': Leaf,
+                  'Pickaxe': Pickaxe
                 };
                 const IconComponent = iconMap[industry.icon] || TrendingUp;
                 return (

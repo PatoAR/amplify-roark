@@ -6,6 +6,7 @@ import {
   Button
 } from '@aws-amplify/ui-react';
 import { useTheme } from '@aws-amplify/ui-react';
+import { useTranslation } from '../../i18n';
 import './GracePeriodBanner.css';
 
 interface GracePeriodBannerProps {
@@ -20,6 +21,7 @@ export const GracePeriodBanner: React.FC<GracePeriodBannerProps> = ({
   onDismiss
 }) => {
   const { tokens } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <Alert 
@@ -31,11 +33,10 @@ export const GracePeriodBanner: React.FC<GracePeriodBannerProps> = ({
       <Flex direction="row" justifyContent="space-between" alignItems="center" wrap="wrap" gap={tokens.space.small}>
         <Flex direction="column" gap={tokens.space.xs} flex="1" minWidth="300px">
           <Text fontSize="medium" fontWeight="semibold">
-            Grace Period Active
+            {t('gracePeriod.title')}
           </Text>
           <Text fontSize="small">
-            Your earned free days have been used. You have {gracePeriodDaysRemaining} days of limited access remaining. 
-            Keep Perkins free by inviting friends, or subscribe for unlimited access.
+            {t('gracePeriod.message').replace('{days}', gracePeriodDaysRemaining.toString())}
           </Text>
         </Flex>
         
@@ -45,7 +46,7 @@ export const GracePeriodBanner: React.FC<GracePeriodBannerProps> = ({
           onClick={onActNow}
           className="act-now-button"
         >
-          Act Now
+          {t('gracePeriod.actNow')}
         </Button>
       </Flex>
     </Alert>

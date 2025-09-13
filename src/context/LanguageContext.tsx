@@ -9,6 +9,8 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+export { LanguageContext };
+
 export const useLanguage = () => {
   const context = useContext(LanguageContext);
   if (!context) {
@@ -54,23 +56,6 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
   // Set the language in Amplify I18n when component mounts
   useEffect(() => {
     I18n.setLanguage(currentLanguage);
-  }, [currentLanguage]);
-
-  // Listen for language change events
-  useEffect(() => {
-    const handleLanguageChange = (event: CustomEvent) => {
-      const { language } = event.detail;
-      if (language !== currentLanguage) {
-        setCurrentLanguage(language);
-        setLanguageVersion(prev => prev + 1);
-      }
-    };
-
-    window.addEventListener('languageChanged', handleLanguageChange as EventListener);
-    
-    return () => {
-      window.removeEventListener('languageChanged', handleLanguageChange as EventListener);
-    };
   }, [currentLanguage]);
 
   const changeLanguage = (language: string) => {

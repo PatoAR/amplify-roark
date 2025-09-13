@@ -128,7 +128,7 @@ const UserSettings = () => {
       {/* Contact Information */}
       <View className="contact-section">
         <Text fontSize="small" color="font.secondary" textAlign="center">
-          Need help? Contact us at{' '}
+          {t('settings.contactHelp')}{' '}
           <a 
             href="mailto:info@perkinsintel.com" 
             className="contact-email"

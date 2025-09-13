@@ -12,6 +12,7 @@ import {
 import { useTheme } from '@aws-amplify/ui-react';
 import { useSubscriptionManager } from '../../hooks/useSubscriptionManager';
 import { SubscriptionUpgradeModal } from '../SubscriptionUpgradeModal';
+import { useTranslation } from '../../i18n';
 import './GracePeriodExpiredModal.css';
 
 interface GracePeriodExpiredModalProps {
@@ -24,6 +25,7 @@ export const GracePeriodExpiredModal: React.FC<GracePeriodExpiredModalProps> = (
   onClose
 }) => {
   const { tokens } = useTheme();
+  const { t } = useTranslation();
   const {
     upgradeSubscription,
     upgradeError,
@@ -58,10 +60,10 @@ export const GracePeriodExpiredModal: React.FC<GracePeriodExpiredModalProps> = (
             {/* Header */}
             <Flex direction="column" gap={tokens.space.small} alignItems="center">
               <Heading level={3} textAlign="center" color="font.error">
-                Access Expired
+                {t('graceExpired.title')}
               </Heading>
               <Text fontSize="medium" color="font.secondary" textAlign="center">
-                Your grace period has ended. Choose an option below to restore your access.
+                {t('graceExpired.message')}
               </Text>
             </Flex>
 
@@ -74,25 +76,25 @@ export const GracePeriodExpiredModal: React.FC<GracePeriodExpiredModalProps> = (
 
             {/* Options */}
             <Flex direction="column" gap={tokens.space.medium}>
-              <Heading level={4}>Choose Your Action</Heading>
+              <Heading level={4}>{t('graceExpired.chooseAction')}</Heading>
               
               {/* Invite Friends Option */}
               <Card className="action-option-card" onClick={handleInviteFriends}>
                 <Flex direction="column" gap={tokens.space.small}>
                   <Flex justifyContent="space-between" alignItems="center">
-                    <Heading level={5}>Invite Friends</Heading>
-                    <Badge variation="success" size="small">Free</Badge>
+                    <Heading level={5}>{t('graceExpired.inviteFriends')}</Heading>
+                    <Badge variation="success" size="small">{t('graceExpired.free')}</Badge>
                   </Flex>
                   <Text fontSize="small" color="font.secondary">
-                    Earn free access by inviting friends to join. Each successful referral extends your access.
+                    {t('graceExpired.inviteFriendsDesc')}
                   </Text>
                   <Flex gap={tokens.space.xs}>
                     <Text fontSize="small" color="font.success">✓</Text>
-                    <Text fontSize="small" color="font.secondary">No cost required</Text>
+                    <Text fontSize="small" color="font.secondary">{t('graceExpired.noCost')}</Text>
                   </Flex>
                   <Flex gap={tokens.space.xs}>
                     <Text fontSize="small" color="font.success">✓</Text>
-                    <Text fontSize="small" color="font.secondary">Unlimited referrals</Text>
+                    <Text fontSize="small" color="font.secondary">{t('graceExpired.unlimitedReferrals')}</Text>
                   </Flex>
                 </Flex>
               </Card>
@@ -103,23 +105,23 @@ export const GracePeriodExpiredModal: React.FC<GracePeriodExpiredModalProps> = (
               <Card className="action-option-card" onClick={() => setShowUpgradeModal(true)}>
                 <Flex direction="column" gap={tokens.space.small}>
                   <Flex justifyContent="space-between" alignItems="center">
-                    <Heading level={5}>Upgrade to Paid</Heading>
-                    <Badge variation="info" size="small">Premium</Badge>
+                    <Heading level={5}>{t('graceExpired.upgradeToPaid')}</Heading>
+                    <Badge variation="info" size="small">{t('graceExpired.premium')}</Badge>
                   </Flex>
                   <Text fontSize="small" color="font.secondary">
-                    Get unlimited access with our premium subscription plans.
+                    {t('graceExpired.upgradeDesc')}
                   </Text>
                   <Flex gap={tokens.space.xs}>
                     <Text fontSize="small" color="font.success">✓</Text>
-                    <Text fontSize="small" color="font.secondary">Unlimited access</Text>
+                    <Text fontSize="small" color="font.secondary">{t('graceExpired.unlimitedAccess')}</Text>
                   </Flex>
                   <Flex gap={tokens.space.xs}>
                     <Text fontSize="small" color="font.success">✓</Text>
-                    <Text fontSize="small" color="font.secondary">Priority support</Text>
+                    <Text fontSize="small" color="font.secondary">{t('graceExpired.prioritySupport')}</Text>
                   </Flex>
                   <Flex gap={tokens.space.xs}>
                     <Text fontSize="small" color="font.success">✓</Text>
-                    <Text fontSize="small" color="font.secondary">Advanced features</Text>
+                    <Text fontSize="small" color="font.secondary">{t('graceExpired.advancedFeatures')}</Text>
                   </Flex>
                 </Flex>
               </Card>
@@ -128,7 +130,7 @@ export const GracePeriodExpiredModal: React.FC<GracePeriodExpiredModalProps> = (
             {/* Footer */}
             <Flex direction="column" gap={tokens.space.small}>
               <Text fontSize="small" color="font.secondary" textAlign="center">
-                Need help? Contact our support team for assistance.
+                {t('graceExpired.needHelp')}
               </Text>
               {onClose && (
                 <Button
@@ -136,7 +138,7 @@ export const GracePeriodExpiredModal: React.FC<GracePeriodExpiredModalProps> = (
                   onClick={onClose}
                   className="close-button"
                 >
-                  Maybe Later
+                  {t('graceExpired.maybeLater')}
                 </Button>
               )}
             </Flex>

@@ -83,7 +83,7 @@ const Referral: React.FC = () => {
     if (result.success) {
       setShowUpgradeModal(false);
       // Show success message
-      setShareSuccess('Subscription upgraded successfully!');
+      setShareSuccess(t('referral.subscriptionUpgraded'));
       setTimeout(() => setShareSuccess(''), 5000);
     }
   };
@@ -124,12 +124,12 @@ const Referral: React.FC = () => {
                     {isInGracePeriod ? gracePeriodDaysRemaining : daysRemaining || 0}
                   </Text>
                   <Text fontSize="small" color="font.secondary">
-                    {isInGracePeriod ? 'Grace Period Days' : t('referral.daysRemaining')}
+                    {isInGracePeriod ? t('referral.gracePeriodDays') : t('referral.daysRemaining')}
                   </Text>
                 </View>
                 <View className="expiration-info">
                   <Text fontSize="medium" fontWeight="semibold" color="font.primary">
-                    {isInGracePeriod ? 'Grace Period Until' : t('referral.freeAccessUntil')}
+                    {isInGracePeriod ? t('referral.gracePeriodUntil') : t('referral.freeAccessUntil')}
                   </Text>
                   <Text fontSize="medium" fontWeight="bold" color="font.primary">
                     {new Date(Date.now() + (isInGracePeriod ? gracePeriodDaysRemaining : daysRemaining || 0) * 24 * 60 * 60 * 1000).toLocaleDateString()}
@@ -144,9 +144,9 @@ const Referral: React.FC = () => {
                     variation="primary"
                     onClick={handleUpgradeClick}
                     isLoading={isUpgrading}
-                    loadingText="Processing..."
+                    loadingText={t('common.processing')}
                   >
-                    {isInGracePeriod ? 'Continue Access' : 'Upgrade Now'}
+                    {isInGracePeriod ? t('referral.continueAccess') : t('referral.upgradeNow')}
                   </Button>
                 </Flex>
               )}
@@ -239,7 +239,7 @@ const Referral: React.FC = () => {
         <Card className="subscription-alternative-section">
           <Alert variation="info">
             <Text fontSize="small">
-              💳 <strong>Prefer unlimited access without referrals?</strong> {t('subscription.referralAlternative')}
+              💳 <strong>{t('referral.preferUnlimited')}</strong> {t('subscription.referralAlternative')}
             </Text>
           </Alert>
         </Card>

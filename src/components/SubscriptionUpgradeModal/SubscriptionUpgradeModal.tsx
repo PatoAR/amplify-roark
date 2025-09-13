@@ -10,6 +10,7 @@ import {
   Divider
 } from '@aws-amplify/ui-react';
 import { useTheme } from '@aws-amplify/ui-react';
+import { useTranslation } from '../../i18n';
 import './SubscriptionUpgradeModal.css';
 
 interface SubscriptionPlan {
@@ -97,6 +98,7 @@ export const SubscriptionUpgradeModal: React.FC<SubscriptionUpgradeModalProps> =
   isInGracePeriod = false
 }) => {
   const { tokens } = useTheme();
+  const { t } = useTranslation();
   const [selectedPlan, setSelectedPlan] = useState<string>('pro-monthly');
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -132,12 +134,12 @@ export const SubscriptionUpgradeModal: React.FC<SubscriptionUpgradeModalProps> =
               {/* Header */}
               <Flex direction="column" gap={tokens.space.small} alignItems="center">
                 <Heading level={3} textAlign="center">
-                  {isInGracePeriod ? 'Continue Your Access' : 'Choose Your Access Method'}
+                  {isInGracePeriod ? t('subscription.continueAccess') : t('subscription.chooseAccessMethod')}
                 </Heading>
                 <Text fontSize="medium" color="font.secondary" textAlign="center">
                   {isInGracePeriod 
-                    ? `Your free trial has ended. Keep Perkins free through referrals, or subscribe for unlimited access.`
-                    : `You have ${currentDaysRemaining} days remaining. Keep Perkins free through referrals, or subscribe for unlimited access.`
+                    ? t('subscription.trialEnded')
+                    : t('subscription.daysRemaining').replace('{days}', currentDaysRemaining.toString())
                   }
                 </Text>
               </Flex>
@@ -145,20 +147,20 @@ export const SubscriptionUpgradeModal: React.FC<SubscriptionUpgradeModalProps> =
               {/* Referral Alternative Alert */}
               <Alert variation="info" isDismissible>
                 <Text fontSize="small">
-                  🎁 <strong>Keep it Free:</strong> Prefer to keep Perkins free? Invite friends instead and earn 3 months free for each successful referral!
+                  🎁 <strong>{t('subscription.keepItFree')}</strong> {t('subscription.keepItFreeText')}
                 </Text>
               </Alert>
 
               {/* Special Offer Alert */}
               <Alert variation="info" isDismissible>
                 <Text fontSize="small">
-                  🎉 <strong>Limited Time:</strong> Get 50% off your first month with any plan!
+                  🎉 <strong>{t('subscription.limitedTime')}</strong> {t('subscription.limitedTimeText')}
                 </Text>
               </Alert>
 
               {/* Plans Grid */}
               <Flex direction="column" gap={tokens.space.medium}>
-                <Heading level={4}>Choose Your Plan</Heading>
+                <Heading level={4}>{t('subscription.choosePlan')}</Heading>
                 <Flex direction="row" gap={tokens.space.medium} wrap="wrap" justifyContent="center">
                   {SUBSCRIPTION_PLANS.map((plan) => (
                     <Card 
@@ -173,7 +175,7 @@ export const SubscriptionUpgradeModal: React.FC<SubscriptionUpgradeModalProps> =
                           <Flex justifyContent="space-between" alignItems="center">
                             <Heading level={5}>{plan.name}</Heading>
                             {plan.popular && (
-                              <Badge variation="success" size="small">Most Popular</Badge>
+                              <Badge variation="success" size="small">{t('subscription.mostPopular')}</Badge>
                             )}
                           </Flex>
                           <Flex alignItems="baseline" gap={tokens.space.xs}>
@@ -186,7 +188,7 @@ export const SubscriptionUpgradeModal: React.FC<SubscriptionUpgradeModalProps> =
                           </Flex>
                           {plan.discount && (
                             <Text fontSize="small" color="font.success">
-                              Save {plan.discount}% with annual billing
+                              {t('subscription.saveWithAnnual').replace('{discount}', plan.discount.toString())}
                             </Text>
                           )}
                         </Flex>
@@ -218,22 +220,22 @@ export const SubscriptionUpgradeModal: React.FC<SubscriptionUpgradeModalProps> =
                     size="large"
                     onClick={handleUpgrade}
                     isLoading={isProcessing}
-                    loadingText="Processing..."
+                    loadingText={t('subscription.processing')}
                     className="upgrade-button"
                   >
-                    {isInGracePeriod ? 'Continue Access' : 'Upgrade Now'}
+                    {isInGracePeriod ? t('subscription.continueAccess') : t('subscription.upgradeNow')}
                   </Button>
                   <Button
                     variation="link"
                     onClick={onClose}
                     disabled={isProcessing}
                   >
-                    Maybe Later
+                    {t('subscription.maybeLater')}
                   </Button>
                 </Flex>
                 
                 <Text fontSize="small" color="font.secondary" textAlign="center">
-                  All plans include a 30-day money-back guarantee. Cancel anytime.
+                  {t('subscription.moneyBackGuarantee')}
                 </Text>
               </Flex>
             </Flex>

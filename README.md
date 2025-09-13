@@ -12,13 +12,8 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
     - Duration (seconds on screen top)
     - CSS?
 - Modified display text
-- Special campaigns, invitation links with codes that give extended (6mo) access
-- Increase by 50% industry filter options
-    MECE:
-    Mutually Exclusive → no overlaps between categories.
-    Collectively Exhaustive → together they cover the entire universe of possibilities.
 
-- Open (MPago) business account for Finu
+- Open (MPago) business account for Finu - PLACEHOLDER
 - Open AWS account on the name of Finu, transfer domain 
 - Implement subscription workflow
 - Legal disclaimers

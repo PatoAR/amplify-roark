@@ -7,6 +7,8 @@ import { UserPreferencesProvider } from '../../context/UserPreferencesContext';
 import { SessionProvider } from '../../context/SessionContext';
 import { NewsProvider } from '../../context/NewsContext';
 import { InactivityLogoutBanner } from '../InactivityLogoutBanner';
+import LanguageSwitcher from '../LanguageSwitcher/LanguageSwitcher';
+import { useTranslation } from '../../i18n';
 import '@aws-amplify/ui-react/styles.css';
 import './LandingPage.css';
 
@@ -28,6 +30,7 @@ const customComponents = {
 };
 
 const LandingPage: React.FC = () => {
+  const { t } = useTranslation();
   const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup');
   const [showInactivityBanner, setShowInactivityBanner] = useState(false);
@@ -87,24 +90,26 @@ const LandingPage: React.FC = () => {
         <div className="landing-logo">
           <img src={perkinsLogo} alt="Perkins Intel" />
         </div>
-        <div className="landing-auth-buttons">
-          <button className="auth-btn auth-btn-secondary" onClick={handleSignIn}>
-            Sign In
-          </button>
-          <button className="auth-btn auth-btn-primary" onClick={handleSignUp}>
-            Sign Up
-          </button>
+        <div className="landing-header-right">
+          <LanguageSwitcher />
+          <div className="landing-auth-buttons">
+            <button className="auth-btn auth-btn-secondary" onClick={handleSignIn}>
+              {t('landing.signIn')}
+            </button>
+            <button className="auth-btn auth-btn-primary" onClick={handleSignUp}>
+              {t('landing.signUp')}
+            </button>
+          </div>
         </div>
       </header>
 
       <main className="landing-main">
         <section className="hero-section">
           <p className="hero-subtitle">
-            From Data to Clarity: Hybrid Intelligence on Business & Markets
+            {t('landing.heroSubtitle')}
           </p>
           <p className="hero-description">
-            Permanently sourcing and processing business, markets, and company information 
-            from across the web to deliver meaningful insights when you need them most.
+            {t('landing.heroDescription')}
           </p>
         </section>
 
@@ -112,76 +117,69 @@ const LandingPage: React.FC = () => {
           <div className="features-grid">
             <div className="feature-card">
               <div className="feature-icon">📊</div>
-              <h3 className="feature-title">Real Intelligence</h3>
+              <h3 className="feature-title">{t('landing.feature1Title')}</h3>
               <p className="feature-description">
-                Continuous monitoring of news articles, regulatory reports, company newswires, 
-                statistical data, and financial filings.
+                {t('landing.feature1Description')}
               </p>
             </div>
 
             <div className="feature-card">
               <div className="feature-icon">🤖</div>
-              <h3 className="feature-title">AI-Powered Processing</h3>
+              <h3 className="feature-title">{t('landing.feature2Title')}</h3>
               <p className="feature-description">
-                Advanced artificial intelligence that transforms raw data into actionable 
-                business insights and market intelligence.
+                {t('landing.feature2Description')}
               </p>
             </div>
 
             <div className="feature-card">
               <div className="feature-icon">⚡</div>
-              <h3 className="feature-title">Timely Delivery</h3>
+              <h3 className="feature-title">{t('landing.feature3Title')}</h3>
               <p className="feature-description">
-                Information reaches you when it matters most, ensuring you never miss 
-                critical business opportunities or risks.
+                {t('landing.feature3Description')}
               </p>
             </div>
 
             <div className="feature-card">
               <div className="feature-icon">🎯</div>
-              <h3 className="feature-title">Meaningful Insights</h3>
+              <h3 className="feature-title">{t('landing.feature4Title')}</h3>
               <p className="feature-description">
-                Data is processed and presented in a way that makes sense for your 
-                business decisions and strategic planning.
+                {t('landing.feature4Description')}
               </p>
             </div>
 
             <div className="feature-card">
               <div className="feature-icon">🎛️</div>
-              <h3 className="feature-title">Customized Content</h3>
+              <h3 className="feature-title">{t('landing.feature5Title')}</h3>
               <p className="feature-description">
-                Tailor your news feed to your specific industry and geographic focus. 
-                Perkins learns your preferences to deliver only the most relevant business intelligence.
+                {t('landing.feature5Description')}
               </p>
             </div>
 
             <div className="feature-card">
               <div className="feature-icon">🎁</div>
-              <h3 className="feature-title">Always Free Through Referrals</h3>
+              <h3 className="feature-title">{t('landing.feature6Title')}</h3>
               <p className="feature-description">
-                Keep Perkins free forever by inviting friends. Earn 3 months of free access 
-                for each successful referral, or subscribe for unlimited access without referrals.
+                {t('landing.feature6Description')}
               </p>
             </div>
           </div>
         </section>
 
         <section className="cta-section">
-          <h2 className="cta-title">Ready to transform your business intelligence?</h2>
+          <h2 className="cta-title">{t('landing.ctaTitle')}</h2>
           <p className="cta-description">
-            Gain access to Perkins comprehensive business intelligence platform. 
-            Keep it free through referrals or subscribe for unlimited access.
+            {t('landing.ctaDescription')}
           </p>
           <button className="cta-button" onClick={handleSignUp}>
-            Get Started Today
+            {t('landing.getStarted')}
           </button>
         </section>
       </main>
 
       <footer className="landing-footer">
-        <p>&copy; 2024 Perkins Intel. All rights reserved.</p>
+        <p>{t('landing.copyright')}</p>
         <p className="contact-info">
-          Need help? Contact us at{' '}
+          {t('landing.contactHelp')}{' '}
           <a href="mailto:info@perkinsintel.com" className="contact-email">
             info@perkinsintel.com
           </a>

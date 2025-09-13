@@ -18,6 +18,12 @@
   width: auto;
 }
 
+.landing-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
 .landing-auth-buttons {
   display: flex;
   gap: var(--space-md);
@@ -231,6 +237,12 @@
     flex-direction: column;
     gap: var(--space-lg);
     padding: var(--space-lg);
+  }
+  
+  .landing-header-right {
+    flex-direction: column;
+    gap: var(--space-md);
+    align-items: center;
   }
   
   .landing-logo img {
