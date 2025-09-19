@@ -23,6 +23,11 @@ export const createArticle = /* GraphQL */ `mutation CreateArticle(
     countries
     language
     ttl
+    category
+    priorityDuration
+    callToAction
+    sponsorLink
+    priorityUntil
     id
     createdAt
     updatedAt
@@ -48,6 +53,11 @@ export const updateArticle = /* GraphQL */ `mutation UpdateArticle(
     countries
     language
     ttl
+    category
+    priorityDuration
+    callToAction
+    sponsorLink
+    priorityUntil
     id
     createdAt
     updatedAt
@@ -73,6 +83,11 @@ export const deleteArticle = /* GraphQL */ `mutation DeleteArticle(
     countries
     language
     ttl
+    category
+    priorityDuration
+    callToAction
+    sponsorLink
+    priorityUntil
     id
     createdAt
     updatedAt

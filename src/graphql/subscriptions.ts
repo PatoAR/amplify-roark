@@ -20,6 +20,11 @@ export const onCreateArticle = /* GraphQL */ `subscription OnCreateArticle($filt
     countries
     language
     ttl
+    category
+    priorityDuration
+    callToAction
+    sponsorLink
+    priorityUntil
     id
     createdAt
     updatedAt
@@ -42,6 +47,11 @@ export const onUpdateArticle = /* GraphQL */ `subscription OnUpdateArticle($filt
     countries
     language
     ttl
+    category
+    priorityDuration
+    callToAction
+    sponsorLink
+    priorityUntil
     id
     createdAt
     updatedAt
@@ -64,6 +74,11 @@ export const onDeleteArticle = /* GraphQL */ `subscription OnDeleteArticle($filt
     countries
     language
     ttl
+    category
+    priorityDuration
+    callToAction
+    sponsorLink
+    priorityUntil
     id
     createdAt
     updatedAt

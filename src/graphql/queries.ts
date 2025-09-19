@@ -20,6 +20,11 @@ export const getArticle = /* GraphQL */ `query GetArticle($id: ID!) {
     countries
     language
     ttl
+    category
+    priorityDuration
+    callToAction
+    sponsorLink
+    priorityUntil
     id
     createdAt
     updatedAt
@@ -47,6 +52,11 @@ export const listArticles = /* GraphQL */ `query ListArticles(
       countries
       language
       ttl
+      category
+      priorityDuration
+      callToAction
+      sponsorLink
+      priorityUntil
       id
       createdAt
       updatedAt
