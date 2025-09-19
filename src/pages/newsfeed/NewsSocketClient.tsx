@@ -229,7 +229,7 @@ function NewsSocketClient() {
                 <motion.div
                   key={msg.id}
                   layout="position"
-                  className={`article-card ${msg.seen ? '' : 'unseen'}`}
+                  className={`article-card ${msg.seen ? '' : 'unseen'} ${msg.category?.toLowerCase() || 'news'}`}
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10, transition: { duration: 0.2 } }}
@@ -268,6 +268,17 @@ function NewsSocketClient() {
                       </>
                     )}
                   </p>
+                  
+                  {/* Add call-to-action for sponsored articles */}
+                  {msg.category === 'SPONSORED' && msg.callToAction && msg.sponsorLink && (
+                    <div className="sponsored-cta" onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      handleArticleClick(e as any, msg.sponsorLink || '#');
+                    }}>
+                      {msg.callToAction}
+                    </div>
+                  )}
                 </a>
               </motion.div>
             );

@@ -2,20 +2,11 @@
 Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fetches, processes and stores news articles in dynambodb. The articles are distributed to varios channels (whatsapp, telegram) and to this webapp via AppSync subscriptions or long-polling.
 
 ## ToDo's
-- Create interface to deliver different content.
-    Categories
-    > NEWS
-    > STATS
-    > SPONSOR
-    Attributes (additional)
-    - Call to action button (text, link)
-    - Duration (seconds on screen top)
-    - CSS?
+- Access expired modal - showed up when i still have days
 - Modified display text
-
-- Open (MPago) business account for Finu - PLACEHOLDER
+- Open (MPago) business account for Finu - pay AWS, GEMINI.
 - Open AWS account on the name of Finu, transfer domain 
-- Implement subscription workflow
+- Implement subscription workflow. Use MPago account.
 - Legal disclaimers
 
 - Native IOS / Android App

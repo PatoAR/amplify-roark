@@ -18,6 +18,11 @@ const schema = a.schema({
       countries: a.string(),
       language: a.string(),
       ttl: a.integer(),
+      category: a.enum(['NEWS', 'STATISTICS', 'SPONSORED']),
+      priorityDuration: a.integer(),
+      callToAction: a.string(),
+      sponsorLink: a.string(),
+      priorityUntil: a.datetime(),
     })
     .authorization(allow => [
       // Allow API keys to create articles for backend ingestion

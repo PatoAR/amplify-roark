@@ -25,6 +25,11 @@ interface Article {
   companies?: string | Record<string, string> | null;
   countries?: string | Record<string, string> | null;
   language?: string | null;
+  category?: string | null;
+  priorityDuration?: number | null;
+  callToAction?: string | null;
+  sponsorLink?: string | null;
+  priorityUntil?: string | null;
 }
 
 interface ArticleForState {
@@ -39,6 +44,11 @@ interface ArticleForState {
   countries?: Record<string, string> | null;
   language: string;
   seen: boolean;
+  category?: string | null;
+  priorityDuration?: number | null;
+  callToAction?: string | null;
+  sponsorLink?: string | null;
+  priorityUntil?: string | null;
 }
 
 // Helper functions
@@ -64,6 +74,20 @@ function normalizeCompanies(companies: string | Record<string, string> | null | 
     }
   }
   return companies;
+}
+
+// Calculate priority expiration time using current time
+function calculatePriorityUntil(article: Article): string | null {
+  // Only calculate if article has priority duration and is STATISTICS or SPONSORED
+  if (!article.priorityDuration || 
+      (article.category !== 'STATISTICS' && article.category !== 'SPONSORED')) {
+    return null;
+  }
+  
+  // Use current time (now) as the base, not article timestamp
+  const now = new Date();
+  const priorityUntil = new Date(now.getTime() + (article.priorityDuration * 60 * 1000));
+  return priorityUntil.toISOString();
 }
 
 export const NewsManager: React.FC = () => {
@@ -98,6 +122,24 @@ export const NewsManager: React.FC = () => {
     articlesRef.current = articles;
     console.log(`[NewsManager] Articles state updated: ${articles.length} articles in memory`);
   }, [articles]);
+
+  // Check for expired priorities and clean them up
+  useEffect(() => {
+    const checkExpiredPriorities = () => {
+      const now = new Date().getTime();
+      const updatedArticles = articlesRef.current.map(article => {
+        // Only check articles that have priorityUntil field
+        if (article.priorityUntil && new Date(article.priorityUntil).getTime() <= now) {
+          return { ...article, priorityUntil: null };
+        }
+        return article;
+      });
+      setArticles(updatedArticles);
+    };
+
+    const interval = setInterval(checkExpiredPriorities, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, [setArticles]);
 
   // Cleanup function to prevent memory leaks
   const cleanupResources = useCallback(() => {
@@ -216,14 +258,36 @@ export const NewsManager: React.FC = () => {
         countries: normalizeCountries(a.countries),
         language: a.language ?? 'N/A',
         seen: false,
+        category: a.category || 'NEWS',
+        priorityDuration: a.priorityDuration || null,
+        callToAction: a.callToAction || null,
+        sponsorLink: a.sponsorLink || null,
+        priorityUntil: calculatePriorityUntil(a),
       }));
 
-      // Sort articles by timestamp in reverse chronological order (newest first)
+      // Enhanced sorting with priority hierarchy: SPONSORED > STATISTICS > NEWS
       const now = new Date().getTime();
       const sorted = formatted.sort((a, b) => {
+        // Check if articles are still in priority period
+        const aIsPriority = (a.category === 'STATISTICS' || a.category === 'SPONSORED') && 
+                           a.priorityUntil && new Date(a.priorityUntil).getTime() > now;
+        const bIsPriority = (b.category === 'STATISTICS' || b.category === 'SPONSORED') && 
+                           b.priorityUntil && new Date(b.priorityUntil).getTime() > now;
+        
+        // Priority articles stay at top
+        if (aIsPriority && !bIsPriority) return -1;
+        if (!aIsPriority && bIsPriority) return 1;
+        
+        // Within priority level, SPONSORED takes precedence over STATISTICS
+        if (aIsPriority && bIsPriority) {
+          if (a.category === 'SPONSORED' && b.category === 'STATISTICS') return -1;
+          if (a.category === 'STATISTICS' && b.category === 'SPONSORED') return 1;
+        }
+        
+        // Within same priority level and category, sort by timestamp
         const timeA = a.timestamp ? new Date(a.timestamp).getTime() : now;
         const timeB = b.timestamp ? new Date(b.timestamp).getTime() : now;
-        return timeB - timeA; // Reverse chronological order
+        return timeB - timeA;
       });
 
       const managedArticles = manageMemory(sorted);
@@ -269,13 +333,35 @@ export const NewsManager: React.FC = () => {
               countries: normalizeCountries(a.countries),
               language: a.language ?? 'N/A',
               seen: false,
+              category: a.category || 'NEWS',
+              priorityDuration: a.priorityDuration || null,
+              callToAction: a.callToAction || null,
+              sponsorLink: a.sponsorLink || null,
+              priorityUntil: calculatePriorityUntil(a),
             }));
-            // Sort new articles by timestamp in reverse chronological order
+            // Sort new articles with enhanced priority logic
             const now = new Date().getTime();
             const sorted = formatted.sort((a, b) => {
+              // Check if articles are still in priority period
+              const aIsPriority = (a.category === 'STATISTICS' || a.category === 'SPONSORED') && 
+                                 a.priorityUntil && new Date(a.priorityUntil).getTime() > now;
+              const bIsPriority = (b.category === 'STATISTICS' || b.category === 'SPONSORED') && 
+                                 b.priorityUntil && new Date(b.priorityUntil).getTime() > now;
+              
+              // Priority articles stay at top
+              if (aIsPriority && !bIsPriority) return -1;
+              if (!aIsPriority && bIsPriority) return 1;
+              
+              // Within priority level, SPONSORED takes precedence over STATISTICS
+              if (aIsPriority && bIsPriority) {
+                if (a.category === 'SPONSORED' && b.category === 'STATISTICS') return -1;
+                if (a.category === 'STATISTICS' && b.category === 'SPONSORED') return 1;
+              }
+              
+              // Within same priority level and category, sort by timestamp
               const timeA = a.timestamp ? new Date(a.timestamp).getTime() : now;
               const timeB = b.timestamp ? new Date(b.timestamp).getTime() : now;
-              return timeB - timeA; // Reverse chronological order
+              return timeB - timeA;
             });
             sorted.forEach(article => addArticle(article));
             console.log(`[NewsManager] Polling added ${newArticles.length} new articles to state`);
@@ -333,6 +419,11 @@ export const NewsManager: React.FC = () => {
               countries: normalizeCountries(newArticle.countries),
               language: newArticle.language ?? 'N/A',
               seen: false,
+              category: newArticle.category || 'NEWS',
+              priorityDuration: newArticle.priorityDuration || null,
+              callToAction: newArticle.callToAction || null,
+              sponsorLink: newArticle.sponsorLink || null,
+              priorityUntil: calculatePriorityUntil(newArticle),
             };
             articleIdsFromSubscriptionRef.current.add(newArticle.id);
             addArticle(formatted);

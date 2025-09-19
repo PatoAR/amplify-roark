@@ -13,6 +13,11 @@ interface ArticleForState {
   countries?: Record<string, string> | null;
   language: string;
   seen: boolean;
+  category?: string | null;
+  priorityDuration?: number | null;
+  callToAction?: string | null;
+  sponsorLink?: string | null;
+  priorityUntil?: string | null;
 }
 
 interface NewsContextType {
