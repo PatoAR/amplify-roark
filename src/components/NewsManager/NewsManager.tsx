@@ -1,10 +1,11 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { useAuthenticator } from '@aws-amplify/ui-react';
 import { generateClient } from 'aws-amplify/api';
 import { type Schema } from '../../../amplify/data/resource';
 import { useNews } from '../../context/NewsContext';
+import { useSession } from '../../context/SessionContext';
 import { listArticles } from '../../graphql/queries';
 import { onCreateArticle } from '../../graphql/subscriptions';
+import { isArticlePriority, sortArticlesByPriority } from '../../utils/articleSorting';
 
 // Constants
 const MAX_ARTICLES_IN_MEMORY = 100;
@@ -30,6 +31,7 @@ interface Article {
   callToAction?: string | null;
   sponsorLink?: string | null;
   priorityUntil?: string | null;
+  createdAt: string;
 }
 
 interface ArticleForState {
@@ -49,6 +51,7 @@ interface ArticleForState {
   callToAction?: string | null;
   sponsorLink?: string | null;
   priorityUntil?: string | null;
+  receivedAt: number; // Timestamp when article was received by the client
 }
 
 // Helper functions
@@ -76,7 +79,7 @@ function normalizeCompanies(companies: string | Record<string, string> | null | 
   return companies;
 }
 
-// Calculate priority expiration time using current time
+// Calculate priority expiration time using article creation time
 function calculatePriorityUntil(article: Article): string | null {
   // Only calculate if article has priority duration and is STATISTICS or SPONSORED
   if (!article.priorityDuration || 
@@ -84,14 +87,54 @@ function calculatePriorityUntil(article: Article): string | null {
     return null;
   }
   
-  // Use current time (now) as the base, not article timestamp
-  const now = new Date();
-  const priorityUntil = new Date(now.getTime() + (article.priorityDuration * 60 * 1000));
+  // Use article creation time (when Perkins received it) as the base
+  const articleCreatedAt = new Date(article.createdAt);
+  const priorityUntil = new Date(articleCreatedAt.getTime() + (article.priorityDuration * 60 * 1000));
   return priorityUntil.toISOString();
 }
 
+// Helper function to process an article into ArticleForState format
+function processArticle(a: Article, receivedAt: number): ArticleForState {
+  const category = a.category || 'NEWS';
+  const priorityUntil = calculatePriorityUntil(a);
+  
+  // Debug: Log category processing for SPONSORED and STATISTICS
+  if (category === 'SPONSORED' || category === 'STATISTICS') {
+    console.log(`[NewsManager] Processing ${category} article:`, {
+      id: a.id,
+      title: a.title,
+      category,
+      priorityDuration: a.priorityDuration,
+      createdAt: a.createdAt,
+      calculatedPriorityUntil: priorityUntil,
+      callToAction: a.callToAction,
+      sponsorLink: a.sponsorLink
+    });
+  }
+  
+  return {
+    id: a.id,
+    timestamp: a.timestamp,
+    source: a.source,
+    title: a.title,
+    industry: a.industry,
+    summary: a.summary,
+    link: a.link ?? '#',
+    companies: normalizeCompanies(a.companies),
+    countries: normalizeCountries(a.countries),
+    language: a.language ?? 'N/A',
+    seen: false,
+    category,
+    priorityDuration: a.priorityDuration || null,
+    callToAction: a.callToAction || null,
+    sponsorLink: a.sponsorLink || null,
+    priorityUntil,
+    receivedAt,
+  };
+}
+
 export const NewsManager: React.FC = () => {
-  const { user, authStatus } = useAuthenticator();
+  const { authStatus, userId } = useSession();
   const { articles, setArticles, addArticle, isInitialized, setIsInitialized, seenArticlesRef } = useNews();
   const clientRef = useRef<ReturnType<typeof generateClient<Schema>> | null>(null);
 
@@ -127,14 +170,23 @@ export const NewsManager: React.FC = () => {
   useEffect(() => {
     const checkExpiredPriorities = () => {
       const now = new Date().getTime();
+      let hasExpiredPriorities = false;
+      
       const updatedArticles = articlesRef.current.map(article => {
         // Only check articles that have priorityUntil field
         if (article.priorityUntil && new Date(article.priorityUntil).getTime() <= now) {
+          hasExpiredPriorities = true;
           return { ...article, priorityUntil: null };
         }
         return article;
       });
-      setArticles(updatedArticles);
+      
+      if (hasExpiredPriorities) {
+        // Re-sort articles after priority expiration to maintain correct order
+        const sorted = sortArticlesByPriority(updatedArticles);
+        setArticles(sorted);
+        console.log('[NewsManager] Priority expiration detected, articles re-sorted');
+      }
     };
 
     const interval = setInterval(checkExpiredPriorities, 60000); // Check every minute
@@ -242,37 +294,31 @@ export const NewsManager: React.FC = () => {
       const articles: Article[] = (result as any).data?.listArticles?.items || [];
       console.log(`[NewsManager] Initial articles fetched: ${articles.length} articles from server`);
       
+      // Debug: Log article categories
+      const categoryCounts = articles.reduce((acc, article) => {
+        const category = article.category || 'NEWS';
+        acc[category] = (acc[category] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      console.log('[NewsManager] Initial articles by category:', categoryCounts);
+      
+      // Debug: Log SPONSORED and STATISTICS articles specifically
+      const sponsoredArticles = articles.filter(a => a.category === 'SPONSORED');
+      const statisticsArticles = articles.filter(a => a.category === 'STATISTICS');
+      console.log(`[NewsManager] SPONSORED articles found: ${sponsoredArticles.length}`, sponsoredArticles.map(a => ({ id: a.id, title: a.title, priorityDuration: a.priorityDuration })));
+      console.log(`[NewsManager] STATISTICS articles found: ${statisticsArticles.length}`, statisticsArticles.map(a => ({ id: a.id, title: a.title, priorityDuration: a.priorityDuration })));
+      
 
       
       // Initial articles fetched
       
-      const formatted = articles.map(a => ({
-        id: a.id,
-        timestamp: a.timestamp,
-        source: a.source,
-        title: a.title,
-        industry: a.industry,
-        summary: a.summary,
-        link: a.link ?? '#',
-        companies: normalizeCompanies(a.companies),
-        countries: normalizeCountries(a.countries),
-        language: a.language ?? 'N/A',
-        seen: false,
-        category: a.category || 'NEWS',
-        priorityDuration: a.priorityDuration || null,
-        callToAction: a.callToAction || null,
-        sponsorLink: a.sponsorLink || null,
-        priorityUntil: calculatePriorityUntil(a),
-      }));
+      const now = Date.now();
+      const formatted = articles.map(a => processArticle(a, now));
 
-      // Enhanced sorting with priority hierarchy: SPONSORED > STATISTICS > NEWS
-      const now = new Date().getTime();
+      // Initial fetch: Sort by timestamp within each category (reverse chronological)
       const sorted = formatted.sort((a, b) => {
-        // Check if articles are still in priority period
-        const aIsPriority = (a.category === 'STATISTICS' || a.category === 'SPONSORED') && 
-                           a.priorityUntil && new Date(a.priorityUntil).getTime() > now;
-        const bIsPriority = (b.category === 'STATISTICS' || b.category === 'SPONSORED') && 
-                           b.priorityUntil && new Date(b.priorityUntil).getTime() > now;
+        const aIsPriority = isArticlePriority(a, now);
+        const bIsPriority = isArticlePriority(b, now);
         
         // Priority articles stay at top
         if (aIsPriority && !bIsPriority) return -1;
@@ -284,13 +330,27 @@ export const NewsManager: React.FC = () => {
           if (a.category === 'STATISTICS' && b.category === 'SPONSORED') return 1;
         }
         
-        // Within same priority level and category, sort by timestamp
-        const timeA = a.timestamp ? new Date(a.timestamp).getTime() : now;
-        const timeB = b.timestamp ? new Date(b.timestamp).getTime() : now;
-        return timeB - timeA;
+        // Within same priority level and category, sort by timestamp (newest first)
+        const aTime = new Date(a.timestamp || '').getTime();
+        const bTime = new Date(b.timestamp || '').getTime();
+        return bTime - aTime;
       });
 
       const managedArticles = manageMemory(sorted);
+      
+      // Debug: Log final article counts by category after sorting
+      const finalCategoryCounts = managedArticles.reduce((acc, article) => {
+        const category = article.category || 'NEWS';
+        acc[category] = (acc[category] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      console.log('[NewsManager] Final articles by category after sorting:', finalCategoryCounts);
+      
+      // Debug: Log priority articles specifically
+      const priorityArticles = managedArticles.filter(a => isArticlePriority(a));
+      console.log(`[NewsManager] Priority articles in final state: ${priorityArticles.length}`, 
+        priorityArticles.map(a => ({ id: a.id, category: a.category, priorityUntil: a.priorityUntil })));
+      
       setArticles(managedArticles);
       setIsInitialized(true);
       console.log(`[NewsManager] Initial articles loaded: ${managedArticles.length} articles in state`);
@@ -321,48 +381,28 @@ export const NewsManager: React.FC = () => {
           );
           if (newArticles.length > 0) {
             console.log(`[NewsManager] Polling found ${newArticles.length} new articles`);
-            const formatted = newArticles.map(a => ({
-              id: a.id,
-              timestamp: a.timestamp,
-              source: a.source,
-              title: a.title,
-              industry: a.industry,
-              summary: a.summary,
-              link: a.link ?? '#',
-              companies: normalizeCompanies(a.companies),
-              countries: normalizeCountries(a.countries),
-              language: a.language ?? 'N/A',
-              seen: false,
-              category: a.category || 'NEWS',
-              priorityDuration: a.priorityDuration || null,
-              callToAction: a.callToAction || null,
-              sponsorLink: a.sponsorLink || null,
-              priorityUntil: calculatePriorityUntil(a),
-            }));
+            
+            // Debug: Log new article categories
+            const newCategoryCounts = newArticles.reduce((acc, article) => {
+              const category = article.category || 'NEWS';
+              acc[category] = (acc[category] || 0) + 1;
+              return acc;
+            }, {} as Record<string, number>);
+            console.log('[NewsManager] New articles by category:', newCategoryCounts);
+            
+            // Debug: Log SPONSORED and STATISTICS articles specifically
+            const newSponsoredArticles = newArticles.filter(a => a.category === 'SPONSORED');
+            const newStatisticsArticles = newArticles.filter(a => a.category === 'STATISTICS');
+            if (newSponsoredArticles.length > 0) {
+              console.log(`[NewsManager] New SPONSORED articles: ${newSponsoredArticles.length}`, newSponsoredArticles.map(a => ({ id: a.id, title: a.title, priorityDuration: a.priorityDuration })));
+            }
+            if (newStatisticsArticles.length > 0) {
+              console.log(`[NewsManager] New STATISTICS articles: ${newStatisticsArticles.length}`, newStatisticsArticles.map(a => ({ id: a.id, title: a.title, priorityDuration: a.priorityDuration })));
+            }
+            const receivedAt = Date.now();
+            const formatted = newArticles.map(a => processArticle(a, receivedAt));
             // Sort new articles with enhanced priority logic
-            const now = new Date().getTime();
-            const sorted = formatted.sort((a, b) => {
-              // Check if articles are still in priority period
-              const aIsPriority = (a.category === 'STATISTICS' || a.category === 'SPONSORED') && 
-                                 a.priorityUntil && new Date(a.priorityUntil).getTime() > now;
-              const bIsPriority = (b.category === 'STATISTICS' || b.category === 'SPONSORED') && 
-                                 b.priorityUntil && new Date(b.priorityUntil).getTime() > now;
-              
-              // Priority articles stay at top
-              if (aIsPriority && !bIsPriority) return -1;
-              if (!aIsPriority && bIsPriority) return 1;
-              
-              // Within priority level, SPONSORED takes precedence over STATISTICS
-              if (aIsPriority && bIsPriority) {
-                if (a.category === 'SPONSORED' && b.category === 'STATISTICS') return -1;
-                if (a.category === 'STATISTICS' && b.category === 'SPONSORED') return 1;
-              }
-              
-              // Within same priority level and category, sort by timestamp
-              const timeA = a.timestamp ? new Date(a.timestamp).getTime() : now;
-              const timeB = b.timestamp ? new Date(b.timestamp).getTime() : now;
-              return timeB - timeA;
-            });
+            const sorted = sortArticlesByPriority(formatted);
             sorted.forEach(article => addArticle(article));
             console.log(`[NewsManager] Polling added ${newArticles.length} new articles to state`);
             // Polling added new articles
@@ -400,6 +440,63 @@ export const NewsManager: React.FC = () => {
           
           if (newArticle && !isArticleSeen(newArticle.id)) {
             console.log(`[NewsManager] AppSync subscription received new article: ${newArticle.id}`);
+            
+            // Debug: Log article category for SPONSORED and STATISTICS
+            const category = newArticle.category || 'NEWS';
+            if (category === 'SPONSORED' || category === 'STATISTICS') {
+              console.log(`[NewsManager] AppSync received ${category} article:`, {
+                id: newArticle.id,
+                title: newArticle.title,
+                category,
+                priorityDuration: newArticle.priorityDuration,
+                callToAction: newArticle.callToAction,
+                sponsorLink: newArticle.sponsorLink
+              });
+            }
+            
+            // Check if article has null category (potential race condition)
+            if (newArticle.category === null) {
+              console.log(`[NewsManager] Article ${newArticle.id} received with null category, waiting for data consistency...`);
+              
+              // Wait a short delay and fetch the article again to get complete data
+              setTimeout(async () => {
+                try {
+                  const client = getClient();
+                  const result = await client.graphql({ 
+                    query: listArticles,
+                    variables: {
+                      filter: { id: { eq: newArticle.id } }
+                    }
+                  });
+                  const articles: Article[] = (result as any).data?.listArticles?.items || [];
+                  
+                  if (articles.length > 0 && articles[0].category) {
+                    console.log(`[NewsManager] Retrieved complete article data for ${newArticle.id}:`, articles[0]);
+                    const formatted: ArticleForState = processArticle(articles[0], Date.now());
+                    articleIdsFromSubscriptionRef.current.add(articles[0].id);
+                    addArticle(formatted);
+                    console.log(`[NewsManager] AppSync live: article ${articles[0].id} added to state with complete data`);
+                  } else {
+                    console.warn(`[NewsManager] Could not retrieve complete data for article ${newArticle.id}, using subscription data`);
+                    // Fallback to original subscription data
+                    const formatted: ArticleForState = processArticle(newArticle, Date.now());
+                    articleIdsFromSubscriptionRef.current.add(newArticle.id);
+                    addArticle(formatted);
+                    console.log(`[NewsManager] AppSync live: article ${newArticle.id} added to state with subscription data`);
+                  }
+                } catch (error) {
+                  console.error(`[NewsManager] Error fetching complete article data for ${newArticle.id}:`, error);
+                  // Fallback to original subscription data
+                  const formatted: ArticleForState = processArticle(newArticle, Date.now());
+                  articleIdsFromSubscriptionRef.current.add(newArticle.id);
+                  addArticle(formatted);
+                  console.log(`[NewsManager] AppSync live: article ${newArticle.id} added to state with subscription data (fallback)`);
+                }
+              }, 1000); // Wait 1 second for data consistency
+              
+              return; // Exit early, we'll handle this article in the setTimeout
+            }
+            
             // Mark subscription as established only when we receive the first article
             if (!subscriptionEstablishedRef.current) {
               subscriptionEstablishedRef.current = true;
@@ -407,24 +504,7 @@ export const NewsManager: React.FC = () => {
             }
             // Mark that AppSync has received at least one article
             appSyncHasReceivedArticlesRef.current = true;
-            const formatted: ArticleForState = {
-              id: newArticle.id,
-              timestamp: newArticle.timestamp,
-              source: newArticle.source,
-              title: newArticle.title,
-              industry: newArticle.industry,
-              summary: newArticle.summary,
-              link: newArticle.link ?? '#',
-              companies: normalizeCompanies(newArticle.companies),
-              countries: normalizeCountries(newArticle.countries),
-              language: newArticle.language ?? 'N/A',
-              seen: false,
-              category: newArticle.category || 'NEWS',
-              priorityDuration: newArticle.priorityDuration || null,
-              callToAction: newArticle.callToAction || null,
-              sponsorLink: newArticle.sponsorLink || null,
-              priorityUntil: calculatePriorityUntil(newArticle),
-            };
+            const formatted: ArticleForState = processArticle(newArticle, Date.now());
             articleIdsFromSubscriptionRef.current.add(newArticle.id);
             addArticle(formatted);
             console.log(`[NewsManager] AppSync live: article ${newArticle.id} added to state`);
@@ -516,7 +596,7 @@ export const NewsManager: React.FC = () => {
 
   // Initialize when user changes
   useEffect(() => {
-    console.log(`[NewsManager] useEffect triggered - authStatus: ${authStatus}, userId: ${user?.userId}, isInitializing: ${isInitializingRef.current}, previousUserId: ${previousUserIdRef.current}`);
+    console.log(`[NewsManager] useEffect triggered - authStatus: ${authStatus}, userId: ${userId}, isInitializing: ${isInitializingRef.current}, previousUserId: ${previousUserIdRef.current}`);
     
     // Add a small delay to prevent rapid re-initialization
     const timeoutId = setTimeout(() => {
@@ -524,18 +604,18 @@ export const NewsManager: React.FC = () => {
         console.log('[NewsManager] Already initializing, skipping');
         return;
       }
-      if (authStatus !== 'authenticated' || !user?.userId) {
+      if (authStatus !== 'authenticated' || !userId) {
         console.log('[NewsManager] User not authenticated or no user ID, skipping initialization');
         return;
       }
       // Check if user actually changed
-      if (previousUserIdRef.current === user.userId) {
+      if (previousUserIdRef.current === userId) {
         console.log('[NewsManager] User ID unchanged, skipping initialization');
         return;
       }
     
-      console.log(`[NewsManager] User changed from ${previousUserIdRef.current || 'none'} to ${user.userId}, initializing...`);
-      previousUserIdRef.current = user.userId;
+      console.log(`[NewsManager] User changed from ${previousUserIdRef.current || 'none'} to ${userId}, initializing...`);
+      previousUserIdRef.current = userId;
       isComponentMountedRef.current = true;
       isInitializingRef.current = true;
       cleanupResources();
@@ -562,7 +642,7 @@ export const NewsManager: React.FC = () => {
       cleanupResources();
       // Component unmounted or user changed
     };
-  }, [user?.userId, authStatus]); // Depend on user ID and auth status
+  }, [userId, authStatus]); // Depend on user ID and auth status
 
   // This component doesn't render anything, it just manages the news state
   return null;

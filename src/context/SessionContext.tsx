@@ -2,10 +2,10 @@ import { createContext, useContext, ReactNode, useState } from 'react';
 import { useSessionManager } from '../hooks/useSessionManager';
 
 interface SessionContextType {
+  authStatus: 'configuring' | 'authenticated' | 'unauthenticated';
   isAuthenticated: boolean;
   isSessionActive: boolean;
   logout: () => Promise<void>;
-  // Remove all activity tracking functions except basic session management
   userId?: string;
   sessionId?: string;
   authError: Error | null;
@@ -33,8 +33,9 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     }
   });
 
-  // Only keep essential session management
+  // Use consolidated session management
   const {
+    authStatus,
     isAuthenticated,
     isSessionActive,
     logout,
@@ -46,6 +47,7 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
 
   return (
     <SessionContext.Provider value={{
+      authStatus,
       isAuthenticated,
       isSessionActive,
       logout,

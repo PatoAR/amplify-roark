@@ -3,7 +3,6 @@ import {
   Card, 
   Flex, 
   Text, 
-  Button, 
   Heading,
   Alert,
   Badge,
@@ -21,8 +20,7 @@ interface GracePeriodExpiredModalProps {
 }
 
 export const GracePeriodExpiredModal: React.FC<GracePeriodExpiredModalProps> = ({
-  isOpen,
-  onClose
+  isOpen
 }) => {
   const { tokens } = useTheme();
   const { t } = useTranslation();
@@ -50,7 +48,7 @@ export const GracePeriodExpiredModal: React.FC<GracePeriodExpiredModalProps> = (
 
   return (
     <>
-      <div className="grace-expired-overlay" onClick={onClose} role="dialog" aria-modal="true">
+      <div className="grace-expired-overlay" role="dialog" aria-modal="true">
         <Card
           className="grace-expired-modal-content"
           variation="elevated"
@@ -132,15 +130,6 @@ export const GracePeriodExpiredModal: React.FC<GracePeriodExpiredModalProps> = (
               <Text fontSize="small" color="font.secondary" textAlign="center">
                 {t('graceExpired.needHelp')}
               </Text>
-              {onClose && (
-                <Button
-                  variation="link"
-                  onClick={onClose}
-                  className="close-button"
-                >
-                  {t('graceExpired.maybeLater')}
-                </Button>
-              )}
             </Flex>
           </Flex>
         </Card>

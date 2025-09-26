@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useAuthenticator } from '@aws-amplify/ui-react';
 import { generateClient } from 'aws-amplify/api';
 import { type Schema } from '../../../amplify/data/resource';
+import { useSession } from '../../context/SessionContext';
 import './AnalyticsDashboard.css';
 
 interface SessionStats {
@@ -11,7 +11,7 @@ interface SessionStats {
 }
 
 export const AnalyticsDashboard = () => {
-  const { user } = useAuthenticator();
+  const { userId } = useSession();
   const [sessionStats, setSessionStats] = useState<SessionStats>({
     totalSessions: 0,
     totalDuration: 0,
@@ -21,13 +21,13 @@ export const AnalyticsDashboard = () => {
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d');
 
   useEffect(() => {
-    if (user?.userId) {
+    if (userId) {
       loadAnalytics();
     }
-  }, [user?.userId, timeRange]);
+  }, [userId, timeRange]);
 
   const loadAnalytics = async () => {
-    if (!user?.userId) return;
+    if (!userId) return;
 
     setIsLoading(true);
     try {
@@ -41,7 +41,7 @@ export const AnalyticsDashboard = () => {
       // Load session data
       const { data: activities } = await client.models.UserActivity.list({
         filter: { 
-          owner: { eq: user.userId },
+          owner: { eq: userId },
           startTime: { ge: startDate.toISOString() }
         }
       });

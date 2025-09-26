@@ -14,6 +14,8 @@ export interface SubscriptionStatus {
   canCreateContent: boolean;
   trialEndDate?: string;
   subscriptionType?: string;
+  isLoading: boolean;
+  hasError: boolean;
 }
 
 const GRACE_PERIOD_DAYS = 14;
@@ -28,6 +30,8 @@ export function useSubscriptionStatus(): SubscriptionStatus {
     gracePeriodDaysRemaining: 0,
     canAccessContent: true,
     canCreateContent: true,
+    isLoading: true,
+    hasError: false,
   });
 
   useEffect(() => {
@@ -39,6 +43,8 @@ export function useSubscriptionStatus(): SubscriptionStatus {
     }
 
     const fetchSubscriptionStatus = async () => {
+      setSubscriptionStatus(prev => ({ ...prev, isLoading: true, hasError: false }));
+      
       // Add a small delay to ensure authentication is fully complete
       await new Promise(resolve => setTimeout(resolve, 100));
       
@@ -63,6 +69,8 @@ export function useSubscriptionStatus(): SubscriptionStatus {
             gracePeriodDaysRemaining: 0,
             canAccessContent: false,
             canCreateContent: false,
+            isLoading: false,
+            hasError: false,
           });
           return;
         }
@@ -79,6 +87,8 @@ export function useSubscriptionStatus(): SubscriptionStatus {
             gracePeriodDaysRemaining: 0,
             canAccessContent: false,
             canCreateContent: false,
+            isLoading: false,
+            hasError: false,
           });
           return;
         }
@@ -123,6 +133,8 @@ export function useSubscriptionStatus(): SubscriptionStatus {
             canCreateContent,
             trialEndDate,
             subscriptionType: subscription.subscriptionType,
+            isLoading: false,
+            hasError: false,
           };
           
           // Check if anything actually changed
@@ -145,22 +157,12 @@ export function useSubscriptionStatus(): SubscriptionStatus {
           return;
         }
         
-        // Default to expired on other errors
-        setSubscriptionStatus(prev => {
-          // Only update if not already expired
-          if (prev.isExpired && prev.daysRemaining === 0) {
-            return prev;
-          }
-          return {
-            status: 'expired',
-            daysRemaining: 0,
-            isExpired: true,
-            isInGracePeriod: false,
-            gracePeriodDaysRemaining: 0,
-            canAccessContent: false,
-            canCreateContent: false,
-          };
-        });
+        // Set error state instead of expired for network/API errors
+        setSubscriptionStatus(prev => ({
+          ...prev,
+          isLoading: false,
+          hasError: true,
+        }));
       }
     };
 

@@ -135,8 +135,30 @@ export const useActivityTracking = () => {
   // Clean up session when user logs out or component unmounts
   useEffect(() => {
     const handleBeforeUnload = () => {
-      if (!user?.userId) {
-        endSession();
+      // Only attempt cleanup if user is logged in and session exists
+      if (user?.userId && sessionRef.current) {
+        // Use sendBeacon for reliable cleanup on page unload
+        if (navigator.sendBeacon && sessionRef.current.recordId) {
+          const endTime = new Date();
+          const duration = Math.floor((endTime.getTime() - sessionRef.current.startTime.getTime()) / 1000);
+          
+          const cleanupData = JSON.stringify({
+            id: sessionRef.current.recordId,
+            endTime: endTime.toISOString(),
+            duration,
+            isActive: false,
+          });
+          
+          // Send cleanup data via beacon (more reliable than fetch on unload)
+          navigator.sendBeacon('/api/cleanup-session', cleanupData);
+        }
+        
+        // Fallback: try to end session synchronously (may not complete)
+        try {
+          endSession();
+        } catch (error) {
+          console.warn('Session cleanup failed on unload:', error);
+        }
       }
     };
 
@@ -144,7 +166,8 @@ export const useActivityTracking = () => {
     
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      if (!user?.userId) {
+      // Clean up session on component unmount if user is no longer logged in
+      if (!user?.userId && sessionRef.current) {
         endSession();
       }
     };

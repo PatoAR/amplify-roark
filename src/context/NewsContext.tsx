@@ -1,7 +1,8 @@
 import { createContext, useContext, useState, useRef, useCallback, ReactNode, useEffect } from 'react';
 import { useAuthenticator } from '@aws-amplify/ui-react';
+import { isArticlePriority, sortArticlesByPriority } from '../utils/articleSorting';
 
-interface ArticleForState {
+export interface ArticleForState {
   id: string;
   timestamp?: string | null;
   source: string;
@@ -18,6 +19,7 @@ interface ArticleForState {
   callToAction?: string | null;
   sponsorLink?: string | null;
   priorityUntil?: string | null;
+  receivedAt: number; // Timestamp when article was received by the client
 }
 
 interface NewsContextType {
@@ -58,7 +60,40 @@ export const NewsProvider: React.FC<NewsProviderProps> = ({ children }) => {
       if (prev.find(a => a.id === article.id)) {
         return prev;
       }
-      return [article, ...prev];
+      
+      // Debug: Log SPONSORED and STATISTICS articles being added
+      if (article.category === 'SPONSORED' || article.category === 'STATISTICS') {
+        console.log(`[NewsContext] Adding ${article.category} article:`, {
+          id: article.id,
+          title: article.title,
+          category: article.category,
+          priorityUntil: article.priorityUntil,
+          callToAction: article.callToAction,
+          sponsorLink: article.sponsorLink
+        });
+      }
+      
+      // Add the new article and then sort the entire array
+      // This ensures consistent ordering and proper React re-rendering
+      const newArticles = [article, ...prev];
+      
+      // Sort the entire array with priority hierarchy
+      const sorted = sortArticlesByPriority(newArticles);
+      
+      // Debug: Log sorting results for SPONSORED and STATISTICS articles
+      const now = new Date().getTime();
+      const priorityArticles = sorted.filter(a => isArticlePriority(a, now));
+      if (priorityArticles.length > 0) {
+        console.log('[NewsContext] Priority articles after sorting:', 
+          priorityArticles.map(a => ({ 
+            id: a.id, 
+            category: a.category, 
+            priorityUntil: a.priorityUntil,
+            receivedAt: a.receivedAt 
+          })));
+      }
+      
+      return sorted;
     });
   }, []);
 

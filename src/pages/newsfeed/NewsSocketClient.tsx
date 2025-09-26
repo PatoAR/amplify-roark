@@ -63,6 +63,14 @@ function NewsSocketClient() {
       return [];
     }
 
+    // Debug: Log total articles and categories before filtering
+    const totalCategoryCounts = articles.reduce((acc, article) => {
+      const category = article.category || 'NEWS';
+      acc[category] = (acc[category] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    console.log(`[NewsSocketClient] Total articles before filtering: ${articles.length}`, totalCategoryCounts);
+
     // Early return if no filters are set
     if (!industryMatcher.hasIndustryFilters && !countryMatcher.hasCountryFilters) {
       return articles;
@@ -77,7 +85,7 @@ function NewsSocketClient() {
       return opt ? opt.id : null;
     };
 
-    return articles.filter(msg => {
+    const filtered = articles.filter(msg => {
       // Industry matching
       const industryMatches = !industryMatcher.hasIndustryFilters || 
         (msg.industry && industryMatcher.industrySet.has(msg.industry));
@@ -132,11 +140,49 @@ function NewsSocketClient() {
 
       return true;
     });
+    
+    // Debug: Log filtered results
+    const filteredCategoryCounts = filtered.reduce((acc: Record<string, number>, article) => {
+      const category = article.category || 'NEWS';
+      acc[category] = (acc[category] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    console.log(`[NewsSocketClient] Articles after filtering: ${filtered.length}`, filteredCategoryCounts);
+    
+    return filtered;
   }, [articles, isLoading, industryMatcher, countryMatcher]);
 
   // Limit the number of articles rendered to prevent performance issues
   const displayedMessages = useMemo(() => {
-    return filteredMessages.slice(0, displayedCount);
+    const messages = filteredMessages.slice(0, displayedCount);
+    
+    // Debug: Log SPONSORED and STATISTICS articles being displayed
+    const sponsoredMessages = messages.filter((msg: any) => msg.category === 'SPONSORED');
+    const statisticsMessages = messages.filter((msg: any) => msg.category === 'STATISTICS');
+    
+    if (sponsoredMessages.length > 0) {
+      console.log(`[NewsSocketClient] Displaying ${sponsoredMessages.length} SPONSORED articles:`, 
+        sponsoredMessages.map((msg: any) => ({ 
+          id: msg.id, 
+          title: msg.title, 
+          category: msg.category,
+          callToAction: msg.callToAction,
+          sponsorLink: msg.sponsorLink,
+          seen: msg.seen 
+        })));
+    }
+    
+    if (statisticsMessages.length > 0) {
+      console.log(`[NewsSocketClient] Displaying ${statisticsMessages.length} STATISTICS articles:`, 
+        statisticsMessages.map((msg: any) => ({ 
+          id: msg.id, 
+          title: msg.title, 
+          category: msg.category,
+          seen: msg.seen 
+        })));
+    }
+    
+    return messages;
   }, [filteredMessages, displayedCount]);
 
   // Show message if there are more articles than displayed
@@ -221,9 +267,19 @@ function NewsSocketClient() {
       ) : (
         <div className="articles-container">
           <AnimatePresence initial={false}>
-            {displayedMessages.map((msg) => {
-              // Console log the countries for each displayed article (muted)
-              // muted debug log removed
+            {displayedMessages.map((msg: any) => {
+              // Debug: Log individual article rendering for SPONSORED and STATISTICS
+              if (msg.category === 'SPONSORED' || msg.category === 'STATISTICS') {
+                console.log(`[NewsSocketClient] Rendering ${msg.category} article:`, {
+                  id: msg.id,
+                  title: msg.title,
+                  category: msg.category,
+                  seen: msg.seen,
+                  hasCallToAction: !!msg.callToAction,
+                  hasSponsorLink: !!msg.sponsorLink,
+                  className: `article-card ${msg.seen ? '' : 'unseen'} ${msg.category?.toLowerCase() || 'news'}`
+                });
+              }
               
               return (
                 <motion.div
@@ -258,7 +314,7 @@ function NewsSocketClient() {
                             onClick={(e) => {
                               e.stopPropagation(); // Prevents bubbling to outer <a>
                               e.preventDefault();  // Prevents any anchor behavior just in case
-                              handleCompanyClick(url);
+                              handleCompanyClick(String(url));
                             }}
                             title={`Google > ${name}`}
                           >
@@ -270,14 +326,27 @@ function NewsSocketClient() {
                   </p>
                   
                   {/* Add call-to-action for sponsored articles */}
-                  {msg.category === 'SPONSORED' && msg.callToAction && msg.sponsorLink && (
-                    <div className="sponsored-cta" onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      handleArticleClick(e as any, msg.sponsorLink || '#');
-                    }}>
-                      {msg.callToAction}
-                    </div>
+                  {msg.category === 'SPONSORED' && (
+                    <>
+                      {msg.callToAction && msg.sponsorLink ? (
+                        <div className="sponsored-cta" onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          handleArticleClick(e as any, String(msg.sponsorLink || '#'));
+                        }}>
+                          {msg.callToAction}
+                        </div>
+                      ) : (
+                        <div className="sponsored-cta" style={{ backgroundColor: '#ef4444', fontSize: '12px' }}>
+                          Missing CTA Data
+                        </div>
+                      )}
+                      
+                      {/* Debug info for sponsored articles */}
+                      <div style={{ fontSize: '10px', color: '#666', marginTop: '4px' }}>
+                        Debug: CTA="{msg.callToAction || 'none'}" Link="{msg.sponsorLink || 'none'}"
+                      </div>
+                    </>
                   )}
                 </a>
               </motion.div>

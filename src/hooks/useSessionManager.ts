@@ -9,6 +9,15 @@ interface SessionState {
   sessionId?: string;
 }
 
+// Consolidated authentication state interface
+interface AuthState {
+  authStatus: 'configuring' | 'authenticated' | 'unauthenticated';
+  isAuthenticated: boolean;
+  isSessionActive: boolean;
+  userId?: string;
+  sessionId?: string;
+}
+
 interface UseSessionManagerOptions {
   onSessionStart?: (userId: string) => void;
   onSessionEnd?: (userId: string) => void;
@@ -18,23 +27,35 @@ interface UseSessionManagerOptions {
 export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
   const { user, authStatus, signOut } = useAuthenticator();
   const { startSession, endSession } = useActivityTracking();
-  const sessionStateRef = useRef<SessionState>({
+  
+  // Consolidated state management
+  const [authState, setAuthState] = useState<AuthState>({
+    authStatus: 'configuring',
     isAuthenticated: false,
     isSessionActive: false,
   });
   
-  const [isAuthenticatedState, setIsAuthenticatedState] = useState<boolean>(false);
-  const [isSessionActiveState, setIsSessionActiveState] = useState<boolean>(false);
-  const [userIdState, setUserIdState] = useState<string | undefined>(undefined);
-  const [sessionIdState, setSessionIdState] = useState<string | undefined>(undefined);
+  const sessionStateRef = useRef<SessionState>({
+    isAuthenticated: false,
+    isSessionActive: false,
+  });
   const isLoggingOutRef = useRef<boolean>(false);
 
-  // Centralized logout function
+  // Centralized logout function with improved error handling
   const performLogout = useCallback(async () => {
     const userId = sessionStateRef.current.userId;
 
     try {
       isLoggingOutRef.current = true;
+
+      // Update auth state immediately to prevent race conditions
+      setAuthState(prev => ({
+        ...prev,
+        isAuthenticated: false,
+        isSessionActive: false,
+        userId: undefined,
+        sessionId: undefined,
+      }));
 
       // End activity tracking session
       if (sessionStateRef.current.isSessionActive) {
@@ -49,11 +70,8 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
         sessionId: undefined,
       };
 
-      // Small delay to ensure state is cleared
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      // Clear localStorage (except UI preferences)
-      const keysToPreserve = ['theme', 'language'];
+      // Clear localStorage (except UI preferences and inactivity flag)
+      const keysToPreserve = ['theme', 'language', 'inactivity-logout'];
       const keysToRemove = Object.keys(localStorage).filter(
         key => !keysToPreserve.includes(key) && 
         (key.includes('user') || key.includes('session') || key.includes('auth'))
@@ -76,11 +94,10 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
         options.onAuthError(error);
       }
     } finally {
-      if (authStatus === 'unauthenticated') {
-        isLoggingOutRef.current = false;
-      }
+      // Always reset logout flag to prevent blocking future logins
+      isLoggingOutRef.current = false;
     }
-  }, [endSession, signOut, options, authStatus]);
+  }, [endSession, signOut, options]);
 
   // Wrapper for startSession that checks logout state
   const safeStartSession = useCallback(async () => {
@@ -99,14 +116,22 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
         sessionId: undefined,
       };
 
-      setIsAuthenticatedState(true);
-      setIsSessionActiveState(true);
-      setUserIdState(user.userId);
+      // Update consolidated auth state
+      setAuthState(prev => ({
+        ...prev,
+        authStatus: 'authenticated',
+        isAuthenticated: true,
+        isSessionActive: true,
+        userId: user.userId,
+      }));
 
       // Start activity tracking
       safeStartSession().then(() => {
         if (sessionStateRef.current.sessionId) {
-          setSessionIdState(sessionStateRef.current.sessionId);
+          setAuthState(prev => ({
+            ...prev,
+            sessionId: sessionStateRef.current.sessionId,
+          }));
         }
       });
 
@@ -116,18 +141,55 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     }
   }, [user?.userId, safeStartSession, options]);
 
-  // Handle logout
+  // Handle logout when authStatus changes
   useEffect(() => {
     if (authStatus === 'unauthenticated' && sessionStateRef.current.isAuthenticated && !isLoggingOutRef.current) {
       performLogout();
     }
   }, [authStatus, performLogout]);
 
+  // Update authStatus in consolidated state
+  useEffect(() => {
+    setAuthState(prev => ({
+      ...prev,
+      authStatus,
+    }));
+  }, [authStatus]);
+
+  // Add browser close cleanup
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // Mark session as ending to prevent new operations
+      isLoggingOutRef.current = true;
+      
+      // Store cleanup flag for next session
+      localStorage.setItem('session-cleanup-needed', 'true');
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
+  // Check for cleanup needed on mount
+  useEffect(() => {
+    const needsCleanup = localStorage.getItem('session-cleanup-needed');
+    if (needsCleanup === 'true') {
+      localStorage.removeItem('session-cleanup-needed');
+      // Perform any necessary cleanup here
+      console.log('Performing session cleanup from previous session');
+    }
+  }, []);
+
   return {
-    isAuthenticated: isAuthenticatedState,
-    isSessionActive: isSessionActiveState,
-    userId: userIdState,
-    sessionId: sessionIdState,
+    // Consolidated authentication state
+    authStatus: authState.authStatus,
+    isAuthenticated: authState.isAuthenticated,
+    isSessionActive: authState.isSessionActive,
+    userId: authState.userId,
+    sessionId: authState.sessionId,
     logout: performLogout,
   };
 }; 

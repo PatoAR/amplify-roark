@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route } from "react-router-dom";
-import { useAuthenticator } from '@aws-amplify/ui-react';
 import Layout from "./components/Layout/Layout";
 import NewsSocketClient from "./pages/newsfeed/NewsSocketClient";
 import UserSettings from "./pages/settings/UserSettings";
@@ -21,11 +20,9 @@ export default function App() {
   // Auth error is now provided by SessionContext
   const [isInitializing, setIsInitializing] = useState(true);
 
-  // Get authStatus directly from authenticator
-  const { authStatus } = useAuthenticator();
-
-  // Use session context
+  // Use consolidated session context (single source of truth)
   const { 
+    authStatus,
     isAuthenticated, 
     isSessionActive, 
     logout,
@@ -37,11 +34,12 @@ export default function App() {
   const subscriptionManager = useSubscriptionManager();
   
   // Check if user is expired and needs to see the grace period expired modal
-  // Only show if user is authenticated and actually expired (not just authentication timing)
+  // Only show if user is authenticated, actually expired, not loading, and no errors
   const shouldShowExpiredModal = subscriptionManager.isExpired && 
                                  isAuthenticated && 
-                                 subscriptionManager.daysRemaining === 0 &&
-                                 !subscriptionManager.isInGracePeriod;
+                                 !subscriptionManager.isInGracePeriod &&
+                                 !subscriptionManager.isLoading &&
+                                 !subscriptionManager.hasError;
 
   // Handle inactivity timer separately (only when authenticated)
   const { resetInactivityTimer } = useInactivityTimer({
@@ -58,8 +56,6 @@ export default function App() {
 
   // Handle authentication state changes and prevent blank screens
   useEffect(() => {
-    // Auth state changed
-    
     // If we're still configuring, keep showing loading
     if (authStatus === 'configuring') {
       setIsInitializing(true);
@@ -87,7 +83,7 @@ export default function App() {
       setIsInitializing(true);
       return;
     }
-  }, [authStatus, isAuthenticated, isSessionActive]);
+  }, [authStatus, isAuthenticated, isSessionActive, clearAuthError]);
 
   // Reset inactivity timer when session state changes
   useEffect(() => {
@@ -108,7 +104,7 @@ export default function App() {
           // Give more time for the session to start up
           setTimeout(() => {
             if (authStatus === 'authenticated' && (!isAuthenticated || !isSessionActive)) {
-           // Authentication state unclear after visibility change
+              // Authentication state unclear after visibility change
               // Don't show error, just log the warning
             }
           }, 5000); // Wait 5 seconds instead of 2
