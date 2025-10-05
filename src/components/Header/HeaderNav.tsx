@@ -17,8 +17,8 @@ const HeaderNav = () => {
   const navigate = useNavigate();
   const [showFiltersModal, setShowFiltersModal] = useState(false); // State to control modal visibility
   const { preferences, savePreferences } = useUserPreferences();
-  const [localIndustries, setLocalIndustries] = useState(preferences.industries);
-  const [localCountries, setLocalCountries] = useState(preferences.countries);
+  const [localIndustries, setLocalIndustries] = useState(preferences.industries || []);
+  const [localCountries, setLocalCountries] = useState(preferences.countries || []);
   const { daysLeft } = useFreeDaysRemaining();
   const [isSaving, setIsSaving] = useState(false);
 
@@ -29,12 +29,12 @@ const HeaderNav = () => {
   
   const handleOpenFiltersModal = useCallback(() => {
     // When opening the modal, sync local state with context
-    setLocalIndustries(preferences.industries);
-    setLocalCountries(preferences.countries);
+    setLocalIndustries(preferences.industries || []);
+    setLocalCountries(preferences.countries || []);
     
     // Check if all industries/countries are selected
-    setSelectAllIndustries(preferences.industries.length === INDUSTRY_OPTIONS.length);
-    setSelectAllCountries(preferences.countries.length === COUNTRY_OPTIONS.length);
+    setSelectAllIndustries((preferences.industries || []).length === INDUSTRY_OPTIONS.length);
+    setSelectAllCountries((preferences.countries || []).length === COUNTRY_OPTIONS.length);
     
     setShowFiltersModal(true);
   }, [preferences.industries, preferences.countries]);
@@ -162,7 +162,7 @@ const HeaderNav = () => {
         <MenuItem onClick={handleOpenFiltersModal}>{t('menu.filters')}</MenuItem>
         <Divider />
         <MenuItem onClick={() => navigate("/settings")}>{t('menu.settings')}</MenuItem>
-        <MenuItem onClick={logout}>Logout</MenuItem>
+        <MenuItem onClick={() => logout()}>Logout</MenuItem>
       </Menu>
 
       <Modal

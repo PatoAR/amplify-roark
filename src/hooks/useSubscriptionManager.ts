@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useSession } from '../context/SessionContext';
 import { useSubscriptionStatus } from './useSubscriptionStatus';
+import { isSubscriptionUpgradeEnabled } from '../config/features';
 
 interface SubscriptionUpgradeResult {
   success: boolean;
@@ -34,6 +35,14 @@ export function useSubscriptionManager() {
   }, [subscriptionStatus.daysRemaining, subscriptionStatus.isInGracePeriod, subscriptionStatus.isExpired, lastLoggedStatus]);
 
   const upgradeSubscription = useCallback(async (planId: string): Promise<SubscriptionUpgradeResult> => {
+    // If subscription upgrades are disabled, return a message indicating this
+    if (!isSubscriptionUpgradeEnabled()) {
+      return {
+        success: false,
+        message: 'Subscription upgrades are currently disabled. Please use referrals to extend your access.',
+      };
+    }
+
     if (!isAuthenticated || !userId) {
       return {
         success: false,
@@ -94,6 +103,11 @@ export function useSubscriptionManager() {
   }, [subscriptionStatus]);
 
   const shouldShowUpgradeModal = useCallback(() => {
+    // If subscription upgrades are disabled, never show upgrade modal
+    if (!isSubscriptionUpgradeEnabled()) {
+      return false;
+    }
+    
     // Show upgrade modal if:
     // - In grace period
     // - Less than 3 days remaining

@@ -32,34 +32,28 @@ export const TabTitleUpdater: React.FC = () => {
     isLoading = false;
   }
 
-  // Early return if not authenticated
-  if (!isAuthenticated) {
-    useEffect(() => {
-      document.title = 'Perkins Live Feed';
-    }, []);
-    return null;
-  }
-
   // Memoize the country matching logic to avoid recreating functions on every render
   const countryMatcher = useMemo(() => {
-    const hasGlobalSelected = preferences.countries.includes('global');
+    const countries = preferences.countries || [];
+    const hasGlobalSelected = countries.includes('global');
     const selectedCountryIdSet = new Set<string>(
       hasGlobalSelected 
-        ? preferences.countries.filter((id: string) => id !== 'global')
-        : preferences.countries
+        ? countries.filter((id: string) => id !== 'global')
+        : countries
     );
     
     return {
       hasGlobalSelected,
       selectedCountryIdSet,
-      hasCountryFilters: preferences.countries.length > 0 && !(preferences.countries.length === COUNTRY_OPTIONS.length)
+      hasCountryFilters: countries.length > 0 && !(countries.length === COUNTRY_OPTIONS.length)
     };
   }, [preferences.countries]);
 
   // Memoize the industry matching logic
   const industryMatcher = useMemo(() => {
-    const hasIndustryFilters = preferences.industries.length > 0;
-    const industrySet = new Set(preferences.industries);
+    const industries = preferences.industries || [];
+    const hasIndustryFilters = industries.length > 0;
+    const industrySet = new Set(industries);
     
     return {
       hasIndustryFilters,
@@ -178,6 +172,11 @@ export const TabTitleUpdater: React.FC = () => {
       document.title = 'Perkins Live Feed';
     };
   }, []);
+
+  // Early return if not authenticated (after all hooks are called)
+  if (!isAuthenticated) {
+    return null;
+  }
 
   // This component doesn't render anything visible
   return null;

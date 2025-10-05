@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useSubscriptionManager } from '../../hooks/useSubscriptionManager';
 import { SubscriptionUpgradeModal } from '../SubscriptionUpgradeModal';
+import { isSubscriptionUpgradeEnabled } from '../../config/features';
 
 interface SubscriptionGuardProps {
   children: React.ReactNode;
@@ -50,13 +51,15 @@ export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
     return (
       <>
         <Navigate to={fallbackPath} replace />
-        <SubscriptionUpgradeModal
-          isOpen={showUpgradeModal}
-          onClose={() => setShowUpgradeModal(false)}
-          onUpgrade={handleUpgrade}
-          currentDaysRemaining={daysRemaining}
-          isInGracePeriod={isInGracePeriod}
-        />
+        {isSubscriptionUpgradeEnabled() && (
+          <SubscriptionUpgradeModal
+            isOpen={showUpgradeModal}
+            onClose={() => setShowUpgradeModal(false)}
+            onUpgrade={handleUpgrade}
+            currentDaysRemaining={daysRemaining}
+            isInGracePeriod={isInGracePeriod}
+          />
+        )}
       </>
     );
   }
@@ -64,13 +67,15 @@ export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
   return (
     <>
       {children}
-      <SubscriptionUpgradeModal
-        isOpen={showUpgradeModal}
-        onClose={() => setShowUpgradeModal(false)}
-        onUpgrade={handleUpgrade}
-        currentDaysRemaining={daysRemaining}
-        isInGracePeriod={isInGracePeriod}
-      />
+      {isSubscriptionUpgradeEnabled() && (
+        <SubscriptionUpgradeModal
+          isOpen={showUpgradeModal}
+          onClose={() => setShowUpgradeModal(false)}
+          onUpgrade={handleUpgrade}
+          currentDaysRemaining={daysRemaining}
+          isInGracePeriod={isInGracePeriod}
+        />
+      )}
     </>
   );
 };

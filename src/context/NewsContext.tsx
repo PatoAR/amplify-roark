@@ -122,10 +122,10 @@ export const NewsProvider: React.FC<NewsProviderProps> = ({ children }) => {
   // Clear articles when user changes
   useEffect(() => {
     // Only clear if user is actually logged out (not just during logout process)
-    if (!user?.userId && articles.length > 0) {
+    if (!user?.userId && articles && articles.length > 0) {
       clearArticles();
     }
-  }, [user?.userId, clearArticles, articles.length]);
+  }, [user?.userId, clearArticles, articles]);
 
   const value: NewsContextType = {
     articles,

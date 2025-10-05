@@ -149,9 +149,8 @@ export const useReferral = () => {
     try {
       switch (platform) {
         case 'whatsapp':
-          const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(
-            t('referral.shareMessage').replace('{code}', referralCode) + `\n\n${referralUrl}`
-          )}`;
+          const message = t('referral.shareMessage').replace('{link}', referralUrl);
+          const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
           window.open(whatsappUrl, '_blank');
           break;
 

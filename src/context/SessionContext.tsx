@@ -5,7 +5,7 @@ interface SessionContextType {
   authStatus: 'configuring' | 'authenticated' | 'unauthenticated';
   isAuthenticated: boolean;
   isSessionActive: boolean;
-  logout: () => Promise<void>;
+  logout: (isInactivityLogout?: boolean) => Promise<void>;
   userId?: string;
   sessionId?: string;
   authError: Error | null;

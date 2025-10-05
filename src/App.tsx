@@ -44,9 +44,9 @@ export default function App() {
   // Handle inactivity timer separately (only when authenticated)
   const { resetInactivityTimer } = useInactivityTimer({
     timeoutInMinutes: 120, // 2 hours
-    enabled: isAuthenticated && isSessionActive, // Only enable when authenticated and session is active
-    onLogout: async () => {
-      await logout();
+    enabled: isAuthenticated, // Only enable when authenticated (independent of session tracking)
+    onLogout: async (isInactivityLogout = false) => {
+      await logout(isInactivityLogout);
     },
     onActivity: () => {
       // Remove activity tracking to reduce AWS resource consumption

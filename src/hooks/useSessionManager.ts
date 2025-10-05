@@ -40,9 +40,20 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     isSessionActive: false,
   });
   const isLoggingOutRef = useRef<boolean>(false);
+  const justLoggedOutRef = useRef<boolean>(false);
+  const optionsRef = useRef<UseSessionManagerOptions>(options);
+  const lastProcessedAuthStateRef = useRef<string>('');
+  const startSessionRef = useRef(startSession);
+  const effectExecutionRef = useRef<boolean>(false);
+  
+  // Update refs when functions change
+  useEffect(() => {
+    optionsRef.current = options;
+    startSessionRef.current = startSession;
+  }, [options, startSession]);
 
   // Centralized logout function with improved error handling
-  const performLogout = useCallback(async () => {
+  const performLogout = useCallback(async (isInactivityLogout = false) => {
     const userId = sessionStateRef.current.userId;
 
     try {
@@ -70,8 +81,11 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
         sessionId: undefined,
       };
 
-      // Clear localStorage (except UI preferences and inactivity flag)
-      const keysToPreserve = ['theme', 'language', 'inactivity-logout'];
+      // Clear localStorage (preserve inactivity flag only for inactivity logouts)
+      const keysToPreserve = ['theme', 'language'];
+      if (isInactivityLogout) {
+        keysToPreserve.push('inactivity-logout');
+      }
       const keysToRemove = Object.keys(localStorage).filter(
         key => !keysToPreserve.includes(key) && 
         (key.includes('user') || key.includes('session') || key.includes('auth'))
@@ -85,30 +99,66 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
       await signOut();
 
       // Notify callback
-      if (userId && options.onSessionEnd) {
-        options.onSessionEnd(userId);
+      if (userId && optionsRef.current.onSessionEnd) {
+        optionsRef.current.onSessionEnd(userId);
       }
+
+      // Set flag to prevent immediate session restart
+      justLoggedOutRef.current = true;
+      // Clear the flag after a short delay to allow future logins
+      setTimeout(() => {
+        justLoggedOutRef.current = false;
+      }, 1000);
     } catch (error) {
       console.error('Logout error', error);
-      if (options.onAuthError) {
-        options.onAuthError(error);
+      if (optionsRef.current.onAuthError) {
+        optionsRef.current.onAuthError(error);
       }
     } finally {
       // Always reset logout flag to prevent blocking future logins
       isLoggingOutRef.current = false;
     }
-  }, [endSession, signOut, options]);
-
-  // Wrapper for startSession that checks logout state
-  const safeStartSession = useCallback(async () => {
-    if (!isLoggingOutRef.current) {
-      return startSession();
-    }
-  }, [startSession]);
+  }, [endSession, signOut]);
 
   // Start session when user becomes authenticated
   useEffect(() => {
-    if (user?.userId && !sessionStateRef.current.isAuthenticated && !isLoggingOutRef.current) {
+    const currentAuthState = `${user?.userId}-${authStatus}-${sessionStateRef.current.isAuthenticated}`;
+    
+    // Skip if we've already processed this exact state or if effect is already executing
+    if (currentAuthState === lastProcessedAuthStateRef.current || effectExecutionRef.current) {
+      return;
+    }
+    
+    // Mark effect as executing and update processed state
+    effectExecutionRef.current = true;
+    lastProcessedAuthStateRef.current = currentAuthState;
+    
+    console.log('[SessionManager] Session start effect triggered:', {
+      hasUser: !!user?.userId,
+      userId: user?.userId,
+      isAuthenticated: sessionStateRef.current.isAuthenticated,
+      isLoggingOut: isLoggingOutRef.current,
+      justLoggedOut: justLoggedOutRef.current,
+      authStatus,
+      shouldStart: user?.userId && 
+                   !sessionStateRef.current.isAuthenticated && 
+                   !isLoggingOutRef.current && 
+                   authStatus === 'authenticated' &&
+                   !justLoggedOutRef.current
+    });
+
+    // Only start session if:
+    // 1. User exists and has userId
+    // 2. We're not currently authenticated
+    // 3. We're not in the middle of logging out
+    // 4. Auth status is actually authenticated (prevents race condition during logout)
+    // 5. We haven't just logged out (prevents immediate restart)
+    if (user?.userId && 
+        !sessionStateRef.current.isAuthenticated && 
+        !isLoggingOutRef.current && 
+        authStatus === 'authenticated' &&
+        !justLoggedOutRef.current) {
+      console.log('[SessionManager] Starting session for user:', user.userId);
       sessionStateRef.current = {
         isAuthenticated: true,
         isSessionActive: true,
@@ -125,28 +175,46 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
         userId: user.userId,
       }));
 
-      // Start activity tracking
-      safeStartSession().then(() => {
-        if (sessionStateRef.current.sessionId) {
-          setAuthState(prev => ({
-            ...prev,
-            sessionId: sessionStateRef.current.sessionId,
-          }));
-        }
-      });
+      // Start activity tracking (using ref to avoid dependency issues)
+      if (!isLoggingOutRef.current) {
+        startSessionRef.current().then(() => {
+          if (sessionStateRef.current.sessionId) {
+            setAuthState(prev => ({
+              ...prev,
+              sessionId: sessionStateRef.current.sessionId,
+            }));
+          }
+        });
+      }
 
-      if (options.onSessionStart) {
-        options.onSessionStart(user.userId);
+      if (optionsRef.current.onSessionStart) {
+        optionsRef.current.onSessionStart(user.userId);
       }
     }
-  }, [user?.userId, safeStartSession, options]);
+    
+    // Reset execution flag after effect completes
+    effectExecutionRef.current = false;
+  }, [user?.userId, authStatus]);
 
   // Handle logout when authStatus changes
   useEffect(() => {
-    if (authStatus === 'unauthenticated' && sessionStateRef.current.isAuthenticated && !isLoggingOutRef.current) {
-      performLogout();
+    const shouldLogout = authStatus === 'unauthenticated' && sessionStateRef.current.isAuthenticated && !isLoggingOutRef.current;
+    
+    // Only log and process if there's an actual change that requires action
+    if (shouldLogout || (authStatus === 'unauthenticated' && sessionStateRef.current.isAuthenticated)) {
+      console.log('[SessionManager] Logout effect triggered:', {
+        authStatus,
+        isAuthenticated: sessionStateRef.current.isAuthenticated,
+        isLoggingOut: isLoggingOutRef.current,
+        shouldLogout
+      });
+
+      if (shouldLogout) {
+        console.log('[SessionManager] Performing logout');
+        performLogout();
+      }
     }
-  }, [authStatus, performLogout]);
+  }, [authStatus]);
 
   // Update authStatus in consolidated state
   useEffect(() => {

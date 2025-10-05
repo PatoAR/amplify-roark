@@ -31,24 +31,26 @@ function NewsSocketClient() {
 
   // Memoize the country matching logic to avoid recreating functions on every render
   const countryMatcher = useMemo(() => {
-    const hasGlobalSelected = preferences.countries.includes('global');
+    const countries = preferences.countries || [];
+    const hasGlobalSelected = countries.includes('global');
     const selectedCountryIdSet = new Set<string>(
       hasGlobalSelected 
-        ? preferences.countries.filter(id => id !== 'global')
-        : preferences.countries
+        ? countries.filter(id => id !== 'global')
+        : countries
     );
     
     return {
       hasGlobalSelected,
       selectedCountryIdSet,
-      hasCountryFilters: preferences.countries.length > 0 && !(preferences.countries.length === COUNTRY_OPTIONS.length)
+      hasCountryFilters: countries.length > 0 && !(countries.length === COUNTRY_OPTIONS.length)
     };
   }, [preferences.countries]);
 
   // Memoize the industry matching logic
   const industryMatcher = useMemo(() => {
-    const hasIndustryFilters = preferences.industries.length > 0;
-    const industrySet = new Set(preferences.industries);
+    const industries = preferences.industries || [];
+    const hasIndustryFilters = industries.length > 0;
+    const industrySet = new Set(industries);
     
     return {
       hasIndustryFilters,
@@ -62,14 +64,6 @@ function NewsSocketClient() {
     if (isLoading) {
       return [];
     }
-
-    // Debug: Log total articles and categories before filtering
-    const totalCategoryCounts = articles.reduce((acc, article) => {
-      const category = article.category || 'NEWS';
-      acc[category] = (acc[category] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-    console.log(`[NewsSocketClient] Total articles before filtering: ${articles.length}`, totalCategoryCounts);
 
     // Early return if no filters are set
     if (!industryMatcher.hasIndustryFilters && !countryMatcher.hasCountryFilters) {
@@ -140,14 +134,6 @@ function NewsSocketClient() {
 
       return true;
     });
-    
-    // Debug: Log filtered results
-    const filteredCategoryCounts = filtered.reduce((acc: Record<string, number>, article) => {
-      const category = article.category || 'NEWS';
-      acc[category] = (acc[category] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-    console.log(`[NewsSocketClient] Articles after filtering: ${filtered.length}`, filteredCategoryCounts);
     
     return filtered;
   }, [articles, isLoading, industryMatcher, countryMatcher]);
@@ -298,6 +284,9 @@ function NewsSocketClient() {
                   className="article-line-link"
                 >
                   <p className="article-line">
+                    {msg.category === 'SPONSORED' && (
+                      <span className="article-sponsored-label">SPONSORED</span>
+                    )}
                     <span className="article-industry">{msg.industry}</span>{" "}
                     <span className="article-timestamp-wrapper">
                       <span className="article-timestamp">{formatLocalTime(msg.timestamp)}</span>
@@ -323,31 +312,18 @@ function NewsSocketClient() {
                         ))}
                       </>
                     )}
+                    
+                    {/* Add call-to-action for sponsored articles - inline after companies */}
+                    {msg.category === 'SPONSORED' && (
+                      <span className="sponsored-cta" onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        handleArticleClick(e as any, String(msg.sponsorLink || msg.link || '#'));
+                      }}>
+                        {msg.callToAction || 'Learn More'}
+                      </span>
+                    )}
                   </p>
-                  
-                  {/* Add call-to-action for sponsored articles */}
-                  {msg.category === 'SPONSORED' && (
-                    <>
-                      {msg.callToAction && msg.sponsorLink ? (
-                        <div className="sponsored-cta" onClick={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          handleArticleClick(e as any, String(msg.sponsorLink || '#'));
-                        }}>
-                          {msg.callToAction}
-                        </div>
-                      ) : (
-                        <div className="sponsored-cta" style={{ backgroundColor: '#ef4444', fontSize: '12px' }}>
-                          Missing CTA Data
-                        </div>
-                      )}
-                      
-                      {/* Debug info for sponsored articles */}
-                      <div style={{ fontSize: '10px', color: '#666', marginTop: '4px' }}>
-                        Debug: CTA="{msg.callToAction || 'none'}" Link="{msg.sponsorLink || 'none'}"
-                      </div>
-                    </>
-                  )}
                 </a>
               </motion.div>
             );

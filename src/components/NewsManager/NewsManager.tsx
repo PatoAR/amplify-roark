@@ -163,7 +163,10 @@ export const NewsManager: React.FC = () => {
   // Keep articlesRef in sync with articles
   useEffect(() => {
     articlesRef.current = articles;
-    console.log(`[NewsManager] Articles state updated: ${articles.length} articles in memory`);
+    // Only log when articles actually change, not on every render
+    if (articles.length !== articlesRef.current.length) {
+      console.log(`[NewsManager] Articles state updated: ${articles.length} articles in memory`);
+    }
   }, [articles]);
 
   // Check for expired priorities and clean them up
@@ -281,8 +284,12 @@ export const NewsManager: React.FC = () => {
 
   // Fetch initial articles
   const fetchInitialArticles = useCallback(async () => {
-    if (!isComponentMountedRef.current || isInitialized) {
-      console.log('[NewsManager] Skipping initial fetch: component not mounted or already initialized');
+    if (!isComponentMountedRef.current) {
+      console.log('[NewsManager] Skipping initial fetch: component not mounted');
+      return;
+    }
+    if (isInitialized) {
+      console.log('[NewsManager] Skipping initial fetch: already initialized');
       return;
     }
     
@@ -460,6 +467,12 @@ export const NewsManager: React.FC = () => {
               
               // Wait a short delay and fetch the article again to get complete data
               setTimeout(async () => {
+                // Check if user is still authenticated before making GraphQL call
+                if (!isComponentMountedRef.current || authStatus !== 'authenticated') {
+                  console.log(`[NewsManager] Skipping article fetch for ${newArticle.id}: user no longer authenticated`);
+                  return;
+                }
+                
                 try {
                   const client = getClient();
                   const result = await client.graphql({ 
@@ -485,7 +498,11 @@ export const NewsManager: React.FC = () => {
                     console.log(`[NewsManager] AppSync live: article ${newArticle.id} added to state with subscription data`);
                   }
                 } catch (error) {
-                  console.error(`[NewsManager] Error fetching complete article data for ${newArticle.id}:`, error);
+                  // Don't log auth errors as they're expected during logout
+                  const errorMessage = error instanceof Error ? error.message : String(error);
+                  if (!errorMessage.includes('NoValidAuthTokens') && !errorMessage.includes('No federated jwt')) {
+                    console.error(`[NewsManager] Error fetching complete article data for ${newArticle.id}:`, error);
+                  }
                   // Fallback to original subscription data
                   const formatted: ArticleForState = processArticle(newArticle, Date.now());
                   articleIdsFromSubscriptionRef.current.add(newArticle.id);
@@ -581,7 +598,11 @@ export const NewsManager: React.FC = () => {
               }
             }, WEBSOCKET_LATENCY_BUFFER);
           } catch (err) {
-            console.error('[NewsManager] Shadow poller error', err);
+            // Don't log auth errors as they're expected during logout
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            if (!errorMessage.includes('NoValidAuthTokens') && !errorMessage.includes('No federated jwt')) {
+              console.error('[NewsManager] Shadow poller error', err);
+            }
           }
         }, POLLER_INTERVAL);
       }
@@ -596,21 +617,24 @@ export const NewsManager: React.FC = () => {
 
   // Initialize when user changes
   useEffect(() => {
-    console.log(`[NewsManager] useEffect triggered - authStatus: ${authStatus}, userId: ${userId}, isInitializing: ${isInitializingRef.current}, previousUserId: ${previousUserIdRef.current}`);
-    
     // Add a small delay to prevent rapid re-initialization
     const timeoutId = setTimeout(() => {
       if (isInitializingRef.current) {
-        console.log('[NewsManager] Already initializing, skipping');
         return;
       }
       if (authStatus !== 'authenticated' || !userId) {
-        console.log('[NewsManager] User not authenticated or no user ID, skipping initialization');
+        // User logged out - cleanup and reset
+        if (previousUserIdRef.current) {
+          console.log('[NewsManager] User logged out, cleaning up resources');
+          cleanupResources();
+          previousUserIdRef.current = undefined;
+          isInitializingRef.current = false;
+          setIsInitialized(false); // Reset initialization state
+        }
         return;
       }
       // Check if user actually changed
       if (previousUserIdRef.current === userId) {
-        console.log('[NewsManager] User ID unchanged, skipping initialization');
         return;
       }
     
@@ -618,7 +642,7 @@ export const NewsManager: React.FC = () => {
       previousUserIdRef.current = userId;
       isComponentMountedRef.current = true;
       isInitializingRef.current = true;
-      cleanupResources();
+      // Don't cleanup during login - only during logout
       // Initializing for user
       const initialize = async () => {
         console.log('[NewsManager] Starting initialization sequence...');
@@ -633,16 +657,22 @@ export const NewsManager: React.FC = () => {
 
     return () => {
       clearTimeout(timeoutId);
-      console.log('[NewsManager] Cleanup: component unmounted or user changed');
-      isComponentMountedRef.current = false;
-      isInitializingRef.current = false;
-      previousUserIdRef.current = undefined;
-      // Reset initialization state for React Strict Mode remounts
-      setIsInitialized(false);
-      cleanupResources();
-      // Component unmounted or user changed
     };
-  }, [userId, authStatus]); // Depend on user ID and auth status
+  }, [userId, authStatus, cleanupResources, fetchInitialArticles, trySubscribe, setIsInitialized]); // Depend on user ID and auth status
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      // Only cleanup if component is actually unmounting (not during login)
+      if (!isComponentMountedRef.current) {
+        console.log('[NewsManager] Component unmounting, cleaning up resources');
+        isComponentMountedRef.current = false;
+        isInitializingRef.current = false;
+        setIsInitialized(false);
+        cleanupResources();
+      }
+    };
+  }, []);
 
   // This component doesn't render anything, it just manages the news state
   return null;

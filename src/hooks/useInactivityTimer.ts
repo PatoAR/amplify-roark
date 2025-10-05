@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 interface UseInactivityTimerOptions {
   timeoutInMinutes?: number; // Inactivity timeout in minutes
-  onLogout?: () => void; // Callback function on logout
+  onLogout?: (isInactivityLogout?: boolean) => void; // Callback function on logout
   onActivity?: () => void; // Callback for user activity
   enabled?: boolean; // Whether the timer should be active
 }
@@ -41,8 +41,8 @@ export const useInactivityTimer = ({
           // Store inactivity logout flag in localStorage for banner display
           localStorage.setItem('inactivity-logout', 'true');
           
-          // Delegate logout to caller
-          await onLogout?.();
+          // Delegate logout to caller with inactivity flag
+          await onLogout?.(true);
         } catch (error) {
           console.error('Error during inactivity logout callback:', error);
         } finally {

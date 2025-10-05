@@ -71,9 +71,9 @@ const customTranslations = {
     
     // Referral
     'referral.title': '🎁 Keep Perkins Free Forever',
-    'referral.subtitle': 'Earn 3 months free for each friend you invite - keep Perkins free through referrals, or subscribe for unlimited access',
+    'referral.subtitle': 'Earn 3 months free for each friend you invite',
     'referral.alwaysFreeTitle': '🎁 Keep Perkins Free Forever',
-    'referral.sustainableAccess': 'Earn 3 months free for each friend you invite - keep Perkins free through referrals',
+    'referral.sustainableAccess': 'Earn 3 months free for each friend you invite',
     'referral.subscriptionAlternative': 'Or subscribe for unlimited access without referrals',
     'referral.loading': 'Loading referral information...',
     'referral.yourCode': 'Your Referral Code',
@@ -98,9 +98,9 @@ const customTranslations = {
     'referral.linkCopied': 'Referral link copied to clipboard!',
     'referral.openingWhatsApp': 'Opening WhatsApp...',
     'referral.openingEmail': 'Opening email client...',
-    'referral.shareMessage': 'Join Perkins - Always Free Through Referrals! Use my referral code: {code}',
+    'referral.shareMessage': 'Hi! I\'ve been using Perkins Intel to stay on top of market and business intelligence, and I thought you\'d find it valuable too. Enjoy 3 months of premium access free of charge.\n\nActivate your access here:\n{link}',
     'referral.emailSubject': 'Join Perkins - Always Free Through Referrals!',
-    'referral.emailBody': 'Hi!\n\nI\'m using Perkins and thought you might be interested. It\'s a great way to stay updated with tailored business and markets intelligence.\n\nPerkins can be free forever through our referral program! You can get 3 months of free access using my referral code: {code}\n\nCheck it out: {link}',
+    'referral.emailBody': 'Hi,\n\nI\'ve been using Perkins Intel to stay on top of market and business intelligence, and I thought you\'d find it valuable too.\n\nPerkins delivers concise, tailored updates on the companies, sectors, and trends you care about—helping you cut through noise and focus on what matters.\n\nAs my referral, you can enjoy 3 months of premium access free of charge.\n\n👉 Activate your access here: {link}\n\nBest regards,',
     'referral.freeAccessStatus': 'Your Free Access Status',
     'referral.daysRemaining': 'Days Remaining',
     'referral.freeAccessUntil': 'Free access until',
@@ -117,8 +117,6 @@ const customTranslations = {
     'subscription.daysRemaining': 'You have {days} days remaining. Keep Perkins free through referrals, or subscribe for unlimited access.',
     'subscription.keepItFree': 'Keep it Free:',
     'subscription.keepItFreeText': 'Prefer to keep Perkins free? Invite friends instead and earn 3 months free for each successful referral!',
-    'subscription.limitedTime': 'Limited Time:',
-    'subscription.limitedTimeText': 'Get 50% off your first month with any plan!',
     'subscription.choosePlan': 'Choose Your Plan',
     'subscription.mostPopular': 'Most Popular',
     'subscription.saveWithAnnual': 'Save {discount}% with annual billing',
@@ -148,7 +146,7 @@ const customTranslations = {
     'landing.ctaDescription': 'Gain access to Perkins comprehensive business intelligence platform. Keep it free through referrals or subscribe for unlimited access.',
     'landing.getStarted': 'Get Started Today',
     'landing.copyright': '© 2024 Perkins Intel. All rights reserved.',
-    'landing.contactHelp': 'Need help? Contact us at',
+    'landing.contactHelp': 'Need help? Contact us at <a href="mailto:info@perkinsintel.com" style="text-decoration: none; color: #4f79a6;">info@perkinsintel.com</a>',
     
     // Referral Component
     'referral.gracePeriodDays': 'Grace Period Days',
@@ -157,9 +155,16 @@ const customTranslations = {
     'referral.upgradeNow': 'Upgrade Now',
     'referral.subscriptionUpgraded': 'Subscription upgraded successfully!',
     'referral.preferUnlimited': 'Prefer unlimited access without referrals?',
+    'referral.extendAccess': 'Extend Your Access',
+    'referral.trialEndedExtend': 'Your trial has ended. Extend your access by inviting friends!',
+    'referral.daysRemainingExtend': 'You have {days} days remaining. Extend your access by inviting friends!',
+    'referral.keepItFree': 'Keep It Free',
+    'referral.keepItFreeText': 'Share your referral code with friends to earn free months and extend your access.',
+    'referral.unlimitedReferrals': 'Unlimited referrals available',
+    'referral.close': 'Close',
     
     // Settings
-    'settings.contactHelp': 'Need help? Contact us at',
+    'settings.contactHelp': 'Need help? Contact us at <a href="mailto:info@perkinsintel.com" style="text-decoration: none; color: #4f79a6;">info@perkinsintel.com</a>',
     
     // Grace Period Banner
     'gracePeriod.title': 'Grace Period Active',
@@ -179,7 +184,7 @@ const customTranslations = {
     'graceExpired.unlimitedAccess': 'Unlimited access',
     'graceExpired.prioritySupport': 'Priority support',
     'graceExpired.advancedFeatures': 'Advanced features',
-    'graceExpired.needHelp': 'Need help? Contact our support team for assistance.',
+    'graceExpired.needHelp': 'Need help? Contact us at <a href="mailto:info@perkinsintel.com" style="text-decoration: none; color: #4f79a6;">info@perkinsintel.com</a>',
     'graceExpired.maybeLater': 'Maybe Later',
     'graceExpired.free': 'Free',
     'graceExpired.premium': 'Premium',
@@ -308,6 +313,7 @@ const customTranslations = {
     // Welcome
     'welcome.title': 'Bienvenido a Perkins News',
     'welcome.subtitle': 'Para comenzar, personaliza tu feed de noticias seleccionando las industrias y países que más te importan.',
+    'welcome.referralIntro': 'Perkins puede ser gratis para siempre a través de nuestro programa de referidos - ¡invita amigos para ganar meses gratis!',
     'welcome.button': 'Personalizar tu Feed',
     'welcome.hint': 'Siempre puedes cambiar esta configuración más tarde desde el menú principal.',
     
@@ -339,8 +345,11 @@ const customTranslations = {
     'common.loadMore': 'Cargar Más Artículos',
     
     // Referral
-    'referral.title': '🎁 Invitar Amigos y Ganar Meses Gratis',
-    'referral.subtitle': '¡Comparte tu código de referido con amigos y obtén 3 meses adicionales de acceso gratis por cada referido exitoso!',
+    'referral.title': '🎁 Mantén Perkins Gratis Para Siempre',
+    'referral.subtitle': 'Gana 3 meses gratis por cada amigo que invites',
+    'referral.alwaysFreeTitle': '🎁 Mantén Perkins Gratis Para Siempre',
+    'referral.sustainableAccess': 'Gana 3 meses gratis por cada amigo que invites',
+    'referral.subscriptionAlternative': 'O suscríbete para acceso ilimitado sin referidos',
     'referral.loading': 'Cargando información de referidos...',
     'referral.yourCode': 'Tu Código de Referido',
     'referral.copyCode': 'Copiar',
@@ -364,9 +373,9 @@ const customTranslations = {
     'referral.linkCopied': '¡Enlace de referido copiado al portapapeles!',
     'referral.openingWhatsApp': 'Abriendo WhatsApp...',
     'referral.openingEmail': 'Abriendo cliente de email...',
-    'referral.shareMessage': '¡Únete a Perkins y obtén 3 meses gratis! Usa mi código de referido: {code}',
-    'referral.emailSubject': '¡Únete a Perkins - 3 Meses Gratis!',
-    'referral.emailBody': '¡Hola!\n\nEstoy usando Perkins y pensé que te podría interesar. Es una excelente manera de mantenerse actualizado con inteligencia empresarial y de mercados personalizada.\n\nPuedes obtener 3 meses de acceso gratis usando mi código de referido: {code}\n\nMíralo aquí: {link}',
+    'referral.shareMessage': '¡Hola! He estado usando Perkins Intel para mantenerme al día con la inteligencia de mercados y empresarial, y pensé que también te resultaría valioso. Disfruta de 3 meses de acceso premium sin costo.\n\nActiva tu acceso aquí:\n{link}',
+    'referral.emailSubject': '¡Únete a Perkins - Siempre Gratis a Través de Referidos!',
+    'referral.emailBody': 'Hola,\n\nHe estado usando Perkins Intel para mantenerme al día con la inteligencia de mercados y empresarial, y pensé que también te resultaría valioso.\n\nPerkins ofrece actualizaciones concisas y personalizadas sobre las empresas, sectores y tendencias que te importan—ayudándote a filtrar el ruido y enfocarte en lo que realmente importa.\n\nComo mi referido, puedes disfrutar de 3 meses de acceso premium sin costo.\n\n👉 Activa tu acceso aquí: {link}\n\nSaludos cordiales,',
     'referral.freeAccessStatus': 'Tu Estado de Acceso Gratis',
     'referral.daysRemaining': 'Días Restantes',
     'referral.freeAccessUntil': 'Acceso gratis hasta',
@@ -404,7 +413,7 @@ const customTranslations = {
     
     // Sign Up
     'signup.title': 'Has sido invitado a unirte a Perkins',
-    'signup.subtitle': 'Obtén 3 meses de acceso ilimitado a la plataforma integral de inteligencia empresarial de Perkins.',
+    'signup.subtitle': 'Obtén 3 meses de acceso ilimitado a la plataforma integral de inteligencia empresarial de Perkins.\n\nMantén Perkins gratis para siempre a través de referidos, o suscríbete para acceso ilimitado.',
     'signup.email': 'Email',
     'signup.password': 'Contraseña',
     'signup.confirmPassword': 'Confirmar Contraseña',
@@ -484,17 +493,17 @@ const customTranslations = {
     'landing.ctaDescription': 'Obtén acceso a la plataforma integral de inteligencia empresarial de Perkins. Manténla gratis a través de referidos o suscríbete para acceso ilimitado.',
     'landing.getStarted': 'Comenzar Hoy',
     'landing.copyright': '© 2024 Perkins Intel. Todos los derechos reservados.',
-    'landing.contactHelp': '¿Necesitas ayuda? Contáctanos en',
+    'landing.contactHelp': '¿Necesitas ayuda? Contáctanos en <a href="mailto:info@perkinsintel.com" style="text-decoration: none; color: #4f79a6;">info@perkinsintel.com</a>',
     
-    // Subscription Modal
-    'subscription.continueAccess': 'Continuar tu Acceso',
+    // Subscription
+    'subscription.referralAlternative': '¿Prefieres mantenerlo gratis? Invita amigos en su lugar',
     'subscription.chooseAccessMethod': 'Elige tu Método de Acceso',
+    'subscription.referralOrSubscribe': 'Mantén Perkins gratis a través de referidos, o suscríbete para acceso ilimitado',
+    'subscription.continueAccess': 'Continuar tu Acceso',
     'subscription.trialEnded': 'Tu prueba gratuita ha terminado. Mantén Perkins gratis a través de referidos, o suscríbete para acceso ilimitado.',
     'subscription.daysRemaining': 'Tienes {days} días restantes. Mantén Perkins gratis a través de referidos, o suscríbete para acceso ilimitado.',
     'subscription.keepItFree': 'Manténlo Gratis:',
     'subscription.keepItFreeText': '¿Prefieres mantener Perkins gratis? ¡Invita amigos en su lugar y gana 3 meses gratis por cada referido exitoso!',
-    'subscription.limitedTime': 'Tiempo Limitado:',
-    'subscription.limitedTimeText': '¡Obtén 50% de descuento en tu primer mes con cualquier plan!',
     'subscription.choosePlan': 'Elige tu Plan',
     'subscription.mostPopular': 'Más Popular',
     'subscription.saveWithAnnual': 'Ahorra {discount}% con facturación anual',
@@ -510,9 +519,16 @@ const customTranslations = {
     'referral.upgradeNow': 'Actualizar Ahora',
     'referral.subscriptionUpgraded': '¡Suscripción actualizada exitosamente!',
     'referral.preferUnlimited': '¿Prefieres acceso ilimitado sin referidos?',
+    'referral.extendAccess': 'Extiende Tu Acceso',
+    'referral.trialEndedExtend': 'Tu período de prueba ha terminado. ¡Extiende tu acceso invitando amigos!',
+    'referral.daysRemainingExtend': 'Tienes {days} días restantes. ¡Extiende tu acceso invitando amigos!',
+    'referral.keepItFree': 'Manténlo Gratis',
+    'referral.keepItFreeText': 'Comparte tu código de referido con amigos para ganar meses gratis y extender tu acceso.',
+    'referral.unlimitedReferrals': 'Referidos ilimitados disponibles',
+    'referral.close': 'Cerrar',
     
     // Settings
-    'settings.contactHelp': '¿Necesitas ayuda? Contáctanos en',
+    'settings.contactHelp': '¿Necesitas ayuda? Contáctanos en <a href="mailto:info@perkinsintel.com" style="text-decoration: none; color: #4f79a6;">info@perkinsintel.com</a>',
     
     // Grace Period Banner
     'gracePeriod.title': 'Período de Gracia Activo',
@@ -532,7 +548,7 @@ const customTranslations = {
     'graceExpired.unlimitedAccess': 'Acceso ilimitado',
     'graceExpired.prioritySupport': 'Soporte prioritario',
     'graceExpired.advancedFeatures': 'Características avanzadas',
-    'graceExpired.needHelp': '¿Necesitas ayuda? Contacta a nuestro equipo de soporte para asistencia.',
+    'graceExpired.needHelp': '¿Necesitas ayuda? Contáctanos en <a href="mailto:info@perkinsintel.com" style="text-decoration: none; color: #4f79a6;">info@perkinsintel.com</a>',
     'graceExpired.maybeLater': 'Tal Vez Después',
     'graceExpired.free': 'Gratis',
     'graceExpired.premium': 'Premium',
@@ -572,6 +588,7 @@ const customTranslations = {
     // Welcome
     'welcome.title': 'Bem-vindo ao Perkins News',
     'welcome.subtitle': 'Para começar, personalize seu feed de notícias selecionando as indústrias e países que mais importam para você.',
+    'welcome.referralIntro': 'Perkins pode ser grátis para sempre através do nosso programa de referidos - convide amigos para ganhar meses grátis!',
     'welcome.button': 'Personalizar seu Feed',
     'welcome.hint': 'Você sempre pode alterar essas configurações mais tarde no menu principal.',
     
@@ -603,8 +620,11 @@ const customTranslations = {
     'common.loadMore': 'Carregar Mais Artigos',
     
     // Referral
-    'referral.title': '🎁 Convidar Amigos e Ganhar Meses Grátis',
-    'referral.subtitle': 'Compartilhe seu código de referido com amigos e ganhe 3 meses adicionais de acesso grátis para cada referido bem-sucedido!',
+    'referral.title': '🎁 Mantenha Perkins Grátis Para Sempre',
+    'referral.subtitle': 'Ganhe 3 meses grátis para cada amigo que convidar',
+    'referral.alwaysFreeTitle': '🎁 Mantenha Perkins Grátis Para Sempre',
+    'referral.sustainableAccess': 'Ganhe 3 meses grátis para cada amigo que convidar',
+    'referral.subscriptionAlternative': 'Ou assine para acesso ilimitado sem referidos',
     'referral.loading': 'Carregando informações de referido...',
     'referral.yourCode': 'Seu Código de Referido',
     'referral.copyCode': 'Copiar',
@@ -628,10 +648,10 @@ const customTranslations = {
     'referral.linkCopied': 'Link de referido copiado para a área de transferência!',
     'referral.openingWhatsApp': 'Abrindo WhatsApp...',
     'referral.openingEmail': 'Abrindo cliente de email...',
-    'referral.shareMessage': 'Junte-se ao Perkins e ganhe 3 meses grátis! Use meu código de referido: {code}',
-    'referral.emailSubject': 'Junte-se ao Perkins - 3 Meses Grátis!',
-    'referral.emailBody': 'Olá!\n\nEstou usando Perkins e pensei que você poderia se interessar. É uma ótima maneira de se manter atualizado com inteligência empresarial e de mercados personalizada.\n\nVocê pode obter 3 meses de acesso grátis usando meu código de referido: {code}\n\nConfira aqui: {link}',
-    'referral.freeAccessStatus': 'Seu Status de Acesso Grátis',
+    'referral.shareMessage': 'Olá! Tenho usado Perkins Intel para me manter atualizado com inteligência de mercados e empresarial, e pensei que você também acharia valioso. Desfrute de 3 meses de acesso premium sem custo.\n\nAtive seu acesso aqui:\n{link}',
+    'referral.emailSubject': 'Junte-se ao Perkins - Sempre Grátis Através de Referidos!',
+    'referral.emailBody': 'Olá,\n\nTenho usado Perkins Intel para me manter atualizado com inteligência de mercados e empresarial, e pensei que você também acharia valioso.\n\nPerkins oferece atualizações concisas e personalizadas sobre as empresas, setores e tendências que você se importa—ajudando você a filtrar o ruído e focar no que realmente importa.\n\nComo meu indicado, você pode desfrutar de 3 meses de acesso premium sem custo.\n\n👉 Ative seu acesso aqui: {link}\n\nAtenciosamente,',
+    'referral.freeAccessStatus': 'Seu Estado de Acesso Grátis',
     'referral.daysRemaining': 'Dias Restantes',
     'referral.freeAccessUntil': 'Acesso grátis até',
     'referral.errorCopyLink': 'Erro ao copiar link:',
@@ -668,7 +688,7 @@ const customTranslations = {
     
     // Sign Up
     'signup.title': 'Você foi convidado a se juntar ao Perkins',
-    'signup.subtitle': 'Obtenha 3 meses de acesso ilimitado à plataforma abrangente de inteligência empresarial do Perkins.',
+    'signup.subtitle': 'Obtenha 3 meses de acesso ilimitado à plataforma abrangente de inteligência empresarial do Perkins.\n\nMantenha Perkins grátis para sempre através de referidos, ou assine para acesso ilimitado.',
     'signup.email': 'Email',
     'signup.password': 'Senha',
     'signup.confirmPassword': 'Confirmar Senha',
@@ -748,17 +768,17 @@ const customTranslations = {
     'landing.ctaDescription': 'Obtenha acesso à plataforma abrangente de inteligência empresarial do Perkins. Mantenha grátis através de referidos ou assine para acesso ilimitado.',
     'landing.getStarted': 'Começar Hoje',
     'landing.copyright': '© 2024 Perkins Intel. Todos os direitos reservados.',
-    'landing.contactHelp': 'Precisa de ajuda? Entre em contato conosco em',
+    'landing.contactHelp': 'Precisa de ajuda? Entre em contato conosco em <a href="mailto:info@perkinsintel.com" style="text-decoration: none; color: #4f79a6;">info@perkinsintel.com</a>',
     
-    // Subscription Modal
-    'subscription.continueAccess': 'Continuar seu Acesso',
+    // Subscription
+    'subscription.referralAlternative': 'Prefere manter grátis? Convide amigos em vez disso',
     'subscription.chooseAccessMethod': 'Escolha seu Método de Acesso',
+    'subscription.referralOrSubscribe': 'Mantenha Perkins grátis através de referidos, ou assine para acesso ilimitado',
+    'subscription.continueAccess': 'Continuar seu Acesso',
     'subscription.trialEnded': 'Seu teste gratuito terminou. Mantenha Perkins grátis através de referidos, ou assine para acesso ilimitado.',
     'subscription.daysRemaining': 'Você tem {days} dias restantes. Mantenha Perkins grátis através de referidos, ou assine para acesso ilimitado.',
     'subscription.keepItFree': 'Mantenha Grátis:',
     'subscription.keepItFreeText': 'Prefere manter Perkins grátis? Convide amigos em vez disso e ganhe 3 meses grátis para cada referido bem-sucedido!',
-    'subscription.limitedTime': 'Tempo Limitado:',
-    'subscription.limitedTimeText': 'Obtenha 50% de desconto no seu primeiro mês com qualquer plano!',
     'subscription.choosePlan': 'Escolha seu Plano',
     'subscription.mostPopular': 'Mais Popular',
     'subscription.saveWithAnnual': 'Economize {discount}% com cobrança anual',
@@ -774,9 +794,16 @@ const customTranslations = {
     'referral.upgradeNow': 'Atualizar Agora',
     'referral.subscriptionUpgraded': 'Assinatura atualizada com sucesso!',
     'referral.preferUnlimited': 'Prefere acesso ilimitado sem referidos?',
+    'referral.extendAccess': 'Estenda Seu Acesso',
+    'referral.trialEndedExtend': 'Seu período de teste terminou. Estenda seu acesso convidando amigos!',
+    'referral.daysRemainingExtend': 'Você tem {days} dias restantes. Estenda seu acesso convidando amigos!',
+    'referral.keepItFree': 'Mantenha Grátis',
+    'referral.keepItFreeText': 'Compartilhe seu código de referido com amigos para ganhar meses grátis e estender seu acesso.',
+    'referral.unlimitedReferrals': 'Referidos ilimitados disponíveis',
+    'referral.close': 'Fechar',
     
     // Settings
-    'settings.contactHelp': 'Precisa de ajuda? Entre em contato conosco em',
+    'settings.contactHelp': 'Precisa de ajuda? Entre em contato conosco em <a href="mailto:info@perkinsintel.com" style="text-decoration: none; color: #4f79a6;">info@perkinsintel.com</a>',
     
     // Grace Period Banner
     'gracePeriod.title': 'Período de Graça Ativo',
@@ -796,7 +823,7 @@ const customTranslations = {
     'graceExpired.unlimitedAccess': 'Acesso ilimitado',
     'graceExpired.prioritySupport': 'Suporte prioritário',
     'graceExpired.advancedFeatures': 'Recursos avançados',
-    'graceExpired.needHelp': 'Precisa de ajuda? Entre em contato com nossa equipe de suporte para assistência.',
+    'graceExpired.needHelp': 'Precisa de ajuda? Entre em contato conosco em <a href="mailto:info@perkinsintel.com" style="text-decoration: none; color: #4f79a6;">info@perkinsintel.com</a>',
     'graceExpired.maybeLater': 'Talvez Depois',
     'graceExpired.free': 'Grátis',
     'graceExpired.premium': 'Premium',

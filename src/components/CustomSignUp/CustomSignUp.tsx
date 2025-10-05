@@ -356,12 +356,13 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
                   </Flex>
                   
                   <TextField
-                    label={t('signup.referralCode') || 'Referral Code'}
+                    label=""
                     value={referralCode}
                     onChange={(e) => handleReferralCodeChange(e.target.value)}
                     placeholder={t('signup.enterReferralCode') || 'Enter referral code'}
                     autoComplete="off"
                     readOnly={referralCodeFromUrl}
+                    className={referralCodeFromUrl ? 'referral-code-readonly' : ''}
                   />
                   
                   {referralCodeFromUrl && (

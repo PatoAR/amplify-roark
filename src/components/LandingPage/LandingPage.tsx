@@ -179,10 +179,7 @@ const LandingPage: React.FC = () => {
       <footer className="landing-footer">
         <p>{t('landing.copyright')}</p>
         <p className="contact-info">
-          {t('landing.contactHelp')}{' '}
-          <a href="mailto:info@perkinsintel.com" className="contact-email">
-            info@perkinsintel.com
-          </a>
+          <span dangerouslySetInnerHTML={{ __html: t('landing.contactHelp') }} />
         </p>
       </footer>
     </div>

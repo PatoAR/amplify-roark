@@ -16,6 +16,19 @@
   padding: var(--amplify-space-large);
 }
 
+/* Grayed-out styling for read-only referral code field */
+.referral-code-readonly {
+  opacity: 0.6;
+  background-color: var(--amplify-colors-background-secondary) !important;
+  color: var(--amplify-colors-font-secondary) !important;
+}
+
+.referral-code-readonly input {
+  background-color: var(--amplify-colors-background-secondary) !important;
+  color: var(--amplify-colors-font-secondary) !important;
+  cursor: not-allowed;
+}
+
 /* Responsive adjustments */
 @media (max-width: 480px) {
   .amplify-authenticator {

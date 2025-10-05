@@ -99,10 +99,8 @@ export const handler = async (
 
 function parsePlanId(planId: string) {
   const plans = {
-    'basic-monthly': { name: 'Basic', price: 9.99, period: 'monthly' },
-    'basic-yearly': { name: 'Basic', price: 95.99, period: 'yearly' },
-    'pro-monthly': { name: 'Pro', price: 19.99, period: 'monthly' },
-    'pro-yearly': { name: 'Pro', price: 191.99, period: 'yearly' },
+    'perkins-monthly': { name: 'Perkins', price: 0.99, period: 'monthly' },
+    'perkins-yearly': { name: 'Perkins', price: 9.50, period: 'yearly' },
   };
   
   return plans[planId as keyof typeof plans] || null;

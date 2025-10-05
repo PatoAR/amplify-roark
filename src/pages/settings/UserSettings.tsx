@@ -128,18 +128,7 @@ const UserSettings = () => {
       {/* Contact Information */}
       <View className="contact-section">
         <Text fontSize="small" color="font.secondary" textAlign="center">
-          {t('settings.contactHelp')}{' '}
-          <a 
-            href="mailto:info@perkinsintel.com" 
-            className="contact-email"
-            style={{ 
-              color: 'var(--color-font-primary)', 
-              textDecoration: 'none',
-              fontWeight: '500'
-            }}
-          >
-            info@perkinsintel.com
-          </a>
+          <span dangerouslySetInnerHTML={{ __html: t('settings.contactHelp') }} />
         </Text>
       </View>
     </Flex>
