@@ -214,7 +214,7 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
         performLogout();
       }
     }
-  }, [authStatus]);
+  }, [authStatus, performLogout]);
 
   // Update authStatus in consolidated state
   useEffect(() => {

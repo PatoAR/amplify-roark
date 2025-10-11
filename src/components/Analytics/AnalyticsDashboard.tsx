@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { generateClient } from 'aws-amplify/api';
 import { type Schema } from '../../../amplify/data/resource';
 import { useSession } from '../../context/SessionContext';
@@ -20,13 +20,7 @@ export const AnalyticsDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d');
 
-  useEffect(() => {
-    if (userId) {
-      loadAnalytics();
-    }
-  }, [userId, timeRange]);
-
-  const loadAnalytics = async () => {
+  const loadAnalytics = useCallback(async () => {
     if (!userId) return;
 
     setIsLoading(true);
@@ -61,7 +55,13 @@ export const AnalyticsDashboard = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [userId, timeRange]);
+
+  useEffect(() => {
+    if (userId) {
+      loadAnalytics();
+    }
+  }, [userId, timeRange, loadAnalytics]);
 
   const formatDuration = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);

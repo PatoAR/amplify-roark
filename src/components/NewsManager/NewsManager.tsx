@@ -280,7 +280,7 @@ export const NewsManager: React.FC = () => {
     
     // Check if it's in seen tracking
     return seenArticlesRef.current.has(articleId);
-  }, []);
+  }, [seenArticlesRef]);
 
   // Fetch initial articles
   const fetchInitialArticles = useCallback(async () => {
@@ -613,7 +613,7 @@ export const NewsManager: React.FC = () => {
         startPolling();
       }
     }
-  }, [addArticle, isArticleSeen, startPolling, getClient]);
+  }, [addArticle, isArticleSeen, startPolling, getClient, authStatus]);
 
   // Initialize when user changes
   useEffect(() => {
@@ -672,7 +672,7 @@ export const NewsManager: React.FC = () => {
         cleanupResources();
       }
     };
-  }, []);
+  }, [cleanupResources, setIsInitialized]);
 
   // This component doesn't render anything, it just manages the news state
   return null;

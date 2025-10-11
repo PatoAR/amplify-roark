@@ -28,9 +28,9 @@ export const GracePeriodExpiredModal: React.FC<GracePeriodExpiredModalProps> = (
   const { tokens } = useTheme();
   const { t } = useTranslation();
   
-  // Only use subscription manager if upgrades are enabled
-  const subscriptionManager = isSubscriptionUpgradeEnabled() ? useSubscriptionManager() : null;
-  const upgradeError = subscriptionManager?.upgradeError;
+  // Always call the hook, but only use it conditionally
+  const subscriptionManager = useSubscriptionManager();
+  const upgradeError = isSubscriptionUpgradeEnabled() ? subscriptionManager?.upgradeError : null;
 
   const {
     shareReferralLink,

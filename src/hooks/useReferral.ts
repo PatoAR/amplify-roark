@@ -35,14 +35,7 @@ export const useReferral = () => {
     return clientRef.current;
   }, []);
 
-  // Load user's referral code and stats
-  useEffect(() => {
-    if (user?.userId) {
-      loadReferralData();
-    }
-  }, [user]);
-
-  const loadReferralData = async () => {
+  const loadReferralData = useCallback(async () => {
     if (!user?.userId) return;
 
     try {
@@ -75,7 +68,14 @@ export const useReferral = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
+
+  // Load user's referral code and stats
+  useEffect(() => {
+    if (user?.userId) {
+      loadReferralData();
+    }
+  }, [user, loadReferralData]);
 
   const generateReferralCode = async () => {
     if (!user?.userId) return;
