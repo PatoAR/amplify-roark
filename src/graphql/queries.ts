@@ -25,8 +25,8 @@ export const getArticle = /* GraphQL */ `query GetArticle($id: ID!) {
     callToAction
     sponsorLink
     priorityUntil
-    id
     createdAt
+    id
     updatedAt
     __typename
   }
@@ -57,8 +57,8 @@ export const listArticles = /* GraphQL */ `query ListArticles(
       callToAction
       sponsorLink
       priorityUntil
-      id
       createdAt
+      id
       updatedAt
       __typename
     }
@@ -69,6 +69,49 @@ export const listArticles = /* GraphQL */ `query ListArticles(
 ` as GeneratedQuery<
   APITypes.ListArticlesQueryVariables,
   APITypes.ListArticlesQuery
+>;
+export const listArticleByCreatedAt = /* GraphQL */ `query ListArticleByCreatedAt(
+  $createdAt: AWSDateTime!
+  $sortDirection: ModelSortDirection
+  $filter: ModelArticleFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listArticleByCreatedAt(
+    createdAt: $createdAt
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      timestamp
+      source
+      title
+      industry
+      summary
+      link
+      companies
+      countries
+      language
+      ttl
+      category
+      priorityDuration
+      callToAction
+      sponsorLink
+      priorityUntil
+      createdAt
+      id
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListArticleByCreatedAtQueryVariables,
+  APITypes.ListArticleByCreatedAtQuery
 >;
 export const getUserProfile = /* GraphQL */ `query GetUserProfile($id: ID!) {
   getUserProfile(id: $id) {

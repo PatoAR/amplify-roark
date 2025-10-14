@@ -8,7 +8,6 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 - Legal disclaimers
 - Implement subscription workflow. Use MPago account.
 
-- Webapp missing articles?
 - Native IOS / Android App
 
 ## CI/CD

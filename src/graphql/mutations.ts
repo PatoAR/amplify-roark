@@ -28,8 +28,8 @@ export const createArticle = /* GraphQL */ `mutation CreateArticle(
     callToAction
     sponsorLink
     priorityUntil
-    id
     createdAt
+    id
     updatedAt
     __typename
   }
@@ -58,8 +58,8 @@ export const updateArticle = /* GraphQL */ `mutation UpdateArticle(
     callToAction
     sponsorLink
     priorityUntil
-    id
     createdAt
+    id
     updatedAt
     __typename
   }
@@ -88,8 +88,8 @@ export const deleteArticle = /* GraphQL */ `mutation DeleteArticle(
     callToAction
     sponsorLink
     priorityUntil
-    id
     createdAt
+    id
     updatedAt
     __typename
   }

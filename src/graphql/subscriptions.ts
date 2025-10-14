@@ -25,8 +25,8 @@ export const onCreateArticle = /* GraphQL */ `subscription OnCreateArticle($filt
     callToAction
     sponsorLink
     priorityUntil
-    id
     createdAt
+    id
     updatedAt
     __typename
   }
@@ -52,8 +52,8 @@ export const onUpdateArticle = /* GraphQL */ `subscription OnUpdateArticle($filt
     callToAction
     sponsorLink
     priorityUntil
-    id
     createdAt
+    id
     updatedAt
     __typename
   }
@@ -79,8 +79,8 @@ export const onDeleteArticle = /* GraphQL */ `subscription OnDeleteArticle($filt
     callToAction
     sponsorLink
     priorityUntil
-    id
     createdAt
+    id
     updatedAt
     __typename
   }

@@ -18,6 +18,7 @@ export type CreateArticleInput = {
   callToAction?: string | null,
   sponsorLink?: string | null,
   priorityUntil?: string | null,
+  createdAt?: string | null,
   id?: string | null,
 };
 
@@ -44,10 +45,10 @@ export type ModelArticleConditionInput = {
   callToAction?: ModelStringInput | null,
   sponsorLink?: ModelStringInput | null,
   priorityUntil?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
   and?: Array< ModelArticleConditionInput | null > | null,
   or?: Array< ModelArticleConditionInput | null > | null,
   not?: ModelArticleConditionInput | null,
-  createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
 };
 
@@ -125,8 +126,8 @@ export type Article = {
   callToAction?: string | null,
   sponsorLink?: string | null,
   priorityUntil?: string | null,
+  createdAt?: string | null,
   id: string,
-  createdAt: string,
   updatedAt: string,
 };
 
@@ -146,6 +147,7 @@ export type UpdateArticleInput = {
   callToAction?: string | null,
   sponsorLink?: string | null,
   priorityUntil?: string | null,
+  createdAt?: string | null,
   id: string,
 };
 
@@ -511,8 +513,8 @@ export type ModelArticleFilterInput = {
   callToAction?: ModelStringInput | null,
   sponsorLink?: ModelStringInput | null,
   priorityUntil?: ModelStringInput | null,
-  id?: ModelIDInput | null,
   createdAt?: ModelStringInput | null,
+  id?: ModelIDInput | null,
   updatedAt?: ModelStringInput | null,
   and?: Array< ModelArticleFilterInput | null > | null,
   or?: Array< ModelArticleFilterInput | null > | null,
@@ -540,6 +542,12 @@ export type ModelArticleConnection = {
   items:  Array<Article | null >,
   nextToken?: string | null,
 };
+
+export enum ModelSortDirection {
+  ASC = "ASC",
+  DESC = "DESC",
+}
+
 
 export type ModelUserProfileFilterInput = {
   owner?: ModelStringInput | null,
@@ -685,8 +693,8 @@ export type ModelSubscriptionArticleFilterInput = {
   callToAction?: ModelSubscriptionStringInput | null,
   sponsorLink?: ModelSubscriptionStringInput | null,
   priorityUntil?: ModelSubscriptionStringInput | null,
-  id?: ModelSubscriptionIDInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
+  id?: ModelSubscriptionIDInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionArticleFilterInput | null > | null,
   or?: Array< ModelSubscriptionArticleFilterInput | null > | null,
@@ -848,8 +856,8 @@ export type CreateArticleMutation = {
     callToAction?: string | null,
     sponsorLink?: string | null,
     priorityUntil?: string | null,
+    createdAt?: string | null,
     id: string,
-    createdAt: string,
     updatedAt: string,
   } | null,
 };
@@ -877,8 +885,8 @@ export type UpdateArticleMutation = {
     callToAction?: string | null,
     sponsorLink?: string | null,
     priorityUntil?: string | null,
+    createdAt?: string | null,
     id: string,
-    createdAt: string,
     updatedAt: string,
   } | null,
 };
@@ -906,8 +914,8 @@ export type DeleteArticleMutation = {
     callToAction?: string | null,
     sponsorLink?: string | null,
     priorityUntil?: string | null,
+    createdAt?: string | null,
     id: string,
-    createdAt: string,
     updatedAt: string,
   } | null,
 };
@@ -1300,8 +1308,8 @@ export type GetArticleQuery = {
     callToAction?: string | null,
     sponsorLink?: string | null,
     priorityUntil?: string | null,
+    createdAt?: string | null,
     id: string,
-    createdAt: string,
     updatedAt: string,
   } | null,
 };
@@ -1332,8 +1340,44 @@ export type ListArticlesQuery = {
       callToAction?: string | null,
       sponsorLink?: string | null,
       priorityUntil?: string | null,
+      createdAt?: string | null,
       id: string,
-      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ListArticleByCreatedAtQueryVariables = {
+  createdAt: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelArticleFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListArticleByCreatedAtQuery = {
+  listArticleByCreatedAt?:  {
+    __typename: "ModelArticleConnection",
+    items:  Array< {
+      __typename: "Article",
+      timestamp?: string | null,
+      source: string,
+      title: string,
+      industry?: string | null,
+      summary?: string | null,
+      link?: string | null,
+      companies?: string | null,
+      countries?: string | null,
+      language?: string | null,
+      ttl?: number | null,
+      category?: ArticleCategory | null,
+      priorityDuration?: number | null,
+      callToAction?: string | null,
+      sponsorLink?: string | null,
+      priorityUntil?: string | null,
+      createdAt?: string | null,
+      id: string,
       updatedAt: string,
     } | null >,
     nextToken?: string | null,
@@ -1630,8 +1674,8 @@ export type OnCreateArticleSubscription = {
     callToAction?: string | null,
     sponsorLink?: string | null,
     priorityUntil?: string | null,
+    createdAt?: string | null,
     id: string,
-    createdAt: string,
     updatedAt: string,
   } | null,
 };
@@ -1658,8 +1702,8 @@ export type OnUpdateArticleSubscription = {
     callToAction?: string | null,
     sponsorLink?: string | null,
     priorityUntil?: string | null,
+    createdAt?: string | null,
     id: string,
-    createdAt: string,
     updatedAt: string,
   } | null,
 };
@@ -1686,8 +1730,8 @@ export type OnDeleteArticleSubscription = {
     callToAction?: string | null,
     sponsorLink?: string | null,
     priorityUntil?: string | null,
+    createdAt?: string | null,
     id: string,
-    createdAt: string,
     updatedAt: string,
   } | null,
 };
