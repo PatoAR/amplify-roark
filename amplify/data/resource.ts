@@ -23,7 +23,11 @@ const schema = a.schema({
       callToAction: a.string(),
       sponsorLink: a.string(),
       priorityUntil: a.datetime(),
+      createdAt: a.datetime(), // Explicit field for indexing
     })
+    .secondaryIndexes((index) => [
+      index('createdAt'), // GSI for efficient time-based queries
+    ])
     .authorization(allow => [
       // Allow API keys to create articles for backend ingestion
       allow.publicApiKey().to(['read', 'create']),
