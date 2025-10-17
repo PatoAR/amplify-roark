@@ -5,6 +5,8 @@ import { useNews } from '../../context/NewsContext';
 import WelcomeScreen from '../../components/WelcomeScreen/WelcomeScreen';
 import { useTranslation } from '../../i18n';
 import { COUNTRY_OPTIONS } from '../../constants/countries';
+import { useSubscriptionManager } from '../../hooks/useSubscriptionManager';
+import { GracePeriodBanner } from '../../components/GracePeriodBanner';
 import './NewsSocketClient.css';
 
 function formatLocalTime(timestamp?: string | null): string {
@@ -16,30 +18,39 @@ function formatLocalTime(timestamp?: string | null): string {
 
 function NewsSocketClient() {
   const [isTabVisible, setIsTabVisible] = useState<boolean>(() => !document.hidden);
+  const [displayedCount, setDisplayedCount] = useState<number>(50);
   const { preferences, isLoading, userProfileId } = useUserPreferences();
   const { articles, markArticleAsSeen } = useNews();
   const { t } = useTranslation();
+  
+  // Subscription management
+  const {
+    isInGracePeriod,
+    gracePeriodDaysRemaining,
+  } = useSubscriptionManager();
 
   // Memoize the country matching logic to avoid recreating functions on every render
   const countryMatcher = useMemo(() => {
-    const hasGlobalSelected = preferences.countries.includes('global');
+    const countries = preferences.countries || [];
+    const hasGlobalSelected = countries.includes('global');
     const selectedCountryIdSet = new Set<string>(
       hasGlobalSelected 
-        ? preferences.countries.filter(id => id !== 'global')
-        : preferences.countries
+        ? countries.filter(id => id !== 'global')
+        : countries
     );
     
     return {
       hasGlobalSelected,
       selectedCountryIdSet,
-      hasCountryFilters: preferences.countries.length > 0 && !(preferences.countries.length === COUNTRY_OPTIONS.length)
+      hasCountryFilters: countries.length > 0 && !(countries.length === COUNTRY_OPTIONS.length)
     };
   }, [preferences.countries]);
 
   // Memoize the industry matching logic
   const industryMatcher = useMemo(() => {
-    const hasIndustryFilters = preferences.industries.length > 0;
-    const industrySet = new Set(preferences.industries);
+    const industries = preferences.industries || [];
+    const hasIndustryFilters = industries.length > 0;
+    const industrySet = new Set(industries);
     
     return {
       hasIndustryFilters,
@@ -68,7 +79,7 @@ function NewsSocketClient() {
       return opt ? opt.id : null;
     };
 
-    return articles.filter(msg => {
+    const filtered = articles.filter(msg => {
       // Industry matching
       const industryMatches = !industryMatcher.hasIndustryFilters || 
         (msg.industry && industryMatcher.industrySet.has(msg.industry));
@@ -123,13 +134,42 @@ function NewsSocketClient() {
 
       return true;
     });
+    
+    return filtered;
   }, [articles, isLoading, industryMatcher, countryMatcher]);
 
   // Limit the number of articles rendered to prevent performance issues
   const displayedMessages = useMemo(() => {
-    const MAX_DISPLAYED_ARTICLES = 50;
-    return filteredMessages.slice(0, MAX_DISPLAYED_ARTICLES);
-  }, [filteredMessages]);
+    const messages = filteredMessages.slice(0, displayedCount);
+    
+    // Debug: Log SPONSORED and STATISTICS articles being displayed
+    const sponsoredMessages = messages.filter((msg: any) => msg.category === 'SPONSORED');
+    const statisticsMessages = messages.filter((msg: any) => msg.category === 'STATISTICS');
+    
+    if (sponsoredMessages.length > 0) {
+      console.log(`[NewsSocketClient] Displaying ${sponsoredMessages.length} SPONSORED articles:`, 
+        sponsoredMessages.map((msg: any) => ({ 
+          id: msg.id, 
+          title: msg.title, 
+          category: msg.category,
+          callToAction: msg.callToAction,
+          sponsorLink: msg.sponsorLink,
+          seen: msg.seen 
+        })));
+    }
+    
+    if (statisticsMessages.length > 0) {
+      console.log(`[NewsSocketClient] Displaying ${statisticsMessages.length} STATISTICS articles:`, 
+        statisticsMessages.map((msg: any) => ({ 
+          id: msg.id, 
+          title: msg.title, 
+          category: msg.category,
+          seen: msg.seen 
+        })));
+    }
+    
+    return messages;
+  }, [filteredMessages, displayedCount]);
 
   // Show message if there are more articles than displayed
   const hasMoreArticles = filteredMessages.length > displayedMessages.length;
@@ -179,8 +219,23 @@ function NewsSocketClient() {
     }
   }, [isTabVisible, articles, markArticleAsSeen]);
 
+  const handleActNow = () => {
+    window.location.href = '/settings/referral';
+  };
+
+  const handleLoadMore = () => {
+    setDisplayedCount(prev => prev + 50);
+  };
+
   return (
     <div className="news-feed">
+      {/* Grace Period Banner */}
+      {isInGracePeriod && (
+        <GracePeriodBanner
+          gracePeriodDaysRemaining={gracePeriodDaysRemaining}
+          onActNow={handleActNow}
+        />
+      )}
       {isLoading ? (
         <p className="no-news">{t('common.loadingPreferences')}</p>
       
@@ -198,15 +253,25 @@ function NewsSocketClient() {
       ) : (
         <div className="articles-container">
           <AnimatePresence initial={false}>
-            {displayedMessages.map((msg) => {
-              // Console log the countries for each displayed article (muted)
-              // muted debug log removed
+            {displayedMessages.map((msg: any) => {
+              // Debug: Log individual article rendering for SPONSORED and STATISTICS
+              if (msg.category === 'SPONSORED' || msg.category === 'STATISTICS') {
+                console.log(`[NewsSocketClient] Rendering ${msg.category} article:`, {
+                  id: msg.id,
+                  title: msg.title,
+                  category: msg.category,
+                  seen: msg.seen,
+                  hasCallToAction: !!msg.callToAction,
+                  hasSponsorLink: !!msg.sponsorLink,
+                  className: `article-card ${msg.seen ? '' : 'unseen'} ${msg.category?.toLowerCase() || 'news'}`
+                });
+              }
               
               return (
                 <motion.div
                   key={msg.id}
                   layout="position"
-                  className={`article-card ${msg.seen ? '' : 'unseen'}`}
+                  className={`article-card ${msg.seen ? '' : 'unseen'} ${msg.category?.toLowerCase() || 'news'}`}
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10, transition: { duration: 0.2 } }}
@@ -219,6 +284,9 @@ function NewsSocketClient() {
                   className="article-line-link"
                 >
                   <p className="article-line">
+                    {msg.category === 'SPONSORED' && (
+                      <span className="article-sponsored-label">SPONSORED</span>
+                    )}
                     <span className="article-industry">{msg.industry}</span>{" "}
                     <span className="article-timestamp-wrapper">
                       <span className="article-timestamp">{formatLocalTime(msg.timestamp)}</span>
@@ -235,7 +303,7 @@ function NewsSocketClient() {
                             onClick={(e) => {
                               e.stopPropagation(); // Prevents bubbling to outer <a>
                               e.preventDefault();  // Prevents any anchor behavior just in case
-                              handleCompanyClick(url);
+                              handleCompanyClick(String(url));
                             }}
                             title={`Google > ${name}`}
                           >
@@ -243,6 +311,17 @@ function NewsSocketClient() {
                           </span>
                         ))}
                       </>
+                    )}
+                    
+                    {/* Add call-to-action for sponsored articles - inline after companies */}
+                    {msg.category === 'SPONSORED' && (
+                      <span className="sponsored-cta" onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        handleArticleClick(e as any, String(msg.sponsorLink || msg.link || '#'));
+                      }}>
+                        {msg.callToAction || 'Learn More'}
+                      </span>
                     )}
                   </p>
                 </a>
@@ -254,7 +333,14 @@ function NewsSocketClient() {
           {/* Show message if there are more articles */}
           {hasMoreArticles && (
             <div className="more-articles-message">
-              <p>{t('common.moreArticles').replace('{count}', String(filteredMessages.length - displayedMessages.length))}</p>
+              <p>
+                {t('common.moreArticles')
+                  .replace('{displayed}', String(displayedMessages.length))
+                  .replace('{count}', String(filteredMessages.length - displayedMessages.length))}
+                <button className="disclaimer-dismiss-btn" onClick={handleLoadMore}>
+                  {t('common.loadMore')}
+                </button>
+              </p>
             </div>
           )}
         </div>

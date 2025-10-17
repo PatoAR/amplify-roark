@@ -10,12 +10,13 @@ export const handler: CustomMessageTriggerHandler = async (event) => {
     if (referralCode) {
       referralMessage = `
         <p>You signed up using a referral code: <strong>${referralCode}</strong></p>
-        <p>You'll get 3 months of free access to Perkins News Service!</p>
+        <p><b>You'll get 3 months of free access!</b></p>
+        <p><b>Keep Perkins free forever through referrals!</b> Invite friends and earn 3 additional months for each successful referral, or subscribe for unlimited access without referrals.</p>
       `;
     } else {
       referralMessage = `
-        <p>You'll get 3 months of free access to Perkins News Service!</p>
-        <p>Invite friends and get 3 additional months for each successful referral!</p>
+        <p><b>You'll get 3 months of free access!</b></p>
+        <p><b>Keep Perkins free forever through referrals!</b> Invite friends and earn 3 additional months for each successful referral, or subscribe for unlimited access without referrals.</p>
       `;
     }
 
@@ -24,13 +25,13 @@ export const handler: CustomMessageTriggerHandler = async (event) => {
       <html>
         <body>
           <p>Hello,</p>
-          <p>Thank you for signing up for Perkins News Service!</p>
+          <p>Thank you for signing up for Perkins!</p>
           ${referralMessage}
           <p>To verify your email address, please use the following code:</p>
           <h3>${event.request.codeParameter}</h3>
           <p>If you didn't sign up for this service, please ignore this email.</p>
           <p>Sincerely,</p>
-          <p>The Perkins News Team</p>
+          <p>The Perkins Team</p>
         </body>
       </html>
     `;

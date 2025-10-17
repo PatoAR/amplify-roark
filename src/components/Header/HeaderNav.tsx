@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useSession } from '../../context/SessionContext';
 import Modal from './Modal'
 import { useUserPreferences } from '../../context/UserPreferencesContext';
-import { Gift, TrendingUp, Building2, HardHat, Zap, Wheat, Banknote, Stethoscope, Factory, Satellite, ShoppingBag, Plane, Train } from 'lucide-react';
+import { Gift, TrendingUp, Building2, HardHat, Pickaxe, Zap, Wheat, Banknote, Stethoscope, Factory, Satellite, ShoppingBag, Plane, Train, Home, Cpu, Video, Truck, Car, GraduationCap, Leaf } from 'lucide-react';
 import { useFreeDaysRemaining } from '../../hooks/useFreeDaysRemaining';
 import { useTranslation } from '../../i18n';
 import LanguageSwitcher from '../LanguageSwitcher/LanguageSwitcher';
@@ -17,9 +17,9 @@ const HeaderNav = () => {
   const navigate = useNavigate();
   const [showFiltersModal, setShowFiltersModal] = useState(false); // State to control modal visibility
   const { preferences, savePreferences } = useUserPreferences();
-  const [localIndustries, setLocalIndustries] = useState(preferences.industries);
-  const [localCountries, setLocalCountries] = useState(preferences.countries);
-  const daysLeft = useFreeDaysRemaining();
+  const [localIndustries, setLocalIndustries] = useState(preferences.industries || []);
+  const [localCountries, setLocalCountries] = useState(preferences.countries || []);
+  const { daysLeft } = useFreeDaysRemaining();
   const [isSaving, setIsSaving] = useState(false);
 
   // New state for "all" selections
@@ -29,12 +29,12 @@ const HeaderNav = () => {
   
   const handleOpenFiltersModal = useCallback(() => {
     // When opening the modal, sync local state with context
-    setLocalIndustries(preferences.industries);
-    setLocalCountries(preferences.countries);
+    setLocalIndustries(preferences.industries || []);
+    setLocalCountries(preferences.countries || []);
     
     // Check if all industries/countries are selected
-    setSelectAllIndustries(preferences.industries.length === INDUSTRY_OPTIONS.length);
-    setSelectAllCountries(preferences.countries.length === COUNTRY_OPTIONS.length);
+    setSelectAllIndustries((preferences.industries || []).length === INDUSTRY_OPTIONS.length);
+    setSelectAllCountries((preferences.countries || []).length === COUNTRY_OPTIONS.length);
     
     setShowFiltersModal(true);
   }, [preferences.industries, preferences.countries]);
@@ -149,7 +149,7 @@ const HeaderNav = () => {
         <Gift size={24} />
         {typeof daysLeft === 'number' && daysLeft > 0 && (
           <span className={`days-counter ${daysLeft > 30 ? 'high' : 'low'}`}>
-            {daysLeft}
+            {daysLeft > 99 ? '+' : daysLeft}
           </span>
         )}
       </div>
@@ -162,7 +162,7 @@ const HeaderNav = () => {
         <MenuItem onClick={handleOpenFiltersModal}>{t('menu.filters')}</MenuItem>
         <Divider />
         <MenuItem onClick={() => navigate("/settings")}>{t('menu.settings')}</MenuItem>
-        <MenuItem onClick={logout}>Logout</MenuItem>
+        <MenuItem onClick={() => logout()}>Logout</MenuItem>
       </Menu>
 
       <Modal
@@ -198,7 +198,15 @@ const HeaderNav = () => {
                   'Satellite': Satellite,
                   'ShoppingBag': ShoppingBag,
                   'Plane': Plane,
-                  'Train': Train
+                  'Train': Train,
+                  'Home': Home,
+                  'Cpu': Cpu,
+                  'Video': Video,
+                  'Truck': Truck,
+                  'Car': Car,
+                  'GraduationCap': GraduationCap,
+                  'Leaf': Leaf,
+                  'Pickaxe': Pickaxe
                 };
                 const IconComponent = iconMap[industry.icon] || TrendingUp;
                 return (
@@ -211,7 +219,6 @@ const HeaderNav = () => {
                     onClick={() => handleIndustryChange(industry.id)}
                   >
                     <IconComponent size={16} />
-                    {industry.icon}
                     {industry.label}
                   </button>
                 );

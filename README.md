@@ -1,15 +1,14 @@
 ## AWS Roark
 Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fetches, processes and stores news articles in dynambodb. The articles are distributed to varios channels (whatsapp, telegram) and to this webapp via AppSync subscriptions or long-polling.
-np
 
 ## ToDo's
-- Trial expiration logic
-- Create interface to deliver different content  - publicity, financials, etc. fix on top, colors, etc.
-- Modified display text
-
-- Add support / sponsorship email with custom domain
-- Pay suscription
+- Apply for AWS grant - Fernando Errandosoro ITBA
+- Open (MPago) business account for Finu - pay AWS, GEMINI.
 - Open AWS account on the name of Finu, transfer domain 
+- Legal disclaimers
+- Implement subscription workflow. Use MPago account.
+
+- Native IOS / Android App
 
 ## CI/CD
 
@@ -32,12 +31,18 @@ np
             >> downloads schema from the server
             >> updates src/API.ts and graphql/files
 
-# PROD - AWS
-        Merge dev into main
+# PROD - AWS - merge dev into main
         git checkout main
         git merge appsync / dev
         git push origin main
 
-
 ## CLI
 https://docs.amplify.aws/react/reference/cli-commands/
+
+## Tests
+- Login / Logout
+- Inactivity logout
+- First time login instructions
+- Referrals
+- Access days left - dynamic getting close to cero on days
+- Deleted emails

@@ -20,8 +20,13 @@ export const onCreateArticle = /* GraphQL */ `subscription OnCreateArticle($filt
     countries
     language
     ttl
-    id
+    category
+    priorityDuration
+    callToAction
+    sponsorLink
+    priorityUntil
     createdAt
+    id
     updatedAt
     __typename
   }
@@ -42,8 +47,13 @@ export const onUpdateArticle = /* GraphQL */ `subscription OnUpdateArticle($filt
     countries
     language
     ttl
-    id
+    category
+    priorityDuration
+    callToAction
+    sponsorLink
+    priorityUntil
     createdAt
+    id
     updatedAt
     __typename
   }
@@ -64,8 +74,13 @@ export const onDeleteArticle = /* GraphQL */ `subscription OnDeleteArticle($filt
     countries
     language
     ttl
-    id
+    category
+    priorityDuration
+    callToAction
+    sponsorLink
+    priorityUntil
     createdAt
+    id
     updatedAt
     __typename
   }
@@ -333,8 +348,6 @@ export const onCreateUserActivity = /* GraphQL */ `subscription OnCreateUserActi
     startTime
     endTime
     duration
-    pageViews
-    interactions
     deviceInfo
     userAgent
     ipAddress
@@ -359,8 +372,6 @@ export const onUpdateUserActivity = /* GraphQL */ `subscription OnUpdateUserActi
     startTime
     endTime
     duration
-    pageViews
-    interactions
     deviceInfo
     userAgent
     ipAddress
@@ -385,8 +396,6 @@ export const onDeleteUserActivity = /* GraphQL */ `subscription OnDeleteUserActi
     startTime
     endTime
     duration
-    pageViews
-    interactions
     deviceInfo
     userAgent
     ipAddress
@@ -400,75 +409,6 @@ export const onDeleteUserActivity = /* GraphQL */ `subscription OnDeleteUserActi
 ` as GeneratedSubscription<
   APITypes.OnDeleteUserActivitySubscriptionVariables,
   APITypes.OnDeleteUserActivitySubscription
->;
-export const onCreateUserEvent = /* GraphQL */ `subscription OnCreateUserEvent(
-  $filter: ModelSubscriptionUserEventFilterInput
-  $owner: String
-) {
-  onCreateUserEvent(filter: $filter, owner: $owner) {
-    owner
-    sessionId
-    eventType
-    eventData
-    timestamp
-    pageUrl
-    elementId
-    metadata
-    id
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnCreateUserEventSubscriptionVariables,
-  APITypes.OnCreateUserEventSubscription
->;
-export const onUpdateUserEvent = /* GraphQL */ `subscription OnUpdateUserEvent(
-  $filter: ModelSubscriptionUserEventFilterInput
-  $owner: String
-) {
-  onUpdateUserEvent(filter: $filter, owner: $owner) {
-    owner
-    sessionId
-    eventType
-    eventData
-    timestamp
-    pageUrl
-    elementId
-    metadata
-    id
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnUpdateUserEventSubscriptionVariables,
-  APITypes.OnUpdateUserEventSubscription
->;
-export const onDeleteUserEvent = /* GraphQL */ `subscription OnDeleteUserEvent(
-  $filter: ModelSubscriptionUserEventFilterInput
-  $owner: String
-) {
-  onDeleteUserEvent(filter: $filter, owner: $owner) {
-    owner
-    sessionId
-    eventType
-    eventData
-    timestamp
-    pageUrl
-    elementId
-    metadata
-    id
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedSubscription<
-  APITypes.OnDeleteUserEventSubscriptionVariables,
-  APITypes.OnDeleteUserEventSubscription
 >;
 export const onCreateDeletedUserEmail = /* GraphQL */ `subscription OnCreateDeletedUserEmail(
   $filter: ModelSubscriptionDeletedUserEmailFilterInput

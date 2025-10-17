@@ -4,106 +4,86 @@ import { useNavigate } from 'react-router-dom';
 
 interface UseInactivityTimerOptions {
   timeoutInMinutes?: number; // Inactivity timeout in minutes
-  warningBeforeLogoutInMinutes?: number; // Time before logout to show a warning
-  onLogout?: () => void; // Callback function on logout
-  onWarning?: (timeLeft: number) => void; // Callback for warning
+  onLogout?: (isInactivityLogout?: boolean) => void; // Callback function on logout
   onActivity?: () => void; // Callback for user activity
   enabled?: boolean; // Whether the timer should be active
 }
 
-const DEFAULT_TIMEOUT_MINUTES = 120;
-const DEFAULT_WARNING_MINUTES = 10;  // minutes before logout
+const DEFAULT_TIMEOUT_MINUTES = 120; // 2 hours
 
 export const useInactivityTimer = ({
   timeoutInMinutes = DEFAULT_TIMEOUT_MINUTES,
-  warningBeforeLogoutInMinutes = DEFAULT_WARNING_MINUTES,
   onLogout,
-  onWarning,
   onActivity,
   enabled = true,
 }: UseInactivityTimerOptions = {}) => {
   const navigate = useNavigate();
   const logoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const warningTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isActiveRef = useRef<boolean>(enabled);
 
-  const resetTimers = useCallback(() => {
-    // Clear existing timers
+  const resetTimer = useCallback(() => {
+    // Clear existing timer
     if (logoutTimerRef.current) {
       clearTimeout(logoutTimerRef.current);
       logoutTimerRef.current = null;
     }
-    if (warningTimerRef.current) {
-      clearTimeout(warningTimerRef.current);
-      warningTimerRef.current = null;
-    }
 
-    // Only set timers if enabled
+    // Only set timer if enabled
     if (!enabled || !isActiveRef.current) {
       return;
     }
 
-    // Set the main logout timer
+    // Set the logout timer
     logoutTimerRef.current = setTimeout(() => {
       // Inactivity logout
       (async () => {
         try {
-          // Delegate logout to caller (e.g., centralized SessionContext.logout)
-          await onLogout?.();
+          // Store inactivity logout flag in localStorage for banner display
+          localStorage.setItem('inactivity-logout', 'true');
+          
+          // Delegate logout to caller with inactivity flag
+          await onLogout?.(true);
         } catch (error) {
           console.error('Error during inactivity logout callback:', error);
         } finally {
-          navigate('/'); // Redirect to home page
+          // Redirect to home page (landing page)
+          navigate('/');
         }
       })();
     }, timeoutInMinutes * 60 * 1000);
-
-    // Set the warning timer (if specified and makes sense)
-    const warningTimeMs = (timeoutInMinutes - warningBeforeLogoutInMinutes) * 60 * 1000;
-    if (warningTimeMs > 0 && warningBeforeLogoutInMinutes > 0) {
-      warningTimerRef.current = setTimeout(() => {
-        const timeLeftSeconds = warningBeforeLogoutInMinutes * 60;
-        // Inactivity warning
-        onWarning?.(timeLeftSeconds);
-      }, warningTimeMs);
-    }
-  }, [timeoutInMinutes, warningBeforeLogoutInMinutes, onLogout, onWarning, navigate, enabled]);
+  }, [timeoutInMinutes, onLogout, navigate, enabled]);
 
   const handleUserActivity = useCallback(() => {
     if (enabled && isActiveRef.current) {
-      resetTimers();
+      resetTimer();
       onActivity?.(); // Notify activity tracking system
     }
-  }, [resetTimers, onActivity, enabled]);
+  }, [resetTimer, onActivity, enabled]);
 
-  const clearTimers = useCallback(() => {
+  const clearTimer = useCallback(() => {
     if (logoutTimerRef.current) {
       clearTimeout(logoutTimerRef.current);
       logoutTimerRef.current = null;
-    }
-    if (warningTimerRef.current) {
-      clearTimeout(warningTimerRef.current);
-      warningTimerRef.current = null;
     }
   }, []);
 
   const enableTimer = useCallback(() => {
     isActiveRef.current = true;
-    resetTimers();
-  }, [resetTimers]);
+    resetTimer();
+  }, [resetTimer]);
 
   const disableTimer = useCallback(() => {
     isActiveRef.current = false;
-    clearTimers();
-  }, [clearTimers]);
+    clearTimer();
+  }, [clearTimer]);
 
   useEffect(() => {
     // Update active state when enabled prop changes
     isActiveRef.current = enabled;
     
     if (enabled) {
-      // Start timers on component mount
-      resetTimers();
+      // Start timer on component mount
+      resetTimer();
 
       // Add event listeners for user activity
       const activityEvents = [
@@ -118,23 +98,22 @@ export const useInactivityTimer = ({
         window.addEventListener(event, handleUserActivity)
       );
 
-      // Clean up timers and event listeners on component unmount
+      // Clean up timer and event listeners on component unmount
       return () => {
-        clearTimers();
+        clearTimer();
         activityEvents.forEach((event) =>
           window.removeEventListener(event, handleUserActivity)
         );
       };
     } else {
-      // Disable timers if not enabled
-      clearTimers();
+      // Disable timer if not enabled
+      clearTimer();
     }
-  }, [handleUserActivity, enabled, resetTimers, clearTimers]);
+  }, [handleUserActivity, enabled, resetTimer, clearTimer]);
 
-  // Optional: Provide a way to manually reset the timer from outside
   return { 
-    resetInactivityTimer: resetTimers,
-    clearInactivityTimer: clearTimers,
+    resetInactivityTimer: resetTimer,
+    clearInactivityTimer: clearTimer,
     enableInactivityTimer: enableTimer,
     disableInactivityTimer: disableTimer,
     isTimerActive: isActiveRef.current

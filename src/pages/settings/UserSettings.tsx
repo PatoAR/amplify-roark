@@ -7,6 +7,7 @@ import {
   Heading,
   Card,
   Alert,
+  Text,
 } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import { useTranslation } from '../../i18n';
@@ -123,6 +124,13 @@ const UserSettings = () => {
           </Card>
         ))}
       </Flex>
+
+      {/* Contact Information */}
+      <View className="contact-section">
+        <Text fontSize="small" color="font.secondary" textAlign="center">
+          <span dangerouslySetInnerHTML={{ __html: t('settings.contactHelp') }} />
+        </Text>
+      </View>
     </Flex>
   );
 };

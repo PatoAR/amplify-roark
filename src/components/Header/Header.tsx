@@ -5,8 +5,16 @@ import "./Header.css";
 import Logo from "/PerkinsLogo_Base_Transp.png";
 import HeaderNav from "./HeaderNav";
 import HeaderSearchBar from "./HeaderSearchBar";
+import { useSubscriptionManager } from "../../hooks/useSubscriptionManager";
 
 const Header = () => {
+  const {
+    shouldShowWarning,
+  } = useSubscriptionManager();
+
+  const handleUpgradeClick = () => {
+    window.location.href = '/settings/referral';
+  };
 
   return (
     <div className="header">
@@ -27,6 +35,14 @@ const Header = () => {
         </div>
 
         <div className="header-right">
+          {/* Minimalistic Subscription Warning */}
+          {shouldShowWarning() && (
+            <Flex alignItems="center" gap="small">
+              <div className="warning-icon" onClick={handleUpgradeClick}>
+                ⚠️
+              </div>
+            </Flex>
+          )}
           <HeaderNav />
         </div>
       </Flex>

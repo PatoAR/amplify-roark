@@ -13,8 +13,21 @@ export type CreateArticleInput = {
   countries?: string | null,
   language?: string | null,
   ttl?: number | null,
+  category?: ArticleCategory | null,
+  priorityDuration?: number | null,
+  callToAction?: string | null,
+  sponsorLink?: string | null,
+  priorityUntil?: string | null,
+  createdAt?: string | null,
   id?: string | null,
 };
+
+export enum ArticleCategory {
+  NEWS = "NEWS",
+  STATISTICS = "STATISTICS",
+  SPONSORED = "SPONSORED",
+}
+
 
 export type ModelArticleConditionInput = {
   timestamp?: ModelStringInput | null,
@@ -27,10 +40,15 @@ export type ModelArticleConditionInput = {
   countries?: ModelStringInput | null,
   language?: ModelStringInput | null,
   ttl?: ModelIntInput | null,
+  category?: ModelArticleCategoryInput | null,
+  priorityDuration?: ModelIntInput | null,
+  callToAction?: ModelStringInput | null,
+  sponsorLink?: ModelStringInput | null,
+  priorityUntil?: ModelStringInput | null,
+  createdAt?: ModelStringInput | null,
   and?: Array< ModelArticleConditionInput | null > | null,
   or?: Array< ModelArticleConditionInput | null > | null,
   not?: ModelArticleConditionInput | null,
-  createdAt?: ModelStringInput | null,
   updatedAt?: ModelStringInput | null,
 };
 
@@ -86,6 +104,11 @@ export type ModelIntInput = {
   attributeType?: ModelAttributeTypes | null,
 };
 
+export type ModelArticleCategoryInput = {
+  eq?: ArticleCategory | null,
+  ne?: ArticleCategory | null,
+};
+
 export type Article = {
   __typename: "Article",
   timestamp?: string | null,
@@ -98,8 +121,13 @@ export type Article = {
   countries?: string | null,
   language?: string | null,
   ttl?: number | null,
+  category?: ArticleCategory | null,
+  priorityDuration?: number | null,
+  callToAction?: string | null,
+  sponsorLink?: string | null,
+  priorityUntil?: string | null,
+  createdAt?: string | null,
   id: string,
-  createdAt: string,
   updatedAt: string,
 };
 
@@ -114,6 +142,12 @@ export type UpdateArticleInput = {
   countries?: string | null,
   language?: string | null,
   ttl?: number | null,
+  category?: ArticleCategory | null,
+  priorityDuration?: number | null,
+  callToAction?: string | null,
+  sponsorLink?: string | null,
+  priorityUntil?: string | null,
+  createdAt?: string | null,
   id: string,
 };
 
@@ -357,8 +391,6 @@ export type CreateUserActivityInput = {
   startTime: string,
   endTime?: string | null,
   duration?: number | null,
-  pageViews?: number | null,
-  interactions?: number | null,
   deviceInfo?: string | null,
   userAgent?: string | null,
   ipAddress?: string | null,
@@ -372,8 +404,6 @@ export type ModelUserActivityConditionInput = {
   startTime?: ModelStringInput | null,
   endTime?: ModelStringInput | null,
   duration?: ModelIntInput | null,
-  pageViews?: ModelIntInput | null,
-  interactions?: ModelIntInput | null,
   deviceInfo?: ModelStringInput | null,
   userAgent?: ModelStringInput | null,
   ipAddress?: ModelStringInput | null,
@@ -392,8 +422,6 @@ export type UserActivity = {
   startTime: string,
   endTime?: string | null,
   duration?: number | null,
-  pageViews?: number | null,
-  interactions?: number | null,
   deviceInfo?: string | null,
   userAgent?: string | null,
   ipAddress?: string | null,
@@ -409,8 +437,6 @@ export type UpdateUserActivityInput = {
   startTime?: string | null,
   endTime?: string | null,
   duration?: number | null,
-  pageViews?: number | null,
-  interactions?: number | null,
   deviceInfo?: string | null,
   userAgent?: string | null,
   ipAddress?: string | null,
@@ -419,85 +445,6 @@ export type UpdateUserActivityInput = {
 };
 
 export type DeleteUserActivityInput = {
-  id: string,
-};
-
-export type CreateUserEventInput = {
-  owner?: string | null,
-  sessionId: string,
-  eventType?: UserEventEventType | null,
-  eventData?: string | null,
-  timestamp: string,
-  pageUrl?: string | null,
-  elementId?: string | null,
-  metadata?: string | null,
-  id?: string | null,
-};
-
-export enum UserEventEventType {
-  page_view = "page_view",
-  article_click = "article_click",
-  article_share = "article_share",
-  filter_change = "filter_change",
-  preference_update = "preference_update",
-  referral_generated = "referral_generated",
-  referral_shared = "referral_shared",
-  settings_accessed = "settings_accessed",
-  search_performed = "search_performed",
-  logout = "logout",
-  login = "login",
-}
-
-
-export type ModelUserEventConditionInput = {
-  owner?: ModelStringInput | null,
-  sessionId?: ModelStringInput | null,
-  eventType?: ModelUserEventEventTypeInput | null,
-  eventData?: ModelStringInput | null,
-  timestamp?: ModelStringInput | null,
-  pageUrl?: ModelStringInput | null,
-  elementId?: ModelStringInput | null,
-  metadata?: ModelStringInput | null,
-  and?: Array< ModelUserEventConditionInput | null > | null,
-  or?: Array< ModelUserEventConditionInput | null > | null,
-  not?: ModelUserEventConditionInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-};
-
-export type ModelUserEventEventTypeInput = {
-  eq?: UserEventEventType | null,
-  ne?: UserEventEventType | null,
-};
-
-export type UserEvent = {
-  __typename: "UserEvent",
-  owner?: string | null,
-  sessionId: string,
-  eventType?: UserEventEventType | null,
-  eventData?: string | null,
-  timestamp: string,
-  pageUrl?: string | null,
-  elementId?: string | null,
-  metadata?: string | null,
-  id: string,
-  createdAt: string,
-  updatedAt: string,
-};
-
-export type UpdateUserEventInput = {
-  owner?: string | null,
-  sessionId?: string | null,
-  eventType?: UserEventEventType | null,
-  eventData?: string | null,
-  timestamp?: string | null,
-  pageUrl?: string | null,
-  elementId?: string | null,
-  metadata?: string | null,
-  id: string,
-};
-
-export type DeleteUserEventInput = {
   id: string,
 };
 
@@ -561,8 +508,13 @@ export type ModelArticleFilterInput = {
   countries?: ModelStringInput | null,
   language?: ModelStringInput | null,
   ttl?: ModelIntInput | null,
-  id?: ModelIDInput | null,
+  category?: ModelArticleCategoryInput | null,
+  priorityDuration?: ModelIntInput | null,
+  callToAction?: ModelStringInput | null,
+  sponsorLink?: ModelStringInput | null,
+  priorityUntil?: ModelStringInput | null,
   createdAt?: ModelStringInput | null,
+  id?: ModelIDInput | null,
   updatedAt?: ModelStringInput | null,
   and?: Array< ModelArticleFilterInput | null > | null,
   or?: Array< ModelArticleFilterInput | null > | null,
@@ -590,6 +542,12 @@ export type ModelArticleConnection = {
   items:  Array<Article | null >,
   nextToken?: string | null,
 };
+
+export enum ModelSortDirection {
+  ASC = "ASC",
+  DESC = "DESC",
+}
+
 
 export type ModelUserProfileFilterInput = {
   owner?: ModelStringInput | null,
@@ -680,8 +638,6 @@ export type ModelUserActivityFilterInput = {
   startTime?: ModelStringInput | null,
   endTime?: ModelStringInput | null,
   duration?: ModelIntInput | null,
-  pageViews?: ModelIntInput | null,
-  interactions?: ModelIntInput | null,
   deviceInfo?: ModelStringInput | null,
   userAgent?: ModelStringInput | null,
   ipAddress?: ModelStringInput | null,
@@ -697,29 +653,6 @@ export type ModelUserActivityFilterInput = {
 export type ModelUserActivityConnection = {
   __typename: "ModelUserActivityConnection",
   items:  Array<UserActivity | null >,
-  nextToken?: string | null,
-};
-
-export type ModelUserEventFilterInput = {
-  owner?: ModelStringInput | null,
-  sessionId?: ModelStringInput | null,
-  eventType?: ModelUserEventEventTypeInput | null,
-  eventData?: ModelStringInput | null,
-  timestamp?: ModelStringInput | null,
-  pageUrl?: ModelStringInput | null,
-  elementId?: ModelStringInput | null,
-  metadata?: ModelStringInput | null,
-  id?: ModelIDInput | null,
-  createdAt?: ModelStringInput | null,
-  updatedAt?: ModelStringInput | null,
-  and?: Array< ModelUserEventFilterInput | null > | null,
-  or?: Array< ModelUserEventFilterInput | null > | null,
-  not?: ModelUserEventFilterInput | null,
-};
-
-export type ModelUserEventConnection = {
-  __typename: "ModelUserEventConnection",
-  items:  Array<UserEvent | null >,
   nextToken?: string | null,
 };
 
@@ -755,8 +688,13 @@ export type ModelSubscriptionArticleFilterInput = {
   countries?: ModelSubscriptionStringInput | null,
   language?: ModelSubscriptionStringInput | null,
   ttl?: ModelSubscriptionIntInput | null,
-  id?: ModelSubscriptionIDInput | null,
+  category?: ModelSubscriptionStringInput | null,
+  priorityDuration?: ModelSubscriptionIntInput | null,
+  callToAction?: ModelSubscriptionStringInput | null,
+  sponsorLink?: ModelSubscriptionStringInput | null,
+  priorityUntil?: ModelSubscriptionStringInput | null,
   createdAt?: ModelSubscriptionStringInput | null,
+  id?: ModelSubscriptionIDInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionArticleFilterInput | null > | null,
   or?: Array< ModelSubscriptionArticleFilterInput | null > | null,
@@ -869,8 +807,6 @@ export type ModelSubscriptionUserActivityFilterInput = {
   startTime?: ModelSubscriptionStringInput | null,
   endTime?: ModelSubscriptionStringInput | null,
   duration?: ModelSubscriptionIntInput | null,
-  pageViews?: ModelSubscriptionIntInput | null,
-  interactions?: ModelSubscriptionIntInput | null,
   deviceInfo?: ModelSubscriptionStringInput | null,
   userAgent?: ModelSubscriptionStringInput | null,
   ipAddress?: ModelSubscriptionStringInput | null,
@@ -880,22 +816,6 @@ export type ModelSubscriptionUserActivityFilterInput = {
   updatedAt?: ModelSubscriptionStringInput | null,
   and?: Array< ModelSubscriptionUserActivityFilterInput | null > | null,
   or?: Array< ModelSubscriptionUserActivityFilterInput | null > | null,
-  owner?: ModelStringInput | null,
-};
-
-export type ModelSubscriptionUserEventFilterInput = {
-  sessionId?: ModelSubscriptionStringInput | null,
-  eventType?: ModelSubscriptionStringInput | null,
-  eventData?: ModelSubscriptionStringInput | null,
-  timestamp?: ModelSubscriptionStringInput | null,
-  pageUrl?: ModelSubscriptionStringInput | null,
-  elementId?: ModelSubscriptionStringInput | null,
-  metadata?: ModelSubscriptionStringInput | null,
-  id?: ModelSubscriptionIDInput | null,
-  createdAt?: ModelSubscriptionStringInput | null,
-  updatedAt?: ModelSubscriptionStringInput | null,
-  and?: Array< ModelSubscriptionUserEventFilterInput | null > | null,
-  or?: Array< ModelSubscriptionUserEventFilterInput | null > | null,
   owner?: ModelStringInput | null,
 };
 
@@ -931,8 +851,13 @@ export type CreateArticleMutation = {
     countries?: string | null,
     language?: string | null,
     ttl?: number | null,
+    category?: ArticleCategory | null,
+    priorityDuration?: number | null,
+    callToAction?: string | null,
+    sponsorLink?: string | null,
+    priorityUntil?: string | null,
+    createdAt?: string | null,
     id: string,
-    createdAt: string,
     updatedAt: string,
   } | null,
 };
@@ -955,8 +880,13 @@ export type UpdateArticleMutation = {
     countries?: string | null,
     language?: string | null,
     ttl?: number | null,
+    category?: ArticleCategory | null,
+    priorityDuration?: number | null,
+    callToAction?: string | null,
+    sponsorLink?: string | null,
+    priorityUntil?: string | null,
+    createdAt?: string | null,
     id: string,
-    createdAt: string,
     updatedAt: string,
   } | null,
 };
@@ -979,8 +909,13 @@ export type DeleteArticleMutation = {
     countries?: string | null,
     language?: string | null,
     ttl?: number | null,
+    category?: ArticleCategory | null,
+    priorityDuration?: number | null,
+    callToAction?: string | null,
+    sponsorLink?: string | null,
+    priorityUntil?: string | null,
+    createdAt?: string | null,
     id: string,
-    createdAt: string,
     updatedAt: string,
   } | null,
 };
@@ -1235,8 +1170,6 @@ export type CreateUserActivityMutation = {
     startTime: string,
     endTime?: string | null,
     duration?: number | null,
-    pageViews?: number | null,
-    interactions?: number | null,
     deviceInfo?: string | null,
     userAgent?: string | null,
     ipAddress?: string | null,
@@ -1260,8 +1193,6 @@ export type UpdateUserActivityMutation = {
     startTime: string,
     endTime?: string | null,
     duration?: number | null,
-    pageViews?: number | null,
-    interactions?: number | null,
     deviceInfo?: string | null,
     userAgent?: string | null,
     ipAddress?: string | null,
@@ -1285,78 +1216,10 @@ export type DeleteUserActivityMutation = {
     startTime: string,
     endTime?: string | null,
     duration?: number | null,
-    pageViews?: number | null,
-    interactions?: number | null,
     deviceInfo?: string | null,
     userAgent?: string | null,
     ipAddress?: string | null,
     isActive?: boolean | null,
-    id: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type CreateUserEventMutationVariables = {
-  input: CreateUserEventInput,
-  condition?: ModelUserEventConditionInput | null,
-};
-
-export type CreateUserEventMutation = {
-  createUserEvent?:  {
-    __typename: "UserEvent",
-    owner?: string | null,
-    sessionId: string,
-    eventType?: UserEventEventType | null,
-    eventData?: string | null,
-    timestamp: string,
-    pageUrl?: string | null,
-    elementId?: string | null,
-    metadata?: string | null,
-    id: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type UpdateUserEventMutationVariables = {
-  input: UpdateUserEventInput,
-  condition?: ModelUserEventConditionInput | null,
-};
-
-export type UpdateUserEventMutation = {
-  updateUserEvent?:  {
-    __typename: "UserEvent",
-    owner?: string | null,
-    sessionId: string,
-    eventType?: UserEventEventType | null,
-    eventData?: string | null,
-    timestamp: string,
-    pageUrl?: string | null,
-    elementId?: string | null,
-    metadata?: string | null,
-    id: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type DeleteUserEventMutationVariables = {
-  input: DeleteUserEventInput,
-  condition?: ModelUserEventConditionInput | null,
-};
-
-export type DeleteUserEventMutation = {
-  deleteUserEvent?:  {
-    __typename: "UserEvent",
-    owner?: string | null,
-    sessionId: string,
-    eventType?: UserEventEventType | null,
-    eventData?: string | null,
-    timestamp: string,
-    pageUrl?: string | null,
-    elementId?: string | null,
-    metadata?: string | null,
     id: string,
     createdAt: string,
     updatedAt: string,
@@ -1440,8 +1303,13 @@ export type GetArticleQuery = {
     countries?: string | null,
     language?: string | null,
     ttl?: number | null,
+    category?: ArticleCategory | null,
+    priorityDuration?: number | null,
+    callToAction?: string | null,
+    sponsorLink?: string | null,
+    priorityUntil?: string | null,
+    createdAt?: string | null,
     id: string,
-    createdAt: string,
     updatedAt: string,
   } | null,
 };
@@ -1467,8 +1335,49 @@ export type ListArticlesQuery = {
       countries?: string | null,
       language?: string | null,
       ttl?: number | null,
+      category?: ArticleCategory | null,
+      priorityDuration?: number | null,
+      callToAction?: string | null,
+      sponsorLink?: string | null,
+      priorityUntil?: string | null,
+      createdAt?: string | null,
       id: string,
-      createdAt: string,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ListArticleByCreatedAtQueryVariables = {
+  createdAt: string,
+  sortDirection?: ModelSortDirection | null,
+  filter?: ModelArticleFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListArticleByCreatedAtQuery = {
+  listArticleByCreatedAt?:  {
+    __typename: "ModelArticleConnection",
+    items:  Array< {
+      __typename: "Article",
+      timestamp?: string | null,
+      source: string,
+      title: string,
+      industry?: string | null,
+      summary?: string | null,
+      link?: string | null,
+      companies?: string | null,
+      countries?: string | null,
+      language?: string | null,
+      ttl?: number | null,
+      category?: ArticleCategory | null,
+      priorityDuration?: number | null,
+      callToAction?: string | null,
+      sponsorLink?: string | null,
+      priorityUntil?: string | null,
+      createdAt?: string | null,
+      id: string,
       updatedAt: string,
     } | null >,
     nextToken?: string | null,
@@ -1661,8 +1570,6 @@ export type GetUserActivityQuery = {
     startTime: string,
     endTime?: string | null,
     duration?: number | null,
-    pageViews?: number | null,
-    interactions?: number | null,
     deviceInfo?: string | null,
     userAgent?: string | null,
     ipAddress?: string | null,
@@ -1689,60 +1596,10 @@ export type ListUserActivitiesQuery = {
       startTime: string,
       endTime?: string | null,
       duration?: number | null,
-      pageViews?: number | null,
-      interactions?: number | null,
       deviceInfo?: string | null,
       userAgent?: string | null,
       ipAddress?: string | null,
       isActive?: boolean | null,
-      id: string,
-      createdAt: string,
-      updatedAt: string,
-    } | null >,
-    nextToken?: string | null,
-  } | null,
-};
-
-export type GetUserEventQueryVariables = {
-  id: string,
-};
-
-export type GetUserEventQuery = {
-  getUserEvent?:  {
-    __typename: "UserEvent",
-    owner?: string | null,
-    sessionId: string,
-    eventType?: UserEventEventType | null,
-    eventData?: string | null,
-    timestamp: string,
-    pageUrl?: string | null,
-    elementId?: string | null,
-    metadata?: string | null,
-    id: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type ListUserEventsQueryVariables = {
-  filter?: ModelUserEventFilterInput | null,
-  limit?: number | null,
-  nextToken?: string | null,
-};
-
-export type ListUserEventsQuery = {
-  listUserEvents?:  {
-    __typename: "ModelUserEventConnection",
-    items:  Array< {
-      __typename: "UserEvent",
-      owner?: string | null,
-      sessionId: string,
-      eventType?: UserEventEventType | null,
-      eventData?: string | null,
-      timestamp: string,
-      pageUrl?: string | null,
-      elementId?: string | null,
-      metadata?: string | null,
       id: string,
       createdAt: string,
       updatedAt: string,
@@ -1812,8 +1669,13 @@ export type OnCreateArticleSubscription = {
     countries?: string | null,
     language?: string | null,
     ttl?: number | null,
+    category?: ArticleCategory | null,
+    priorityDuration?: number | null,
+    callToAction?: string | null,
+    sponsorLink?: string | null,
+    priorityUntil?: string | null,
+    createdAt?: string | null,
     id: string,
-    createdAt: string,
     updatedAt: string,
   } | null,
 };
@@ -1835,8 +1697,13 @@ export type OnUpdateArticleSubscription = {
     countries?: string | null,
     language?: string | null,
     ttl?: number | null,
+    category?: ArticleCategory | null,
+    priorityDuration?: number | null,
+    callToAction?: string | null,
+    sponsorLink?: string | null,
+    priorityUntil?: string | null,
+    createdAt?: string | null,
     id: string,
-    createdAt: string,
     updatedAt: string,
   } | null,
 };
@@ -1858,8 +1725,13 @@ export type OnDeleteArticleSubscription = {
     countries?: string | null,
     language?: string | null,
     ttl?: number | null,
+    category?: ArticleCategory | null,
+    priorityDuration?: number | null,
+    callToAction?: string | null,
+    sponsorLink?: string | null,
+    priorityUntil?: string | null,
+    createdAt?: string | null,
     id: string,
-    createdAt: string,
     updatedAt: string,
   } | null,
 };
@@ -2114,8 +1986,6 @@ export type OnCreateUserActivitySubscription = {
     startTime: string,
     endTime?: string | null,
     duration?: number | null,
-    pageViews?: number | null,
-    interactions?: number | null,
     deviceInfo?: string | null,
     userAgent?: string | null,
     ipAddress?: string | null,
@@ -2139,8 +2009,6 @@ export type OnUpdateUserActivitySubscription = {
     startTime: string,
     endTime?: string | null,
     duration?: number | null,
-    pageViews?: number | null,
-    interactions?: number | null,
     deviceInfo?: string | null,
     userAgent?: string | null,
     ipAddress?: string | null,
@@ -2164,78 +2032,10 @@ export type OnDeleteUserActivitySubscription = {
     startTime: string,
     endTime?: string | null,
     duration?: number | null,
-    pageViews?: number | null,
-    interactions?: number | null,
     deviceInfo?: string | null,
     userAgent?: string | null,
     ipAddress?: string | null,
     isActive?: boolean | null,
-    id: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type OnCreateUserEventSubscriptionVariables = {
-  filter?: ModelSubscriptionUserEventFilterInput | null,
-  owner?: string | null,
-};
-
-export type OnCreateUserEventSubscription = {
-  onCreateUserEvent?:  {
-    __typename: "UserEvent",
-    owner?: string | null,
-    sessionId: string,
-    eventType?: UserEventEventType | null,
-    eventData?: string | null,
-    timestamp: string,
-    pageUrl?: string | null,
-    elementId?: string | null,
-    metadata?: string | null,
-    id: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type OnUpdateUserEventSubscriptionVariables = {
-  filter?: ModelSubscriptionUserEventFilterInput | null,
-  owner?: string | null,
-};
-
-export type OnUpdateUserEventSubscription = {
-  onUpdateUserEvent?:  {
-    __typename: "UserEvent",
-    owner?: string | null,
-    sessionId: string,
-    eventType?: UserEventEventType | null,
-    eventData?: string | null,
-    timestamp: string,
-    pageUrl?: string | null,
-    elementId?: string | null,
-    metadata?: string | null,
-    id: string,
-    createdAt: string,
-    updatedAt: string,
-  } | null,
-};
-
-export type OnDeleteUserEventSubscriptionVariables = {
-  filter?: ModelSubscriptionUserEventFilterInput | null,
-  owner?: string | null,
-};
-
-export type OnDeleteUserEventSubscription = {
-  onDeleteUserEvent?:  {
-    __typename: "UserEvent",
-    owner?: string | null,
-    sessionId: string,
-    eventType?: UserEventEventType | null,
-    eventData?: string | null,
-    timestamp: string,
-    pageUrl?: string | null,
-    elementId?: string | null,
-    metadata?: string | null,
     id: string,
     createdAt: string,
     updatedAt: string,

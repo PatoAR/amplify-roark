@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import { Amplify } from "aws-amplify";
+import { getCurrentUser } from 'aws-amplify/auth';
+import { Hub } from 'aws-amplify/utils';
 import outputs from '../amplify_outputs.json';
 
 // Configure Amplify FIRST, before any other imports that might use Amplify
@@ -48,7 +50,6 @@ const MainApp: React.FC = () => {
     const setupAuth = async () => {
       try {
         // Check if user is authenticated using Amplify
-        const { getCurrentUser } = await import('aws-amplify/auth');
         const user = await getCurrentUser();
         setIsAuthenticated(!!user);
       } catch {
@@ -59,7 +60,6 @@ const MainApp: React.FC = () => {
       
       // Set up a listener for authentication state changes
       try {
-        const { Hub } = await import('aws-amplify/utils');
         unsubscribe = Hub.listen('auth', (data) => {
           if (data.payload.event === 'signedIn') {
             setIsAuthenticated(true);

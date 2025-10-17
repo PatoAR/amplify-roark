@@ -2,27 +2,37 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { postConfirmation } from "../auth/post-confirmation/resource";
 import { referralApi } from "../functions/referral-api/resource";
 import { referralProcessor } from "../functions/referral-processor/resource";
+import { subscriptionManager } from "../functions/subscription-manager/resource";
 
 const schema = a.schema({
   // Article Model
   Article: a
-  .model({
-    timestamp: a.datetime(),
-    source: a.string().required(),
-    title: a.string().required(),
-    industry: a.string(),
-    summary: a.string(),
-    link: a.string(),
-    companies: a.string(),
-    countries: a.string(),
-    language: a.string(),
-    ttl: a.integer(),
-  })
-  .authorization((allow) => [
-    // Allow API keys to create articles for backend ingestion
-    allow.publicApiKey().to(['read', 'create']),
-    allow.authenticated(),
-  ]),
+    .model({
+      timestamp: a.datetime(),
+      source: a.string().required(),
+      title: a.string().required(),
+      industry: a.string(),
+      summary: a.string(),
+      link: a.string(),
+      companies: a.string(),
+      countries: a.string(),
+      language: a.string(),
+      ttl: a.integer(),
+      category: a.enum(['NEWS', 'STATISTICS', 'SPONSORED']),
+      priorityDuration: a.integer(),
+      callToAction: a.string(),
+      sponsorLink: a.string(),
+      priorityUntil: a.datetime(),
+      createdAt: a.datetime(), // Explicit field for indexing
+    })
+    .secondaryIndexes((index) => [
+      index('createdAt'), // GSI for efficient time-based queries
+    ])
+    .authorization(allow => [
+      // Allow API keys to create articles for backend ingestion
+      allow.publicApiKey().to(['read', 'create']),
+      allow.authenticated(),
+    ]),
 
   // UserProfile Model
   UserProfile: a
@@ -90,38 +100,10 @@ const schema = a.schema({
     startTime: a.datetime().required(),
     endTime: a.datetime(),
     duration: a.integer(), // Duration in seconds
-    pageViews: a.integer().default(0),
-    interactions: a.integer().default(0), // Clicks, form submissions, etc.
     deviceInfo: a.string(), // Browser, OS, screen size
     userAgent: a.string(),
     ipAddress: a.string(),
     isActive: a.boolean().default(true),
-  })
-  .authorization(allow => [allow.owner().identityClaim('sub')]),
-
-  // UserEvent Model - Track specific user actions
-  UserEvent: a
-  .model({
-    owner: a.string(),
-    sessionId: a.string().required(),
-    eventType: a.enum([
-      'page_view',
-      'article_click',
-      'article_share',
-      'filter_change',
-      'preference_update',
-      'referral_generated',
-      'referral_shared',
-      'settings_accessed',
-      'search_performed',
-      'logout',
-      'login'
-    ]),
-    eventData: a.string(), // JSON string with additional event data
-    timestamp: a.datetime().required(),
-    pageUrl: a.string(),
-    elementId: a.string(), // ID of the element that triggered the event
-    metadata: a.string(), // Additional metadata as JSON string
   })
   .authorization(allow => [allow.owner().identityClaim('sub')]),
 
@@ -156,5 +138,6 @@ export const data = defineData({
     postConfirmation,
     referralApi,
     referralProcessor,
+    subscriptionManager,
   }
 });

@@ -35,11 +35,10 @@ const customTranslations = {
     'settings.backToNews': '← Back to News Feed',
     'settings.backToSettings': '← Back to Settings',
     
-
-    
     // Welcome
     'welcome.title': 'Welcome to Perkins News',
     'welcome.subtitle': 'To get started, personalize your news feed by selecting the industries and countries that matter most to you.',
+    'welcome.referralIntro': 'Perkins can be free forever through our referral program - invite friends to earn free months!',
     'welcome.button': 'Personalize Your Feed',
     'welcome.hint': 'You can always change these settings later from the main menu.',
     
@@ -67,11 +66,15 @@ const customTranslations = {
     'common.confirm': 'Confirm',
     'common.delete': 'Delete',
     'common.edit': 'Edit',
-    'common.moreArticles': 'Showing first 50 articles. There are {count} more articles available.',
+    'common.moreArticles': 'Showing {displayed} articles. There are {count} more articles available.',
+    'common.loadMore': 'Load More Articles',
     
     // Referral
-    'referral.title': '🎁 Invite Friends & Earn Free Months',
-    'referral.subtitle': 'Share your referral code with friends and get 3 additional months of free access for each successful referral!',
+    'referral.title': '🎁 Keep Perkins Free Forever',
+    'referral.subtitle': 'Earn 3 months free for each friend you invite',
+    'referral.alwaysFreeTitle': '🎁 Keep Perkins Free Forever',
+    'referral.sustainableAccess': 'Earn 3 months free for each friend you invite',
+    'referral.subscriptionAlternative': 'Or subscribe for unlimited access without referrals',
     'referral.loading': 'Loading referral information...',
     'referral.yourCode': 'Your Referral Code',
     'referral.copyCode': 'Copy',
@@ -95,15 +98,108 @@ const customTranslations = {
     'referral.linkCopied': 'Referral link copied to clipboard!',
     'referral.openingWhatsApp': 'Opening WhatsApp...',
     'referral.openingEmail': 'Opening email client...',
-    'referral.shareMessage': 'Join Perkins News Service and get 3 months free! Use my referral code: {code}',
-    'referral.emailSubject': 'Join Perkins News Service - 3 Months Free!',
-    'referral.emailBody': 'Hi!\n\nI\'m using Perkins News Service and thought you might be interested. It\'s a great way to stay updated with business news.\n\nYou can get 3 months of free access using my referral code: {code}\n\nCheck it out: {link}',
+    'referral.shareMessage': 'Hi! I\'ve been using Perkins Intel to stay on top of market and business intelligence, and I thought you\'d find it valuable too. Enjoy 3 months of premium access free of charge.\n\nActivate your access here:\n{link}',
+    'referral.emailSubject': 'Join Perkins - Intelligence for Business and Markets',
+    'referral.emailBody': 'Hi,\n\nI\'ve been using Perkins Intel to stay on top of market and business intelligence, and I thought you\'d find it valuable too.\n\nPerkins delivers concise, tailored updates on the countries, sectors, and companies you define.\n\nAs my referral, you can enjoy 3 months of premium access free of charge.\n\n👉 Activate your access here: {link}\n\nBest regards,',
     'referral.freeAccessStatus': 'Your Free Access Status',
     'referral.daysRemaining': 'Days Remaining',
     'referral.freeAccessUntil': 'Free access until',
     'referral.errorCopyLink': 'Failed to copy link:',
     'referral.errorWhatsApp': 'Failed to share via WhatsApp:',
     'referral.errorEmail': 'Failed to share via email:',
+    
+    // Subscription
+    'subscription.referralAlternative': 'Prefer to keep it free? Invite friends instead',
+    'subscription.chooseAccessMethod': 'Choose Your Access Method',
+    'subscription.referralOrSubscribe': 'Keep Perkins free through referrals, or subscribe for unlimited access',
+    'subscription.continueAccess': 'Continue Your Access',
+    'subscription.trialEnded': 'Your free trial has ended. Keep Perkins free through referrals, or subscribe for unlimited access.',
+    'subscription.daysRemaining': 'You have {days} days remaining. Keep Perkins free through referrals, or subscribe for unlimited access.',
+    'subscription.keepItFree': 'Keep it Free:',
+    'subscription.keepItFreeText': 'Prefer to keep Perkins free? Invite friends instead and earn 3 months free for each successful referral!',
+    'subscription.choosePlan': 'Choose Your Plan',
+    'subscription.mostPopular': 'Most Popular',
+    'subscription.saveWithAnnual': 'Save {discount}% with annual billing',
+    'subscription.upgradeNow': 'Upgrade Now',
+    'subscription.maybeLater': 'Maybe Later',
+    'subscription.moneyBackGuarantee': 'All plans include a 30-day money-back guarantee. Cancel anytime.',
+    'subscription.processing': 'Processing...',
+    
+    // Landing Page
+    'landing.signIn': 'Sign In',
+    'landing.signUp': 'Sign Up',
+    'landing.heroSubtitle': 'News, data and analysis for business and market specialists',
+    'landing.heroDescription': 'Permanently sourcing and processing business, markets, and company information from across the web to deliver meaningful insights when you need them most.',
+    'landing.feature1Title': 'Real Intelligence',
+    'landing.feature1Description': 'Continuous monitoring of news articles, regulatory reports, company newswires, statistical data, and financial filings.',
+    'landing.feature2Title': 'AI-Processing',
+    'landing.feature2Description': 'Advanced artificial intelligence that transforms raw data into actionable business insights and market intelligence.',
+    'landing.feature3Title': 'Timely Delivery',
+    'landing.feature3Description': 'Information reaches you when it matters most, ensuring you never miss critical business opportunities or risks.',
+    'landing.feature4Title': 'Meaningful Insights',
+    'landing.feature4Description': 'Data is processed and presented in a way that makes sense for your business decisions and strategic planning.',
+    'landing.feature5Title': 'Customized Content',
+    'landing.feature5Description': 'Tailor your news feed to your specific industry and geographic focus. Perkins learns your preferences to deliver only the most relevant business intelligence.',
+    'landing.feature6Title': 'Always Free Through Referrals',
+    'landing.feature6Description': 'Keep Perkins free forever by inviting friends. Earn 3 months of free access for each successful referral, or subscribe for unlimited access without referrals.',
+    'landing.ctaTitle': 'Ready to transform your business intelligence?',
+    'landing.ctaDescription': 'Gain access to Perkins comprehensive business intelligence platform. Keep it free through referrals or subscribe for unlimited access.',
+    'landing.getStarted': 'Get Started Today',
+    'landing.copyright': '© 2024 Perkins Intel. All rights reserved.',
+    'landing.contactHelp': 'Need help? Contact us at <a href="mailto:info@perkinsintel.com" style="text-decoration: none; color: #4f79a6;">info@perkinsintel.com</a>',
+    
+    // Newsfeed Preview
+    'newsfeedPreview.title': 'Live Business Intelligence Feed',
+    'newsfeedPreview.subtitle': 'Sign up to tailor the news feed to your specific industry and geographic focus',
+    
+    // WhatsApp Channels
+    'whatsapp.title': 'Try Perkins on WhatsApp',
+    'whatsapp.subtitle': 'Follow our channels and experience real-time business intelligence for your region',
+    'whatsapp.argentinaDescription': 'Daily business intelligence for Argentina',
+    'whatsapp.brasilDescription': 'Daily business intelligence for Brasil',
+    'whatsapp.followButton': 'Follow on WhatsApp',
+    'whatsapp.note': 'No signup required • Free forever • Instant updates',
+    
+    // Referral Component
+    'referral.gracePeriodDays': 'Grace Period Days',
+    'referral.gracePeriodUntil': 'Grace Period Until',
+    'referral.continueAccess': 'Continue Access',
+    'referral.upgradeNow': 'Upgrade Now',
+    'referral.subscriptionUpgraded': 'Subscription upgraded successfully!',
+    'referral.preferUnlimited': 'Prefer unlimited access without referrals?',
+    'referral.extendAccess': 'Extend Your Access',
+    'referral.trialEndedExtend': 'Your trial has ended. Extend your access by inviting friends!',
+    'referral.daysRemainingExtend': 'You have {days} days remaining. Extend your access by inviting friends!',
+    'referral.keepItFree': 'Keep It Free',
+    'referral.keepItFreeText': 'Share your referral code with friends to earn free months and extend your access.',
+    'referral.unlimitedReferrals': 'Unlimited referrals available',
+    'referral.close': 'Close',
+    
+    // Settings
+    'settings.contactHelp': 'Need help? Contact us at <a href="mailto:info@perkinsintel.com" style="text-decoration: none; color: #4f79a6;">info@perkinsintel.com</a>',
+    
+    // Grace Period Banner
+    'gracePeriod.title': 'Grace Period Active',
+    'gracePeriod.message': 'Your earned free days have been used. You have {days} days of limited access remaining. Keep Perkins free by inviting friends, or subscribe for unlimited access.',
+    'gracePeriod.actNow': 'Act Now',
+    
+    // Grace Period Expired Modal
+    'graceExpired.title': 'Access Expired',
+    'graceExpired.message': 'Your grace period has ended. Choose an option below to restore your access.',
+    'graceExpired.chooseAction': 'Choose Your Action',
+    'graceExpired.inviteFriends': 'Invite Friends',
+    'graceExpired.inviteFriendsDesc': 'Earn free access by inviting friends to join. Each successful referral extends your access.',
+    'graceExpired.noCost': 'No cost required',
+    'graceExpired.unlimitedReferrals': 'Unlimited referrals',
+    'graceExpired.upgradeToPaid': 'Upgrade to Paid',
+    'graceExpired.upgradeDesc': 'Get unlimited access with our premium subscription plans.',
+    'graceExpired.unlimitedAccess': 'Unlimited access',
+    'graceExpired.prioritySupport': 'Priority support',
+    'graceExpired.advancedFeatures': 'Advanced features',
+    'graceExpired.needHelp': 'Need help? Contact us at <a href="mailto:info@perkinsintel.com" style="text-decoration: none; color: #4f79a6;">info@perkinsintel.com</a>',
+    'graceExpired.maybeLater': 'Maybe Later',
+    'graceExpired.free': 'Free',
+    'graceExpired.premium': 'Premium',
     
     // Password
     'password.title': 'Change Password',
@@ -128,15 +224,14 @@ const customTranslations = {
     'deleteAccount.confirmDelete': 'Delete Account',
     'deleteAccount.accountDeleted': 'Account deleted successfully. You will be redirected to the login page.',
     'deleteAccount.enterPassword': 'Please enter your password to confirm account deletion',
-    // Removed password confirmation fields from delete account flow
     'deleteAccount.deleting': 'Deleting account...',
     'deleteAccount.failedToDelete': 'Failed to delete account',
     'deleteAccount.unexpectedError': 'An unexpected error occurred while deleting account',
     'deleteAccount.loseAccess': 'By deleting your account, you will lose access to all your personalized news feeds, preferences, and referral benefits.',
     
     // Sign Up
-    'signup.title': 'Join Perkins News Service',
-    'signup.subtitle': 'Get 3 months of free access to personalized business news',
+    'signup.title': 'You have been invited to join Perkins',
+    'signup.subtitle': 'Gain 3 months of unlimited access to Perkins\ncomprehensive business intelligence platform.\n\nKeep Perkins free forever through referrals, or subscribe for unlimited access.',
     'signup.email': 'Email',
     'signup.password': 'Password',
     'signup.confirmPassword': 'Confirm Password',
@@ -161,6 +256,7 @@ const customTranslations = {
     'signup.invalidUserAttributes': 'Invalid user attributes',
 
     // Verify Email
+    'verify.title': 'Verify your email',
     'verify.subtitle': 'Enter the verification code sent to',
     'verify.codeLabel': 'Verification Code',
     'verify.codePlaceholder': '6-digit code',
@@ -180,6 +276,8 @@ const customTranslations = {
     'inactivity.message': 'For your security, you will be logged out in less than {minutes} minute(s). Do you want to stay logged in?',
     'inactivity.logout': 'Logout',
     'inactivity.stayLoggedIn': 'Stay Logged In',
+    'inactivity.logoutTitle': 'Session Expired',
+    'inactivity.logoutMessage': 'You have been automatically logged out due to inactivity. Please sign in again to continue.',
     
     // Auth Error
     'authError.title': 'Authentication Error',
@@ -187,8 +285,6 @@ const customTranslations = {
     'authError.technicalDetails': 'Technical Details',
     'authError.tryAgain': 'Try Again',
     'authError.logout': 'Logout',
-    
-
     
     // Disclaimer
     'disclaimer.text': 'News may be delayed by several minutes depending on source publication and retrieval frequency.',
@@ -229,8 +325,22 @@ const customTranslations = {
     // Welcome
     'welcome.title': 'Bienvenido a Perkins News',
     'welcome.subtitle': 'Para comenzar, personaliza tu feed de noticias seleccionando las industrias y países que más te importan.',
+    'welcome.referralIntro': 'Perkins puede ser gratis para siempre a través de nuestro programa de referidos - ¡invita amigos para ganar meses gratis!',
     'welcome.button': 'Personalizar tu Feed',
     'welcome.hint': 'Siempre puedes cambiar esta configuración más tarde desde el menú principal.',
+    
+    // Optimal Usage
+    'optimalUsage.title': 'Experiencia de Usuario Óptima',
+    'optimalUsage.splitScreen.title': '1. Habilitar Pantalla Dividida',
+    'optimalUsage.splitScreen.description': 'Para la mejor experiencia en escritorio o portátil, usa la función de pantalla dividida de tu navegador. Esto te permite ver la lista de artículos y leer artículos simultáneamente.',
+    'optimalUsage.splitScreen.imageAlt': 'Función de pantalla dividida del navegador',
+    'optimalUsage.articleSize.title': '2. Ajustar Tamaño de Lista de Artículos',
+    'optimalUsage.articleSize.description': 'Establece la lista de artículos en la izquierda a aproximadamente un tercio del ancho de tu pantalla. Esto proporciona el equilibrio perfecto entre navegar artículos y leer contenido.',
+    'optimalUsage.openRight.title': '3. Usar Opción "Abrir a la Derecha"',
+    'optimalUsage.openRight.description': 'Una vez que la pantalla dividida esté habilitada, busca la opción "abrir a la derecha" en la barra de navegación de tu navegador. Esto abrirá artículos en el panel derecho para una lectura óptima.',
+    'optimalUsage.openRight.imageAlt': 'Opción abrir a la derecha del navegador',
+    'optimalUsage.tip': 'Estos ajustes te darán el flujo de trabajo más eficiente para consumir contenido de noticias en la plataforma Perkins.',
+    'optimalUsage.dontShowAgain': 'No mostrar este mensaje de nuevo',
     
     // Common
     'common.loading': 'Cargando...',
@@ -243,11 +353,15 @@ const customTranslations = {
     'common.confirm': 'Confirmar',
     'common.delete': 'Eliminar',
     'common.edit': 'Editar',
-    'common.moreArticles': 'Mostrando los primeros 50 artículos. Hay {count} artículos más disponibles.',
+    'common.moreArticles': 'Mostrando {displayed} artículos. Hay {count} artículos más disponibles.',
+    'common.loadMore': 'Cargar Más Artículos',
     
     // Referral
-    'referral.title': '🎁 Invitar Amigos y Ganar Meses Gratis',
-    'referral.subtitle': '¡Comparte tu código de referido con amigos y obtén 3 meses adicionales de acceso gratis por cada referido exitoso!',
+    'referral.title': '🎁 Mantén Perkins Gratis Para Siempre',
+    'referral.subtitle': 'Gana 3 meses gratis por cada amigo que invites',
+    'referral.alwaysFreeTitle': '🎁 Mantén Perkins Gratis Para Siempre',
+    'referral.sustainableAccess': 'Gana 3 meses gratis por cada amigo que invites',
+    'referral.subscriptionAlternative': 'O suscríbete para acceso ilimitado sin referidos',
     'referral.loading': 'Cargando información de referidos...',
     'referral.yourCode': 'Tu Código de Referido',
     'referral.copyCode': 'Copiar',
@@ -271,9 +385,9 @@ const customTranslations = {
     'referral.linkCopied': '¡Enlace de referido copiado al portapapeles!',
     'referral.openingWhatsApp': 'Abriendo WhatsApp...',
     'referral.openingEmail': 'Abriendo cliente de email...',
-    'referral.shareMessage': '¡Únete al Servicio de Notícias Perkins y obtén 3 meses gratis! Usa mi código de referido: {code}',
-    'referral.emailSubject': '¡Únete al Servicio de Notícias Perkins - 3 Meses Gratis!',
-    'referral.emailBody': '¡Hola!\n\nEstoy usando el Servicio de Notícias Perkins y pensé que te podría interesar. Es una excelente manera de mantenerse actualizado con noticias de negocios.\n\nPuedes obtener 3 meses de acceso gratis usando mi código de referido: {code}\n\nMíralo aquí: {link}',
+    'referral.shareMessage': '¡Hola! He estado usando Perkins Intel para mantenerme al día con la inteligencia de mercados y empresarial, y pensé que también te resultaría valioso. Disfruta de 3 meses de acceso premium sin costo.\n\nActiva tu acceso aquí:\n{link}',
+    'referral.emailSubject': '¡Únete a Perkins - Intelligence for Business and Markets',
+    'referral.emailBody': 'Hola,\n\nHe estado usando Perkins Intel para mantenerme al día con la inteligencia de mercados y empresarial, y pensé que también te resultaría valioso.\n\nPerkins ofrece actualizaciones concisas y personalizadas sobre los países, sectores y empresas que defines.\n\nComo mi referido, puedes disfrutar de 3 meses de acceso premium sin costo.\n\n👉 Activa tu acceso aquí: {link}\n\nSaludos cordiales,',
     'referral.freeAccessStatus': 'Tu Estado de Acceso Gratis',
     'referral.daysRemaining': 'Días Restantes',
     'referral.freeAccessUntil': 'Acceso gratis hasta',
@@ -304,15 +418,14 @@ const customTranslations = {
     'deleteAccount.confirmDelete': 'Eliminar Cuenta',
     'deleteAccount.accountDeleted': 'Cuenta eliminada exitosamente. Serás redirigido a la página de inicio de sesión.',
     'deleteAccount.enterPassword': 'Por favor ingresa tu contraseña para confirmar la eliminación de la cuenta',
-    // Removed password confirmation fields from delete account flow
     'deleteAccount.deleting': 'Eliminando cuenta...',
     'deleteAccount.failedToDelete': 'Error al eliminar la cuenta',
     'deleteAccount.unexpectedError': 'Ocurrió un error inesperado al eliminar la cuenta',
-    'deleteAccount.loseAccess': 'Al eliminar tu cuenta, perderás acceso a todos tus feeds de notícias personalizados, preferencias y beneficios de referidos.',
+    'deleteAccount.loseAccess': 'Al eliminar tu cuenta, perderás acceso a todos tus feeds de noticias personalizados, preferencias y beneficios de referidos.',
     
     // Sign Up
-    'signup.title': 'Únete al Servicio de Notícias Perkins',
-    'signup.subtitle': 'Obtén 3 meses de acesso grátis a notícias de negócios personalizadas',
+    'signup.title': 'Has sido invitado a unirte a Perkins',
+    'signup.subtitle': 'Obtén 3 meses de acceso ilimitado a la plataforma integral de inteligencia empresarial de Perkins.\n\nMantén Perkins gratis para siempre a través de referidos, o suscríbete para acceso ilimitado.',
     'signup.email': 'Email',
     'signup.password': 'Contraseña',
     'signup.confirmPassword': 'Confirmar Contraseña',
@@ -337,6 +450,7 @@ const customTranslations = {
     'signup.invalidUserAttributes': 'Atributos de usuario inválidos',
 
     // Verify Email
+    'verify.title': 'Verificar tu email',
     'verify.subtitle': 'Ingresa el código de verificación enviado a',
     'verify.codeLabel': 'Código de Verificación',
     'verify.codePlaceholder': 'Código de 6 dígitos',
@@ -356,6 +470,8 @@ const customTranslations = {
     'inactivity.message': 'Por tu seguridad, serás desconectado en menos de {minutes} minuto(s). ¿Quieres mantenerte conectado?',
     'inactivity.logout': 'Cerrar Sesión',
     'inactivity.stayLoggedIn': 'Mantenerse Conectado',
+    'inactivity.logoutTitle': 'Sesión Expirada',
+    'inactivity.logoutMessage': 'Has sido desconectado automáticamente por inactividad. Por favor, inicia sesión nuevamente para continuar.',
     
     // Auth Error
     'authError.title': 'Error de Autenticación',
@@ -364,11 +480,90 @@ const customTranslations = {
     'authError.tryAgain': 'Intentar de Nuevo',
     'authError.logout': 'Cerrar Sesión',
     
-
-    
     // Disclaimer
-    'disclaimer.text': 'Las notícias pueden retrasarse varios minutos según la publicación de la fonte y la frequência de busca.',
+    'disclaimer.text': 'Las noticias pueden retrasarse varios minutos según la publicación de la fuente y la frecuencia de búsqueda.',
     'disclaimer.understood': 'Entendido',
+    
+    // Landing Page
+    'landing.signIn': 'Iniciar Sesión',
+    'landing.signUp': 'Registrarse',
+    'landing.heroSubtitle': 'Noticias, datos y análisis para especialistas en negocios y mercados',
+    'landing.heroDescription': 'Obteniendo y procesando permanentemente información empresarial, de mercados y de empresas de toda la web para entregar insights significativos cuando más los necesitas.',
+    'landing.feature1Title': 'Inteligencia Real',
+    'landing.feature1Description': 'Monitoreo continuo de artículos de noticias, reportes regulatorios, comunicados de empresas, datos estadísticos y archivos financieros.',
+    'landing.feature2Title': 'Procesamiento con IA',
+    'landing.feature2Description': 'Inteligencia artificial avanzada que transforma datos en bruto en insights empresariales accionables e inteligencia de mercados.',
+    'landing.feature3Title': 'Entrega Oportuna',
+    'landing.feature3Description': 'La información te llega cuando más importa, asegurando que nunca pierdas oportunidades empresariales críticas o riesgos.',
+    'landing.feature4Title': 'Insights Significativos',
+    'landing.feature4Description': 'Los datos se procesan y presentan de manera que tenga sentido para tus decisiones empresariales y planificación estratégica.',
+    'landing.feature5Title': 'Contenido Personalizado',
+    'landing.feature5Description': 'Personaliza tu feed de noticias según tu industria específica y enfoque geográfico. Perkins aprende tus preferencias para entregar solo la inteligencia empresarial más relevante.',
+    'landing.feature6Title': 'Siempre Gratis a Través de Referidos',
+    'landing.feature6Description': 'Mantén Perkins gratis para siempre invitando amigos. Gana 3 meses de acceso gratis por cada referido exitoso, o suscríbete para acceso ilimitado sin referidos.',
+    'landing.ctaTitle': '¿Listo para transformar tu inteligencia empresarial?',
+    'landing.ctaDescription': 'Obtén acceso a la plataforma integral de inteligencia empresarial de Perkins. Manténla gratis a través de referidos o suscríbete para acceso ilimitado.',
+    'landing.getStarted': 'Comenzar Hoy',
+    'landing.copyright': '© 2024 Perkins Intel. Todos los derechos reservados.',
+    'landing.contactHelp': '¿Necesitas ayuda? Contáctanos en <a href="mailto:info@perkinsintel.com" style="text-decoration: none; color: #4f79a6;">info@perkinsintel.com</a>',
+    
+    // Subscription
+    'subscription.referralAlternative': '¿Prefieres mantenerlo gratis? Invita amigos en su lugar',
+    'subscription.chooseAccessMethod': 'Elige tu Método de Acceso',
+    'subscription.referralOrSubscribe': 'Mantén Perkins gratis a través de referidos, o suscríbete para acceso ilimitado',
+    'subscription.continueAccess': 'Continuar tu Acceso',
+    'subscription.trialEnded': 'Tu prueba gratuita ha terminado. Mantén Perkins gratis a través de referidos, o suscríbete para acceso ilimitado.',
+    'subscription.daysRemaining': 'Tienes {days} días restantes. Mantén Perkins gratis a través de referidos, o suscríbete para acceso ilimitado.',
+    'subscription.keepItFree': 'Manténlo Gratis:',
+    'subscription.keepItFreeText': '¿Prefieres mantener Perkins gratis? ¡Invita amigos en su lugar y gana 3 meses gratis por cada referido exitoso!',
+    'subscription.choosePlan': 'Elige tu Plan',
+    'subscription.mostPopular': 'Más Popular',
+    'subscription.saveWithAnnual': 'Ahorra {discount}% con facturación anual',
+    'subscription.upgradeNow': 'Actualizar Ahora',
+    'subscription.maybeLater': 'Tal Vez Después',
+    'subscription.moneyBackGuarantee': 'Todos los planes incluyen garantía de devolución de dinero de 30 días. Cancela en cualquier momento.',
+    'subscription.processing': 'Procesando...',
+    
+    // Referral Component
+    'referral.gracePeriodDays': 'Días de Período de Gracia',
+    'referral.gracePeriodUntil': 'Período de Gracia Hasta',
+    'referral.continueAccess': 'Continuar Acceso',
+    'referral.upgradeNow': 'Actualizar Ahora',
+    'referral.subscriptionUpgraded': '¡Suscripción actualizada exitosamente!',
+    'referral.preferUnlimited': '¿Prefieres acceso ilimitado sin referidos?',
+    'referral.extendAccess': 'Extiende Tu Acceso',
+    'referral.trialEndedExtend': 'Tu período de prueba ha terminado. ¡Extiende tu acceso invitando amigos!',
+    'referral.daysRemainingExtend': 'Tienes {days} días restantes. ¡Extiende tu acceso invitando amigos!',
+    'referral.keepItFree': 'Manténlo Gratis',
+    'referral.keepItFreeText': 'Comparte tu código de referido con amigos para ganar meses gratis y extender tu acceso.',
+    'referral.unlimitedReferrals': 'Referidos ilimitados disponibles',
+    'referral.close': 'Cerrar',
+    
+    // Settings
+    'settings.contactHelp': '¿Necesitas ayuda? Contáctanos en <a href="mailto:info@perkinsintel.com" style="text-decoration: none; color: #4f79a6;">info@perkinsintel.com</a>',
+    
+    // Grace Period Banner
+    'gracePeriod.title': 'Período de Gracia Activo',
+    'gracePeriod.message': 'Tus días gratis ganados han sido utilizados. Tienes {days} días de acceso limitado restantes. Mantén Perkins gratis invitando amigos, o suscríbete para acceso ilimitado.',
+    'gracePeriod.actNow': 'Actuar Ahora',
+    
+    // Grace Period Expired Modal
+    'graceExpired.title': 'Acceso Expirado',
+    'graceExpired.message': 'Tu período de gracia ha terminado. Elige una opción a continuación para restaurar tu acceso.',
+    'graceExpired.chooseAction': 'Elige tu Acción',
+    'graceExpired.inviteFriends': 'Invitar Amigos',
+    'graceExpired.inviteFriendsDesc': 'Gana acceso gratis invitando amigos a unirse. Cada referido exitoso extiende tu acceso.',
+    'graceExpired.noCost': 'Sin costo requerido',
+    'graceExpired.unlimitedReferrals': 'Referidos ilimitados',
+    'graceExpired.upgradeToPaid': 'Actualizar a Pago',
+    'graceExpired.upgradeDesc': 'Obtén acceso ilimitado con nuestros planes de suscripción premium.',
+    'graceExpired.unlimitedAccess': 'Acceso ilimitado',
+    'graceExpired.prioritySupport': 'Soporte prioritario',
+    'graceExpired.advancedFeatures': 'Características avanzadas',
+    'graceExpired.needHelp': '¿Necesitas ayuda? Contáctanos en <a href="mailto:info@perkinsintel.com" style="text-decoration: none; color: #4f79a6;">info@perkinsintel.com</a>',
+    'graceExpired.maybeLater': 'Tal Vez Después',
+    'graceExpired.free': 'Gratis',
+    'graceExpired.premium': 'Premium',
   },
   pt: {
     // Menu items
@@ -398,15 +593,29 @@ const customTranslations = {
     'settings.deleteAccount': 'Excluir Conta',
     'settings.deleteAccountDesc': 'Excluir permanentemente sua conta e todos os dados',
     'settings.inviteFriends': 'Convidar Amigos',
-    'settings.inviteFriendsDesc': 'Compartilhe seu código de indicação e ganhe meses grátis',
+    'settings.inviteFriendsDesc': 'Compartilhe seu código de referido e ganhe meses grátis',
     'settings.backToNews': '← Voltar ao Feed de Notícias',
     'settings.backToSettings': '← Voltar às Configurações',
     
     // Welcome
     'welcome.title': 'Bem-vindo ao Perkins News',
     'welcome.subtitle': 'Para começar, personalize seu feed de notícias selecionando as indústrias e países que mais importam para você.',
+    'welcome.referralIntro': 'Perkins pode ser grátis para sempre através do nosso programa de referidos - convide amigos para ganhar meses grátis!',
     'welcome.button': 'Personalizar seu Feed',
     'welcome.hint': 'Você sempre pode alterar essas configurações mais tarde no menu principal.',
+    
+    // Optimal Usage
+    'optimalUsage.title': 'Experiência de Usuário Otimizada',
+    'optimalUsage.splitScreen.title': '1. Habilitar Tela Dividida',
+    'optimalUsage.splitScreen.description': 'Para a melhor experiência em desktop ou laptop, use o recurso de tela dividida do seu navegador. Isso permite que você visualize a lista de artigos e leia artigos simultaneamente.',
+    'optimalUsage.splitScreen.imageAlt': 'Recurso de tela dividida do navegador',
+    'optimalUsage.articleSize.title': '2. Ajustar Tamanho da Lista de Artigos',
+    'optimalUsage.articleSize.description': 'Defina a lista de artigos à esquerda para aproximadamente um terço da largura da sua tela. Isso fornece o equilíbrio perfeito entre navegar artigos e ler conteúdo.',
+    'optimalUsage.openRight.title': '3. Usar Opção "Abrir à Direita"',
+    'optimalUsage.openRight.description': 'Uma vez que a tela dividida esteja habilitada, procure pela opção "abrir à direita" na barra de navegação do seu navegador. Isso abrirá artigos no painel direito para leitura otimizada.',
+    'optimalUsage.openRight.imageAlt': 'Opção abrir à direita do navegador',
+    'optimalUsage.tip': 'Essas configurações lhe darão o fluxo de trabalho mais eficiente para consumir conteúdo de notícias na plataforma Perkins.',
+    'optimalUsage.dontShowAgain': 'Não mostrar esta mensagem novamente',
     
     // Common
     'common.loading': 'Carregando...',
@@ -419,38 +628,42 @@ const customTranslations = {
     'common.confirm': 'Confirmar',
     'common.delete': 'Excluir',
     'common.edit': 'Editar',
-    'common.moreArticles': 'Mostrando os primeiros 50 artigos. Há {count} artigos mais disponíveis.',
+    'common.moreArticles': 'Mostrando {displayed} artigos. Há {count} artigos mais disponíveis.',
+    'common.loadMore': 'Carregar Mais Artigos',
     
     // Referral
-    'referral.title': '🎁 Convidar Amigos e Ganhar Meses Grátis',
-    'referral.subtitle': 'Compartilhe seu código de indicação com amigos e ganhe 3 meses adicionais de acesso grátis para cada indicação bem-sucedida!',
-    'referral.loading': 'Carregando informações de indicação...',
-    'referral.yourCode': 'Seu Código de Indicação',
+    'referral.title': '🎁 Mantenha Perkins Grátis Para Sempre',
+    'referral.subtitle': 'Ganhe 3 meses grátis para cada amigo que convidar',
+    'referral.alwaysFreeTitle': '🎁 Mantenha Perkins Grátis Para Sempre',
+    'referral.sustainableAccess': 'Ganhe 3 meses grátis para cada amigo que convidar',
+    'referral.subscriptionAlternative': 'Ou assine para acesso ilimitado sem referidos',
+    'referral.loading': 'Carregando informações de referido...',
+    'referral.yourCode': 'Seu Código de Referido',
     'referral.copyCode': 'Copiar',
     'referral.copied': 'Copiado!',
     'referral.shareCodeHint': 'Compartilhe este código com amigos para ganhar meses grátis',
-    'referral.shareTitle': 'Compartilhar seu Link de Indicação',
+    'referral.shareTitle': 'Compartilhar seu Link de Referido',
     'referral.whatsapp': '📱 WhatsApp',
     'referral.email': '📧 Email',
     'referral.copyLink': '📋 Copiar Link',
-    'referral.statsTitle': 'Suas Estatísticas de Indicação',
-    'referral.successfulReferrals': 'Indicações Bem-sucedidas',
+    'referral.statsTitle': 'Suas Estatísticas de Referido',
+    'referral.successfulReferrals': 'Referidos Bem-sucedidos',
     'referral.monthsEarned': 'Meses Ganhos',
-    'referral.totalReferrals': 'Total de Indicações',
+    'referral.totalReferrals': 'Total de Referidos',
     'referral.howItWorks': 'Como Funciona',
-    'referral.step1': 'Compartilhe seu código de indicação com amigos via WhatsApp, email, ou copie o link',
+    'referral.step1': 'Compartilhe seu código de referido com amigos via WhatsApp, email, ou copie o link',
     'referral.step2': 'Quando eles se registrarem usando seu código, ganham 3 meses de acesso grátis',
-    'referral.step3': 'Você ganha 3 meses adicionais de acesso grátis para cada indicação bem-sucedida',
+    'referral.step3': 'Você ganha 3 meses adicionais de acesso grátis para cada referido bem-sucedido',
     'referral.step4': 'Acompanhe seu progresso e ganhos nas estatísticas acima',
     'referral.refreshStats': 'Atualizar Estatísticas',
     'referral.refreshing': 'Atualizando...',
-    'referral.linkCopied': 'Link de indicação copiado para a área de transferência!',
+    'referral.linkCopied': 'Link de referido copiado para a área de transferência!',
     'referral.openingWhatsApp': 'Abrindo WhatsApp...',
     'referral.openingEmail': 'Abrindo cliente de email...',
-    'referral.shareMessage': 'Junte-se ao Serviço de Notícias Perkins e ganhe 3 meses grátis! Use meu código de indicação: {code}',
-    'referral.emailSubject': 'Junte-se ao Serviço de Notícias Perkins - 3 Meses Grátis!',
-    'referral.emailBody': 'Olá!\n\nEstou usando o Serviço de Notícias Perkins e pensei que você poderia se interessar. É uma ótima maneira de se manter atualizado com notícias de negócios.\n\nVocê pode obter 3 meses de acesso grátis usando meu código de indicação: {code}\n\nConfira aqui: {link}',
-    'referral.freeAccessStatus': 'Seu Status de Acesso Grátis',
+    'referral.shareMessage': 'Olá! Tenho usado Perkins Intel para me manter atualizado com inteligência de mercados e empresarial, e pensei que você também acharia valioso. Desfrute de 3 meses de acesso premium sem custo.\n\nAtive seu acesso aqui:\n{link}',
+    'referral.emailSubject': 'Junte-se ao Perkins - Intelligence for Business and Markets',
+    'referral.emailBody': 'Olá,\n\nTenho usado Perkins Intel para me manter atualizado com inteligência de mercados e empresarial, e pensei que você também acharia valioso.\n\nPerkins oferece atualizações concisas e personalizadas sobre os países, setores e empresas que você define.\n\nComo meu indicado, você pode desfrutar de 3 meses de acesso premium sem custo.\n\n👉 Ative seu acesso aqui: {link}\n\nAtenciosamente,',
+    'referral.freeAccessStatus': 'Seu Estado de Acesso Grátis',
     'referral.daysRemaining': 'Dias Restantes',
     'referral.freeAccessUntil': 'Acesso grátis até',
     'referral.errorCopyLink': 'Erro ao copiar link:',
@@ -480,33 +693,31 @@ const customTranslations = {
     'deleteAccount.confirmDelete': 'Excluir Conta',
     'deleteAccount.accountDeleted': 'Conta excluída com sucesso. Você será redirecionado para a página de login.',
     'deleteAccount.enterPassword': 'Por favor, digite sua senha para confirmar a exclusão da conta',
-    'deleteAccount.confirmPassword': 'Confirmar Senha',
-    'deleteAccount.enterPasswordToConfirm': 'Digite sua senha para confirmar',
     'deleteAccount.deleting': 'Excluindo conta...',
     'deleteAccount.failedToDelete': 'Erro ao excluir conta',
     'deleteAccount.unexpectedError': 'Ocorreu um erro inesperado ao excluir a conta',
-    'deleteAccount.loseAccess': 'Ao excluir sua conta, você perderá acesso a todos os seus feeds de notícias personalizados, preferências e benefícios de indicação.',
+    'deleteAccount.loseAccess': 'Ao excluir sua conta, você perderá acesso a todos os seus feeds de notícias personalizados, preferências e benefícios de referido.',
     
     // Sign Up
-    'signup.title': 'Junte-se ao Serviço de Notícias Perkins',
-    'signup.subtitle': 'Obtenha 3 meses de acesso grátis a notícias de negócios personalizadas',
+    'signup.title': 'Você foi convidado a se juntar ao Perkins',
+    'signup.subtitle': 'Obtenha 3 meses de acesso ilimitado à plataforma abrangente de inteligência empresarial do Perkins.\n\nMantenha Perkins grátis para sempre através de referidos, ou assine para acesso ilimitado.',
     'signup.email': 'Email',
     'signup.password': 'Senha',
     'signup.confirmPassword': 'Confirmar Senha',
-    'signup.referralCode': 'Código de Indicação (Opcional)',
+    'signup.referralCode': 'Código de Referido (Opcional)',
     'signup.enterEmail': 'Digite seu email',
     'signup.createPassword': 'Crie uma senha',
     'signup.confirmPasswordPlaceholder': 'Confirme sua senha',
-    'signup.enterReferralCode': 'Digite código de indicação se tiver um',
+    'signup.enterReferralCode': 'Digite código de referido se tiver um',
     'signup.createAccount': 'Criar Conta',
     'signup.creatingAccount': 'Criando conta...',
     'signup.accountCreated': 'Conta criada com sucesso! Por favor, verifique seu email para confirmar sua conta.',
     'signup.validEmail': 'Por favor, digite um email válido',
     'signup.passwordsDontMatch': 'As senhas não coincidem',
-    'signup.validReferralCode': '✅ Código de indicação válido! Você ganhará 3 meses de acesso grátis.',
-    'signup.invalidReferralCode': '❌ Código de indicação inválido. Você ainda pode se registrar por 3 meses grátis.',
-    'signup.errorValidatingCode': '❌ Erro ao validar código de indicação.',
-    'signup.referralCodeFromLink': 'Código de indicação do seu link de convite',
+    'signup.validReferralCode': '✅ Código de referido válido! Você ganhará 3 meses de acesso grátis.',
+    'signup.invalidReferralCode': '❌ Código de referido inválido. Você ainda pode se registrar por 3 meses grátis.',
+    'signup.errorValidatingCode': '❌ Erro ao validar código de referido.',
+    'signup.referralCodeFromLink': 'Código de referido do seu link de convite',
     'signup.backToSignIn': 'Voltar ao Login',
     'signup.termsAgreement': 'Ao criar uma conta, você concorda com nossos Termos de Serviço e Política de Privacidade',
     'signup.errorDuringSignup': 'Ocorreu um erro durante o registro',
@@ -514,6 +725,7 @@ const customTranslations = {
     'signup.invalidUserAttributes': 'Atributos de usuário inválidos',
 
     // Verify Email
+    'verify.title': 'Verificar seu email',
     'verify.subtitle': 'Digite o código de verificação enviado para',
     'verify.codeLabel': 'Código de Verificação',
     'verify.codePlaceholder': 'Código de 6 dígitos',
@@ -533,6 +745,8 @@ const customTranslations = {
     'inactivity.message': 'Por sua segurança, você será desconectado em menos de {minutes} minuto(s). Você quer permanecer conectado?',
     'inactivity.logout': 'Sair',
     'inactivity.stayLoggedIn': 'Permanecer Conectado',
+    'inactivity.logoutTitle': 'Sessão Expirada',
+    'inactivity.logoutMessage': 'Você foi desconectado automaticamente por inatividade. Por favor, faça login novamente para continuar.',
     
     // Auth Error
     'authError.title': 'Erro de Autenticação',
@@ -541,11 +755,90 @@ const customTranslations = {
     'authError.tryAgain': 'Tentar Novamente',
     'authError.logout': 'Sair',
     
-
-    
     // Disclaimer
     'disclaimer.text': 'As notícias podem sofrer atraso de alguns minutos, dependendo da publicação da fonte e da frequência de busca.',
     'disclaimer.understood': 'Entendi',
+    
+    // Landing Page
+    'landing.signIn': 'Entrar',
+    'landing.signUp': 'Cadastrar',
+    'landing.heroSubtitle': 'Notícias, dados e análise para especialistas em negócios e mercados',
+    'landing.heroDescription': 'Obtendo e processando permanentemente informações empresariais, de mercados e de empresas de toda a web para entregar insights significativos quando você mais precisa.',
+    'landing.feature1Title': 'Inteligência Real',
+    'landing.feature1Description': 'Monitoramento contínuo de artigos de notícias, relatórios regulatórios, comunicados de empresas, dados estatísticos e arquivos financeiros.',
+    'landing.feature2Title': 'Processamento com IA',
+    'landing.feature2Description': 'Inteligência artificial avançada que transforma dados brutos em insights empresariais acionáveis e inteligência de mercados.',
+    'landing.feature3Title': 'Entrega Oportuna',
+    'landing.feature3Description': 'A informação chega até você quando mais importa, garantindo que você nunca perca oportunidades empresariais críticas ou riscos.',
+    'landing.feature4Title': 'Insights Significativos',
+    'landing.feature4Description': 'Os dados são processados e apresentados de forma que faça sentido para suas decisões empresariais e planejamento estratégico.',
+    'landing.feature5Title': 'Conteúdo Personalizado',
+    'landing.feature5Description': 'Personalize seu feed de notícias de acordo com sua indústria específica e foco geográfico. Perkins aprende suas preferências para entregar apenas a inteligência empresarial mais relevante.',
+    'landing.feature6Title': 'Sempre Grátis Através de Referidos',
+    'landing.feature6Description': 'Mantenha Perkins grátis para sempre convidando amigos. Ganhe 3 meses de acesso grátis para cada referido bem-sucedido, ou assine para acesso ilimitado sem referidos.',
+    'landing.ctaTitle': 'Pronto para transformar sua inteligência empresarial?',
+    'landing.ctaDescription': 'Obtenha acesso à plataforma abrangente de inteligência empresarial do Perkins. Mantenha grátis através de referidos ou assine para acesso ilimitado.',
+    'landing.getStarted': 'Começar Hoje',
+    'landing.copyright': '© 2024 Perkins Intel. Todos os direitos reservados.',
+    'landing.contactHelp': 'Precisa de ajuda? Entre em contato conosco em <a href="mailto:info@perkinsintel.com" style="text-decoration: none; color: #4f79a6;">info@perkinsintel.com</a>',
+    
+    // Subscription
+    'subscription.referralAlternative': 'Prefere manter grátis? Convide amigos em vez disso',
+    'subscription.chooseAccessMethod': 'Escolha seu Método de Acesso',
+    'subscription.referralOrSubscribe': 'Mantenha Perkins grátis através de referidos, ou assine para acesso ilimitado',
+    'subscription.continueAccess': 'Continuar seu Acesso',
+    'subscription.trialEnded': 'Seu teste gratuito terminou. Mantenha Perkins grátis através de referidos, ou assine para acesso ilimitado.',
+    'subscription.daysRemaining': 'Você tem {days} dias restantes. Mantenha Perkins grátis através de referidos, ou assine para acesso ilimitado.',
+    'subscription.keepItFree': 'Mantenha Grátis:',
+    'subscription.keepItFreeText': 'Prefere manter Perkins grátis? Convide amigos em vez disso e ganhe 3 meses grátis para cada referido bem-sucedido!',
+    'subscription.choosePlan': 'Escolha seu Plano',
+    'subscription.mostPopular': 'Mais Popular',
+    'subscription.saveWithAnnual': 'Economize {discount}% com cobrança anual',
+    'subscription.upgradeNow': 'Atualizar Agora',
+    'subscription.maybeLater': 'Talvez Depois',
+    'subscription.moneyBackGuarantee': 'Todos os planos incluem garantia de devolução do dinheiro de 30 dias. Cancele a qualquer momento.',
+    'subscription.processing': 'Processando...',
+    
+    // Referral Component
+    'referral.gracePeriodDays': 'Dias de Período de Graça',
+    'referral.gracePeriodUntil': 'Período de Graça Até',
+    'referral.continueAccess': 'Continuar Acesso',
+    'referral.upgradeNow': 'Atualizar Agora',
+    'referral.subscriptionUpgraded': 'Assinatura atualizada com sucesso!',
+    'referral.preferUnlimited': 'Prefere acesso ilimitado sem referidos?',
+    'referral.extendAccess': 'Estenda Seu Acesso',
+    'referral.trialEndedExtend': 'Seu período de teste terminou. Estenda seu acesso convidando amigos!',
+    'referral.daysRemainingExtend': 'Você tem {days} dias restantes. Estenda seu acesso convidando amigos!',
+    'referral.keepItFree': 'Mantenha Grátis',
+    'referral.keepItFreeText': 'Compartilhe seu código de referido com amigos para ganhar meses grátis e estender seu acesso.',
+    'referral.unlimitedReferrals': 'Referidos ilimitados disponíveis',
+    'referral.close': 'Fechar',
+    
+    // Settings
+    'settings.contactHelp': 'Precisa de ajuda? Entre em contato conosco em <a href="mailto:info@perkinsintel.com" style="text-decoration: none; color: #4f79a6;">info@perkinsintel.com</a>',
+    
+    // Grace Period Banner
+    'gracePeriod.title': 'Período de Graça Ativo',
+    'gracePeriod.message': 'Seus dias grátis ganhos foram utilizados. Você tem {days} dias de acesso limitado restantes. Mantenha Perkins grátis convidando amigos, ou assine para acesso ilimitado.',
+    'gracePeriod.actNow': 'Agir Agora',
+    
+    // Grace Period Expired Modal
+    'graceExpired.title': 'Acesso Expirado',
+    'graceExpired.message': 'Seu período de graça terminou. Escolha uma opção abaixo para restaurar seu acesso.',
+    'graceExpired.chooseAction': 'Escolha sua Ação',
+    'graceExpired.inviteFriends': 'Convidar Amigos',
+    'graceExpired.inviteFriendsDesc': 'Ganhe acesso grátis convidando amigos para se juntar. Cada referido bem-sucedido estende seu acesso.',
+    'graceExpired.noCost': 'Sem custo necessário',
+    'graceExpired.unlimitedReferrals': 'Referidos ilimitados',
+    'graceExpired.upgradeToPaid': 'Atualizar para Pago',
+    'graceExpired.upgradeDesc': 'Obtenha acesso ilimitado com nossos planos de assinatura premium.',
+    'graceExpired.unlimitedAccess': 'Acesso ilimitado',
+    'graceExpired.prioritySupport': 'Suporte prioritário',
+    'graceExpired.advancedFeatures': 'Recursos avançados',
+    'graceExpired.needHelp': 'Precisa de ajuda? Entre em contato conosco em <a href="mailto:info@perkinsintel.com" style="text-decoration: none; color: #4f79a6;">info@perkinsintel.com</a>',
+    'graceExpired.maybeLater': 'Talvez Depois',
+    'graceExpired.free': 'Grátis',
+    'graceExpired.premium': 'Premium',
   }
 };
 
@@ -558,11 +851,5 @@ export const t = (key: string): string => {
   return I18n.get(key) || key;
 };
 
-// Hook to use translations
-export const useTranslation = () => {
-  return {
-    t: (key: string): string => {
-      return t(key);
-    }
-  };
-}; 
+// Re-export the enhanced useTranslation hook
+export { useTranslation } from './hooks/useTranslation'; 

@@ -18,6 +18,12 @@
   width: auto;
 }
 
+.landing-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
 .landing-auth-buttons {
   display: flex;
   gap: var(--space-md);
@@ -62,7 +68,7 @@
 .landing-main {
   max-width: var(--container-max-width);
   margin: 0 auto;
-  padding: var(--space-3xl) var(--space-2xl);
+  padding: var(--space-md) var(--space-2xl) var(--space-3xl);
 }
 
 /* Hero Section */
@@ -75,7 +81,8 @@
   font-size: var(--font-size-2xl);
   color: var(--color-primary);
   font-weight: var(--font-weight-semibold);
-  margin-bottom: var(--space-xl);
+  margin-top: 0;
+  margin-bottom: 0;
   line-height: var(--line-height-normal);
 }
 
@@ -87,16 +94,43 @@
   line-height: var(--line-height-relaxed);
 }
 
+.hero-value-prop {
+  font-size: var(--font-size-base);
+  color: var(--color-primary);
+  max-width: 600px;
+  margin: var(--space-lg) auto 0;
+  line-height: var(--line-height-relaxed);
+  text-align: center;
+  background-color: rgba(var(--color-primary-rgb), 0.1);
+  padding: var(--space-md);
+  border-radius: var(--border-radius-md);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+}
+
+/* Features with Preview Container - Split Layout */
+.features-with-preview-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3xl);
+  margin-bottom: var(--space-3xl);
+  align-items: stretch;
+}
+
 /* Features Section */
 .features-section {
-  margin-bottom: var(--space-3xl);
+  flex: 1;
 }
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--space-2xl);
-  margin-top: var(--space-2xl);
+}
+
+.newsfeed-preview-wrapper {
+  flex: 1;
+  display: flex;
+  align-self: stretch;
 }
 
 .feature-card {
@@ -187,6 +221,24 @@
   font-size: var(--font-size-sm);
 }
 
+.contact-info {
+  margin-top: var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.contact-email {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: color var(--transition-normal);
+}
+
+.contact-email:hover {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
+}
+
 /* Auth Logo */
 .auth-logo {
   height: 60px;
@@ -195,11 +247,28 @@
 }
 
 /* Responsive Design */
+@media (max-width: 1024px) {
+  .features-with-preview-container {
+    grid-template-columns: 1fr;
+    gap: var(--space-2xl);
+  }
+  
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .landing-header {
     flex-direction: column;
     gap: var(--space-lg);
     padding: var(--space-lg);
+  }
+  
+  .landing-header-right {
+    flex-direction: column;
+    gap: var(--space-md);
+    align-items: center;
   }
   
   .landing-logo img {
@@ -212,6 +281,11 @@
   
   .hero-subtitle {
     font-size: var(--font-size-xl);
+  }
+  
+  .features-with-preview-container {
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
   }
   
   .features-grid {

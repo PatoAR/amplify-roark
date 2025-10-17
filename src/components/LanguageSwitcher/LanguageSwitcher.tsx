@@ -17,14 +17,6 @@ const LanguageSwitcher = () => {
   const handleLanguageChange = (languageCode: string) => {
     changeLanguage(languageCode);
     setIsOpen(false);
-    
-    // Force re-render of components that use translations by dispatching a custom event
-    // This is more efficient than a full page refresh
-    setTimeout(() => {
-      window.dispatchEvent(new CustomEvent('languageChanged', { 
-        detail: { language: languageCode } 
-      }));
-    }, 50);
   };
 
   return (

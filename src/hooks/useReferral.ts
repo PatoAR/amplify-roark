@@ -35,14 +35,7 @@ export const useReferral = () => {
     return clientRef.current;
   }, []);
 
-  // Load user's referral code and stats
-  useEffect(() => {
-    if (user?.userId) {
-      loadReferralData();
-    }
-  }, [user]);
-
-  const loadReferralData = async () => {
+  const loadReferralData = useCallback(async () => {
     if (!user?.userId) return;
 
     try {
@@ -75,7 +68,14 @@ export const useReferral = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
+
+  // Load user's referral code and stats
+  useEffect(() => {
+    if (user?.userId) {
+      loadReferralData();
+    }
+  }, [user, loadReferralData]);
 
   const generateReferralCode = async () => {
     if (!user?.userId) return;
@@ -149,9 +149,8 @@ export const useReferral = () => {
     try {
       switch (platform) {
         case 'whatsapp':
-          const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(
-            t('referral.shareMessage').replace('{code}', referralCode) + `\n\n${referralUrl}`
-          )}`;
+          const message = t('referral.shareMessage').replace('{link}', referralUrl);
+          const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
           window.open(whatsappUrl, '_blank');
           break;
 

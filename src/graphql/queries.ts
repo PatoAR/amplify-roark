@@ -20,8 +20,13 @@ export const getArticle = /* GraphQL */ `query GetArticle($id: ID!) {
     countries
     language
     ttl
-    id
+    category
+    priorityDuration
+    callToAction
+    sponsorLink
+    priorityUntil
     createdAt
+    id
     updatedAt
     __typename
   }
@@ -47,8 +52,13 @@ export const listArticles = /* GraphQL */ `query ListArticles(
       countries
       language
       ttl
-      id
+      category
+      priorityDuration
+      callToAction
+      sponsorLink
+      priorityUntil
       createdAt
+      id
       updatedAt
       __typename
     }
@@ -59,6 +69,49 @@ export const listArticles = /* GraphQL */ `query ListArticles(
 ` as GeneratedQuery<
   APITypes.ListArticlesQueryVariables,
   APITypes.ListArticlesQuery
+>;
+export const listArticleByCreatedAt = /* GraphQL */ `query ListArticleByCreatedAt(
+  $createdAt: AWSDateTime!
+  $sortDirection: ModelSortDirection
+  $filter: ModelArticleFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listArticleByCreatedAt(
+    createdAt: $createdAt
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      timestamp
+      source
+      title
+      industry
+      summary
+      link
+      companies
+      countries
+      language
+      ttl
+      category
+      priorityDuration
+      callToAction
+      sponsorLink
+      priorityUntil
+      createdAt
+      id
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListArticleByCreatedAtQueryVariables,
+  APITypes.ListArticleByCreatedAtQuery
 >;
 export const getUserProfile = /* GraphQL */ `query GetUserProfile($id: ID!) {
   getUserProfile(id: $id) {
@@ -241,8 +294,6 @@ export const getUserActivity = /* GraphQL */ `query GetUserActivity($id: ID!) {
     startTime
     endTime
     duration
-    pageViews
-    interactions
     deviceInfo
     userAgent
     ipAddress
@@ -269,8 +320,6 @@ export const listUserActivities = /* GraphQL */ `query ListUserActivities(
       startTime
       endTime
       duration
-      pageViews
-      interactions
       deviceInfo
       userAgent
       ipAddress
@@ -287,54 +336,6 @@ export const listUserActivities = /* GraphQL */ `query ListUserActivities(
 ` as GeneratedQuery<
   APITypes.ListUserActivitiesQueryVariables,
   APITypes.ListUserActivitiesQuery
->;
-export const getUserEvent = /* GraphQL */ `query GetUserEvent($id: ID!) {
-  getUserEvent(id: $id) {
-    owner
-    sessionId
-    eventType
-    eventData
-    timestamp
-    pageUrl
-    elementId
-    metadata
-    id
-    createdAt
-    updatedAt
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.GetUserEventQueryVariables,
-  APITypes.GetUserEventQuery
->;
-export const listUserEvents = /* GraphQL */ `query ListUserEvents(
-  $filter: ModelUserEventFilterInput
-  $limit: Int
-  $nextToken: String
-) {
-  listUserEvents(filter: $filter, limit: $limit, nextToken: $nextToken) {
-    items {
-      owner
-      sessionId
-      eventType
-      eventData
-      timestamp
-      pageUrl
-      elementId
-      metadata
-      id
-      createdAt
-      updatedAt
-      __typename
-    }
-    nextToken
-    __typename
-  }
-}
-` as GeneratedQuery<
-  APITypes.ListUserEventsQueryVariables,
-  APITypes.ListUserEventsQuery
 >;
 export const getDeletedUserEmail = /* GraphQL */ `query GetDeletedUserEmail($id: ID!) {
   getDeletedUserEmail(id: $id) {

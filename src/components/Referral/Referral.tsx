@@ -11,8 +11,10 @@ import {
   useTheme,
 } from '@aws-amplify/ui-react';
 import { useReferral } from '../../hooks/useReferral';
-import { useFreeDaysRemaining } from '../../hooks/useFreeDaysRemaining';
+import { useSubscriptionManager } from '../../hooks/useSubscriptionManager';
+import { SubscriptionUpgradeModal } from '../SubscriptionUpgradeModal';
 import { useTranslation } from '../../i18n';
+import { isSubscriptionButtonEnabled } from '../../config/features';
 import './Referral.css';
 
 const Referral: React.FC = () => {
@@ -25,10 +27,21 @@ const Referral: React.FC = () => {
     shareReferralLink,
     refreshData,
   } = useReferral();
-  const daysLeft = useFreeDaysRemaining();
+  
+  const {
+    daysRemaining,
+    isInGracePeriod,
+    gracePeriodDaysRemaining,
+    shouldShowWarning,
+    shouldShowUpgradeModal,
+    upgradeSubscription,
+    isUpgrading,
+    upgradeError,
+  } = useSubscriptionManager();
 
   const [copied, setCopied] = useState(false);
   const [shareSuccess, setShareSuccess] = useState<string>('');
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const handleCopyLink = async () => {
     try {
@@ -62,6 +75,20 @@ const Referral: React.FC = () => {
     }
   };
 
+  const handleUpgradeClick = () => {
+    setShowUpgradeModal(true);
+  };
+
+  const handleUpgrade = async (planId: string) => {
+    const result = await upgradeSubscription(planId);
+    if (result.success) {
+      setShowUpgradeModal(false);
+      // Show success message
+      setShareSuccess(t('referral.subscriptionUpgraded'));
+      setTimeout(() => setShareSuccess(''), 5000);
+    }
+  };
+
   if (isLoading) {
     return (
       <Card className="referral-card">
@@ -73,44 +100,78 @@ const Referral: React.FC = () => {
   }
 
   return (
-    <Card className="referral-card">
-      <Flex direction="column" gap={tokens.space.large}>
-        {/* Free Access Info Card */}
-        <Card className="free-access-info">
-          <Flex direction="column" gap={tokens.space.small}>
-            <Heading level={5} className="free-access-title">
-              {t('referral.freeAccessStatus')}
-            </Heading>
-            <Flex justifyContent="center" gap={tokens.space.large} wrap="wrap" alignItems="center">
-              <View className={`days-remaining ${(daysLeft || 0) > 30 ? 'high' : 'low'}`}>
-                <Text fontSize="large" fontWeight="bold" color="font.primary">
-                  {daysLeft || 0}
-                </Text>
-                <Text fontSize="small" color="font.secondary">
-                  {t('referral.daysRemaining')}
-                </Text>
-              </View>
-              <View className="expiration-info">
-                <Text fontSize="medium" fontWeight="semibold" color="font.primary">
-                  {t('referral.freeAccessUntil')}
-                </Text>
-                <Text fontSize="medium" fontWeight="bold" color="font.primary">
-                  {new Date(Date.now() + (daysLeft || 0) * 24 * 60 * 60 * 1000).toLocaleDateString()}
-                </Text>
-              </View>
+    <>
+
+      {/* Upgrade Modal - Only show if subscription buttons are enabled */}
+      {isSubscriptionButtonEnabled() && (
+        <SubscriptionUpgradeModal
+          isOpen={showUpgradeModal}
+          onClose={() => setShowUpgradeModal(false)}
+          onUpgrade={handleUpgrade}
+          currentDaysRemaining={daysRemaining}
+          isInGracePeriod={isInGracePeriod}
+        />
+      )}
+
+      <Card className="referral-card">
+        <Flex direction="column" gap={tokens.space.large}>
+          {/* Free Access Info Card */}
+          <Card className="free-access-info">
+            <Flex direction="column" gap={tokens.space.small}>
+              <Heading level={5} marginBottom={tokens.space.medium}>
+                {t('referral.freeAccessStatus')}
+              </Heading>
+              <Flex justifyContent="center" gap={tokens.space.large} wrap="wrap" alignItems="center">
+                <View className={`days-remaining ${(daysRemaining || 0) > 30 ? 'high' : 'low'}`}>
+                  <Text fontSize="large" fontWeight="bold" color="font.primary">
+                    {isInGracePeriod ? gracePeriodDaysRemaining : daysRemaining || 0}
+                  </Text>
+                  <Text fontSize="small" color="font.secondary">
+                    {isInGracePeriod ? t('referral.gracePeriodDays') : t('referral.daysRemaining')}
+                  </Text>
+                </View>
+                <View className="expiration-info">
+                  <Text fontSize="medium" fontWeight="semibold" color="font.primary">
+                    {isInGracePeriod ? t('referral.gracePeriodUntil') : t('referral.freeAccessUntil')}
+                  </Text>
+                  <Text fontSize="medium" fontWeight="bold" color="font.primary">
+                    {new Date(Date.now() + (isInGracePeriod ? gracePeriodDaysRemaining : daysRemaining || 0) * 24 * 60 * 60 * 1000).toLocaleDateString()}
+                  </Text>
+                </View>
+                {/* Upgrade Button - Only show if subscription buttons are enabled */}
+                {isSubscriptionButtonEnabled() && (shouldShowWarning() || shouldShowUpgradeModal()) && (
+                  <Button
+                    variation="primary"
+                    onClick={handleUpgradeClick}
+                    isLoading={isUpgrading}
+                    loadingText={t('common.processing')}
+                    size="small"
+                  >
+                    {t('referral.upgradeNow')}
+                  </Button>
+                )}
+              </Flex>
             </Flex>
-          </Flex>
-        </Card>
+          </Card>
 
         <View>
           <Heading level={4} className="referral-title">
             {t('referral.title')}
           </Heading>
+          <Text fontSize="medium" color="font.secondary" marginTop={tokens.space.small} textAlign="center">
+            {t('referral.subtitle')}
+          </Text>
         </View>
 
         {error && (
           <Alert variation="error" isDismissible>
             {error}
+          </Alert>
+        )}
+
+        {isSubscriptionButtonEnabled() && upgradeError && (
+          <Alert variation="error" isDismissible>
+            {upgradeError}
           </Alert>
         )}
 
@@ -125,25 +186,28 @@ const Referral: React.FC = () => {
           <Heading level={5} marginBottom={tokens.space.medium}>
             {t('referral.shareTitle')}
           </Heading>
-          <Flex gap={tokens.space.medium} wrap="wrap">
+          <Flex gap={tokens.space.small} wrap="wrap">
             <Button
               variation="primary"
               onClick={handleShareWhatsApp}
-              className="share-button whatsapp"
+              size="small"
+              className="referral-action-button whatsapp"
             >
               {t('referral.whatsapp')}
             </Button>
             <Button
               variation="primary"
               onClick={handleShareEmail}
-              className="share-button email"
+              size="small"
+              className="referral-action-button email"
             >
               {t('referral.email')}
             </Button>
             <Button
               onClick={handleCopyLink}
               disabled={copied}
-              className="share-button copy"
+              size="small"
+              className="referral-action-button copy"
             >
               {t('referral.copyLink')}
             </Button>
@@ -165,11 +229,16 @@ const Referral: React.FC = () => {
               <Text>{t('referral.step2')}</Text>
             </Flex>
             <Flex gap={tokens.space.small} alignItems="flex-start">
+              <Badge variation="success" size="small">3</Badge>
+              <Text>{t('referral.step3')}</Text>
+            </Flex>
+            <Flex gap={tokens.space.small} alignItems="flex-start">
               <Badge variation="success" size="small">4</Badge>
               <Text>{t('referral.step4')}</Text>
             </Flex>
           </Flex>
         </Card>
+
 
         {/* Referral Statistics */}
         <Card className="stats-section">
@@ -208,6 +277,7 @@ const Referral: React.FC = () => {
         </Card>
       </Flex>
     </Card>
+    </>
   );
 };
 

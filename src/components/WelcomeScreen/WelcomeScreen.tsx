@@ -15,6 +15,9 @@ const WelcomeScreen = () => {
       <p className="welcome-subtitle">
         {t('welcome.subtitle')}
       </p>
+      <p className="welcome-referral-intro">
+        {t('welcome.referralIntro')}
+      </p>
       <button className="welcome-button" onClick={handleOpenFiltersModal}>
         {t('welcome.button')}
       </button>

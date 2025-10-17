@@ -1,48 +1,41 @@
-.custom-signup-container {
+/* CustomSignUp - Simplified to match Amplify Authenticator */
+
+.amplify-authenticator {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  padding: 2rem;
+  padding: 1rem;
+  background-color: var(--amplify-colors-background-primary);
 }
 
-.auth-logo {
-  max-width: 200px;
-  height: auto;
-}
-
-.signup-card {
-  max-width: 500px;
+/* Ensure the card matches Amplify's default styling */
+.amplify-authenticator .amplify-card {
+  max-width: 28rem;
   width: 100%;
-  padding: 0rem 2rem;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  padding: var(--amplify-space-large);
 }
 
-.signup-title {
-  color: #1f2937;
-  margin-bottom: 0.5rem;
-  font-weight: 700;
+/* Grayed-out styling for read-only referral code field */
+.referral-code-readonly {
+  opacity: 0.6;
+  background-color: var(--amplify-colors-background-secondary) !important;
+  color: var(--amplify-colors-font-secondary) !important;
 }
 
-.signup-subtitle {
-  color: #6b7280;
-  font-size: 1rem;
-  line-height: 1.6;
+.referral-code-readonly input {
+  background-color: var(--amplify-colors-background-secondary) !important;
+  color: var(--amplify-colors-font-secondary) !important;
+  cursor: not-allowed;
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
-  .custom-signup-container {
-    padding: 1rem;
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .amplify-authenticator {
+    padding: 0.5rem;
   }
   
-  .signup-card {
-    padding: 1.5rem;
+  .amplify-authenticator .amplify-card {
+    padding: var(--amplify-space-medium);
   }
-  
-  .signup-title {
-    font-size: 1.5rem;
-  }
-} 
+}
