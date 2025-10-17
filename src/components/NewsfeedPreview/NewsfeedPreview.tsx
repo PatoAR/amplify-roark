@@ -214,7 +214,7 @@ const NewsfeedPreview: React.FC = () => {
                   <span className="preview-article-summary">{article.summary}</span>{" "}
                   {article.companies && (
                     <>
-                      {Object.entries(article.companies).map(([name, url]) => (
+                      {Object.entries(article.companies).map(([name]) => (
                         <span
                           key={name}
                           className="preview-article-companies"
