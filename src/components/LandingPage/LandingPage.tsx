@@ -8,6 +8,8 @@ import { SessionProvider } from '../../context/SessionContext';
 import { NewsProvider } from '../../context/NewsContext';
 import { InactivityLogoutBanner } from '../InactivityLogoutBanner';
 import LanguageSwitcher from '../LanguageSwitcher/LanguageSwitcher';
+import { NewsfeedPreview } from '../NewsfeedPreview';
+import { WhatsAppChannels } from '../WhatsAppChannels';
 import { useTranslation } from '../../i18n';
 import '@aws-amplify/ui-react/styles.css';
 import './LandingPage.css';
@@ -113,57 +115,65 @@ const LandingPage: React.FC = () => {
           </p>
         </section>
 
-        <section className="features-section">
-          <div className="features-grid">
-            <div className="feature-card">
-              <div className="feature-icon">📊</div>
-              <h3 className="feature-title">{t('landing.feature1Title')}</h3>
-              <p className="feature-description">
-                {t('landing.feature1Description')}
-              </p>
-            </div>
+        <section className="features-with-preview-container">
+          <div className="newsfeed-preview-wrapper">
+            <NewsfeedPreview />
+          </div>
 
-            <div className="feature-card">
-              <div className="feature-icon">🤖</div>
-              <h3 className="feature-title">{t('landing.feature2Title')}</h3>
-              <p className="feature-description">
-                {t('landing.feature2Description')}
-              </p>
-            </div>
+          <div className="features-section">
+            <div className="features-grid">
+              <div className="feature-card">
+                <div className="feature-icon">📊</div>
+                <h3 className="feature-title">{t('landing.feature1Title')}</h3>
+                <p className="feature-description">
+                  {t('landing.feature1Description')}
+                </p>
+              </div>
 
-            <div className="feature-card">
-              <div className="feature-icon">⚡</div>
-              <h3 className="feature-title">{t('landing.feature3Title')}</h3>
-              <p className="feature-description">
-                {t('landing.feature3Description')}
-              </p>
-            </div>
+              <div className="feature-card">
+                <div className="feature-icon">🤖</div>
+                <h3 className="feature-title">{t('landing.feature2Title')}</h3>
+                <p className="feature-description">
+                  {t('landing.feature2Description')}
+                </p>
+              </div>
 
-            <div className="feature-card">
-              <div className="feature-icon">🎯</div>
-              <h3 className="feature-title">{t('landing.feature4Title')}</h3>
-              <p className="feature-description">
-                {t('landing.feature4Description')}
-              </p>
-            </div>
+              <div className="feature-card">
+                <div className="feature-icon">⚡</div>
+                <h3 className="feature-title">{t('landing.feature3Title')}</h3>
+                <p className="feature-description">
+                  {t('landing.feature3Description')}
+                </p>
+              </div>
 
-            <div className="feature-card">
-              <div className="feature-icon">🎛️</div>
-              <h3 className="feature-title">{t('landing.feature5Title')}</h3>
-              <p className="feature-description">
-                {t('landing.feature5Description')}
-              </p>
-            </div>
+              <div className="feature-card">
+                <div className="feature-icon">🎯</div>
+                <h3 className="feature-title">{t('landing.feature4Title')}</h3>
+                <p className="feature-description">
+                  {t('landing.feature4Description')}
+                </p>
+              </div>
 
-            <div className="feature-card">
-              <div className="feature-icon">🎁</div>
-              <h3 className="feature-title">{t('landing.feature6Title')}</h3>
-              <p className="feature-description">
-                {t('landing.feature6Description')}
-              </p>
+              <div className="feature-card">
+                <div className="feature-icon">🎛️</div>
+                <h3 className="feature-title">{t('landing.feature5Title')}</h3>
+                <p className="feature-description">
+                  {t('landing.feature5Description')}
+                </p>
+              </div>
+
+              <div className="feature-card">
+                <div className="feature-icon">🎁</div>
+                <h3 className="feature-title">{t('landing.feature6Title')}</h3>
+                <p className="feature-description">
+                  {t('landing.feature6Description')}
+                </p>
+              </div>
             </div>
           </div>
         </section>
+
+        <WhatsAppChannels />
 
         <section className="cta-section">
           <h2 className="cta-title">{t('landing.ctaTitle')}</h2>

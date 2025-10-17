@@ -132,7 +132,7 @@ const customTranslations = {
     'landing.heroDescription': 'Permanently sourcing and processing business, markets, and company information from across the web to deliver meaningful insights when you need them most.',
     'landing.feature1Title': 'Real Intelligence',
     'landing.feature1Description': 'Continuous monitoring of news articles, regulatory reports, company newswires, statistical data, and financial filings.',
-    'landing.feature2Title': 'AI-Powered Processing',
+    'landing.feature2Title': 'AI-Processing',
     'landing.feature2Description': 'Advanced artificial intelligence that transforms raw data into actionable business insights and market intelligence.',
     'landing.feature3Title': 'Timely Delivery',
     'landing.feature3Description': 'Information reaches you when it matters most, ensuring you never miss critical business opportunities or risks.',
@@ -147,6 +147,18 @@ const customTranslations = {
     'landing.getStarted': 'Get Started Today',
     'landing.copyright': '© 2024 Perkins Intel. All rights reserved.',
     'landing.contactHelp': 'Need help? Contact us at <a href="mailto:info@perkinsintel.com" style="text-decoration: none; color: #4f79a6;">info@perkinsintel.com</a>',
+    
+    // Newsfeed Preview
+    'newsfeedPreview.title': 'Live Business Intelligence Feed',
+    'newsfeedPreview.subtitle': 'Sign up to tailor the news feed to your specific industry and geographic focus',
+    
+    // WhatsApp Channels
+    'whatsapp.title': 'Try Perkins on WhatsApp',
+    'whatsapp.subtitle': 'Follow our channels and experience real-time business intelligence for your region',
+    'whatsapp.argentinaDescription': 'Daily business intelligence for Argentina',
+    'whatsapp.brasilDescription': 'Daily business intelligence for Brasil',
+    'whatsapp.followButton': 'Follow on WhatsApp',
+    'whatsapp.note': 'No signup required • Free forever • Instant updates',
     
     // Referral Component
     'referral.gracePeriodDays': 'Grace Period Days',
