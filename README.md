@@ -33,7 +33,8 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 
 # PROD - AWS - merge dev into main
         git checkout main
-        git merge appsync / dev
+        git merge appsync (or dev in the future)
+        git commit -am
         git push origin main
 
 ## Tests
