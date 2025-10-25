@@ -42,10 +42,6 @@ async function appsyncRequest<T = any>(query: string, variables?: any): Promise<
   const apiKey = getApiKey();
   const body = JSON.stringify({ query, variables });
 
-  console.log(`Making AppSync request to: ${url}`);
-  console.log(`Query: ${query}`);
-  console.log(`Variables: ${JSON.stringify(variables)}`);
-
   const response = await fetch(url, {
     method: 'POST',
     headers: {
@@ -73,8 +69,6 @@ async function appsyncRequest<T = any>(query: string, variables?: any): Promise<
 }
 
 export const handler: PostConfirmationTriggerHandler = async (event) => {
-  console.log('Post-confirmation trigger:', JSON.stringify(event, null, 2));
-
   try {
     const { userAttributes } = event.request;
     const userId = event.request.userAttributes.sub;
@@ -114,20 +108,11 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
     const referralCode = userAttributes['custom:referralCode'] || event.request.clientMetadata?.referralCode;
     const referrerId = userAttributes['custom:referrerId'] || event.request.clientMetadata?.referrerId;
 
-    console.log('User signup details:', {
-      referralCode,
-      referrerId,
-      hasReferralCode: !!referralCode,
-      hasReferrerId: !!referrerId,
-      allUserAttributes: userAttributes
-    });
-
     if (referralCode) {
       let finalReferrerId: string | null = referrerId ?? null;
       
       // If we don't have a referrerId, try to find it from the referral code
       if (!referrerId || referrerId === 'pending') {
-        console.log('Looking up referrerId for referral code:', referralCode);
         try {
           const listReferralCodesQuery = `
             query ListReferralCodes($filter: ModelReferralCodeFilterInput) {
@@ -149,7 +134,6 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
           if (referralCodes.listReferralCodes.items.length > 0) {
             const referralCodeRecord = referralCodes.listReferralCodes.items[0];
             finalReferrerId = referralCodeRecord.owner;
-            console.log('Found referrerId:', finalReferrerId, 'for referral code:', referralCode);
           } else {
             console.warn(`Referral code not found or inactive: ${referralCode}`);
             finalReferrerId = null;
@@ -161,19 +145,11 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
       }
 
       if (finalReferrerId) {
-        console.log('Processing referral:', {
-          code: referralCode,
-          referrerId: finalReferrerId,
-          userId: userId
-        });
-
         try {
           // Create UserSubscription record with referral information
           const trialStartDate = new Date();
           const trialEndDate = new Date();
           trialEndDate.setMonth(trialEndDate.getMonth() + 3); // 3 months free trial
-
-          console.log('Creating UserSubscription for user', userId, 'with referral info');
           
           const createUserSubscriptionMutation = `
             mutation CreateUserSubscription($input: CreateUserSubscriptionInput!) {
@@ -203,11 +179,8 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
               referrerId: finalReferrerId,
             }
           });
-          console.log('UserSubscription created:', userSubscription);
 
           // Create referral record
-          console.log('Creating Referral record for referrer');
-          
           const createReferralMutation = `
             mutation CreateReferral($input: CreateReferralInput!) {
               createReferral(input: $input) {
@@ -232,11 +205,8 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
               freeMonthsEarned: 3,
             }
           });
-          console.log('Referral created:', referral);
 
           // Update referral code stats
-          console.log('Updating referral code stats');
-          
           const listReferralCodesQuery = `
             query ListReferralCodes($filter: ModelReferralCodeFilterInput) {
               listReferralCodes(filter: $filter) {
@@ -276,14 +246,11 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
                 successfulReferrals: (referralCodeRecord.successfulReferrals || 0) + 1,
               }
             });
-            console.log('ReferralCode updated:', updatedCode);
           } else {
             console.warn(`ReferralCode not found for code: ${referralCode}`);
           }
 
           // Extend referrer's subscription
-          console.log('Extending referrer\'s subscription');
-          
           const listReferrerSubscriptionsQuery = `
             query ListUserSubscriptions($filter: ModelUserSubscriptionFilterInput) {
               listUserSubscriptions(filter: $filter) {
@@ -332,23 +299,18 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
                 trialEndDate: newTrialEndDate.toISOString(),
               }
             });
-            console.log('Referrer subscription updated:', updatedSubscription);
           } else {
-            console.warn(`Referrer subscription not found for user: ${finalReferrerId}`);
+            console.error(`Referrer subscription not found for user: ${finalReferrerId}`);
           }
-
-          console.log('Referral processing completed successfully');
         } catch (referralError) {
           console.error('Error processing referral for user', userId, ':', referralError);
           // Don't fail the user creation if referral processing fails
           // The user should still be created successfully
         }
       } else {
-        console.log('No valid referrerId found, creating basic UserSubscription');
         await createBasicUserSubscription(userId);
       }
     } else {
-      console.log('No referral code, creating basic UserSubscription');
       await createBasicUserSubscription(userId);
     }
 
@@ -390,8 +352,6 @@ async function createBasicUserSubscription(userId: string): Promise<void> {
         earnedFreeMonths: 0,
       }
     });
-
-    console.log('Basic UserSubscription created for user:', userId, userSubscription);
   } catch (subscriptionError) {
     console.error('Error creating UserSubscription for user:', userId, subscriptionError);
     throw subscriptionError; // Re-throw this error as it's critical

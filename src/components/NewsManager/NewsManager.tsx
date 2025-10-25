@@ -99,20 +99,6 @@ function processArticle(a: Article, receivedAt: number): ArticleForState {
   const category = a.category || 'NEWS';
   const priorityUntil = calculatePriorityUntil(a);
   
-  // Debug: Log category processing for SPONSORED and STATISTICS
-  if (category === 'SPONSORED' || category === 'STATISTICS') {
-    console.log(`[NewsManager] Processing ${category} article:`, {
-      id: a.id,
-      title: a.title,
-      category,
-      priorityDuration: a.priorityDuration,
-      createdAt: a.createdAt,
-      calculatedPriorityUntil: priorityUntil,
-      callToAction: a.callToAction,
-      sponsorLink: a.sponsorLink
-    });
-  }
-  
   return {
     id: a.id,
     timestamp: a.timestamp,
@@ -142,7 +128,6 @@ export const NewsManager: React.FC = () => {
   // Initialize client when needed
   const getClient = useCallback(() => {
     if (!clientRef.current) {
-      console.log('[NewsManager] Initializing GraphQL client');
       clientRef.current = generateClient<Schema>();
     }
     return clientRef.current;
@@ -166,7 +151,6 @@ export const NewsManager: React.FC = () => {
     articlesRef.current = articles;
     // Only log when articles actually change, not on every render
     if (articles.length !== articlesRef.current.length) {
-      console.log(`[NewsManager] Articles state updated: ${articles.length} articles in memory`);
     }
   }, [articles]);
 
@@ -189,7 +173,6 @@ export const NewsManager: React.FC = () => {
         // Re-sort articles after priority expiration to maintain correct order
         const sorted = sortArticlesByPriority(updatedArticles);
         setArticles(sorted);
-        console.log('[NewsManager] Priority expiration detected, articles re-sorted');
       }
     };
 
@@ -199,20 +182,16 @@ export const NewsManager: React.FC = () => {
 
   // Cleanup function to prevent memory leaks
   const cleanupResources = useCallback(() => {
-    console.log('[NewsManager] Cleaning up resources');
     // Idempotent cleanup
     if (unsubscribeRef.current) {
-      console.log('[NewsManager] Unsubscribing from AppSync subscription');
       unsubscribeRef.current();
       unsubscribeRef.current = null;
     }
     if (pollingIntervalRef.current) {
-      console.log('[NewsManager] Clearing polling interval');
       clearInterval(pollingIntervalRef.current);
       pollingIntervalRef.current = null;
     }
     if (shadowPollerRef.current) {
-      console.log('[NewsManager] Clearing shadow poller');
       clearInterval(shadowPollerRef.current);
       shadowPollerRef.current = null;
     }
@@ -221,13 +200,11 @@ export const NewsManager: React.FC = () => {
     articleIdsFromSubscriptionRef.current.clear();
     subscriptionEstablishedRef.current = false;
     appSyncHasReceivedArticlesRef.current = false;
-    console.log('[NewsManager] Resource cleanup completed');
   }, []);
 
   // Memory management: limit articles in memory while preserving seen tracking
   const manageMemory = useCallback((articles: ArticleForState[]) => {
     if (articles.length > MAX_ARTICLES_IN_MEMORY) {
-      console.log(`[NewsManager] Memory management: trimming from ${articles.length} to ${MAX_ARTICLES_IN_MEMORY} articles`);
       const trimmed = articles.slice(0, MAX_ARTICLES_IN_MEMORY);
       
       // Update seen tracking for articles being removed from memory
@@ -250,8 +227,7 @@ export const NewsManager: React.FC = () => {
         }
       }
       if (ttlEvictions > 0) {
-        console.log(`[NewsManager] TTL eviction: removed ${ttlEvictions} expired seen articles`);
-      }
+              }
       
       let sizeEvictions = 0;
       // Size cap eviction (oldest first; Map preserves insertion order)
@@ -262,8 +238,7 @@ export const NewsManager: React.FC = () => {
         sizeEvictions++;
       }
       if (sizeEvictions > 0) {
-        console.log(`[NewsManager] Size eviction: removed ${sizeEvictions} oldest seen articles`);
-      }
+              }
 
       // Memory management trimming
       return trimmed;
@@ -286,35 +261,35 @@ export const NewsManager: React.FC = () => {
   // Fetch initial articles
   const fetchInitialArticles = useCallback(async () => {
     if (!isComponentMountedRef.current) {
-      console.log('[NewsManager] Skipping initial fetch: component not mounted');
-      return;
+            return;
     }
     if (isInitialized) {
-      console.log('[NewsManager] Skipping initial fetch: already initialized');
-      return;
+            return;
     }
     
-    console.log('[NewsManager] Fetching initial articles...');
-    // Fetching initial articles
+        // Fetching initial articles
     try {
       const client = getClient();
       const result = await client.graphql({ query: listArticles });
       const articles: Article[] = (result as any).data?.listArticles?.items || [];
-      console.log(`[NewsManager] Initial articles fetched: ${articles.length} articles from server`);
-      
+            
       // Debug: Log article categories
       const categoryCounts = articles.reduce((acc, article) => {
         const category = article.category || 'NEWS';
         acc[category] = (acc[category] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
-      console.log('[NewsManager] Initial articles by category:', categoryCounts);
-      
+      console.log('[NewsManager] Initial article categories:', categoryCounts);
+            
       // Debug: Log SPONSORED and STATISTICS articles specifically
       const sponsoredArticles = articles.filter(a => a.category === 'SPONSORED');
       const statisticsArticles = articles.filter(a => a.category === 'STATISTICS');
-      console.log(`[NewsManager] SPONSORED articles found: ${sponsoredArticles.length}`, sponsoredArticles.map(a => ({ id: a.id, title: a.title, priorityDuration: a.priorityDuration })));
-      console.log(`[NewsManager] STATISTICS articles found: ${statisticsArticles.length}`, statisticsArticles.map(a => ({ id: a.id, title: a.title, priorityDuration: a.priorityDuration })));
+      if (sponsoredArticles.length > 0) {
+        console.log(`[NewsManager] Found ${sponsoredArticles.length} SPONSORED articles`);
+      }
+      if (statisticsArticles.length > 0) {
+        console.log(`[NewsManager] Found ${statisticsArticles.length} STATISTICS articles`);
+      }
       
 
       
@@ -352,17 +327,15 @@ export const NewsManager: React.FC = () => {
         acc[category] = (acc[category] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
-      console.log('[NewsManager] Final articles by category after sorting:', finalCategoryCounts);
-      
+      console.log('[NewsManager] Final article categories after sorting:', finalCategoryCounts);
+            
       // Debug: Log priority articles specifically
       const priorityArticles = managedArticles.filter(a => isArticlePriority(a));
-      console.log(`[NewsManager] Priority articles in final state: ${priorityArticles.length}`, 
-        priorityArticles.map(a => ({ id: a.id, category: a.category, priorityUntil: a.priorityUntil })));
+      console.log(`[NewsManager] Found ${priorityArticles.length} priority articles`);
       
       setArticles(managedArticles);
       setIsInitialized(true);
-      console.log(`[NewsManager] Initial articles loaded: ${managedArticles.length} articles in state`);
-      // Initial articles loaded
+            // Initial articles loaded
     } catch (error) {
       console.error('[NewsManager] Failed to fetch initial articles', error);
     }
@@ -371,10 +344,8 @@ export const NewsManager: React.FC = () => {
   // Start polling for new articles
   const startPolling = useCallback(() => {
     if (pollingIntervalRef.current) {
-      console.log('[NewsManager] Polling already active, skipping start');
       return;
     }
-    console.log('[NewsManager] Starting polling for new articles');
     pollingIntervalRef.current = setInterval(async () => {
           if (!isComponentMountedRef.current) {
             return;
@@ -397,7 +368,6 @@ export const NewsManager: React.FC = () => {
           const nextToken = (result as any).data?.listArticles?.nextToken;
           
           // Debug logging to detect pagination issues
-          console.log(`[NewsManager] Polling fetched ${articles.length} articles from server (last 5 min)`);
           if (nextToken) {
             console.warn('[NewsManager] ⚠️ PAGINATION: More articles exist beyond limit. Consider increasing lookback window.');
           }
@@ -406,35 +376,32 @@ export const NewsManager: React.FC = () => {
             a => !articlesRef.current.find(existing => existing.id === a.id) && !isArticleSeen(a.id)
           );
           if (newArticles.length > 0) {
-            console.log(`[NewsManager] Polling found ${newArticles.length} new articles`);
-            
+                        
             // Debug: Log new article categories
             const newCategoryCounts = newArticles.reduce((acc, article) => {
               const category = article.category || 'NEWS';
               acc[category] = (acc[category] || 0) + 1;
               return acc;
             }, {} as Record<string, number>);
-            console.log('[NewsManager] New articles by category:', newCategoryCounts);
-            
+            console.log('[NewsManager] New article categories:', newCategoryCounts);
+                        
             // Debug: Log SPONSORED and STATISTICS articles specifically
             const newSponsoredArticles = newArticles.filter(a => a.category === 'SPONSORED');
             const newStatisticsArticles = newArticles.filter(a => a.category === 'STATISTICS');
             if (newSponsoredArticles.length > 0) {
-              console.log(`[NewsManager] New SPONSORED articles: ${newSponsoredArticles.length}`, newSponsoredArticles.map(a => ({ id: a.id, title: a.title, priorityDuration: a.priorityDuration })));
+              console.log(`[NewsManager] Found ${newSponsoredArticles.length} new SPONSORED articles`);
             }
             if (newStatisticsArticles.length > 0) {
-              console.log(`[NewsManager] New STATISTICS articles: ${newStatisticsArticles.length}`, newStatisticsArticles.map(a => ({ id: a.id, title: a.title, priorityDuration: a.priorityDuration })));
+              console.log(`[NewsManager] Found ${newStatisticsArticles.length} new STATISTICS articles`);
             }
             const receivedAt = Date.now();
             const formatted = newArticles.map(a => processArticle(a, receivedAt));
             // Sort new articles with enhanced priority logic
             const sorted = sortArticlesByPriority(formatted);
             sorted.forEach(article => addArticle(article));
-            console.log(`[NewsManager] Polling added ${newArticles.length} new articles to state`);
-            // Polling added new articles
+                        // Polling added new articles
           } else {
-            console.log('[NewsManager] Polling: no new articles found');
-            // No new articles found
+                        // No new articles found
           }
         } catch (error) {
           console.error('[NewsManager] Polling error', error);
@@ -442,17 +409,14 @@ export const NewsManager: React.FC = () => {
       };
       fetchArticles();
     }, POLLER_INTERVAL);
-    console.log(`[NewsManager] Polling started with ${POLLER_INTERVAL}ms interval`);
-  }, [addArticle, isArticleSeen, getClient]);
+      }, [addArticle, isArticleSeen, getClient]);
 
   // Try to establish AppSync subscription
   const trySubscribe = useCallback(async () => {
     if (unsubscribeRef.current || subscriptionEstablishedRef.current) {
-      console.log('[NewsManager] Subscription already active or established, skipping');
-      return;
+            return;
     }
-    console.log('[NewsManager] Attempting to establish AppSync subscription...');
-    try {
+        try {
       // Attempt subscription
       const client = getClient();
       const subscription = (client.graphql({
@@ -465,31 +429,20 @@ export const NewsManager: React.FC = () => {
 
           
           if (newArticle && !isArticleSeen(newArticle.id)) {
-            console.log(`[NewsManager] AppSync subscription received new article: ${newArticle.id}`);
-            
+                        
             // Debug: Log article category for SPONSORED and STATISTICS
             const category = newArticle.category || 'NEWS';
             if (category === 'SPONSORED' || category === 'STATISTICS') {
-              console.log(`[NewsManager] AppSync received ${category} article:`, {
-                id: newArticle.id,
-                title: newArticle.title,
-                category,
-                priorityDuration: newArticle.priorityDuration,
-                callToAction: newArticle.callToAction,
-                sponsorLink: newArticle.sponsorLink
-              });
-            }
+                          }
             
             // Check if article has null category (potential race condition)
             if (newArticle.category === null) {
-              console.log(`[NewsManager] Article ${newArticle.id} received with null category, waiting for data consistency...`);
-              
+                            
               // Wait a short delay and fetch the article again to get complete data
               setTimeout(async () => {
                 // Check if user is still authenticated before making GraphQL call
                 if (!isComponentMountedRef.current || authStatus !== 'authenticated') {
-                  console.log(`[NewsManager] Skipping article fetch for ${newArticle.id}: user no longer authenticated`);
-                  return;
+                                    return;
                 }
                 
                 try {
@@ -503,18 +456,15 @@ export const NewsManager: React.FC = () => {
                   const articles: Article[] = (result as any).data?.listArticles?.items || [];
                   
                   if (articles.length > 0 && articles[0].category) {
-                    console.log(`[NewsManager] Retrieved complete article data for ${newArticle.id}:`, articles[0]);
                     const formatted: ArticleForState = processArticle(articles[0], Date.now());
                     articleIdsFromSubscriptionRef.current.add(articles[0].id);
                     addArticle(formatted);
-                    console.log(`[NewsManager] AppSync live: article ${articles[0].id} added to state with complete data`);
                   } else {
                     console.warn(`[NewsManager] Could not retrieve complete data for article ${newArticle.id}, using subscription data`);
                     // Fallback to original subscription data
                     const formatted: ArticleForState = processArticle(newArticle, Date.now());
                     articleIdsFromSubscriptionRef.current.add(newArticle.id);
                     addArticle(formatted);
-                    console.log(`[NewsManager] AppSync live: article ${newArticle.id} added to state with subscription data`);
                   }
                 } catch (error) {
                   // Don't log auth errors as they're expected during logout
@@ -526,7 +476,6 @@ export const NewsManager: React.FC = () => {
                   const formatted: ArticleForState = processArticle(newArticle, Date.now());
                   articleIdsFromSubscriptionRef.current.add(newArticle.id);
                   addArticle(formatted);
-                  console.log(`[NewsManager] AppSync live: article ${newArticle.id} added to state with subscription data (fallback)`);
                 }
               }, 1000); // Wait 1 second for data consistency
               
@@ -536,35 +485,29 @@ export const NewsManager: React.FC = () => {
             // Mark subscription as established only when we receive the first article
             if (!subscriptionEstablishedRef.current) {
               subscriptionEstablishedRef.current = true;
-              console.log('[NewsManager] AppSync subscription established successfully');
-            }
+                          }
             // Mark that AppSync has received at least one article
             appSyncHasReceivedArticlesRef.current = true;
             const formatted: ArticleForState = processArticle(newArticle, Date.now());
             articleIdsFromSubscriptionRef.current.add(newArticle.id);
             addArticle(formatted);
-            console.log(`[NewsManager] AppSync live: article ${newArticle.id} added to state`);
-            // AppSync live: receiving news
+                        // AppSync live: receiving news
           } else {
-            console.log(`[NewsManager] AppSync received duplicate/seen article: ${newArticle?.id || 'unknown'}`);
-            // Duplicate or seen article
+                        // Duplicate or seen article
           }
         },
         error: (error: any) => {
           console.error('[NewsManager] Subscription error', error);
           subscriptionEstablishedRef.current = false;
-          console.log('[NewsManager] AppSync subscription failed, falling back to polling');
-          if (isComponentMountedRef.current) {
+                    if (isComponentMountedRef.current) {
             startPolling();
           }
         },
       });
       unsubscribeRef.current = () => subscription.unsubscribe();
-      console.log('[NewsManager] AppSync subscription setup completed, starting shadow poller');
-      // Start shadow poller to detect missed articles
+            // Start shadow poller to detect missed articles
       if (!shadowPollerRef.current && !shadowPollerStoppedRef.current) {
-        console.log('[NewsManager] Starting shadow poller to monitor AppSync reliability');
-        // Start shadow poller
+                // Start shadow poller
         shadowPollerRef.current = setInterval(async () => {
           if (!isComponentMountedRef.current || shadowPollerStoppedRef.current) {
             return;
@@ -593,8 +536,7 @@ export const NewsManager: React.FC = () => {
               );
               
               if (missedArticles.length > 0) {
-                console.log(`[NewsManager] Shadow poller detected ${missedArticles.length} missed articles by AppSync, switching to polling`);
-                // Missed articles by AppSync; switching to polling
+                                // Missed articles by AppSync; switching to polling
                 // Stop AppSync subscription
                 if (unsubscribeRef.current) {
                   unsubscribeRef.current();
@@ -612,8 +554,7 @@ export const NewsManager: React.FC = () => {
               } else {
                 // Only stop shadow poller if AppSync has received at least one article (proving it works)
                 if (appSyncHasReceivedArticlesRef.current) {
-                  console.log('[NewsManager] AppSync proven reliable, stopping shadow poller');
-                  // AppSync reliable
+                                    // AppSync reliable
                   // Stop shadow poller, keep AppSync
                   shadowPollerStoppedRef.current = true;
                   if (shadowPollerRef.current) {
@@ -621,8 +562,7 @@ export const NewsManager: React.FC = () => {
                     shadowPollerRef.current = null;
                   }
                 } else {
-                  console.log('[NewsManager] Shadow poller: AppSync not yet proven reliable, continuing monitoring');
-                  // Continue monitoring
+                                    // Continue monitoring
                 }
               }
             }, WEBSOCKET_LATENCY_BUFFER);
@@ -654,8 +594,7 @@ export const NewsManager: React.FC = () => {
       if (authStatus !== 'authenticated' || !userId) {
         // User logged out - cleanup and reset
         if (previousUserIdRef.current) {
-          console.log('[NewsManager] User logged out, cleaning up resources');
-          cleanupResources();
+                    cleanupResources();
           previousUserIdRef.current = undefined;
           isInitializingRef.current = false;
           setIsInitialized(false); // Reset initialization state
@@ -667,20 +606,17 @@ export const NewsManager: React.FC = () => {
         return;
       }
     
-      console.log(`[NewsManager] User changed from ${previousUserIdRef.current || 'none'} to ${userId}, initializing...`);
-      previousUserIdRef.current = userId;
+            previousUserIdRef.current = userId;
       isComponentMountedRef.current = true;
       isInitializingRef.current = true;
       // Don't cleanup during login - only during logout
       // Initializing for user
       const initialize = async () => {
-        console.log('[NewsManager] Starting initialization sequence...');
-        await fetchInitialArticles();
+                await fetchInitialArticles();
         if (isComponentMountedRef.current) {
           trySubscribe();
         }
-        console.log('[NewsManager] Initialization sequence completed');
-      };
+              };
       initialize();
     }, 100); // 100ms delay to prevent rapid re-initialization
 
@@ -694,8 +630,7 @@ export const NewsManager: React.FC = () => {
     return () => {
       // Only cleanup if component is actually unmounting (not during login)
       if (!isComponentMountedRef.current) {
-        console.log('[NewsManager] Component unmounting, cleaning up resources');
-        isComponentMountedRef.current = false;
+                isComponentMountedRef.current = false;
         isInitializingRef.current = false;
         setIsInitialized(false);
         cleanupResources();

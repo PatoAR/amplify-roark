@@ -3,7 +3,10 @@ export const COUNTRY_OPTIONS = [
   { id: 'Q414', label: 'ARG', code:'ar' },
   { id: 'Q155', label: 'BRA', code: 'br' },
   { id: 'Q298', label: 'CHL', code: 'cl' },
+  { id: 'Q739', label: 'COL', code: 'co' },
+  { id: 'Q96', label: 'MEX', code: 'mx' },
   { id: 'Q733', label: 'PAR', code: 'py' },
+  { id: 'Q419', label: 'PER', code: 'pe' },
   { id: 'Q77', label: 'URU', code: 'uy' },
 ];
 

@@ -26,12 +26,45 @@ export const AuthErrorFallback: React.FC<AuthErrorFallbackProps> = ({ error, onR
     if (onLogout) {
       onLogout();
     } else {
-      // Default logout behavior
+      // Default logout behavior with comprehensive cleanup
       try {
-        await signOut();
+        // Clear all browser storage except specific app preferences
+        const keysToPreserve = [
+          'theme', 
+          'userLanguage',
+          'session-cleanup-needed',
+          'perkins-optimal-usage-modal-hidden'
+        ];
+        
+        Object.keys(localStorage).forEach(key => {
+          if (!keysToPreserve.includes(key)) {
+            if (
+              key.startsWith('CognitoIdentityServiceProvider') ||
+              key.startsWith('amplify') ||
+              key.includes('auth') ||
+              key.includes('token')
+            ) {
+              localStorage.removeItem(key);
+            }
+          }
+        });
+        
+        Object.keys(sessionStorage).forEach(key => {
+          if (!keysToPreserve.includes(key)) {
+            sessionStorage.removeItem(key);
+          }
+        });
+        
+        await signOut({ global: true });
       } catch (error) {
         console.error('Error during logout', error);
-        // Force reload as fallback
+        // Try local signOut as fallback
+        try {
+          await signOut();
+        } catch (fallbackError) {
+          console.error('Fallback signOut also failed', fallbackError);
+        }
+        // Force reload as final fallback
         window.location.reload();
       }
     }

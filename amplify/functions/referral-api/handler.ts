@@ -42,10 +42,6 @@ async function appsyncRequest<T = any>(query: string, variables?: any): Promise<
   const apiKey = getApiKey();
   const body = JSON.stringify({ query, variables });
 
-  console.log(`Making AppSync request to: ${url}`);
-  console.log(`Query: ${query}`);
-  console.log(`Variables: ${JSON.stringify(variables)}`);
-
   const response = await fetch(url, {
     method: 'POST',
     headers: {
@@ -104,8 +100,6 @@ export const handler = async (event: ReferralEvent): Promise<ReferralResponse> =
   }
 
   try {
-    console.log('Referral API event:', JSON.stringify(event, null, 2));
-    
     switch (event.httpMethod) {
       case 'GET':
         if (event.path === '/validate') {
@@ -155,8 +149,6 @@ async function handleValidationRequest(event: ReferralEvent, headers: Record<str
       };
     }
 
-    console.log('Validating referral code:', code);
-
     // Validate referral code using AppSync
     const listReferralCodesQuery = `
       query ListReferralCodes($filter: ModelReferralCodeFilterInput) {
@@ -180,12 +172,6 @@ async function handleValidationRequest(event: ReferralEvent, headers: Record<str
     if (referralCodes.listReferralCodes.items.length > 0) {
       const referralCode = referralCodes.listReferralCodes.items[0];
       
-      console.log('Referral code validated successfully:', {
-        code: referralCode.code,
-        referrerId: referralCode.owner,
-        isActive: referralCode.isActive
-      });
-
       return {
         statusCode: 200,
         body: JSON.stringify({
@@ -197,7 +183,6 @@ async function handleValidationRequest(event: ReferralEvent, headers: Record<str
         headers
       };
     } else {
-      console.log('Referral code not found or inactive:', code);
       return {
         statusCode: 200,
         body: JSON.stringify({ valid: false }),
@@ -252,8 +237,6 @@ async function handlePostRequest(body: any, headers: Record<string, string>): Pr
 
 async function generateReferralCode(userId: string, headers: Record<string, string>): Promise<ReferralResponse> {
   try {
-    console.log('Generating referral code for user:', userId);
-    
     // Generate a unique 8-character code
     const code = generateUniqueCode();
     
@@ -302,8 +285,6 @@ async function generateReferralCode(userId: string, headers: Record<string, stri
       }
     });
     
-    console.log('Referral code generated successfully:', result.createReferralCode);
-    
     return {
       statusCode: 200,
       headers,
@@ -329,8 +310,6 @@ async function generateReferralCode(userId: string, headers: Record<string, stri
 
 async function validateReferralCode(code: string, headers: Record<string, string>): Promise<ReferralResponse> {
   try {
-    console.log('Validating referral code via POST:', code);
-    
     const listReferralCodesQuery = `
       query ListReferralCodes($filter: ModelReferralCodeFilterInput) {
         listReferralCodes(filter: $filter) {
@@ -391,8 +370,6 @@ async function validateReferralCode(code: string, headers: Record<string, string
 
 async function processReferral(referrerId: string, referredId: string, code: string, headers: Record<string, string>): Promise<ReferralResponse> {
   try {
-    console.log('Processing referral:', { referrerId, referredId, code });
-    
     // Create referral record
     const createReferralMutation = `
       mutation CreateReferral($input: CreateReferralInput!) {
@@ -461,8 +438,6 @@ async function processReferral(referrerId: string, referredId: string, code: str
     // Extend referrer's subscription
     await extendSubscription(referrerId, headers);
     
-    console.log('Referral processed successfully');
-    
     return {
       statusCode: 200,
       headers,
@@ -488,8 +463,6 @@ async function processReferral(referrerId: string, referredId: string, code: str
 
 async function extendSubscription(userId: string, headers: Record<string, string>): Promise<ReferralResponse> {
   try {
-    console.log('Extending subscription for user:', userId);
-    
     // Get user's subscription
     const listUserSubscriptionsQuery = `
       query ListUserSubscriptions($filter: ModelUserSubscriptionFilterInput) {

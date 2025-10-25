@@ -142,32 +142,6 @@ function NewsSocketClient() {
   const displayedMessages = useMemo(() => {
     const messages = filteredMessages.slice(0, displayedCount);
     
-    // Debug: Log SPONSORED and STATISTICS articles being displayed
-    const sponsoredMessages = messages.filter((msg: any) => msg.category === 'SPONSORED');
-    const statisticsMessages = messages.filter((msg: any) => msg.category === 'STATISTICS');
-    
-    if (sponsoredMessages.length > 0) {
-      console.log(`[NewsSocketClient] Displaying ${sponsoredMessages.length} SPONSORED articles:`, 
-        sponsoredMessages.map((msg: any) => ({ 
-          id: msg.id, 
-          title: msg.title, 
-          category: msg.category,
-          callToAction: msg.callToAction,
-          sponsorLink: msg.sponsorLink,
-          seen: msg.seen 
-        })));
-    }
-    
-    if (statisticsMessages.length > 0) {
-      console.log(`[NewsSocketClient] Displaying ${statisticsMessages.length} STATISTICS articles:`, 
-        statisticsMessages.map((msg: any) => ({ 
-          id: msg.id, 
-          title: msg.title, 
-          category: msg.category,
-          seen: msg.seen 
-        })));
-    }
-    
     return messages;
   }, [filteredMessages, displayedCount]);
 
@@ -254,19 +228,6 @@ function NewsSocketClient() {
         <div className="articles-container">
           <AnimatePresence initial={false}>
             {displayedMessages.map((msg: any) => {
-              // Debug: Log individual article rendering for SPONSORED and STATISTICS
-              if (msg.category === 'SPONSORED' || msg.category === 'STATISTICS') {
-                console.log(`[NewsSocketClient] Rendering ${msg.category} article:`, {
-                  id: msg.id,
-                  title: msg.title,
-                  category: msg.category,
-                  seen: msg.seen,
-                  hasCallToAction: !!msg.callToAction,
-                  hasSponsorLink: !!msg.sponsorLink,
-                  className: `article-card ${msg.seen ? '' : 'unseen'} ${msg.category?.toLowerCase() || 'news'}`
-                });
-              }
-              
               return (
                 <motion.div
                   key={msg.id}

@@ -42,10 +42,6 @@ async function appsyncRequest<T = any>(query: string, variables?: any): Promise<
   const apiKey = getApiKey();
   const body = JSON.stringify({ query, variables });
 
-  console.log(`Making AppSync request to: ${url}`);
-  console.log(`Query: ${query}`);
-  console.log(`Variables: ${JSON.stringify(variables)}`);
-
   const response = await fetch(url, {
     method: 'POST',
     headers: {
@@ -89,8 +85,6 @@ interface ReferralResponse {
 
 export const handler = async (event: ReferralEvent): Promise<ReferralResponse> => {
   try {
-    console.log('Referral processor event:', JSON.stringify(event, null, 2));
-    
     switch (event.action) {
       case 'generate_code':
         return await generateReferralCode(event.userId!);
@@ -115,8 +109,6 @@ export const handler = async (event: ReferralEvent): Promise<ReferralResponse> =
 
 async function generateReferralCode(userId: string): Promise<ReferralResponse> {
   try {
-    console.log('Generating referral code for user:', userId);
-    
     // Generate a unique 8-character code
     const code = generateUniqueCode();
     
@@ -165,8 +157,6 @@ async function generateReferralCode(userId: string): Promise<ReferralResponse> {
       }
     });
     
-    console.log('Referral code generated successfully:', result.createReferralCode);
-    
     return {
       success: true,
       message: 'Referral code generated successfully',
@@ -184,8 +174,6 @@ async function generateReferralCode(userId: string): Promise<ReferralResponse> {
 
 async function validateReferralCode(code: string): Promise<ReferralResponse> {
   try {
-    console.log('Validating referral code:', code);
-    
     const listReferralCodesQuery = `
       query ListReferralCodes($filter: ModelReferralCodeFilterInput) {
         listReferralCodes(filter: $filter) {
@@ -211,7 +199,6 @@ async function validateReferralCode(code: string): Promise<ReferralResponse> {
     }
     
     const referralCode = result.listReferralCodes.items[0];
-    console.log('Referral code validated successfully:', referralCode);
     
     return {
       success: true,
@@ -233,8 +220,6 @@ async function validateReferralCode(code: string): Promise<ReferralResponse> {
 
 async function processReferral(referrerId: string, referredId: string, code: string): Promise<ReferralResponse> {
   try {
-    console.log('Processing referral:', { referrerId, referredId, code });
-    
     // Create referral record
     const createReferralMutation = `
       mutation CreateReferral($input: CreateReferralInput!) {
@@ -303,8 +288,6 @@ async function processReferral(referrerId: string, referredId: string, code: str
     // Extend referrer's subscription
     await extendSubscription(referrerId);
     
-    console.log('Referral processed successfully');
-    
     return {
       success: true,
       message: 'Referral processed successfully',
@@ -322,8 +305,6 @@ async function processReferral(referrerId: string, referredId: string, code: str
 
 async function extendSubscription(userId: string): Promise<ReferralResponse> {
   try {
-    console.log('Extending subscription for user:', userId);
-    
     // Get user's subscription
     const listUserSubscriptionsQuery = `
       query ListUserSubscriptions($filter: ModelUserSubscriptionFilterInput) {

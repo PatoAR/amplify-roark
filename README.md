@@ -2,6 +2,9 @@
 Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fetches, processes and stores news articles in dynambodb. The articles are distributed to varios channels (whatsapp, telegram) and to this webapp via AppSync subscriptions or long-polling.
 
 ## ToDo's
+- No modified text on article card, but perhaps highlight match in entities? (like "argentina" highlighted as a company to signal that it is mentioned on the text?)
+- Track users/usage admin page
+
 - Apply for AWS grant - Fernando Errandosoro ITBA
 - Open (MPago) business account for Finu - pay AWS, GEMINI.
 - Open AWS account on the name of Finu, transfer domain 
