@@ -235,7 +235,9 @@ async function handlePostRequest(body: any, headers: Record<string, string>): Pr
   }
 }
 
-async function generateReferralCode(userId: string, headers: Record<string, string>): Promise<ReferralResponse> {
+async function generateReferralCode(userId: string, headers: Record<string, string>, retryCount = 0): Promise<ReferralResponse> {
+  const MAX_RETRIES = 10;
+  
   try {
     // Generate a unique 8-character code
     const code = generateUniqueCode();
@@ -257,8 +259,20 @@ async function generateReferralCode(userId: string, headers: Record<string, stri
     });
     
     if (existingCodes.listReferralCodes.items.length > 0) {
-      // Retry with a new code
-      return await generateReferralCode(userId, headers);
+      // Retry with a new code if we haven't exceeded max retries
+      if (retryCount >= MAX_RETRIES) {
+        console.error(`Failed to generate unique referral code after ${MAX_RETRIES} attempts`);
+        return {
+          statusCode: 500,
+          headers,
+          body: JSON.stringify({
+            success: false,
+            message: 'Failed to generate unique referral code after multiple attempts',
+            error: 'Code generation timeout'
+          }),
+        };
+      }
+      return await generateReferralCode(userId, headers, retryCount + 1);
     }
     
     // Create the referral code
