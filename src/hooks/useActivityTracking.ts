@@ -83,9 +83,15 @@ export const useActivityTracking = () => {
         // Store the actual database record ID, not just the sessionId
         sessionRef.current.recordId = result.data.createUserActivity.id;
         setIsTracking(true);
+        console.log('✅ Activity tracking started:', {
+          sessionId: sessionRef.current.sessionId,
+          recordId: sessionRef.current.recordId,
+          startTime: sessionRef.current.startTime.toISOString()
+        });
       }
     } catch (error) {
-      console.error('Failed to start activity session', error);
+      console.error('❌ Failed to start activity session', error);
+      console.error('Error details:', error);
     }
   }, [user?.userId, getClient, generateSessionId, getDeviceInfo]);
 
@@ -123,9 +129,11 @@ export const useActivityTracking = () => {
             }
           }
         }) as any;
+        console.log('✅ Activity session ended:', { duration, recordId: sessionRef.current.recordId });
       }
     } catch (error) {
-      console.error('Failed to end activity session', error);
+      console.error('❌ Failed to end activity session', error);
+      console.error('Error details:', error);
     } finally {
       sessionRef.current = null;
       setIsTracking(false);

@@ -42,8 +42,29 @@ export const AnalyticsDashboard = () => {
 
       // Calculate session stats
       const sessions = activities || [];
+      console.log('📊 Loaded sessions:', sessions.length, 'for userId:', userId);
+      console.log('📊 Sessions data:', sessions.map(s => ({ 
+        id: s.id, 
+        startTime: s.startTime, 
+        duration: s.duration, 
+        isActive: s.isActive 
+      })));
+      
+      // Count all sessions, including active ones without duration
       const totalSessions = sessions.length;
-      const totalDuration = sessions.reduce((sum, session) => sum + (session.duration || 0), 0);
+      const totalDuration = sessions.reduce((sum, session) => {
+        if (session.duration) {
+          return sum + session.duration;
+        }
+        // For active sessions without duration, calculate from startTime
+        if (session.isActive && session.startTime) {
+          const sessionStart = new Date(session.startTime);
+          const now = new Date();
+          const seconds = Math.floor((now.getTime() - sessionStart.getTime()) / 1000);
+          return sum + Math.max(0, seconds);
+        }
+        return sum + 0;
+      }, 0);
 
       setSessionStats({
         totalSessions,
@@ -52,6 +73,7 @@ export const AnalyticsDashboard = () => {
       });
     } catch (error) {
       console.error('Failed to load analytics', error);
+      console.error('Error details:', error);
     } finally {
       setIsLoading(false);
     }
