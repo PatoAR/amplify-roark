@@ -11,7 +11,7 @@ import { isArticlePriority, sortArticlesByPriority } from '../../utils/articleSo
 const MAX_ARTICLES_IN_MEMORY = 100;
 const WEBSOCKET_LATENCY_BUFFER = 5000; // 5 seconds
 const POLLER_INTERVAL = 60000; // 60 seconds
-const POLL_LOOKBACK_WINDOW = 5 * 60 * 1000; // 5 minutes - buffer for polling queries
+const POLL_LOOKBACK_WINDOW = 2 * 60 * 1000; // 2 minutes - sufficient for 60s poll interval
 // Seen cache limits to prevent unbounded growth
 const SEEN_CACHE_MAX_SIZE = 2000;
 const SEEN_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -353,28 +353,36 @@ export const NewsManager: React.FC = () => {
       const fetchArticles = async () => {
         try {
           const client = getClient();
-          // Only fetch articles created in the last 5 minutes to avoid pagination issues
           const lookbackTime = new Date(Date.now() - POLL_LOOKBACK_WINDOW).toISOString();
-          const result = await client.graphql({ 
-            query: listArticles,
-            variables: {
-              filter: {
-                createdAt: { gt: lookbackTime }
-              },
-              limit: 250  // Safety buffer for high-volume periods
-            }
-          });
-          const articles: Article[] = (result as any).data?.listArticles?.items || [];
-          const nextToken = (result as any).data?.listArticles?.nextToken;
           
-          // Debug logging to detect pagination issues
-          if (nextToken) {
-            console.warn('[NewsManager] ⚠️ PAGINATION: More articles exist beyond limit. Consider increasing lookback window.');
-          }
+          // Fetch all articles with pagination support
+          let allArticles: Article[] = [];
+          let nextToken: string | null = null;
+          let pageCount = 0;
+          const maxPages = 10; // Safety limit to prevent infinite loops
           
-          const newArticles = articles.filter(
+          do {
+            const result: any = await client.graphql({ 
+              query: listArticles,
+              variables: {
+                filter: {
+                  createdAt: { gt: lookbackTime }
+                },
+                limit: 1000,  // Larger page size to reduce number of requests
+                nextToken: nextToken || undefined
+              }
+            });
+            
+            const pageArticles: Article[] = (result as any).data?.listArticles?.items || [];
+            allArticles = allArticles.concat(pageArticles);
+            nextToken = (result as any).data?.listArticles?.nextToken;
+            pageCount++;
+          } while (nextToken && pageCount < maxPages);
+          
+          const newArticles = allArticles.filter(
             a => !articlesRef.current.find(existing => existing.id === a.id) && !isArticleSeen(a.id)
           );
+          
           if (newArticles.length > 0) {
                         
             // Debug: Log new article categories
@@ -514,24 +522,38 @@ export const NewsManager: React.FC = () => {
           }
           try {
             const client = getClient();
-            // Only check recent articles to avoid pagination issues
             const lookbackTime = new Date(Date.now() - POLL_LOOKBACK_WINDOW).toISOString();
-            const result = await client.graphql({ 
-              query: listArticles,
-              variables: {
-                filter: {
-                  createdAt: { gt: lookbackTime }
-                },
-                limit: 250
-              }
-            });
-            const articlesFromServer: Article[] = (result as any).data?.listArticles?.items || [];
+            
+            // Fetch all articles with pagination support
+            let allArticlesFromServer: Article[] = [];
+            let nextToken: string | null = null;
+            let pageCount = 0;
+            const maxPages = 10; // Safety limit to prevent infinite loops
+            
+            do {
+              const result: any = await client.graphql({ 
+                query: listArticles,
+                variables: {
+                  filter: {
+                    createdAt: { gt: lookbackTime }
+                  },
+                  limit: 1000,  // Larger page size to reduce number of requests
+                  nextToken: nextToken || undefined
+                }
+              });
+              
+              const pageArticles: Article[] = (result as any).data?.listArticles?.items || [];
+              allArticlesFromServer = allArticlesFromServer.concat(pageArticles);
+              nextToken = (result as any).data?.listArticles?.nextToken;
+              pageCount++;
+            } while (nextToken && pageCount < maxPages);
+            
             // Wait for WebSocket latency buffer to allow AppSync to deliver any pending articles
             setTimeout(() => {
               if (!isComponentMountedRef.current || shadowPollerStoppedRef.current) return;
               
               // Check for articles in database that are NOT in local state (AppSync missed them)
-              const missedArticles = articlesFromServer.filter(
+              const missedArticles = allArticlesFromServer.filter(
                 serverArticle => !articlesRef.current.find(localArticle => localArticle.id === serverArticle.id) && !isArticleSeen(serverArticle.id)
               );
               
