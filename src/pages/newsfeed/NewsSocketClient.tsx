@@ -286,59 +286,77 @@ function NewsSocketClient() {
                     {/* Country pills - show only for countries in user preferences and if source doesn't include country code */}
                     {(() => {
                       const renderedCountries = msg.countries && typeof msg.countries === 'object' && Object.keys(msg.countries).length > 0 
-                        ? Object.entries(msg.countries)
-                            .map(([countryKey, url]) => {
-                              // Get country name - try countryKey as ID/label/code first
-                              let countryName = getCountryName(countryKey);
-                              
-                              // If not found, try using the value (url) as country identifier
-                              if (!countryName && typeof url === 'string') {
-                                countryName = getCountryName(url);
+                        ? (() => {
+                            // First, process all entries and collect unique countries by their resolved country ID
+                            const processedCountries = Object.entries(msg.countries)
+                              .map(([countryKey, url]) => {
+                                // Get country name - try countryKey as ID/label/code first
+                                let countryName = getCountryName(countryKey);
+                                
+                                // If not found, try using the value (url) as country identifier
+                                if (!countryName && typeof url === 'string') {
+                                  countryName = getCountryName(url);
+                                }
+                                
+                                if (!countryName) return null;
+                                
+                                // Find the country option to get the code/label for source checking
+                                const countryOption = COUNTRY_OPTIONS.find(
+                                  c => c.id.toLowerCase() === countryKey.toLowerCase() ||
+                                       c.label.toLowerCase() === countryKey.toLowerCase() ||
+                                       c.code.toLowerCase() === countryKey.toLowerCase() ||
+                                       (typeof url === 'string' && (
+                                         c.id.toLowerCase() === url.toLowerCase() ||
+                                         c.label.toLowerCase() === url.toLowerCase() ||
+                                         c.code.toLowerCase() === url.toLowerCase()
+                                       ))
+                                );
+                                
+                                if (!countryOption) return null;
+                                
+                                // Only show if country is in user's preferences
+                                if (!isCountryInUserPreferences(countryKey, url as string)) {
+                                  return null;
+                                }
+                                
+                                // Check if source contains country code (ARG, BRA, CHL, etc.) or full country name
+                                const sourceUpper = msg.source.toUpperCase();
+                                const hasCountryCode = sourceUpper.includes(countryOption.label) || 
+                                                      sourceUpper.includes(countryOption.code.toUpperCase()) ||
+                                                      msg.source.toLowerCase().includes(countryName.toLowerCase());
+                                
+                                // Only show if source doesn't already contain the country code or name
+                                if (hasCountryCode) {
+                                  return null;
+                                }
+                                
+                                return {
+                                  countryId: countryOption.id,
+                                  countryName,
+                                  countryKey
+                                };
+                              })
+                              .filter(Boolean) as Array<{ countryId: string; countryName: string; countryKey: string }>;
+                            
+                            // Deduplicate by countryId
+                            const uniqueCountriesMap = new Map<string, { countryId: string; countryName: string; countryKey: string }>();
+                            processedCountries.forEach(country => {
+                              if (!uniqueCountriesMap.has(country.countryId)) {
+                                uniqueCountriesMap.set(country.countryId, country);
                               }
-                              
-                              if (!countryName) return null;
-                              
-                              // Find the country option to get the code/label for source checking
-                              const countryOption = COUNTRY_OPTIONS.find(
-                                c => c.id.toLowerCase() === countryKey.toLowerCase() ||
-                                     c.label.toLowerCase() === countryKey.toLowerCase() ||
-                                     c.code.toLowerCase() === countryKey.toLowerCase() ||
-                                     (typeof url === 'string' && (
-                                       c.id.toLowerCase() === url.toLowerCase() ||
-                                       c.label.toLowerCase() === url.toLowerCase() ||
-                                       c.code.toLowerCase() === url.toLowerCase()
-                                     ))
-                              );
-                              
-                              if (!countryOption) return null;
-                              
-                              // Only show if country is in user's preferences
-                              if (!isCountryInUserPreferences(countryKey, url as string)) {
-                                return null;
-                              }
-                              
-                              // Check if source contains country code (ARG, BRA, CHL, etc.) or full country name
-                              const sourceUpper = msg.source.toUpperCase();
-                              const hasCountryCode = sourceUpper.includes(countryOption.label) || 
-                                                    sourceUpper.includes(countryOption.code.toUpperCase()) ||
-                                                    msg.source.toLowerCase().includes(countryName.toLowerCase());
-                              
-                              // Only show if source doesn't already contain the country code or name
-                              if (hasCountryCode) {
-                                return null;
-                              }
-                              
-                              return (
-                                <span
-                                  key={countryKey}
-                                  className="article-countries"
-                                  title={countryName}
-                                >
-                                  {countryName}
-                                </span>
-                              );
-                            })
-                            .filter(Boolean)
+                            });
+                            
+                            // Convert to JSX elements
+                            return Array.from(uniqueCountriesMap.values()).map((country) => (
+                              <span
+                                key={country.countryKey}
+                                className="article-countries"
+                                title={country.countryName}
+                              >
+                                {country.countryName}
+                              </span>
+                            ));
+                          })()
                         : [];
                       
                       return renderedCountries.length > 0 ? (
