@@ -296,7 +296,6 @@ export const getUserActivity = /* GraphQL */ `query GetUserActivity($id: ID!) {
     duration
     deviceInfo
     userAgent
-    ipAddress
     isActive
     id
     createdAt
@@ -322,7 +321,6 @@ export const listUserActivities = /* GraphQL */ `query ListUserActivities(
       duration
       deviceInfo
       userAgent
-      ipAddress
       isActive
       id
       createdAt

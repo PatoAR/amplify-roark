@@ -350,7 +350,6 @@ export const onCreateUserActivity = /* GraphQL */ `subscription OnCreateUserActi
     duration
     deviceInfo
     userAgent
-    ipAddress
     isActive
     id
     createdAt
@@ -374,7 +373,6 @@ export const onUpdateUserActivity = /* GraphQL */ `subscription OnUpdateUserActi
     duration
     deviceInfo
     userAgent
-    ipAddress
     isActive
     id
     createdAt
@@ -398,7 +396,6 @@ export const onDeleteUserActivity = /* GraphQL */ `subscription OnDeleteUserActi
     duration
     deviceInfo
     userAgent
-    ipAddress
     isActive
     id
     createdAt
