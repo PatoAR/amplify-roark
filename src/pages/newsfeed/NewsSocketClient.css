@@ -199,11 +199,27 @@
 .article-companies {
   background-color: var(--color-border-light);
   color: var(--color-success);
-  padding: 0 var(--space-sm);
+  padding: 1px var(--space-xs);
   border-radius: var(--border-radius-sm);
   margin-right: var(--space-sm);
   font-size: var(--font-size-xs);
   display: inline-block;
+}
+
+/* Countries format with hashtag */
+.article-countries {
+  background-color: var(--color-border-light);
+  color: var(--color-primary);
+  padding: 1px var(--space-xs);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+  display: inline-block;
+}
+
+.article-countries::before {
+  content: '#';
+  color: var(--color-text-tertiary);
+
 }
 
 /* Links */

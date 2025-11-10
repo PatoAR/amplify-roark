@@ -115,13 +115,7 @@ async function createSubscription(userId: string, planDetails: any): Promise<str
   
   const subscriptionId = `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   
-  // Mock database update
-  console.log('Creating subscription:', {
-    userId,
-    planDetails,
-    subscriptionId,
-    createdAt: new Date().toISOString(),
-  });
+  // Mock database update (TODO: Implement actual subscription creation)
   
   return subscriptionId;
 }

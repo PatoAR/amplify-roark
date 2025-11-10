@@ -359,7 +359,6 @@ export const createUserActivity = /* GraphQL */ `mutation CreateUserActivity(
     duration
     deviceInfo
     userAgent
-    ipAddress
     isActive
     id
     createdAt
@@ -383,7 +382,6 @@ export const updateUserActivity = /* GraphQL */ `mutation UpdateUserActivity(
     duration
     deviceInfo
     userAgent
-    ipAddress
     isActive
     id
     createdAt
@@ -407,7 +405,6 @@ export const deleteUserActivity = /* GraphQL */ `mutation DeleteUserActivity(
     duration
     deviceInfo
     userAgent
-    ipAddress
     isActive
     id
     createdAt

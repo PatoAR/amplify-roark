@@ -21,15 +21,6 @@ export function useSubscriptionManager() {
   React.useEffect(() => {
     const currentStatus = `${subscriptionStatus.daysRemaining}-${subscriptionStatus.isInGracePeriod}-${subscriptionStatus.isExpired}`;
     if (currentStatus !== lastLoggedStatus) {
-      // Only log if we have meaningful data (not initial/loading state)
-      if (subscriptionStatus.daysRemaining > 0 || subscriptionStatus.isExpired || subscriptionStatus.isInGracePeriod) {
-        console.log('[SubscriptionManager] Status changed:', JSON.stringify({
-          daysRemaining: subscriptionStatus.daysRemaining,
-          isInGracePeriod: subscriptionStatus.isInGracePeriod,
-          isExpired: subscriptionStatus.isExpired,
-          shouldShow: subscriptionStatus.isInGracePeriod || subscriptionStatus.daysRemaining <= 30 || subscriptionStatus.isExpired
-        }));
-      }
       setLastLoggedStatus(currentStatus);
     }
   }, [subscriptionStatus.daysRemaining, subscriptionStatus.isInGracePeriod, subscriptionStatus.isExpired, lastLoggedStatus]);

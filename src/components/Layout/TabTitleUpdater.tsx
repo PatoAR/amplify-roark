@@ -17,7 +17,6 @@ export const TabTitleUpdater: React.FC = () => {
     articles = newsContext.articles;
   } catch (error) {
     // If useNews fails, we're not within NewsProvider context yet
-    console.log('[TabTitleUpdater] NewsProvider not available yet, using empty articles array');
     articles = [];
   }
   
@@ -27,7 +26,6 @@ export const TabTitleUpdater: React.FC = () => {
     isLoading = userPrefsContext.isLoading;
   } catch (error) {
     // If useUserPreferences fails, use defaults
-    console.log('[TabTitleUpdater] UserPreferencesProvider not available yet, using defaults');
     preferences = { countries: [], industries: [] };
     isLoading = false;
   }

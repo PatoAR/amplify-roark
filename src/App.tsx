@@ -97,8 +97,6 @@ export default function App() {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        console.log('👁️ User returned to tab, checking authentication state...');
-        
         // Only show error if we've been in an unclear state for a long time
         if (authStatus === 'authenticated' && (!isAuthenticated || !isSessionActive)) {
           // Give more time for the session to start up

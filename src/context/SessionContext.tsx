@@ -21,14 +21,14 @@ interface SessionProviderProps {
 export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) => {
   const [authError, setAuthError] = useState<Error | null>(null);
   const sessionManager = useSessionManager({
-    onSessionStart: (userId) => {
-      console.log('✅ Session started for user:', userId);
+    onSessionStart: (_userId) => {
+      // Session started successfully
     },
-    onSessionEnd: (userId) => {
-      console.log('✅ Session ended for user:', userId);
+    onSessionEnd: (_userId) => {
+      // Session ended
     },
     onAuthError: (error) => {
-      console.error('❌ Authentication error:', error);
+      console.error('Authentication error:', error);
       setAuthError(error instanceof Error ? error : new Error('Authentication error'));
     }
   });

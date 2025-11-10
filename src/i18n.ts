@@ -157,6 +157,12 @@ const customTranslations = {
     'whatsapp.subtitle': 'Follow our channels and experience real-time business intelligence for your region',
     'whatsapp.argentinaDescription': 'Daily business intelligence for Argentina',
     'whatsapp.brasilDescription': 'Daily business intelligence for Brasil',
+    'whatsapp.chileDescription': 'Daily business intelligence for Chile',
+    'whatsapp.colombiaDescription': 'Daily business intelligence for Colombia',
+    'whatsapp.mexicoDescription': 'Daily business intelligence for México',
+    'whatsapp.paraguayDescription': 'Daily business intelligence for Paraguay',
+    'whatsapp.peruDescription': 'Daily business intelligence for Perú',
+    'whatsapp.uruguayDescription': 'Daily business intelligence for Uruguay',
     'whatsapp.followButton': 'Follow on WhatsApp',
     'whatsapp.note': 'No signup required • Free forever • Instant updates',
     

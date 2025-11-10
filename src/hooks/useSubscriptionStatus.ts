@@ -153,7 +153,6 @@ export function useSubscriptionStatus(): SubscriptionStatus {
         // Check if it's an authentication error
         if (error instanceof Error && error.message.includes('NoSignedUser')) {
           // Authentication error - don't set expired status, just return
-          console.log('[SubscriptionStatus] Authentication error, skipping status update');
           return;
         }
         

@@ -28,15 +28,15 @@
 /* Channel Cards Grid */
 .whatsapp-channels-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-2xl);
-  max-width: 800px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-lg);
+  max-width: 1000px;
   margin: 0 auto var(--space-xl);
 }
 
 .whatsapp-channel-card {
   background: white;
-  padding: var(--space-lg) var(--space-xl);
+  padding: var(--space-sm) var(--space-xs);
   border-radius: var(--border-radius-md);
   border: 1px solid #86efac;
   box-shadow: var(--shadow-sm);
@@ -46,6 +46,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
+  min-height: 140px;
 }
 
 .whatsapp-channel-card:hover {
@@ -55,9 +56,9 @@
 }
 
 .whatsapp-channel-flag {
-  margin-bottom: var(--space-sm);
-  width: 60px;
-  height: 45px;
+  margin-bottom: var(--space-xs);
+  width: 40px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -73,17 +74,18 @@
 }
 
 .whatsapp-channel-country {
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
-  margin: 0 0 var(--space-xs) 0;
+  margin: 0 0 2px 0;
 }
 
 .whatsapp-channel-description {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
-  margin: 0 0 var(--space-md) 0;
+  margin: 0 0 var(--space-xs) 0;
   flex: 1;
+  line-height: 1.2;
 }
 
 /* WhatsApp Button */
@@ -91,15 +93,15 @@
   background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
   color: white;
   border: none;
-  padding: var(--space-sm) var(--space-lg);
+  padding: 4px var(--space-xs);
   border-radius: var(--border-radius-sm);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
   transition: all var(--transition-normal);
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
+  gap: 4px;
   box-shadow: 0 2px 4px rgba(37, 211, 102, 0.2);
   width: 100%;
   justify-content: center;
@@ -117,8 +119,8 @@
 }
 
 .whatsapp-icon {
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
 }
 
 /* Bottom Note */
@@ -129,6 +131,52 @@
   font-weight: var(--font-weight-medium);
   margin: 0;
   font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .whatsapp-channels-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .whatsapp-channels-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .whatsapp-channels-section {
+    padding: var(--space-2xl) var(--space-lg);
+  }
+
+  .whatsapp-channels-title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .whatsapp-channels-subtitle {
+    font-size: var(--font-size-base);
+  }
+
+  .whatsapp-channels-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  .whatsapp-channel-card {
+    padding: var(--space-xs) var(--space-sm);
+    min-height: 120px;
+  }
+
+  .whatsapp-channel-flag {
+    width: 35px;
+    height: 26px;
+  }
+
+  .whatsapp-channel-country {
+    font-size: var(--font-size-xs);
+  }
 }
 
 /* Responsive Design */

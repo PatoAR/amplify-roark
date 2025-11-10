@@ -4,7 +4,7 @@ import { useUserPreferences } from '../../context/UserPreferencesContext';
 import { useNews } from '../../context/NewsContext';
 import WelcomeScreen from '../../components/WelcomeScreen/WelcomeScreen';
 import { useTranslation } from '../../i18n';
-import { COUNTRY_OPTIONS } from '../../constants/countries';
+import { COUNTRY_OPTIONS, getCountryName } from '../../constants/countries';
 import { useSubscriptionManager } from '../../hooks/useSubscriptionManager';
 import { GracePeriodBanner } from '../../components/GracePeriodBanner';
 import './NewsSocketClient.css';
@@ -13,7 +13,11 @@ function formatLocalTime(timestamp?: string | null): string {
   if (!timestamp) return '';
   
   const date = new Date(timestamp);
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
+function removeEmojis(text: string): string {
+  return text.replace(/[\u{1F300}-\u{1F9FF}]|[\u{1F100}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
 }
 
 function NewsSocketClient() {
@@ -142,32 +146,6 @@ function NewsSocketClient() {
   const displayedMessages = useMemo(() => {
     const messages = filteredMessages.slice(0, displayedCount);
     
-    // Debug: Log SPONSORED and STATISTICS articles being displayed
-    const sponsoredMessages = messages.filter((msg: any) => msg.category === 'SPONSORED');
-    const statisticsMessages = messages.filter((msg: any) => msg.category === 'STATISTICS');
-    
-    if (sponsoredMessages.length > 0) {
-      console.log(`[NewsSocketClient] Displaying ${sponsoredMessages.length} SPONSORED articles:`, 
-        sponsoredMessages.map((msg: any) => ({ 
-          id: msg.id, 
-          title: msg.title, 
-          category: msg.category,
-          callToAction: msg.callToAction,
-          sponsorLink: msg.sponsorLink,
-          seen: msg.seen 
-        })));
-    }
-    
-    if (statisticsMessages.length > 0) {
-      console.log(`[NewsSocketClient] Displaying ${statisticsMessages.length} STATISTICS articles:`, 
-        statisticsMessages.map((msg: any) => ({ 
-          id: msg.id, 
-          title: msg.title, 
-          category: msg.category,
-          seen: msg.seen 
-        })));
-    }
-    
     return messages;
   }, [filteredMessages, displayedCount]);
 
@@ -204,6 +182,31 @@ function NewsSocketClient() {
     a.rel = 'noopener noreferrer';
     a.click();
   }, []);
+
+  // Helper function to check if a country is in user's preferences
+  const isCountryInUserPreferences = useCallback((countryKey: string, url: string): boolean => {
+    // If no country filters are set (showing all countries), show all country pills
+    if (!countryMatcher.hasCountryFilters) {
+      return true;
+    }
+
+    // Try to find the country option
+    const countryOption = COUNTRY_OPTIONS.find(
+      c => c.id.toLowerCase() === countryKey.toLowerCase() ||
+           c.label.toLowerCase() === countryKey.toLowerCase() ||
+           c.code.toLowerCase() === countryKey.toLowerCase() ||
+           (typeof url === 'string' && (
+             c.id.toLowerCase() === url.toLowerCase() ||
+             c.label.toLowerCase() === url.toLowerCase() ||
+             c.code.toLowerCase() === url.toLowerCase()
+           ))
+    );
+
+    if (!countryOption) return false;
+
+    // Check if this country is in the user's selected countries
+    return countryMatcher.selectedCountryIdSet.has(countryOption.id);
+  }, [countryMatcher]);
 
   // Timer for new messages
   useEffect(() => {
@@ -254,19 +257,6 @@ function NewsSocketClient() {
         <div className="articles-container">
           <AnimatePresence initial={false}>
             {displayedMessages.map((msg: any) => {
-              // Debug: Log individual article rendering for SPONSORED and STATISTICS
-              if (msg.category === 'SPONSORED' || msg.category === 'STATISTICS') {
-                console.log(`[NewsSocketClient] Rendering ${msg.category} article:`, {
-                  id: msg.id,
-                  title: msg.title,
-                  category: msg.category,
-                  seen: msg.seen,
-                  hasCallToAction: !!msg.callToAction,
-                  hasSponsorLink: !!msg.sponsorLink,
-                  className: `article-card ${msg.seen ? '' : 'unseen'} ${msg.category?.toLowerCase() || 'news'}`
-                });
-              }
-              
               return (
                 <motion.div
                   key={msg.id}
@@ -287,13 +277,99 @@ function NewsSocketClient() {
                     {msg.category === 'SPONSORED' && (
                       <span className="article-sponsored-label">SPONSORED</span>
                     )}
-                    <span className="article-industry">{msg.industry}</span>{" "}
+                    <span className="article-industry">{removeEmojis(msg.industry)}</span>{" "}
                     <span className="article-timestamp-wrapper">
                       <span className="article-timestamp">{formatLocalTime(msg.timestamp)}</span>
                     </span>
                     <strong className="article-source">| {msg.source} - </strong>{" "}
+                    
+                    {/* Country pills - show only for countries in user preferences and if source doesn't include country code */}
+                    {(() => {
+                      const renderedCountries = msg.countries && typeof msg.countries === 'object' && Object.keys(msg.countries).length > 0 
+                        ? (() => {
+                            // First, process all entries and collect unique countries by their resolved country ID
+                            const processedCountries = Object.entries(msg.countries)
+                              .map(([countryKey, url]) => {
+                                // Get country name - try countryKey as ID/label/code first
+                                let countryName = getCountryName(countryKey);
+                                
+                                // If not found, try using the value (url) as country identifier
+                                if (!countryName && typeof url === 'string') {
+                                  countryName = getCountryName(url);
+                                }
+                                
+                                if (!countryName) return null;
+                                
+                                // Find the country option to get the code/label for source checking
+                                const countryOption = COUNTRY_OPTIONS.find(
+                                  c => c.id.toLowerCase() === countryKey.toLowerCase() ||
+                                       c.label.toLowerCase() === countryKey.toLowerCase() ||
+                                       c.code.toLowerCase() === countryKey.toLowerCase() ||
+                                       (typeof url === 'string' && (
+                                         c.id.toLowerCase() === url.toLowerCase() ||
+                                         c.label.toLowerCase() === url.toLowerCase() ||
+                                         c.code.toLowerCase() === url.toLowerCase()
+                                       ))
+                                );
+                                
+                                if (!countryOption) return null;
+                                
+                                // Only show if country is in user's preferences
+                                if (!isCountryInUserPreferences(countryKey, url as string)) {
+                                  return null;
+                                }
+                                
+                                // Check if source contains country code (ARG, BRA, CHL, etc.) or full country name
+                                const sourceUpper = msg.source.toUpperCase();
+                                const hasCountryCode = sourceUpper.includes(countryOption.label) || 
+                                                      sourceUpper.includes(countryOption.code.toUpperCase()) ||
+                                                      msg.source.toLowerCase().includes(countryName.toLowerCase());
+                                
+                                // Only show if source doesn't already contain the country code or name
+                                if (hasCountryCode) {
+                                  return null;
+                                }
+                                
+                                return {
+                                  countryId: countryOption.id,
+                                  countryName,
+                                  countryKey
+                                };
+                              })
+                              .filter(Boolean) as Array<{ countryId: string; countryName: string; countryKey: string }>;
+                            
+                            // Deduplicate by countryId
+                            const uniqueCountriesMap = new Map<string, { countryId: string; countryName: string; countryKey: string }>();
+                            processedCountries.forEach(country => {
+                              if (!uniqueCountriesMap.has(country.countryId)) {
+                                uniqueCountriesMap.set(country.countryId, country);
+                              }
+                            });
+                            
+                            // Convert to JSX elements
+                            return Array.from(uniqueCountriesMap.values()).map((country) => (
+                              <span
+                                key={country.countryKey}
+                                className="article-countries"
+                                title={country.countryName}
+                              >
+                                {country.countryName}
+                              </span>
+                            ));
+                          })()
+                        : [];
+                      
+                      return renderedCountries.length > 0 ? (
+                        <>
+                          {renderedCountries}
+                          {" - "}
+                        </>
+                      ) : null;
+                    })()}
+                    
                     <strong className="article-title">{msg.title}</strong>
                     <span className="article-summary">{msg.summary}</span>{" "}
+                    
                     {msg.companies && typeof msg.companies === 'object' && (
                       <>
                         {Object.entries(msg.companies).map(([name, url]) => (

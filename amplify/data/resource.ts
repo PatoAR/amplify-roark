@@ -102,7 +102,6 @@ const schema = a.schema({
     duration: a.integer(), // Duration in seconds
     deviceInfo: a.string(), // Browser, OS, screen size
     userAgent: a.string(),
-    ipAddress: a.string(),
     isActive: a.boolean().default(true),
   })
   .authorization(allow => [allow.owner().identityClaim('sub')]),
@@ -131,7 +130,7 @@ export const data = defineData({
   authorizationModes: {
     defaultAuthorizationMode: 'userPool',
     apiKeyAuthorizationMode: {
-      expiresInDays: 30,
+      expiresInDays: 365,
     },
   },
   functions: {

@@ -1,11 +1,24 @@
 export const COUNTRY_OPTIONS = [
-  { id: 'global', label: 'GLOBAL', code: 'global' },
-  { id: 'Q414', label: 'ARG', code:'ar' },
-  { id: 'Q155', label: 'BRA', code: 'br' },
-  { id: 'Q298', label: 'CHL', code: 'cl' },
-  { id: 'Q733', label: 'PAR', code: 'py' },
-  { id: 'Q77', label: 'URU', code: 'uy' },
+  { id: 'global', label: 'GLOBAL', code: 'global', fullName: 'Global' },
+  { id: 'Q414', label: 'ARG', code:'ar', fullName: 'Argentina' },
+  { id: 'Q155', label: 'BRA', code: 'br', fullName: 'Brazil' },
+  { id: 'Q298', label: 'CHL', code: 'cl', fullName: 'Chile' },
+  { id: 'Q739', label: 'COL', code: 'co', fullName: 'Colombia' },
+  { id: 'Q96', label: 'MEX', code: 'mx', fullName: 'Mexico' },
+  { id: 'Q733', label: 'PAR', code: 'py', fullName: 'Paraguay' },
+  { id: 'Q419', label: 'PER', code: 'pe', fullName: 'Peru' },
+  { id: 'Q77', label: 'URU', code: 'uy', fullName: 'Uruguay' },
 ];
+
+// Helper function to get full country name from ID or code
+export const getCountryName = (identifier: string): string | null => {
+  const country = COUNTRY_OPTIONS.find(
+    c => c.id.toLowerCase() === identifier.toLowerCase() || 
+         c.code.toLowerCase() === identifier.toLowerCase() ||
+         c.label.toLowerCase() === identifier.toLowerCase()
+  );
+  return country?.fullName || null;
+};
 
 export const INDUSTRY_OPTIONS = [
   { id: '💵 MARKETS', label: 'MARKETS', icon: 'TrendingUp' },

@@ -81,22 +81,45 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
         sessionId: undefined,
       };
 
-      // Clear localStorage (preserve inactivity flag only for inactivity logouts)
-      const keysToPreserve = ['theme', 'language'];
+      // Clear localStorage - comprehensive cleanup
+      const keysToPreserve = [
+        'theme', 
+        'userLanguage',  // User's language preference
+        'session-cleanup-needed',  // Cleanup flag for next session
+        'perkins-optimal-usage-modal-hidden'  // User UI preference
+      ];
       if (isInactivityLogout) {
         keysToPreserve.push('inactivity-logout');
       }
-      const keysToRemove = Object.keys(localStorage).filter(
-        key => !keysToPreserve.includes(key) && 
-        (key.includes('user') || key.includes('session') || key.includes('auth'))
-      );
       
-      keysToRemove.forEach(key => {
-        localStorage.removeItem(key);
+      // Remove all localStorage keys except those we want to preserve
+      Object.keys(localStorage).forEach(key => {
+        // Preserve specific app preferences
+        if (!keysToPreserve.includes(key)) {
+          // Clear AWS Amplify/Cognito keys (CognitoIdentityServiceProvider.*)
+          // Clear amplify-* prefixed keys
+          // Clear any user/session/auth related keys
+          if (
+            key.startsWith('CognitoIdentityServiceProvider') ||
+            key.startsWith('amplify') ||
+            key.includes('auth') ||
+            key.includes('token')
+          ) {
+            localStorage.removeItem(key);
+          }
+        }
       });
 
-      // Call signOut
-      await signOut();
+      // Also clear sessionStorage (except preserved keys)
+      Object.keys(sessionStorage).forEach(key => {
+        if (!keysToPreserve.includes(key)) {
+          sessionStorage.removeItem(key);
+        }
+      });
+
+      // Call signOut with global option to invalidate tokens on all devices
+      // This ensures tokens are revoked server-side as well
+      await signOut({ global: true });
 
       // Notify callback
       if (userId && optionsRef.current.onSessionEnd) {
@@ -111,6 +134,14 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
       }, 1000);
     } catch (error) {
       console.error('Logout error', error);
+      
+      // If global signOut fails, try local signOut as fallback
+      try {
+        await signOut();
+      } catch (fallbackError) {
+        console.error('Fallback signOut also failed', fallbackError);
+      }
+      
       if (optionsRef.current.onAuthError) {
         optionsRef.current.onAuthError(error);
       }
@@ -132,20 +163,6 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     // Mark effect as executing and update processed state
     effectExecutionRef.current = true;
     lastProcessedAuthStateRef.current = currentAuthState;
-    
-    console.log('[SessionManager] Session start effect triggered:', {
-      hasUser: !!user?.userId,
-      userId: user?.userId,
-      isAuthenticated: sessionStateRef.current.isAuthenticated,
-      isLoggingOut: isLoggingOutRef.current,
-      justLoggedOut: justLoggedOutRef.current,
-      authStatus,
-      shouldStart: user?.userId && 
-                   !sessionStateRef.current.isAuthenticated && 
-                   !isLoggingOutRef.current && 
-                   authStatus === 'authenticated' &&
-                   !justLoggedOutRef.current
-    });
 
     // Only start session if:
     // 1. User exists and has userId
@@ -158,7 +175,6 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
         !isLoggingOutRef.current && 
         authStatus === 'authenticated' &&
         !justLoggedOutRef.current) {
-      console.log('[SessionManager] Starting session for user:', user.userId);
       sessionStateRef.current = {
         isAuthenticated: true,
         isSessionActive: true,
@@ -200,17 +216,9 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
   useEffect(() => {
     const shouldLogout = authStatus === 'unauthenticated' && sessionStateRef.current.isAuthenticated && !isLoggingOutRef.current;
     
-    // Only log and process if there's an actual change that requires action
+    // Only process if there's an actual change that requires action
     if (shouldLogout || (authStatus === 'unauthenticated' && sessionStateRef.current.isAuthenticated)) {
-      console.log('[SessionManager] Logout effect triggered:', {
-        authStatus,
-        isAuthenticated: sessionStateRef.current.isAuthenticated,
-        isLoggingOut: isLoggingOutRef.current,
-        shouldLogout
-      });
-
       if (shouldLogout) {
-        console.log('[SessionManager] Performing logout');
         performLogout();
       }
     }
@@ -247,7 +255,6 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     if (needsCleanup === 'true') {
       localStorage.removeItem('session-cleanup-needed');
       // Perform any necessary cleanup here
-      console.log('Performing session cleanup from previous session');
     }
   }, []);
 

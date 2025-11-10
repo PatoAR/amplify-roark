@@ -21,6 +21,42 @@ const channels: WhatsAppChannel[] = [
     countryCode: 'br',
     url: 'https://whatsapp.com/channel/0029Vb4WfYkIt5s5V1pj4n14',
     descriptionKey: 'whatsapp.brasilDescription'
+  },
+  {
+    country: 'Chile',
+    countryCode: 'cl',
+    url: 'https://whatsapp.com/channel/0029VbBhI2CInlqNnbral746',
+    descriptionKey: 'whatsapp.chileDescription'
+  },
+  {
+    country: 'Colombia',
+    countryCode: 'co',
+    url: 'https://whatsapp.com/channel/0029Vb76nsk2P59hZam1783L',
+    descriptionKey: 'whatsapp.colombiaDescription'
+  },
+  {
+    country: 'México',
+    countryCode: 'mx',
+    url: 'https://whatsapp.com/channel/0029VbBfg9H59PwZw8qBRI19',
+    descriptionKey: 'whatsapp.mexicoDescription'
+  },
+  {
+    country: 'Paraguay',
+    countryCode: 'py',
+    url: 'https://whatsapp.com/channel/0029Vb6NS9qDZ4LUGxk8fG3m',
+    descriptionKey: 'whatsapp.paraguayDescription'
+  },
+  {
+    country: 'Perú',
+    countryCode: 'pe',
+    url: 'https://whatsapp.com/channel/0029VbAtdpGIXnlwJSX7xS2f',
+    descriptionKey: 'whatsapp.peruDescription'
+  },
+  {
+    country: 'Uruguay',
+    countryCode: 'uy',
+    url: 'https://whatsapp.com/channel/0029Vb6ywnu6rsQqs93KRW44',
+    descriptionKey: 'whatsapp.uruguayDescription'
   }
 ];
 
