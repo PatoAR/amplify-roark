@@ -33,9 +33,10 @@ export const AnalyticsDashboard = () => {
       const startDate = new Date(now.getTime() - (daysAgo * 24 * 60 * 60 * 1000));
 
       // Load session data
+      // Note: owner filter is automatic via Amplify's authorization rule (identityClaim('sub'))
+      // We only need to filter by startTime
       const { data: activities } = await client.models.UserActivity.list({
         filter: { 
-          owner: { eq: userId },
           startTime: { ge: startDate.toISOString() }
         }
       });

@@ -3,11 +3,11 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 
 ## ToDo's
 - Analytics dashboard
+- Legal disclaimers / cookies
 
 - Apply for AWS grant - Fernando Errandosoro ITBA
 - Open (MPago) business account for Finu - pay AWS, GEMINI.
 - Open AWS account on the name of Finu, transfer domain 
-- Legal disclaimers
 - Implement subscription workflow. Use MPago account.
 
 - Native IOS / Android App

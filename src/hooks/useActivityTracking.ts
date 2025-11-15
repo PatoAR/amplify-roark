@@ -74,7 +74,7 @@ export const useActivityTracking = () => {
             deviceInfo,
             userAgent,
             isActive: true,
-            owner: user.userId,
+            // owner is automatically set by Amplify from JWT 'sub' claim via identityClaim('sub')
           }
         }
       }) as any;
