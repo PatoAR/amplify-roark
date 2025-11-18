@@ -3,6 +3,7 @@ import { postConfirmation } from "../auth/post-confirmation/resource";
 import { referralApi } from "../functions/referral-api/resource";
 import { referralProcessor } from "../functions/referral-processor/resource";
 import { subscriptionManager } from "../functions/subscription-manager/resource";
+import { analyticsAggregator } from "../functions/analytics-aggregator/resource";
 
 const schema = a.schema({
   // Article Model
@@ -104,7 +105,11 @@ const schema = a.schema({
     userAgent: a.string(),
     isActive: a.boolean().default(true),
   })
-  .authorization(allow => [allow.owner().identityClaim('sub')]),
+  .authorization(allow => [
+    allow.owner().identityClaim('sub'),
+    // Allow Lambda functions (via API key) to read all activities for analytics aggregation
+    allow.publicApiKey().to(['read'])
+  ]),
 
   // DeletedUserEmail Model - Track deleted account emails to prevent recreation
   DeletedUserEmail: a
@@ -138,5 +143,6 @@ export const data = defineData({
     referralApi,
     referralProcessor,
     subscriptionManager,
+    analyticsAggregator,
   }
 });

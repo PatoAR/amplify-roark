@@ -490,6 +490,24 @@ const customTranslations = {
     'disclaimer.text': 'Las noticias pueden retrasarse varios minutos según la publicación de la fuente y la frecuencia de búsqueda.',
     'disclaimer.understood': 'Entendido',
     
+    // Newsfeed Preview
+    'newsfeedPreview.title': 'Feed de Inteligencia Empresarial en Vivo',
+    'newsfeedPreview.subtitle': 'Regístrate para personalizar el feed de noticias según tu industria y enfoque geográfico específico',
+    
+    // WhatsApp Channels
+    'whatsapp.title': 'Prueba Perkins en WhatsApp',
+    'whatsapp.subtitle': 'Sigue nuestros canales y experimenta inteligencia empresarial en tiempo real para tu región',
+    'whatsapp.argentinaDescription': 'Inteligencia empresarial diaria para Argentina',
+    'whatsapp.brasilDescription': 'Inteligencia empresarial diaria para Brasil',
+    'whatsapp.chileDescription': 'Inteligencia empresarial diaria para Chile',
+    'whatsapp.colombiaDescription': 'Inteligencia empresarial diaria para Colombia',
+    'whatsapp.mexicoDescription': 'Inteligencia empresarial diaria para México',
+    'whatsapp.paraguayDescription': 'Inteligencia empresarial diaria para Paraguay',
+    'whatsapp.peruDescription': 'Inteligencia empresarial diaria para Perú',
+    'whatsapp.uruguayDescription': 'Inteligencia empresarial diaria para Uruguay',
+    'whatsapp.followButton': 'Seguir en WhatsApp',
+    'whatsapp.note': 'Sin registro requerido • Gratis para siempre • Actualizaciones instantáneas',
+    
     // Landing Page
     'landing.signIn': 'Iniciar Sesión',
     'landing.signUp': 'Registrarse',
@@ -764,6 +782,24 @@ const customTranslations = {
     // Disclaimer
     'disclaimer.text': 'As notícias podem sofrer atraso de alguns minutos, dependendo da publicação da fonte e da frequência de busca.',
     'disclaimer.understood': 'Entendi',
+    
+    // Newsfeed Preview
+    'newsfeedPreview.title': 'Feed de Inteligência Empresarial ao Vivo',
+    'newsfeedPreview.subtitle': 'Cadastre-se para personalizar o feed de notícias de acordo com sua indústria e foco geográfico específico',
+    
+    // WhatsApp Channels
+    'whatsapp.title': 'Experimente Perkins no WhatsApp',
+    'whatsapp.subtitle': 'Siga nossos canais e experimente inteligência empresarial em tempo real para sua região',
+    'whatsapp.argentinaDescription': 'Inteligência empresarial diária para Argentina',
+    'whatsapp.brasilDescription': 'Inteligência empresarial diária para Brasil',
+    'whatsapp.chileDescription': 'Inteligência empresarial diária para Chile',
+    'whatsapp.colombiaDescription': 'Inteligência empresarial diária para Colômbia',
+    'whatsapp.mexicoDescription': 'Inteligência empresarial diária para México',
+    'whatsapp.paraguayDescription': 'Inteligência empresarial diária para Paraguai',
+    'whatsapp.peruDescription': 'Inteligência empresarial diária para Peru',
+    'whatsapp.uruguayDescription': 'Inteligência empresarial diária para Uruguai',
+    'whatsapp.followButton': 'Seguir no WhatsApp',
+    'whatsapp.note': 'Sem cadastro necessário • Grátis para sempre • Atualizações instantâneas',
     
     // Landing Page
     'landing.signIn': 'Entrar',
