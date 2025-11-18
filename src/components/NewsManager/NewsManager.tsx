@@ -463,13 +463,13 @@ export const NewsManager: React.FC = () => {
                   });
                   const articles: Article[] = (result as any).data?.listArticles?.items || [];
                   
-                  if (articles.length > 0 && articles[0].category) {
+                  if (articles.length > 0) {
+                    // Use fetched article data (even if category is still null, it will default to 'NEWS')
                     const formatted: ArticleForState = processArticle(articles[0], Date.now());
                     articleIdsFromSubscriptionRef.current.add(articles[0].id);
                     addArticle(formatted);
                   } else {
-                    console.warn(`[NewsManager] Could not retrieve complete data for article ${newArticle.id}, using subscription data`);
-                    // Fallback to original subscription data
+                    // Article not found in database yet, use subscription data (category will default to 'NEWS')
                     const formatted: ArticleForState = processArticle(newArticle, Date.now());
                     articleIdsFromSubscriptionRef.current.add(newArticle.id);
                     addArticle(formatted);
@@ -478,14 +478,15 @@ export const NewsManager: React.FC = () => {
                   // Don't log auth errors as they're expected during logout
                   const errorMessage = error instanceof Error ? error.message : String(error);
                   if (!errorMessage.includes('NoValidAuthTokens') && !errorMessage.includes('No federated jwt')) {
-                    console.error(`[NewsManager] Error fetching complete article data for ${newArticle.id}:`, error);
+                    // Only log actual fetch errors, not null category cases
+                    console.warn(`[NewsManager] Could not retrieve complete data for article ${newArticle.id}, using subscription data`);
                   }
-                  // Fallback to original subscription data
+                  // Fallback to original subscription data (category will default to 'NEWS')
                   const formatted: ArticleForState = processArticle(newArticle, Date.now());
                   articleIdsFromSubscriptionRef.current.add(newArticle.id);
                   addArticle(formatted);
                 }
-              }, 1000); // Wait 1 second for data consistency
+              }, 2000); // Wait 2 seconds for data consistency (increased from 1 second)
               
               return; // Exit early, we'll handle this article in the setTimeout
             }
