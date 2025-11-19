@@ -1,5 +1,6 @@
-import React, { useState, useCallback } from 'react';
-import { functions } from 'aws-amplify/api';
+import React, { useState, useCallback, useRef } from 'react';
+import { generateClient } from 'aws-amplify/api';
+import { type Schema } from '../../amplify/data/resource';
 import { useSession } from '../context/SessionContext';
 import { useSubscriptionStatus } from './useSubscriptionStatus';
 import { isSubscriptionUpgradeEnabled } from '../config/features';
@@ -17,6 +18,15 @@ export function useSubscriptionManager() {
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [upgradeError, setUpgradeError] = useState<string | null>(null);
   const [lastLoggedStatus, setLastLoggedStatus] = useState<string>('');
+  const clientRef = useRef<ReturnType<typeof generateClient<Schema>> | null>(null);
+
+  // Initialize client when needed
+  const getClient = useCallback(() => {
+    if (!clientRef.current) {
+      clientRef.current = generateClient<Schema>();
+    }
+    return clientRef.current;
+  }, []);
 
   // Only log when status actually changes to reduce console noise
   React.useEffect(() => {
@@ -46,16 +56,15 @@ export function useSubscriptionManager() {
     setUpgradeError(null);
 
     try {
-      // Call the subscription manager function via Function URL
-      const { body } = await functions.invoke({
-        name: 'subscription-manager',
-        payload: {
-          planId,
-          userId,
-        },
+      // Call the subscription manager function via GraphQL mutation
+      const client = getClient();
+      const response = await client.mutations.upgradeSubscription({
+        planId,
+        userId,
       });
 
-      const result = (await body.json()) as SubscriptionUpgradeResult;
+      // GraphQL returns data nested under the mutation name
+      const result = ((response.data as any)?.upgradeSubscription || response.data) as SubscriptionUpgradeResult;
       
       if (result.success) {
         // Refresh subscription status

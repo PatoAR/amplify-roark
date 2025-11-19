@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getCurrentUser } from 'aws-amplify/auth';
-import { functions } from 'aws-amplify/api';
+import { generateClient } from 'aws-amplify/api';
+import { type Schema } from '../../../amplify/data/resource';
 import { useSession } from '../../context/SessionContext';
 import './AnalyticsDashboard.css';
 
@@ -32,6 +33,15 @@ export const AnalyticsDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d');
+  const clientRef = useRef<ReturnType<typeof generateClient<Schema>> | null>(null);
+
+  // Initialize client when needed
+  const getClient = useCallback(() => {
+    if (!clientRef.current) {
+      clientRef.current = generateClient<Schema>();
+    }
+    return clientRef.current;
+  }, []);
 
   // Check if user is master
   useEffect(() => {
@@ -57,20 +67,15 @@ export const AnalyticsDashboard = () => {
     setIsLoading(true);
     setError(null);
     try {
-      // Get user email to pass to Lambda for verification
-      const user = await getCurrentUser();
-      const userEmail = user.signInDetails?.loginId || user.username;
-
-      // Invoke the analytics aggregator Lambda function via Function URL
-      const { body } = await functions.invoke({
-        name: 'analytics-aggregator',
-        payload: {
-          timeRange,
-          userEmail, // Pass email for Lambda verification
-        },
+      // Invoke the analytics aggregator Lambda function via GraphQL query
+      // Note: User email is automatically extracted from identity claims for security
+      const client = getClient();
+      const response = await client.queries.getAnalytics({
+        timeRange,
       });
 
-      const data = await body.json();
+      // GraphQL returns data nested under the query name
+      const data = ((response.data as any)?.getAnalytics || response.data) as AggregatedAnalytics;
       setAnalytics(data);
     } catch (error) {
       console.error('Failed to load analytics', error);

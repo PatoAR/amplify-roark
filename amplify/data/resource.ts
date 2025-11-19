@@ -125,6 +125,28 @@ const schema = a.schema({
     // Allow authenticated users to read their own deletion record
     allow.owner().identityClaim('sub').to(['read'])
   ]),
+
+  // Subscription Management Mutation
+  upgradeSubscription: a
+    .mutation()
+    .arguments({
+      planId: a.string().required(),
+      userId: a.string().required(),
+      paymentMethodId: a.string(),
+    })
+    .returns(a.json())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function(subscriptionManager)),
+
+  // Analytics Query
+  getAnalytics: a
+    .query()
+    .arguments({
+      timeRange: a.string(),
+    })
+    .returns(a.json())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function(analyticsAggregator)),
 });
 
 export type Schema = ClientSchema<typeof schema>;

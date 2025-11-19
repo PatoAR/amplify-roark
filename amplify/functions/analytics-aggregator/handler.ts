@@ -103,6 +103,26 @@ interface AnalyticsEvent {
   userEmail?: string;
 }
 
+// AppSync resolver event format
+interface AppSyncResolverEvent {
+  arguments: {
+    timeRange?: '7d' | '30d' | '90d';
+  };
+  identity?: {
+    sub?: string;
+    claims?: {
+      email?: string;
+      'cognito:username'?: string;
+    };
+  };
+  request?: {
+    userAttributes?: {
+      email?: string;
+      sub?: string;
+    };
+  };
+}
+
 interface AnalyticsResponse {
   statusCode: number;
   headers: Record<string, string>;
@@ -206,39 +226,44 @@ async function getAllUserSubscriptions(): Promise<any[]> {
   return allSubscriptions;
 }
 
-function verifyMasterUser(event: AnalyticsEvent | any): boolean {
-  // Check email from request body (passed from frontend)
+function verifyMasterUser(event: AnalyticsEvent | AppSyncResolverEvent | any): boolean {
   let email: string | undefined;
   
-  // Parse body if it's a string
-  let bodyData: any = null;
-  if (event.body) {
+  // PRIORITY 1: Check identity claims from AppSync/Cognito (most secure - cannot be spoofed)
+  // For AppSync resolver events, identity claims are the authoritative source
+  if (event.identity?.claims?.email) {
+    email = event.identity.claims.email;
+  }
+  
+  // PRIORITY 2: Check request userAttributes (Amplify function invocation)
+  if (!email && event.request?.userAttributes?.email) {
+    email = event.request.userAttributes.email;
+  }
+  
+  // PRIORITY 3: Check email from request context (Cognito authorizer - API Gateway)
+  if (!email && event.requestContext?.authorizer?.claims?.email) {
+    email = event.requestContext.authorizer.claims.email;
+  }
+  
+  // PRIORITY 4: Check from headers (for direct Lambda invocation)
+  if (!email && event.headers) {
+    email = event.headers['x-user-email'] || event.headers['X-User-Email'];
+  }
+  
+  // PRIORITY 5: Check from request body (for HTTP events)
+  if (!email && event.body) {
     try {
-      bodyData = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
+      const bodyData = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
       email = bodyData.userEmail;
     } catch (e) {
       // Ignore parse errors
     }
   }
   
-  // For direct Lambda invocations, event might be the body directly
+  // PRIORITY 6: Check userEmail property (for direct Lambda invocations - least secure)
+  // This should only be used if no identity information is available
   if (!email && event.userEmail) {
     email = event.userEmail;
-  }
-  
-  // Check email from request context (Cognito authorizer - API Gateway)
-  if (!email) {
-    email = event.requestContext?.authorizer?.claims?.email;
-  }
-  
-  // Check from request userAttributes (Amplify function invocation)
-  if (!email) {
-    email = event.request?.userAttributes?.email;
-  }
-  
-  // Also check from headers if available (for direct Lambda invocation)
-  if (!email) {
-    email = event.headers?.['x-user-email'] || event.headers?.['X-User-Email'];
   }
   
   if (!email) {
@@ -356,41 +381,38 @@ async function aggregateAnalytics(timeRange?: '7d' | '30d' | '90d'): Promise<Agg
   };
 }
 
-export const handler = async (event: AnalyticsEvent | any): Promise<AnalyticsResponse> => {
-  const headers = {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  };
-
-  // Handle CORS preflight (for HTTP events)
-  if (event.httpMethod === 'OPTIONS' || event.requestContext?.http?.method === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers,
-      body: '',
+export const handler = async (event: AnalyticsEvent | AppSyncResolverEvent | any): Promise<AnalyticsResponse | AggregatedAnalytics> => {
+  // Handle HTTP events (Function URL / API Gateway) - return HTTP response
+  if ('httpMethod' in event || ('requestContext' in event && !('arguments' in event))) {
+    const headers = {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     };
-  }
 
-  try {
-    // Verify master user
-    if (!verifyMasterUser(event)) {
+    // Handle CORS preflight (for HTTP events)
+    if (event.httpMethod === 'OPTIONS' || event.requestContext?.http?.method === 'OPTIONS') {
       return {
-        statusCode: 403,
+        statusCode: 200,
         headers,
-        body: JSON.stringify({ error: 'Access denied. Master user access required.' }),
+        body: '',
       };
     }
 
-    // Parse request body for time range
-    let timeRange: '7d' | '30d' | '90d' | undefined;
-    
-    // Handle different event formats
-    // For direct Lambda invocations (via invoke()), event is the payload directly
-    if (event.timeRange) {
-      timeRange = event.timeRange;
-    } else {
+    try {
+      // Verify master user
+      if (!verifyMasterUser(event)) {
+        return {
+          statusCode: 403,
+          headers,
+          body: JSON.stringify({ error: 'Access denied. Master user access required.' }),
+        };
+      }
+
+      // Parse request body for time range
+      let timeRange: '7d' | '30d' | '90d' | undefined;
+      
       // For HTTP events (Function URL or API Gateway), parse body
       let bodyData: any = null;
       if (event.body) {
@@ -410,26 +432,59 @@ export const handler = async (event: AnalyticsEvent | any): Promise<AnalyticsRes
           timeRange = range;
         }
       }
+
+      // Aggregate analytics
+      const analytics = await aggregateAnalytics(timeRange);
+
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify(analytics),
+      };
+    } catch (error) {
+      console.error('Analytics aggregator error:', error);
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ 
+          error: 'Internal server error',
+          message: error instanceof Error ? error.message : 'Unknown error'
+        }),
+      };
+    }
+  }
+
+  // Handle AppSync resolver events - return data directly
+  try {
+    let timeRange: '7d' | '30d' | '90d' | undefined;
+
+    // AppSync resolver format
+    if ('arguments' in event) {
+      const args = (event as AppSyncResolverEvent).arguments;
+      timeRange = args.timeRange;
+      
+      // Verify master user using identity claims (cannot be spoofed)
+      if (!verifyMasterUser(event)) {
+        throw new Error('Access denied. Master user access required.');
+      }
+    } 
+    // Direct Lambda invocation format
+    else if ('timeRange' in event || 'userEmail' in event) {
+      timeRange = event.timeRange;
+      userEmail = event.userEmail;
+      
+      if (!verifyMasterUser(event)) {
+        throw new Error('Access denied. Master user access required.');
+      }
+    } else {
+      throw new Error('Invalid event format');
     }
 
     // Aggregate analytics
-    const analytics = await aggregateAnalytics(timeRange);
-
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify(analytics),
-    };
+    return await aggregateAnalytics(timeRange);
   } catch (error) {
     console.error('Analytics aggregator error:', error);
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ 
-        error: 'Internal server error',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      }),
-    };
+    throw error;
   }
 };
 
