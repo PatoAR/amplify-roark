@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { invoke } from 'aws-amplify/api';
 import { useSession } from '../context/SessionContext';
 import { useSubscriptionStatus } from './useSubscriptionStatus';
 import { isSubscriptionUpgradeEnabled } from '../config/features';
@@ -45,23 +46,16 @@ export function useSubscriptionManager() {
     setUpgradeError(null);
 
     try {
-      // Call the subscription manager function via HTTP
-      const response = await fetch('/api/subscription-manager', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // Call the subscription manager function via Function URL
+      const { body } = await invoke({
+        functionName: 'subscription-manager',
+        payload: {
           planId,
           userId,
-        }),
+        },
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json() as SubscriptionUpgradeResult;
+      const result = (await body.json()) as SubscriptionUpgradeResult;
       
       if (result.success) {
         // Refresh subscription status

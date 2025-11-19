@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getCurrentUser } from 'aws-amplify/auth';
+import { invoke } from 'aws-amplify/api';
 import { useSession } from '../../context/SessionContext';
 import './AnalyticsDashboard.css';
 
@@ -60,24 +61,16 @@ export const AnalyticsDashboard = () => {
       const user = await getCurrentUser();
       const userEmail = user.signInDetails?.loginId || user.username;
 
-      // Invoke the analytics aggregator Lambda function via HTTP endpoint
-      const response = await fetch('/api/analytics-aggregator', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
+      // Invoke the analytics aggregator Lambda function via Function URL
+      const { body } = await invoke({
+        functionName: 'analytics-aggregator',
+        payload: {
           timeRange,
           userEmail, // Pass email for Lambda verification
-        }),
+        },
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to fetch analytics data' }));
-        throw new Error(errorData.error || `Request failed with status ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await body.json();
       setAnalytics(data);
     } catch (error) {
       console.error('Failed to load analytics', error);

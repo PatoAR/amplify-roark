@@ -13,8 +13,10 @@ interface SubscriptionUpgradeResponse {
   error?: string;
 }
 
+type SubscriptionEvent = APIGatewayProxyEvent | SubscriptionUpgradeRequest;
+
 export const handler = async (
-  event: APIGatewayProxyEvent
+  event: SubscriptionEvent
 ): Promise<APIGatewayProxyResult> => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -23,7 +25,8 @@ export const handler = async (
     'Content-Type': 'application/json',
   };
 
-  if (event.httpMethod === 'OPTIONS') {
+  // Handle CORS preflight
+  if ('httpMethod' in event && event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
       headers,
@@ -32,7 +35,18 @@ export const handler = async (
   }
 
   try {
-    const { planId, userId, paymentMethodId }: SubscriptionUpgradeRequest = JSON.parse(event.body || '{}');
+    // Handle different event formats
+    // For direct Lambda invocations (via invoke()), event is the payload directly
+    let requestData: SubscriptionUpgradeRequest;
+    if ('planId' in event && 'userId' in event) {
+      // Direct invocation - event is the payload
+      requestData = event as SubscriptionUpgradeRequest;
+    } else {
+      // API Gateway/Function URL - parse from body
+      requestData = JSON.parse((event as APIGatewayProxyEvent).body || '{}');
+    }
+
+    const { planId, userId, paymentMethodId } = requestData;
 
     if (!planId || !userId) {
       return {

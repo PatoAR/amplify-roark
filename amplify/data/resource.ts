@@ -1,6 +1,5 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { postConfirmation } from "../auth/post-confirmation/resource";
-import { referralApi } from "../functions/referral-api/resource";
 import { referralProcessor } from "../functions/referral-processor/resource";
 import { subscriptionManager } from "../functions/subscription-manager/resource";
 import { analyticsAggregator } from "../functions/analytics-aggregator/resource";
@@ -140,7 +139,6 @@ export const data = defineData({
   },
   functions: {
     postConfirmation,
-    referralApi,
     referralProcessor,
     subscriptionManager,
     analyticsAggregator,

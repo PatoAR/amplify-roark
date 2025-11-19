@@ -7,5 +7,8 @@ export const analyticsAggregator = defineFunction({
     GRAPHQL_API_URL: secret('GRAPHQL_API_URL'),
     GRAPHQL_API_KEY: secret('GRAPHQL_API_KEY'),
   },
+  functionUrl: {
+    authType: 'AWS_IAM',
+  },
 });
 

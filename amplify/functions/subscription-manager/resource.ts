@@ -5,5 +5,8 @@ export const subscriptionManager = defineFunction({
   entry: './handler.ts',
   runtime: 20,
   timeoutSeconds: 30,
+  functionUrl: {
+    authType: 'AWS_IAM',
+  },
 });
 

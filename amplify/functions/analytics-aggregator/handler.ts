@@ -82,6 +82,10 @@ interface AnalyticsEvent {
     identity?: {
       cognitoIdentityId?: string;
     };
+    http?: {
+      method?: string;
+      path?: string;
+    };
   };
   rawQueryString?: string;
   // For direct Lambda invocations from Amplify
@@ -94,6 +98,9 @@ interface AnalyticsEvent {
       email?: string;
     };
   };
+  // For Function URL events (direct invocation via invoke())
+  timeRange?: '7d' | '30d' | '90d';
+  userEmail?: string;
 }
 
 interface AnalyticsResponse {
@@ -358,7 +365,7 @@ export const handler = async (event: AnalyticsEvent | any): Promise<AnalyticsRes
   };
 
   // Handle CORS preflight (for HTTP events)
-  if (event.httpMethod === 'OPTIONS') {
+  if (event.httpMethod === 'OPTIONS' || event.requestContext?.http?.method === 'OPTIONS') {
     return {
       statusCode: 200,
       headers,
@@ -380,27 +387,28 @@ export const handler = async (event: AnalyticsEvent | any): Promise<AnalyticsRes
     let timeRange: '7d' | '30d' | '90d' | undefined;
     
     // Handle different event formats
-    let bodyData: any = null;
-    if (event.body) {
-      try {
-        bodyData = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
-        timeRange = bodyData.timeRange;
-      } catch (e) {
-        // Ignore parse errors, use default
-      }
-    }
-    
-    // For direct Lambda invocations, event might be the body directly
-    if (!timeRange && event.timeRange) {
+    // For direct Lambda invocations (via invoke()), event is the payload directly
+    if (event.timeRange) {
       timeRange = event.timeRange;
-    }
+    } else {
+      // For HTTP events (Function URL or API Gateway), parse body
+      let bodyData: any = null;
+      if (event.body) {
+        try {
+          bodyData = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
+          timeRange = bodyData.timeRange;
+        } catch (e) {
+          // Ignore parse errors, use default
+        }
+      }
 
-    // Also check query parameters (for HTTP events)
-    if (!timeRange && event.rawQueryString) {
-      const params = new URLSearchParams(event.rawQueryString);
-      const range = params.get('timeRange');
-      if (range === '7d' || range === '30d' || range === '90d') {
-        timeRange = range;
+      // Also check query parameters (for HTTP events)
+      if (!timeRange && event.rawQueryString) {
+        const params = new URLSearchParams(event.rawQueryString);
+        const range = params.get('timeRange');
+        if (range === '7d' || range === '30d' || range === '90d') {
+          timeRange = range;
+        }
       }
     }
 
