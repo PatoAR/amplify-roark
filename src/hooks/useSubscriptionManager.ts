@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { invoke } from 'aws-amplify/api';
+import { functions } from 'aws-amplify/api';
 import { useSession } from '../context/SessionContext';
 import { useSubscriptionStatus } from './useSubscriptionStatus';
 import { isSubscriptionUpgradeEnabled } from '../config/features';
@@ -47,8 +47,8 @@ export function useSubscriptionManager() {
 
     try {
       // Call the subscription manager function via Function URL
-      const { body } = await invoke({
-        functionName: 'subscription-manager',
+      const { body } = await functions.invoke({
+        name: 'subscription-manager',
         payload: {
           planId,
           userId,

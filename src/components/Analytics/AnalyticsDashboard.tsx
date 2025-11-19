@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getCurrentUser } from 'aws-amplify/auth';
-import { invoke } from 'aws-amplify/api';
+import { functions } from 'aws-amplify/api';
 import { useSession } from '../../context/SessionContext';
 import './AnalyticsDashboard.css';
 
@@ -62,8 +62,8 @@ export const AnalyticsDashboard = () => {
       const userEmail = user.signInDetails?.loginId || user.username;
 
       // Invoke the analytics aggregator Lambda function via Function URL
-      const { body } = await invoke({
-        functionName: 'analytics-aggregator',
+      const { body } = await functions.invoke({
+        name: 'analytics-aggregator',
         payload: {
           timeRange,
           userEmail, // Pass email for Lambda verification
