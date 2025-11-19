@@ -379,3 +379,10 @@ export const listDeletedUserEmails = /* GraphQL */ `query ListDeletedUserEmails(
   APITypes.ListDeletedUserEmailsQueryVariables,
   APITypes.ListDeletedUserEmailsQuery
 >;
+export const getAnalytics = /* GraphQL */ `query GetAnalytics($timeRange: String) {
+  getAnalytics(timeRange: $timeRange)
+}
+` as GeneratedQuery<
+  APITypes.GetAnalyticsQueryVariables,
+  APITypes.GetAnalyticsQuery
+>;

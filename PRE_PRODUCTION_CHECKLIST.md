@@ -89,28 +89,6 @@ export default defineConfig({
 
 ---
 
-## ⚠️ HIGH PRIORITY ISSUES
-
-
-### 8. **CODE QUALITY: TODO/FIXME Items in Production Code**
-**Severity:** MEDIUM  
-**Files Found:** 7 files with TODO comments
-
-**Files:**
-- `src/i18n.ts`
-- `src/pages/newsfeed/NewsSocketClient.tsx`
-- `src/hooks/useSubscriptionStatus.ts`
-- `src/context/NewsContext.tsx`
-- `src/components/NewsManager/NewsManager.tsx`
-- `src/App.tsx`
-- `src/types/errors.ts`
-
-**Recommendation:**
-- Review all TODO items
-- Create tickets for incomplete features
-- Remove or complete before production
-
----
 
 ## ⚡ MEDIUM PRIORITY ISSUES
 
@@ -275,22 +253,6 @@ async function appsyncRequest<T = any>(query: string, variables?: any)
 
 ---
 
-### 21. **ACCESSIBILITY: No ARIA Labels or A11y Considerations**
-**Severity:** LOW  
-**Files:** UI Components
-
-**Issue:**
-- Limited accessibility attributes
-- No keyboard navigation testing
-- No screen reader testing
-
-**Recommendation:**
-- Add ARIA labels
-- Test with screen readers
-- Implement keyboard navigation
-- Add focus management
-
----
 
 ### 22. **PERFORMANCE: Images Not Optimized**
 **Severity:** LOW  
@@ -336,30 +298,13 @@ public/
 
 ---
 
-## 📊 PRIORITY MATRIX
-
-| Priority | Issue Count | Must Fix Before Launch |
-|----------|-------------|------------------------|
-| CRITICAL | 5 | Yes |
-| HIGH | 6 | Yes |
-| MEDIUM | 7 | Review & Plan |
-| LOW | 4 | Post-launch OK |
-
----
 
 ## 🚀 PRE-LAUNCH CHECKLIST
 
 ### Immediate Action Required (Before Production):
 
-- [ ] **FIX #1:** Increase API key expiration to 365 days
-- [ ] **FIX #2:** Remove all `console.log` statements (29 files)
 - [ ] **FIX #3:** Implement React Error Boundary
-- [ ] **FIX #4:** Add privacy policy page (IP/tracking disclosure)
 - [ ] **FIX #5:** Configure production build optimizations
-- [ ] **FIX #6:** Add retry limits to referral code generation
-- [ ] **FIX #7:** Restrict CORS to specific origins
-- [ ] **FIX #8:** Resolve all TODO comments
-- [ ] **FIX #9:** Run npm audit and fix vulnerabilities
 
 ### Recommended Before Launch:
 
@@ -371,15 +316,6 @@ public/
 - [ ] Review and strengthen password policy
 - [ ] Clean up README documentation
 - [ ] Write basic test coverage (auth, critical paths)
-
-### Post-Launch (Can Be Deferred):
-
-- [ ] Optimize images and use WebP
-- [ ] Improve accessibility (ARIA labels)
-- [ ] Set up bundle size monitoring
-- [ ] Implement comprehensive testing
-
----
 
 ## 🔧 RECOMMENDED NEXT STEPS
 
@@ -415,8 +351,3 @@ public/
 - Set up staging environment
 
 ---
-
-**Report Generated:** October 22, 2025  
-**Review Status:** Complete  
-**Recommendation:** Address all CRITICAL and HIGH priority issues before production deployment.
-

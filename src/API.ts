@@ -1277,6 +1277,16 @@ export type DeleteDeletedUserEmailMutation = {
   } | null,
 };
 
+export type UpgradeSubscriptionMutationVariables = {
+  planId: string,
+  userId: string,
+  paymentMethodId?: string | null,
+};
+
+export type UpgradeSubscriptionMutation = {
+  upgradeSubscription?: string | null,
+};
+
 export type GetArticleQueryVariables = {
   id: string,
 };
@@ -1639,6 +1649,14 @@ export type ListDeletedUserEmailsQuery = {
     } | null >,
     nextToken?: string | null,
   } | null,
+};
+
+export type GetAnalyticsQueryVariables = {
+  timeRange?: string | null,
+};
+
+export type GetAnalyticsQuery = {
+  getAnalytics?: string | null,
 };
 
 export type OnCreateArticleSubscriptionVariables = {
