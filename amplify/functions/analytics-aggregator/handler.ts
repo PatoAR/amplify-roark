@@ -471,7 +471,6 @@ export const handler = async (event: AnalyticsEvent | AppSyncResolverEvent | any
     // Direct Lambda invocation format
     else if ('timeRange' in event || 'userEmail' in event) {
       timeRange = event.timeRange;
-      userEmail = event.userEmail;
       
       if (!verifyMasterUser(event)) {
         throw new Error('Access denied. Master user access required.');
