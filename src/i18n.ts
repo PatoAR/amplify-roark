@@ -145,7 +145,7 @@ const customTranslations = {
     'landing.ctaTitle': 'Ready to transform your business intelligence?',
     'landing.ctaDescription': 'Gain access to Perkins comprehensive business intelligence platform. Keep it free through referrals or subscribe for unlimited access.',
     'landing.getStarted': 'Get Started Today',
-    'landing.copyright': '© 2024 Perkins Intel. All rights reserved.',
+    'landing.copyright': '© 2024 Finu S.A. All rights reserved.',
     'landing.contactHelp': 'Need help? Contact us at <a href="mailto:info@perkinsintel.com" style="text-decoration: none; color: #4f79a6;">info@perkinsintel.com</a>',
     
     // Newsfeed Preview
