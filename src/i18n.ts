@@ -295,6 +295,21 @@ const customTranslations = {
     // Disclaimer
     'disclaimer.text': 'News may be delayed by several minutes depending on source publication and retrieval frequency.',
     'disclaimer.understood': 'Understood',
+    
+    // Cookie Consent
+    'cookieConsent.title': 'Cookie Consent',
+    'cookieConsent.message': 'We use cookies to enhance your experience and analyze site usage. By continuing, you agree to our use of cookies.',
+    'cookieConsent.accept': 'Accept',
+    'cookieConsent.decline': 'Decline',
+    'cookieConsent.learnMore': 'Learn more',
+    
+    // Legal
+    'legal.terms.title': 'Terms and Conditions',
+    'legal.terms.content': 'Terms and conditions content will be provided here.',
+    'legal.privacy.title': 'Privacy Policy',
+    'legal.privacy.content': 'Privacy policy content will be provided here.',
+    'legal.footerLinks.terms': 'Terms & Conditions',
+    'legal.footerLinks.privacy': 'Privacy Policy',
   },
   es: {
     // Menu items
@@ -489,6 +504,21 @@ const customTranslations = {
     // Disclaimer
     'disclaimer.text': 'Las noticias pueden retrasarse varios minutos según la publicación de la fuente y la frecuencia de búsqueda.',
     'disclaimer.understood': 'Entendido',
+    
+    // Cookie Consent
+    'cookieConsent.title': 'Consentimiento de Cookies',
+    'cookieConsent.message': 'Utilizamos cookies para mejorar su experiencia y analizar el uso del sitio. Al continuar, acepta nuestro uso de cookies.',
+    'cookieConsent.accept': 'Aceptar',
+    'cookieConsent.decline': 'Rechazar',
+    'cookieConsent.learnMore': 'Más información',
+    
+    // Legal
+    'legal.terms.title': 'Términos y Condiciones',
+    'legal.terms.content': 'El contenido de términos y condiciones se proporcionará aquí.',
+    'legal.privacy.title': 'Política de Privacidad',
+    'legal.privacy.content': 'El contenido de la política de privacidad se proporcionará aquí.',
+    'legal.footerLinks.terms': 'Términos y Condiciones',
+    'legal.footerLinks.privacy': 'Política de Privacidad',
     
     // Newsfeed Preview
     'newsfeedPreview.title': 'Feed de Inteligencia Empresarial en Vivo',
@@ -782,6 +812,21 @@ const customTranslations = {
     // Disclaimer
     'disclaimer.text': 'As notícias podem sofrer atraso de alguns minutos, dependendo da publicação da fonte e da frequência de busca.',
     'disclaimer.understood': 'Entendi',
+    
+    // Cookie Consent
+    'cookieConsent.title': 'Consentimento de Cookies',
+    'cookieConsent.message': 'Usamos cookies para melhorar sua experiência e analisar o uso do site. Ao continuar, você concorda com o uso de cookies.',
+    'cookieConsent.accept': 'Aceitar',
+    'cookieConsent.decline': 'Recusar',
+    'cookieConsent.learnMore': 'Saiba mais',
+    
+    // Legal
+    'legal.terms.title': 'Termos e Condições',
+    'legal.terms.content': 'O conteúdo dos termos e condições será fornecido aqui.',
+    'legal.privacy.title': 'Política de Privacidade',
+    'legal.privacy.content': 'O conteúdo da política de privacidade será fornecido aqui.',
+    'legal.footerLinks.terms': 'Termos e Condições',
+    'legal.footerLinks.privacy': 'Política de Privacidade',
     
     // Newsfeed Preview
     'newsfeedPreview.title': 'Feed de Inteligência Empresarial ao Vivo',

@@ -2,7 +2,6 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { postConfirmation } from "../auth/post-confirmation/resource";
 import { referralProcessor } from "../functions/referral-processor/resource";
 import { subscriptionManager } from "../functions/subscription-manager/resource";
-import { analyticsAggregator } from "../functions/analytics-aggregator/resource";
 
 const schema = a.schema({
   // Article Model
@@ -88,6 +87,8 @@ const schema = a.schema({
   })
   .authorization(allow => [
     allow.owner().identityClaim('sub'),
+    // Allow authenticated users to read all subscriptions (for analytics)
+    allow.authenticated().to(['read']),
     // Allow Lambda functions (via API key) to create/update subscriptions during post-confirmation
     allow.publicApiKey().to(['create', 'update', 'read'])
   ]),
@@ -106,6 +107,8 @@ const schema = a.schema({
   })
   .authorization(allow => [
     allow.owner().identityClaim('sub'),
+    // Allow authenticated users to read all activities (for analytics)
+    allow.authenticated().to(['read']),
     // Allow Lambda functions (via API key) to read all activities for analytics aggregation
     allow.publicApiKey().to(['read'])
   ]),
@@ -138,15 +141,6 @@ const schema = a.schema({
     .authorization(allow => [allow.authenticated()])
     .handler(a.handler.function(subscriptionManager)),
 
-  // Analytics Query
-  getAnalytics: a
-    .query()
-    .arguments({
-      timeRange: a.string(),
-    })
-    .returns(a.json())
-    .authorization(allow => [allow.authenticated()])
-    .handler(a.handler.function(analyticsAggregator)),
 });
 
 export type Schema = ClientSchema<typeof schema>;
@@ -163,6 +157,5 @@ export const data = defineData({
     postConfirmation,
     referralProcessor,
     subscriptionManager,
-    analyticsAggregator,
   }
 });

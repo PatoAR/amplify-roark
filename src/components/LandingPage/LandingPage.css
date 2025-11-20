@@ -221,6 +221,32 @@
   font-size: var(--font-size-sm);
 }
 
+.landing-footer-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-sm);
+  margin: var(--space-md) 0;
+  flex-wrap: wrap;
+}
+
+.footer-link {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  transition: color var(--transition-normal);
+}
+
+.footer-link:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.footer-link-separator {
+  color: var(--color-text-muted);
+  margin: 0 var(--space-xs);
+}
+
 .contact-info {
   margin-top: var(--space-md);
   font-size: var(--font-size-sm);
