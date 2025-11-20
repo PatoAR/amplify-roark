@@ -1651,14 +1651,6 @@ export type ListDeletedUserEmailsQuery = {
   } | null,
 };
 
-export type GetAnalyticsQueryVariables = {
-  timeRange?: string | null,
-};
-
-export type GetAnalyticsQuery = {
-  getAnalytics?: string | null,
-};
-
 export type OnCreateArticleSubscriptionVariables = {
   filter?: ModelSubscriptionArticleFilterInput | null,
 };
