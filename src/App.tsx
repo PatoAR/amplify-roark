@@ -9,6 +9,8 @@ import ReferralSettings from "./pages/settings/ReferralSettings";
 import { AnalyticsDashboard } from "./components/Analytics/AnalyticsDashboard";
 import CustomSignUp from "./components/CustomSignUp/CustomSignUp";
 import LandingPage from "./components/LandingPage";
+import TermsAndConditions from "./pages/legal/TermsAndConditions";
+import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
 import { useSession } from './context/SessionContext';
 import { useInactivityTimer } from './hooks/useInactivityTimer';
 import { AuthErrorFallback } from './components/AuthErrorFallback';
@@ -158,9 +160,15 @@ export default function App() {
     );
   }
 
-  // If user is not authenticated, show landing page
+  // If user is not authenticated, show landing page or legal pages
   if (authStatus === 'unauthenticated') {
-    return <LandingPage />;
+    return (
+      <Routes>
+        <Route path="/terms" element={<TermsAndConditions />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="*" element={<LandingPage />} />
+      </Routes>
+    );
   }
 
   // If authStatus is authenticated, allow the app to run even if session state is unclear
@@ -183,6 +191,8 @@ export default function App() {
             <Route path="analytics" element={<AnalyticsDashboard />} />
             <Route path="signup" element={<CustomSignUp />} />
           </Route>
+          <Route path="/terms" element={<TermsAndConditions />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
         </Routes>
       </div>
     );

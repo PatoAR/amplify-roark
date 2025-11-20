@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Menu, MenuItem, Divider, Button } from "@aws-amplify/ui-react";
 import { useNavigate } from "react-router-dom";
+import { getCurrentUser } from 'aws-amplify/auth';
 import { useSession } from '../../context/SessionContext';
 import Modal from './Modal'
 import { useUserPreferences } from '../../context/UserPreferencesContext';
@@ -11,9 +12,11 @@ import LanguageSwitcher from '../LanguageSwitcher/LanguageSwitcher';
 import { COUNTRY_OPTIONS, INDUSTRY_OPTIONS } from '../../constants/countries';
 import "./HeaderNav.css";
 
+const MASTER_EMAIL = 'master@perkinsintel.com';
+
 const HeaderNav = () => {
   const { t } = useTranslation();
-  const { logout } = useSession();
+  const { logout, userId } = useSession();
   const navigate = useNavigate();
   const [showFiltersModal, setShowFiltersModal] = useState(false); // State to control modal visibility
   const { preferences, savePreferences } = useUserPreferences();
@@ -21,10 +24,31 @@ const HeaderNav = () => {
   const [localCountries, setLocalCountries] = useState(preferences.countries || []);
   const { daysLeft } = useFreeDaysRemaining();
   const [isSaving, setIsSaving] = useState(false);
+  const [isMasterUser, setIsMasterUser] = useState(false);
 
   // New state for "all" selections
   const [selectAllIndustries, setSelectAllIndustries] = useState(false);
   const [selectAllCountries, setSelectAllCountries] = useState(false);
+
+  // Check if user is master
+  useEffect(() => {
+    const checkMasterUser = async () => {
+      if (!userId) {
+        setIsMasterUser(false);
+        return;
+      }
+      try {
+        const user = await getCurrentUser();
+        const userEmail = user.signInDetails?.loginId || user.username;
+        setIsMasterUser(userEmail?.toLowerCase() === MASTER_EMAIL.toLowerCase());
+      } catch (error) {
+        console.error('Failed to get current user:', error);
+        setIsMasterUser(false);
+      }
+    };
+
+    checkMasterUser();
+  }, [userId]);
 
   
   const handleOpenFiltersModal = useCallback(() => {
@@ -162,6 +186,9 @@ const HeaderNav = () => {
         <MenuItem onClick={handleOpenFiltersModal}>{t('menu.filters')}</MenuItem>
         <Divider />
         <MenuItem onClick={() => navigate("/settings")}>{t('menu.settings')}</MenuItem>
+        {isMasterUser && (
+          <MenuItem onClick={() => navigate("/analytics")}>Analytics</MenuItem>
+        )}
         <MenuItem onClick={() => logout()}>Logout</MenuItem>
       </Menu>
 

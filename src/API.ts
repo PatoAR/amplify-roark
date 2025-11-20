@@ -1277,6 +1277,16 @@ export type DeleteDeletedUserEmailMutation = {
   } | null,
 };
 
+export type UpgradeSubscriptionMutationVariables = {
+  planId: string,
+  userId: string,
+  paymentMethodId?: string | null,
+};
+
+export type UpgradeSubscriptionMutation = {
+  upgradeSubscription?: string | null,
+};
+
 export type GetArticleQueryVariables = {
   id: string,
 };

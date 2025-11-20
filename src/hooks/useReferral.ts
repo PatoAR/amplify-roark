@@ -107,36 +107,6 @@ export const useReferral = () => {
     }
   };
 
-  const validateReferralCode = async (code: string): Promise<{ valid: boolean; referrerId?: string }> => {
-    try {
-      // Use the API endpoint instead of direct GraphQL to avoid authorization issues
-      const response = await fetch(`/api/referral/validate?code=${encodeURIComponent(code)}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Validation request failed: ${response.status}`);
-      }
-
-      const result = await response.json();
-      
-      if (result.valid) {
-        return {
-          valid: true,
-          referrerId: result.referrerId,
-        };
-      } else {
-        return { valid: false };
-      }
-    } catch (err) {
-      console.error('Error validating referral code:', err);
-      return { valid: false };
-    }
-  };
-
   const shareReferralLink = async (platform: 'whatsapp' | 'email' | 'copy') => {
     if (!referralCode) {
       setError('No referral code available');
@@ -186,7 +156,6 @@ export const useReferral = () => {
     isLoading,
     error,
     generateReferralCode,
-    validateReferralCode,
     shareReferralLink,
     getReferralUrl,
     refreshData: loadReferralData,

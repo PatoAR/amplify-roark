@@ -6,34 +6,17 @@ import { Hub } from 'aws-amplify/utils';
 import outputs from '../amplify_outputs.json';
 
 // Configure Amplify FIRST, before any other imports that might use Amplify
-Amplify.configure({
-  Auth: {
-    Cognito: {
-      userPoolId: outputs.auth.user_pool_id,
-      userPoolClientId: outputs.auth.user_pool_client_id,
-      identityPoolId: outputs.auth.identity_pool_id,
-      loginWith: {
-        email: true,
-        username: false,
-        phone: false,
-      },
-    },
-  },
-  API: {
-    GraphQL: {
-      endpoint: outputs.data.url,
-      region: outputs.data.aws_region,
-      defaultAuthMode: 'userPool',
-    },
-  },
-});
+Amplify.configure(outputs);
 
 // Now import other components after Amplify is configured
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import CustomSignUp from "./components/CustomSignUp/CustomSignUp";
 import LandingPage from "./components/LandingPage";
 import AuthWrapper from "./components/AuthWrapper";
+import TermsAndConditions from "./pages/legal/TermsAndConditions";
+import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
 import { LanguageProvider } from './context/LanguageContext';
+import { CookieConsent } from './components/CookieConsent';
 import "./index.css";
 
 import './i18n'; // Initialize our custom translations
@@ -99,7 +82,13 @@ const MainApp: React.FC = () => {
   if (isAuthenticated) {
     return <AuthWrapper />;
   } else {
-    return <LandingPage />;
+    return (
+      <Routes>
+        <Route path="/terms" element={<TermsAndConditions />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="*" element={<LandingPage />} />
+      </Routes>
+    );
   }
 };
 
@@ -119,6 +108,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <BrowserRouter>
         <LanguageProvider>
           <CustomSignUp />
+          <CookieConsent />
         </LanguageProvider>
       </BrowserRouter>
     ) : (
@@ -126,6 +116,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <BrowserRouter>
         <LanguageProvider>
           <MainApp />
+          <CookieConsent />
         </LanguageProvider>
       </BrowserRouter>
     )}

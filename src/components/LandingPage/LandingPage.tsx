@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Authenticator } from '@aws-amplify/ui-react';
 import { useTheme, Image, View } from '@aws-amplify/ui-react';
 import perkinsLogo from '/PerkinsLogo_Base_Gray.png';
@@ -188,6 +189,11 @@ const LandingPage: React.FC = () => {
 
       <footer className="landing-footer">
         <p>{t('landing.copyright')}</p>
+        <div className="landing-footer-links">
+          <Link to="/terms" className="footer-link">{t('legal.footerLinks.terms')}</Link>
+          <span className="footer-link-separator">|</span>
+          <Link to="/privacy" className="footer-link">{t('legal.footerLinks.privacy')}</Link>
+        </div>
         <p className="contact-info">
           <span dangerouslySetInnerHTML={{ __html: t('landing.contactHelp') }} />
         </p>
