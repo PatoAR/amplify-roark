@@ -16,10 +16,10 @@ const TermsAndConditions: React.FC = () => {
         <div className="legal-content">
           <h1 className="legal-title">{t('legal.terms.title')}</h1>
           <div className="legal-text">
-            <p className="legal-date">Last updated: [Insert Date]</p>
+            <p className="legal-date">Last updated: November 21, 2025</p>
             
             <p className="legal-intro">
-              Welcome to Perkins News ("Perkins," "we," "our," or "us"), a personalized news-aggregation and information service. By using our website, chatbots, applications, or any related features ("the Service"), you agree to the following Terms & Conditions.
+              Welcome to Perkins News ("Perkins," "we," "our," or "us"), a personalized news-aggregation and information service operated by Finu S.A., legally registered in Argentina. By using our website, chatbots, applications, or any related features ("the Service"), you agree to the following Terms & Conditions.
             </p>
             
             <p>Please read them carefully.</p>
@@ -118,10 +118,15 @@ const TermsAndConditions: React.FC = () => {
 
             <h2>12. Governing Law</h2>
             <p>These Terms & Conditions are governed by the laws of the Republic of Argentina. Any disputes will be resolved in the competent courts of the City of Buenos Aires, unless local law requires otherwise.</p>
+            <p>These Terms are entered into between you and Finu S.A., the legal entity that owns and operates Perkins News.</p>
 
             <h2>13. Contact</h2>
             <p className="legal-contact">For questions, support, or legal requests:</p>
-            <p><strong>📧 info@perkinsintel.com</strong></p>
+            <p>
+              <strong>Perkins News</strong><br />
+              Finu S.A.<br />
+              <strong>📧 info@perkinsintel.com</strong>
+            </p>
           </div>
         </div>
       </div>

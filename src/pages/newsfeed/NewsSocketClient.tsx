@@ -197,10 +197,12 @@ function NewsSocketClient() {
       c => c.id.toLowerCase() === countryKey.toLowerCase() ||
            c.label.toLowerCase() === countryKey.toLowerCase() ||
            c.code.toLowerCase() === countryKey.toLowerCase() ||
+           c.fullName.toLowerCase() === countryKey.toLowerCase() ||
            (typeof url === 'string' && (
              c.id.toLowerCase() === url.toLowerCase() ||
              c.label.toLowerCase() === url.toLowerCase() ||
-             c.code.toLowerCase() === url.toLowerCase()
+             c.code.toLowerCase() === url.toLowerCase() ||
+             c.fullName.toLowerCase() === url.toLowerCase()
            ))
     );
 
@@ -307,10 +309,12 @@ function NewsSocketClient() {
                                   c => c.id.toLowerCase() === countryKey.toLowerCase() ||
                                        c.label.toLowerCase() === countryKey.toLowerCase() ||
                                        c.code.toLowerCase() === countryKey.toLowerCase() ||
+                                       c.fullName.toLowerCase() === countryKey.toLowerCase() ||
                                        (typeof url === 'string' && (
                                          c.id.toLowerCase() === url.toLowerCase() ||
                                          c.label.toLowerCase() === url.toLowerCase() ||
-                                         c.code.toLowerCase() === url.toLowerCase()
+                                         c.code.toLowerCase() === url.toLowerCase() ||
+                                         c.fullName.toLowerCase() === url.toLowerCase()
                                        ))
                                 );
                                 

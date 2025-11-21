@@ -16,7 +16,7 @@ const PrivacyPolicy: React.FC = () => {
         <div className="legal-content">
           <h1 className="legal-title">{t('legal.privacy.title')}</h1>
           <div className="legal-text">
-            <p className="legal-date">Last updated: 19/11/2025</p>
+            <p className="legal-date">Last updated: November 21, 2025</p>
             
             <p className="legal-intro">
               This Privacy Policy explains how Perkins News ("Perkins," "we," "our," or "us"), legally registered in Argentina, collects, uses, stores, and protects personal data from users located in Argentina and other Latin American countries.
@@ -140,6 +140,7 @@ const PrivacyPolicy: React.FC = () => {
             <p className="legal-contact">For privacy-related questions or rights requests:</p>
             <p>
               <strong>Perkins News</strong><br />
+              Finu S.A.<br />
               Email: info@perkinsintel.com
             </p>
           </div>
