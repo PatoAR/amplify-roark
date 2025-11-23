@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getCurrentUser } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
 import { type Schema } from '../../../amplify/data/resource';
 import { useSession } from '../../context/SessionContext';
 import { listUserActivities, listUserSubscriptions } from '../../graphql/queries';
+import { useTranslation } from '../../i18n';
 import './AnalyticsDashboard.css';
 
 interface AggregatedAnalytics {
@@ -115,7 +117,6 @@ function aggregateAnalytics(
   });
 
   const totalSessions = filteredActivities.length;
-  const averageSessionsPerUser = registeredUsers > 0 ? totalSessions / registeredUsers : 0;
 
   // Calculate session durations
   const now = new Date();
@@ -139,24 +140,21 @@ function aggregateAnalytics(
 
   const averageSessionDuration = validDurations > 0 ? Math.round(totalDuration / validDurations) : 0;
 
-  // Calculate active users (users with active sessions or recent activity)
+  // Calculate active users (users with active sessions or activity within the selected time range)
   const activeUserIds = new Set<string>();
-  const recentActivityThreshold = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000)); // Last 7 days
-
+  
+  // filteredActivities already contains activities within the selected time range
   filteredActivities.forEach((activity: any) => {
     if (activity.owner) {
-      if (activity.isActive) {
-        activeUserIds.add(activity.owner);
-      } else if (activity.startTime) {
-        const activityDate = new Date(activity.startTime);
-        if (activityDate >= recentActivityThreshold) {
-          activeUserIds.add(activity.owner);
-        }
-      }
+      // Count users with active sessions or any activity in the time range
+      activeUserIds.add(activity.owner);
     }
   });
 
   const activeUsers = activeUserIds.size;
+  
+  // Calculate average sessions per user based on active users (not registered users)
+  const averageSessionsPerUser = activeUsers > 0 ? totalSessions / activeUsers : 0;
 
   // Calculate subscription status breakdown
   const statusBreakdown = {
@@ -192,11 +190,17 @@ function aggregateAnalytics(
 
 export const AnalyticsDashboard = () => {
   const { userId } = useSession();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
   const [isMasterUser, setIsMasterUser] = useState<boolean | null>(null);
   const [analytics, setAnalytics] = useState<AggregatedAnalytics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d');
+
+  const handleBack = () => {
+    navigate('/');
+  };
 
   // Check if user is master
   useEffect(() => {
@@ -252,14 +256,13 @@ export const AnalyticsDashboard = () => {
   const formatDuration = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
 
     if (hours > 0) {
-      return `${hours}h ${minutes}m ${secs}s`;
+      return `${hours}h ${minutes}m`;
     } else if (minutes > 0) {
-      return `${minutes}m ${secs}s`;
+      return `${minutes}m`;
     } else {
-      return `${secs}s`;
+      return '0m';
     }
   };
 
@@ -267,11 +270,19 @@ export const AnalyticsDashboard = () => {
   if (isMasterUser === false) {
     return (
       <div className="analytics-dashboard">
+        <div className="analytics-page-header">
+          <button
+            onClick={handleBack}
+            className="back-button"
+          >
+            {t('settings.backToNews')}
+          </button>
+        </div>
         <div className="analytics-header">
           <h1>Analytics Dashboard</h1>
         </div>
         <div className="analytics-content">
-          <div style={{ textAlign: 'center', padding: '3rem', color: '#6c757d' }}>
+          <div className="error-message">
             <h2>Access Denied</h2>
             <p>You do not have permission to access this dashboard.</p>
           </div>
@@ -283,28 +294,16 @@ export const AnalyticsDashboard = () => {
   if (isLoading || isMasterUser === null) {
     return (
       <div className="analytics-dashboard">
+        <div className="analytics-page-header">
+          <button
+            onClick={handleBack}
+            className="back-button"
+          >
+            {t('settings.backToNews')}
+          </button>
+        </div>
         <div className="analytics-header">
           <h1>Analytics Dashboard</h1>
-          <div className="time-range-selector">
-            <button
-              className={timeRange === '7d' ? 'active' : ''}
-              onClick={() => setTimeRange('7d')}
-            >
-              7 Days
-            </button>
-            <button
-              className={timeRange === '30d' ? 'active' : ''}
-              onClick={() => setTimeRange('30d')}
-            >
-              30 Days
-            </button>
-            <button
-              className={timeRange === '90d' ? 'active' : ''}
-              onClick={() => setTimeRange('90d')}
-            >
-              90 Days
-            </button>
-          </div>
         </div>
         <div className="loading">Loading analytics...</div>
       </div>
@@ -314,34 +313,22 @@ export const AnalyticsDashboard = () => {
   if (error) {
     return (
       <div className="analytics-dashboard">
+        <div className="analytics-page-header">
+          <button
+            onClick={handleBack}
+            className="back-button"
+          >
+            {t('settings.backToNews')}
+          </button>
+        </div>
         <div className="analytics-header">
           <h1>Analytics Dashboard</h1>
-          <div className="time-range-selector">
-            <button
-              className={timeRange === '7d' ? 'active' : ''}
-              onClick={() => setTimeRange('7d')}
-            >
-              7 Days
-            </button>
-            <button
-              className={timeRange === '30d' ? 'active' : ''}
-              onClick={() => setTimeRange('30d')}
-            >
-              30 Days
-            </button>
-            <button
-              className={timeRange === '90d' ? 'active' : ''}
-              onClick={() => setTimeRange('90d')}
-            >
-              90 Days
-            </button>
-          </div>
         </div>
         <div className="analytics-content">
-          <div style={{ textAlign: 'center', padding: '3rem', color: '#dc3545' }}>
+          <div className="error-message error">
             <h2>Error</h2>
             <p>{error}</p>
-            <button onClick={loadAnalytics} style={{ marginTop: '1rem', padding: '0.5rem 1rem' }}>
+            <button onClick={loadAnalytics} className="retry-button">
               Retry
             </button>
           </div>
@@ -356,35 +343,45 @@ export const AnalyticsDashboard = () => {
 
   return (
     <div className="analytics-dashboard">
+      <div className="analytics-page-header">
+        <button
+          onClick={handleBack}
+          className="back-button"
+        >
+          {t('settings.backToNews')}
+        </button>
+      </div>
+
       <div className="analytics-header">
         <h1>Analytics Dashboard</h1>
-        <div className="time-range-selector">
-          <button
-            className={timeRange === '7d' ? 'active' : ''}
-            onClick={() => setTimeRange('7d')}
-          >
-            7 Days
-          </button>
-          <button
-            className={timeRange === '30d' ? 'active' : ''}
-            onClick={() => setTimeRange('30d')}
-          >
-            30 Days
-          </button>
-          <button
-            className={timeRange === '90d' ? 'active' : ''}
-            onClick={() => setTimeRange('90d')}
-          >
-            90 Days
-          </button>
-        </div>
+      </div>
+      
+      <div className="time-range-selector">
+        <button
+          className={timeRange === '7d' ? 'active' : ''}
+          onClick={() => setTimeRange('7d')}
+        >
+          7 Days
+        </button>
+        <button
+          className={timeRange === '30d' ? 'active' : ''}
+          onClick={() => setTimeRange('30d')}
+        >
+          30 Days
+        </button>
+        <button
+          className={timeRange === '90d' ? 'active' : ''}
+          onClick={() => setTimeRange('90d')}
+        >
+          90 Days
+        </button>
       </div>
 
       <div className="analytics-content">
         <div className="stats-grid">
           <div className="stat-card">
-            <span className="stat-value">{analytics.registeredUsers}</span>
-            <span className="stat-label">Registered Users</span>
+            <span className="stat-value">{analytics.activeUsers}</span>
+            <span className="stat-label">Active Users</span>
           </div>
 
           <div className="stat-card">
@@ -400,8 +397,8 @@ export const AnalyticsDashboard = () => {
           </div>
 
           <div className="stat-card">
-            <span className="stat-value">{formatDuration(analytics.averageSessionDuration)}</span>
-            <span className="stat-label">Avg Session Duration</span>
+            <span className="stat-value">{analytics.registeredUsers}</span>
+            <span className="stat-label">Registered Users</span>
           </div>
 
           <div className="stat-card">
@@ -410,40 +407,30 @@ export const AnalyticsDashboard = () => {
           </div>
 
           <div className="stat-card">
-            <span className="stat-value">{analytics.activeUsers}</span>
-            <span className="stat-label">Active Users</span>
+            <span className="stat-value">{formatDuration(analytics.averageSessionDuration)}</span>
+            <span className="stat-label">Avg Session Duration</span>
           </div>
         </div>
 
-        <div className="analytics-section">
-          <h2>System Overview</h2>
-          <p>
-            There are <strong>{analytics.registeredUsers}</strong> registered users in the system.
-          </p>
-          <p>
-            Total sessions across all users: <strong>{analytics.totalSessions}</strong>
-          </p>
-          <p>
-            Average sessions per user: <strong>{analytics.averageSessionsPerUser.toFixed(1)}</strong>
-          </p>
-          <p>
-            Average session duration: <strong>{formatDuration(analytics.averageSessionDuration)}</strong>
-          </p>
-          <p>
-            Total time spent across all users: <strong>{formatDuration(analytics.totalTimeSpent)}</strong>
-          </p>
-          <p>
-            Active users (last 7 days): <strong>{analytics.activeUsers}</strong>
-          </p>
-        </div>
-
-        <div className="analytics-section">
-          <h2>Subscription Status Breakdown</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
-            <div>Free Trial: <strong>{analytics.subscriptionStatusBreakdown.free_trial}</strong></div>
-            <div>Active: <strong>{analytics.subscriptionStatusBreakdown.active}</strong></div>
-            <div>Expired: <strong>{analytics.subscriptionStatusBreakdown.expired}</strong></div>
-            <div>Cancelled: <strong>{analytics.subscriptionStatusBreakdown.cancelled}</strong></div>
+        <div className="subscription-card">
+          <h2 className="subscription-card-title">Subscription Status Breakdown</h2>
+          <div className="subscription-items">
+            <div className="subscription-item">
+              <span className="subscription-label">Free Trial</span>
+              <span className="subscription-value">{analytics.subscriptionStatusBreakdown.free_trial}</span>
+            </div>
+            <div className="subscription-item">
+              <span className="subscription-label">Active</span>
+              <span className="subscription-value">{analytics.subscriptionStatusBreakdown.active}</span>
+            </div>
+            <div className="subscription-item">
+              <span className="subscription-label">Expired</span>
+              <span className="subscription-value">{analytics.subscriptionStatusBreakdown.expired}</span>
+            </div>
+            <div className="subscription-item">
+              <span className="subscription-label">Cancelled</span>
+              <span className="subscription-value">{analytics.subscriptionStatusBreakdown.cancelled}</span>
+            </div>
           </div>
         </div>
       </div>
