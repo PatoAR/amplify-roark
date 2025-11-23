@@ -116,7 +116,12 @@ export const handler = async (
         }
       `;
 
-      const result = await appsyncRequest<{
+      const result: {
+        listUserActivities: {
+          items: UserActivity[];
+          nextToken?: string;
+        };
+      } = await appsyncRequest<{
         listUserActivities: {
           items: UserActivity[];
           nextToken?: string;
