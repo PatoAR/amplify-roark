@@ -6,6 +6,7 @@ import { useSession } from '../../context/SessionContext';
 import { listArticles } from '../../graphql/queries';
 import { onCreateArticle } from '../../graphql/subscriptions';
 import { isArticlePriority, sortArticlesByPriority } from '../../utils/articleSorting';
+import { SessionService } from '../../utils/sessionService';
 
 // Constants
 const MAX_ARTICLES_IN_MEMORY = 100;
@@ -182,6 +183,11 @@ export const NewsManager: React.FC = () => {
 
   // Cleanup function to prevent memory leaks
   const cleanupResources = useCallback(() => {
+    // Stop polling
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
     // Idempotent cleanup
     if (unsubscribeRef.current) {
       unsubscribeRef.current();
@@ -210,9 +216,14 @@ export const NewsManager: React.FC = () => {
       // Update seen tracking for articles being removed from memory
       const removedArticles = articles.slice(MAX_ARTICLES_IN_MEMORY);
       const now = Date.now();
+      const currentSession = SessionService.getCurrentSession();
       removedArticles.forEach(article => {
         if (article.seen) {
           seenArticlesRef.current.set(article.id, now);
+          // Persist to localStorage if session exists
+          if (currentSession) {
+            SessionService.storeArticleReadState(article.id, currentSession.sessionId);
+          }
         }
       });
 
@@ -298,6 +309,18 @@ export const NewsManager: React.FC = () => {
       const now = Date.now();
       const formatted = articles.map(a => processArticle(a, now));
 
+      // Check read states from localStorage and apply to articles
+      const currentSession = SessionService.getCurrentSession();
+      if (currentSession) {
+        const readStates = SessionService.getArticleReadStates(currentSession.sessionId);
+        formatted.forEach(article => {
+          if (readStates.has(article.id)) {
+            article.seen = true;
+            seenArticlesRef.current.set(article.id, Date.now());
+          }
+        });
+      }
+
       // Initial fetch: Sort by timestamp within each category (reverse chronological)
       const sorted = formatted.sort((a, b) => {
         const aIsPriority = isArticlePriority(a, now);
@@ -350,6 +373,10 @@ export const NewsManager: React.FC = () => {
           if (!isComponentMountedRef.current) {
             return;
           }
+      // Don't poll if user is not authenticated
+      if (authStatus !== 'authenticated') {
+        return;
+      }
       const fetchArticles = async () => {
         try {
           const client = getClient();
@@ -411,13 +438,16 @@ export const NewsManager: React.FC = () => {
           } else {
                         // No new articles found
           }
-        } catch (error) {
-          console.error('[NewsManager] Polling error', error);
+        } catch (error: any) {
+          // Don't log auth errors during logout (expected)
+          if (!error?.message?.includes('NoValidAuthTokens') && !error?.message?.includes('No federated jwt')) {
+            console.error('[NewsManager] Polling error', error);
+          }
         }
       };
       fetchArticles();
     }, POLLER_INTERVAL);
-      }, [addArticle, isArticleSeen, getClient]);
+      }, [addArticle, isArticleSeen, getClient, authStatus]);
 
   // Try to establish AppSync subscription
   const trySubscribe = useCallback(async () => {

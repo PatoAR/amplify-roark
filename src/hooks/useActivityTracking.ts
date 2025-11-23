@@ -1,34 +1,11 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { useAuthenticator } from '@aws-amplify/ui-react';
-import { generateClient } from 'aws-amplify/api';
-import { type Schema } from '../../amplify/data/resource';
-
-interface SessionInfo {
-  sessionId: string;
-  startTime: Date;
-  deviceInfo: string;
-  userAgent: string;
-  recordId?: string;
-}
+import { SessionService } from '../utils/sessionService';
 
 export const useActivityTracking = () => {
   const { user } = useAuthenticator();
-  const sessionRef = useRef<SessionInfo | null>(null);
   const [isTracking, setIsTracking] = useState(false);
-  const clientRef = useRef<ReturnType<typeof generateClient<Schema>> | null>(null);
-
-  // Initialize client when needed
-  const getClient = useCallback(() => {
-    if (!clientRef.current) {
-      clientRef.current = generateClient<Schema>();
-    }
-    return clientRef.current;
-  }, []);
-
-  // Generate unique session ID
-  const generateSessionId = useCallback(() => {
-    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  }, []);
+  const sessionInitializedRef = useRef(false);
 
   // Get minimal device information
   const getDeviceInfo = useCallback(() => {
@@ -38,136 +15,139 @@ export const useActivityTracking = () => {
 
   // Start a new session (only on login)
   const startSession = useCallback(async () => {
-    if (!user?.userId || sessionRef.current) return;
+    if (!user?.userId) return;
 
-    const client = getClient();
-    const sessionId = generateSessionId();
-    const deviceInfo = getDeviceInfo();
-    const userAgent = navigator.userAgent;
-
-    sessionRef.current = {
-      sessionId,
-      startTime: new Date(),
-      deviceInfo,
-      userAgent,
-    };
+    // Check if we already have a valid session
+    const currentSession = SessionService.getCurrentSession();
+    if (currentSession) {
+      setIsTracking(true);
+      // Ensure activity tracking and visibility tracking are running
+      SessionService.startActivityTracking();
+      SessionService.startVisibilityTracking();
+      return;
+    }
 
     try {
-      // Create UserActivity record
-      const createUserActivityMutation = /* GraphQL */ `
-        mutation CreateUserActivity($input: CreateUserActivityInput!) {
-          createUserActivity(input: $input) {
-            id
-            sessionId
-            startTime
-            isActive
-          }
-        }
-      `;
+      const sessionId = SessionService.generateSessionId();
+      const deviceInfo = getDeviceInfo();
+      const userAgent = navigator.userAgent;
 
-      const result = await client.graphql({
-        query: createUserActivityMutation,
-        variables: {
-          input: {
-            sessionId,
-            startTime: sessionRef.current.startTime.toISOString(),
-            deviceInfo,
-            userAgent,
-            isActive: true,
-            // owner is automatically set by Amplify from JWT 'sub' claim via identityClaim('sub')
-          }
-        }
-      }) as any;
+      const result = await SessionService.createSession(
+        sessionId,
+        user.userId,
+        deviceInfo,
+        userAgent
+      );
 
-      if (result.data?.createUserActivity) {
-        // Store the actual database record ID, not just the sessionId
-        sessionRef.current.recordId = result.data.createUserActivity.id;
+      if (result) {
         setIsTracking(true);
+        // Activity tracking is started by SessionService.createSession
         console.log('✅ Activity tracking started:', {
-          sessionId: sessionRef.current.sessionId,
-          recordId: sessionRef.current.recordId,
-          startTime: sessionRef.current.startTime.toISOString()
+          sessionId: result.sessionId,
+          recordId: result.id,
         });
       }
     } catch (error) {
       console.error('❌ Failed to start activity session', error);
-      console.error('Error details:', error);
     }
-  }, [user?.userId, getClient, generateSessionId, getDeviceInfo]);
+  }, [user?.userId, getDeviceInfo]);
+
+  // Restore existing session (on page load)
+  const restoreSession = useCallback(async () => {
+    if (!user?.userId || sessionInitializedRef.current) return;
+
+    sessionInitializedRef.current = true;
+
+    try {
+      // First, expire any stale sessions
+      await SessionService.expireStaleSessions(user.userId);
+
+      // Try to restore existing session
+      const restoredSession = await SessionService.validateStoredSession(user.userId);
+
+      if (restoredSession) {
+        SessionService.setCurrentSession(restoredSession);
+        setIsTracking(true);
+        // Activity tracking and visibility tracking are started by SessionService.setCurrentSession
+        console.log('✅ Session restored:', {
+          sessionId: restoredSession.sessionId,
+          recordId: restoredSession.recordId,
+        });
+        return true;
+      }
+      
+      // No session to restore - check if we need to create a new one
+      // This handles the case where session was restarted due to visibility change
+      const currentSession = SessionService.getCurrentSession();
+      if (!currentSession && user?.userId) {
+        // Session was cleared (likely due to restart), create new one
+        await startSession();
+        return true;
+      }
+    } catch (error) {
+      console.error('❌ Failed to restore session', error);
+    }
+
+    return false;
+  }, [user?.userId]);
 
   // End session (only on logout)
   const endSession = useCallback(async () => {
-    if (!sessionRef.current || !user?.userId) return;
+    const currentSession = SessionService.getCurrentSession();
+    if (!currentSession || !user?.userId) return;
 
     try {
-      const client = getClient();
-      
-      // Update UserActivity to mark session as ended
-      if (sessionRef.current && sessionRef.current.recordId) {
-        const updateUserActivityMutation = /* GraphQL */ `
-          mutation UpdateUserActivity($input: UpdateUserActivityInput!) {
-            updateUserActivity(input: $input) {
-              id
-              endTime
-              duration
-              isActive
-            }
-          }
-        `;
-
-        const endTime = new Date();
-        const duration = Math.floor((endTime.getTime() - sessionRef.current.startTime.getTime()) / 1000);
-
-        await client.graphql({
-          query: updateUserActivityMutation,
-          variables: {
-            input: {
-              id: sessionRef.current.recordId, // Use the actual database record ID
-              endTime: endTime.toISOString(),
-              duration,
-              isActive: false,
-            }
-          }
-        }) as any;
-        console.log('✅ Activity session ended:', { duration, recordId: sessionRef.current.recordId });
-      }
+      await SessionService.endSession(currentSession.recordId, currentSession.startTime);
+      setIsTracking(false);
+      console.log('✅ Activity session ended');
     } catch (error) {
       console.error('❌ Failed to end activity session', error);
-      console.error('Error details:', error);
-    } finally {
-      sessionRef.current = null;
       setIsTracking(false);
     }
-  }, [user?.userId, getClient]);
+  }, [user?.userId]);
+
+  // Set up cross-tab communication and visibility change handling
+  useEffect(() => {
+    const handleSessionCleared = () => {
+      setIsTracking(false);
+      // Session was cleared in another tab, update state
+    };
+
+    SessionService.setupStorageListener(handleSessionCleared);
+
+    // Handle visibility changes for session restart
+    const handleVisibilityChange = async () => {
+      if (!document.hidden && user?.userId) {
+        // Tab became visible - check if session needs restart
+        const deviceInfo = getDeviceInfo();
+        const userAgent = navigator.userAgent;
+        const restarted = await SessionService.handleTabVisible(user.userId, deviceInfo, userAgent);
+        
+        if (restarted) {
+          // Session was restarted, update tracking state
+          setIsTracking(true);
+        } else if (!SessionService.getCurrentSession() && user?.userId) {
+          // Session was expired but not restarted (missing info), create new one
+          await startSession();
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      SessionService.removeStorageListener();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [user?.userId, getDeviceInfo, startSession]);
 
   // Clean up session when user logs out or component unmounts
   useEffect(() => {
     const handleBeforeUnload = () => {
-      // Only attempt cleanup if user is logged in and session exists
-      if (user?.userId && sessionRef.current) {
-        // Use sendBeacon for reliable cleanup on page unload
-        if (navigator.sendBeacon && sessionRef.current.recordId) {
-          const endTime = new Date();
-          const duration = Math.floor((endTime.getTime() - sessionRef.current.startTime.getTime()) / 1000);
-          
-          const cleanupData = JSON.stringify({
-            id: sessionRef.current.recordId,
-            endTime: endTime.toISOString(),
-            duration,
-            isActive: false,
-          });
-          
-          // Send cleanup data via beacon (more reliable than fetch on unload)
-          navigator.sendBeacon('/api/cleanup-session', cleanupData);
-        }
-        
-        // Fallback: try to end session synchronously (may not complete)
-        try {
-          endSession();
-        } catch (error) {
-          console.warn('Session cleanup failed on unload:', error);
-        }
-      }
+      // Stop activity tracking on page unload
+      SessionService.stopActivityTracking();
+      // Note: We don't end the session here because the user might just be refreshing
+      // The session will be restored on next page load, or expired if stale
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
@@ -175,7 +155,8 @@ export const useActivityTracking = () => {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       // Clean up session on component unmount if user is no longer logged in
-      if (!user?.userId && sessionRef.current) {
+      if (!user?.userId) {
+        SessionService.stopActivityTracking();
         endSession();
       }
     };
@@ -185,6 +166,7 @@ export const useActivityTracking = () => {
     isTracking,
     startSession,
     endSession,
-    currentSessionId: sessionRef.current?.sessionId,
+    restoreSession,
+    currentSessionId: SessionService.getCurrentSession()?.sessionId,
   };
 }; 

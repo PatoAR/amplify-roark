@@ -2,7 +2,10 @@
 Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fetches, processes and stores news articles in dynambodb. The articles are distributed to varios channels (whatsapp, telegram) and to this webapp via AppSync subscriptions or long-polling.
 
 ## ToDo's
-- Platform for original content publishers (CGI) self-service
+- Better settings/change password buttons/cards. Like welcome modal
+- Improve dashboard analytics
+
+- Platform for original content publishers (CGI) self-service. Show mock card as it would be shown once published. 
 - Platform for publicity self-service
 - Implement subscription workflow. Use MPago account.
 - Follow companies
@@ -30,15 +33,6 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
             >> updates src/API.ts and graphql/files
 
 # PROD - AWS - merge dev into main
-        git checkout main
-        git merge appsync (or dev in the future)
-        git commit -am
-        git push origin main
-
-## Tests
-- Login / Logout
-- Inactivity logout
-- First time login instructions
-- Referrals
-- Access days left - dynamic getting close to cero on days
-- Deleted emails
+        1. git checkout main
+        2. git merge appsync (or dev in the future)
+        3. git push origin main
