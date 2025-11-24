@@ -2,14 +2,14 @@
 Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fetches, processes and stores news articles in dynambodb. The articles are distributed to varios channels (whatsapp, telegram) and to this webapp via AppSync subscriptions or long-polling.
 
 ## ToDo's
-- Platform for original content publishers (CGI) self-service. Show mock card as it would be shown once published. 
+- Platform for original content publishers (CGI) self-service.
+- Follow companies
+
 - Platform for publicity self-service
 - Implement subscription workflow. Use MPago account.
-- Follow companies
 - Native IOS / Android App
 
 ## CI/CD
-
 # DEV - LOCAL
     - Font-end local instance: npm run dev
     - Back-end sandbox: npx amplify sandbox

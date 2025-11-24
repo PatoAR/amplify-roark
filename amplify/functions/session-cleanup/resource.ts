@@ -5,6 +5,9 @@ export const sessionCleanup = defineFunction({
   entry: './handler.ts',
   runtime: 20,
   timeoutSeconds: 60, // May need more time for large datasets
+  schedule: {
+    rate: '1 hour',
+  },
 });
 
 
