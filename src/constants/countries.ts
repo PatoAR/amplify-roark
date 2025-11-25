@@ -10,12 +10,13 @@ export const COUNTRY_OPTIONS = [
   { id: 'Q77', label: 'URU', code: 'uy', fullName: 'Uruguay' },
 ];
 
-// Helper function to get full country name from ID or code
+// Helper function to get full country name from ID, code, label, or fullName
 export const getCountryName = (identifier: string): string | null => {
   const country = COUNTRY_OPTIONS.find(
     c => c.id.toLowerCase() === identifier.toLowerCase() || 
          c.code.toLowerCase() === identifier.toLowerCase() ||
-         c.label.toLowerCase() === identifier.toLowerCase()
+         c.label.toLowerCase() === identifier.toLowerCase() ||
+         c.fullName.toLowerCase() === identifier.toLowerCase()
   );
   return country?.fullName || null;
 };

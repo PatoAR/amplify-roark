@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useRef, useCallback, ReactNode, useEffect } from 'react';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { sortArticlesByPriority } from '../utils/articleSorting';
+import { SessionService } from '../utils/sessionService';
 
 export interface ArticleForState {
   id: string;
@@ -53,12 +54,52 @@ export const NewsProvider: React.FC<NewsProviderProps> = ({ children }) => {
   const [articles, setArticles] = useState<ArticleForState[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
   const seenArticlesRef = useRef<Map<string, number>>(new Map());
+  const readStatesRestoredRef = useRef(false);
+
+  // Restore article read states from localStorage on mount
+  useEffect(() => {
+    if (user?.userId && !readStatesRestoredRef.current) {
+      const currentSession = SessionService.getCurrentSession();
+      if (currentSession) {
+        const readStates = SessionService.getArticleReadStates(currentSession.sessionId);
+        // Populate seenArticlesRef with restored read states
+        readStates.forEach((articleId) => {
+          seenArticlesRef.current.set(articleId, Date.now());
+        });
+        readStatesRestoredRef.current = true;
+
+        // Also update articles in state if they exist
+        setArticles(prev => {
+          if (prev.length === 0) return prev;
+          const hasChanges = prev.some(article => 
+            readStates.has(article.id) && !article.seen
+          );
+          if (hasChanges) {
+            return prev.map(article => 
+              readStates.has(article.id) ? { ...article, seen: true } : article
+            );
+          }
+          return prev;
+        });
+      }
+    }
+  }, [user?.userId]);
 
   const addArticle = useCallback((article: ArticleForState) => {
     setArticles(prev => {
       // Don't add if article already exists
       if (prev.find(a => a.id === article.id)) {
         return prev;
+      }
+      
+      // Check if article was previously read (from localStorage)
+      const currentSession = SessionService.getCurrentSession();
+      if (currentSession) {
+        const readStates = SessionService.getArticleReadStates(currentSession.sessionId);
+        if (readStates.has(article.id)) {
+          article.seen = true;
+          seenArticlesRef.current.set(article.id, Date.now());
+        }
       }
       
       // Add the new article and then sort the entire array
@@ -81,17 +122,26 @@ export const NewsProvider: React.FC<NewsProviderProps> = ({ children }) => {
   }, []);
 
   const markArticleAsSeen = useCallback((id: string) => {
+    // Update in-memory state
     setArticles(prev => 
       prev.map(article => 
         article.id === id ? { ...article, seen: true } : article
       )
     );
+
+    // Persist to localStorage via SessionService
+    const currentSession = SessionService.getCurrentSession();
+    if (currentSession) {
+      SessionService.storeArticleReadState(id, currentSession.sessionId);
+      seenArticlesRef.current.set(id, Date.now());
+    }
   }, []);
 
   const clearArticles = useCallback(() => {
     setArticles([]);
     setIsInitialized(false);
     seenArticlesRef.current.clear();
+    readStatesRestoredRef.current = false;
   }, []);
 
   // Clear articles when user changes
@@ -99,6 +149,9 @@ export const NewsProvider: React.FC<NewsProviderProps> = ({ children }) => {
     // Only clear if user is actually logged out (not just during logout process)
     if (!user?.userId && articles && articles.length > 0) {
       clearArticles();
+    } else if (user?.userId) {
+      // Reset restoration flag when new user logs in
+      readStatesRestoredRef.current = false;
     }
   }, [user?.userId, clearArticles, articles]);
 

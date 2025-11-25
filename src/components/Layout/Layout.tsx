@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, Link } from "react-router-dom";
 import Header from "../Header/Header";
 import { NewsManager } from "../NewsManager/NewsManager";
 import { TabTitleUpdater } from "./TabTitleUpdater";
@@ -62,6 +62,11 @@ const Layout = () => {
           >
             {t('disclaimer.understood')}
           </button>
+        </div>
+        <div className="legal-footer-links">
+          <Link to="/terms" className="legal-footer-link">{t('legal.footerLinks.terms')}</Link>
+          <span className="legal-footer-separator">|</span>
+          <Link to="/privacy" className="legal-footer-link">{t('legal.footerLinks.privacy')}</Link>
         </div>
       </div>
       <OptimalUsageModal

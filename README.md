@@ -2,18 +2,18 @@
 Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fetches, processes and stores news articles in dynambodb. The articles are distributed to varios channels (whatsapp, telegram) and to this webapp via AppSync subscriptions or long-polling.
 
 ## ToDo's
-- Analytics dashboard
+- Implement SES for email campaign
+- Migrate email from Zoho to AWS Workmail
 
-- Apply for AWS grant - Fernando Errandosoro ITBA
-- Open (MPago) business account for Finu - pay AWS, GEMINI.
-- Open AWS account on the name of Finu, transfer domain 
-- Legal disclaimers
+- Platform for original content publishers (CGI) self-service.
+- Follow companies
+
+- Platform for publicity self-service
 - Implement subscription workflow. Use MPago account.
 
 - Native IOS / Android App
 
 ## CI/CD
-
 # DEV - LOCAL
     - Font-end local instance: npm run dev
     - Back-end sandbox: npx amplify sandbox
@@ -29,15 +29,14 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
         > Download new amplify_outputs.json 
         > Run: npx ampx generate graphql-client-code --format graphql-codegen --out ./src/graphql/ 
             >> generates API.ts, and graphql files based on local schema and amplify_outputs.json 
-        - npx @aws-amplify/cli codegen 
+        - npx @aws-amplify/cli codegen
             >> downloads schema from the server
             >> updates src/API.ts and graphql/files
 
 # PROD - AWS - merge dev into main
-        git checkout main
-        git merge appsync (or dev in the future)
-        git commit -am
-        git push origin main
+        1. git checkout main
+        2. git merge appsync (or dev in the future)
+        3. git push origin main
 
 ## CLI
 https://docs.amplify.aws/react/reference/cli-commands/

@@ -11,50 +11,148 @@ interface SubscriptionUpgradeResponse {
   message: string;
   subscriptionId?: string;
   error?: string;
+  data?: {
+    planId: string;
+    planName: string;
+    amount: number;
+    period: string;
+    nextBillingDate: string;
+  };
 }
 
-export const handler = async (
-  event: APIGatewayProxyEvent
-): Promise<APIGatewayProxyResult> => {
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
-    'Access-Control-Allow-Methods': 'POST,OPTIONS',
-    'Content-Type': 'application/json',
+// AppSync resolver event format
+interface AppSyncResolverEvent {
+  arguments: {
+    planId: string;
+    userId: string;
+    paymentMethodId?: string;
   };
-
-  if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers,
-      body: '',
+  identity?: {
+    sub?: string;
+    claims?: {
+      email?: string;
+      'cognito:username'?: string;
     };
-  }
+  };
+  request?: {
+    userAttributes?: {
+      email?: string;
+      sub?: string;
+    };
+  };
+}
 
-  try {
-    const { planId, userId, paymentMethodId }: SubscriptionUpgradeRequest = JSON.parse(event.body || '{}');
+type SubscriptionEvent = APIGatewayProxyEvent | SubscriptionUpgradeRequest | AppSyncResolverEvent;
 
-    if (!planId || !userId) {
+export const handler = async (
+  event: SubscriptionEvent
+): Promise<APIGatewayProxyResult | SubscriptionUpgradeResponse> => {
+  // Handle HTTP events (Function URL / API Gateway) - return HTTP response
+  if ('httpMethod' in event || 'requestContext' in event) {
+    const headers = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+      'Access-Control-Allow-Methods': 'POST,OPTIONS',
+      'Content-Type': 'application/json',
+    };
+
+    // Handle CORS preflight
+    if ('httpMethod' in event && event.httpMethod === 'OPTIONS') {
       return {
-        statusCode: 400,
+        statusCode: 200,
+        headers,
+        body: '',
+      };
+    }
+
+    try {
+      // API Gateway/Function URL - parse from body
+      const requestData = JSON.parse((event as APIGatewayProxyEvent).body || '{}');
+      const { planId, userId, paymentMethodId } = requestData;
+
+      if (!planId || !userId) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({
+            success: false,
+            message: 'Missing required fields: planId and userId',
+          }),
+        };
+      }
+
+      const result = await processSubscriptionUpgrade(planId, userId, paymentMethodId);
+      
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify(result),
+      };
+    } catch (error) {
+      console.error('Subscription upgrade error:', error);
+      return {
+        statusCode: 500,
         headers,
         body: JSON.stringify({
           success: false,
-          message: 'Missing required fields: planId and userId',
+          message: 'Internal server error',
+          error: error instanceof Error ? error.message : 'Unknown error',
         }),
       };
     }
+  }
+
+  // Handle AppSync resolver events - return data directly
+  try {
+    let planId: string;
+    let userId: string;
+    let paymentMethodId: string | undefined;
+
+    // AppSync resolver format
+    if ('arguments' in event) {
+      const args = (event as AppSyncResolverEvent).arguments;
+      planId = args.planId;
+      userId = args.userId;
+      paymentMethodId = args.paymentMethodId;
+    } 
+    // Direct Lambda invocation format
+    else if ('planId' in event && 'userId' in event) {
+      const requestData = event as SubscriptionUpgradeRequest;
+      planId = requestData.planId;
+      userId = requestData.userId;
+      paymentMethodId = requestData.paymentMethodId;
+    } else {
+      throw new Error('Invalid event format');
+    }
+
+    if (!planId || !userId) {
+      throw new Error('Missing required fields: planId and userId');
+    }
+
+    return await processSubscriptionUpgrade(planId, userId, paymentMethodId);
+  } catch (error) {
+    console.error('Subscription upgrade error:', error);
+    return {
+      success: false,
+      message: 'Internal server error',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+};
+
+async function processSubscriptionUpgrade(
+  planId: string,
+  userId: string,
+  paymentMethodId?: string
+): Promise<SubscriptionUpgradeResponse> {
+  try {
 
     // Parse plan details
     const planDetails = parsePlanId(planId);
     if (!planDetails) {
       return {
-        statusCode: 400,
-        headers,
-        body: JSON.stringify({
-          success: false,
-          message: 'Invalid plan ID',
-        }),
+        success: false,
+        message: 'Invalid plan ID',
       };
     }
 
@@ -67,35 +165,22 @@ export const handler = async (
     const subscriptionId = await createSubscription(userId, planDetails);
     
     return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({
-        success: true,
-        message: 'Subscription upgraded successfully',
-        subscriptionId,
-        data: {
-          planId,
-          planName: planDetails.name,
-          amount: planDetails.price,
-          period: planDetails.period,
-          nextBillingDate: calculateNextBillingDate(planDetails.period as 'monthly' | 'yearly'),
-        },
-      }),
+      success: true,
+      message: 'Subscription upgraded successfully',
+      subscriptionId,
+      data: {
+        planId,
+        planName: planDetails.name,
+        amount: planDetails.price,
+        period: planDetails.period,
+        nextBillingDate: calculateNextBillingDate(planDetails.period as 'monthly' | 'yearly'),
+      },
     };
-
   } catch (error) {
     console.error('Subscription upgrade error:', error);
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({
-        success: false,
-        message: 'Internal server error',
-        error: error instanceof Error ? error.message : 'Unknown error',
-      }),
-    };
+    throw error;
   }
-};
+}
 
 function parsePlanId(planId: string) {
   const plans = {

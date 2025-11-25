@@ -17,7 +17,9 @@ function formatLocalTime(timestamp?: string | null): string {
 }
 
 function removeEmojis(text: string): string {
-  return text.replace(/[\u{1F300}-\u{1F9FF}]|[\u{1F100}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
+  if (!text) return text;
+  // Remove emojis (including variation selectors U+FE00-FE0F) and trim leading/trailing spaces
+  return text.replace(/[\u{1F300}-\u{1F9FF}]|[\u{1F100}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{FE00}-\u{FE0F}]/gu, '').trim();
 }
 
 function NewsSocketClient() {
@@ -195,10 +197,12 @@ function NewsSocketClient() {
       c => c.id.toLowerCase() === countryKey.toLowerCase() ||
            c.label.toLowerCase() === countryKey.toLowerCase() ||
            c.code.toLowerCase() === countryKey.toLowerCase() ||
+           c.fullName.toLowerCase() === countryKey.toLowerCase() ||
            (typeof url === 'string' && (
              c.id.toLowerCase() === url.toLowerCase() ||
              c.label.toLowerCase() === url.toLowerCase() ||
-             c.code.toLowerCase() === url.toLowerCase()
+             c.code.toLowerCase() === url.toLowerCase() ||
+             c.fullName.toLowerCase() === url.toLowerCase()
            ))
     );
 
@@ -305,10 +309,12 @@ function NewsSocketClient() {
                                   c => c.id.toLowerCase() === countryKey.toLowerCase() ||
                                        c.label.toLowerCase() === countryKey.toLowerCase() ||
                                        c.code.toLowerCase() === countryKey.toLowerCase() ||
+                                       c.fullName.toLowerCase() === countryKey.toLowerCase() ||
                                        (typeof url === 'string' && (
                                          c.id.toLowerCase() === url.toLowerCase() ||
                                          c.label.toLowerCase() === url.toLowerCase() ||
-                                         c.code.toLowerCase() === url.toLowerCase()
+                                         c.code.toLowerCase() === url.toLowerCase() ||
+                                         c.fullName.toLowerCase() === url.toLowerCase()
                                        ))
                                 );
                                 

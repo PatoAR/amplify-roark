@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { useActivityTracking } from './useActivityTracking';
+import { SessionService } from '../utils/sessionService';
 
 interface SessionState {
   isAuthenticated: boolean;
@@ -26,7 +27,7 @@ interface UseSessionManagerOptions {
 
 export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
   const { user, authStatus, signOut } = useAuthenticator();
-  const { startSession, endSession } = useActivityTracking();
+  const { startSession, endSession, restoreSession } = useActivityTracking();
   
   // Consolidated state management
   const [authState, setAuthState] = useState<AuthState>({
@@ -44,13 +45,16 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
   const optionsRef = useRef<UseSessionManagerOptions>(options);
   const lastProcessedAuthStateRef = useRef<string>('');
   const startSessionRef = useRef(startSession);
+  const restoreSessionRef = useRef(restoreSession);
   const effectExecutionRef = useRef<boolean>(false);
+  const restorationAttemptedRef = useRef<boolean>(false);
   
   // Update refs when functions change
   useEffect(() => {
     optionsRef.current = options;
     startSessionRef.current = startSession;
-  }, [options, startSession]);
+    restoreSessionRef.current = restoreSession;
+  }, [options, startSession, restoreSession]);
 
   // Centralized logout function with improved error handling
   const performLogout = useCallback(async (isInactivityLogout = false) => {
@@ -81,6 +85,9 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
         sessionId: undefined,
       };
 
+      // Clear ALL article read states (clean up all sessions)
+      SessionService.clearAllArticleReadStates();
+
       // Clear localStorage - comprehensive cleanup
       const keysToPreserve = [
         'theme', 
@@ -95,18 +102,23 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
       // Remove all localStorage keys except those we want to preserve
       Object.keys(localStorage).forEach(key => {
         // Preserve specific app preferences
-        if (!keysToPreserve.includes(key)) {
-          // Clear AWS Amplify/Cognito keys (CognitoIdentityServiceProvider.*)
-          // Clear amplify-* prefixed keys
-          // Clear any user/session/auth related keys
-          if (
-            key.startsWith('CognitoIdentityServiceProvider') ||
-            key.startsWith('amplify') ||
-            key.includes('auth') ||
-            key.includes('token')
-          ) {
-            localStorage.removeItem(key);
-          }
+        if (keysToPreserve.includes(key)) {
+          return; // Skip preserved keys
+        }
+        
+        // Clear AWS Amplify/Cognito keys (CognitoIdentityServiceProvider.*)
+        // Clear amplify-* prefixed keys
+        // Clear any user/session/auth related keys
+        // Clear roark_* keys (session-related, but not preserved preferences)
+        // Note: SessionService keys are cleared by SessionService.endSession()
+        if (
+          key.startsWith('CognitoIdentityServiceProvider') ||
+          key.startsWith('amplify') ||
+          key.startsWith('roark_') ||
+          (key.includes('auth') && !keysToPreserve.includes(key)) ||
+          key.includes('token')
+        ) {
+          localStorage.removeItem(key);
         }
       });
 
@@ -151,7 +163,7 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     }
   }, [endSession, signOut]);
 
-  // Start session when user becomes authenticated
+  // Restore or start session when user becomes authenticated
   useEffect(() => {
     const currentAuthState = `${user?.userId}-${authStatus}-${sessionStateRef.current.isAuthenticated}`;
     
@@ -164,7 +176,7 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     effectExecutionRef.current = true;
     lastProcessedAuthStateRef.current = currentAuthState;
 
-    // Only start session if:
+    // Only process if:
     // 1. User exists and has userId
     // 2. We're not currently authenticated
     // 3. We're not in the middle of logging out
@@ -175,41 +187,82 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
         !isLoggingOutRef.current && 
         authStatus === 'authenticated' &&
         !justLoggedOutRef.current) {
-      sessionStateRef.current = {
-        isAuthenticated: true,
-        isSessionActive: true,
-        userId: user.userId,
-        sessionId: undefined,
+      
+      // Try to restore existing session first (only once per mount)
+      const attemptRestore = async () => {
+        if (!restorationAttemptedRef.current) {
+          restorationAttemptedRef.current = true;
+          const restored = await restoreSessionRef.current();
+          
+          if (restored) {
+            // Session was restored
+            const currentSession = SessionService.getCurrentSession();
+            if (currentSession) {
+              sessionStateRef.current = {
+                isAuthenticated: true,
+                isSessionActive: true,
+                userId: user.userId,
+                sessionId: currentSession.sessionId,
+              };
+
+              setAuthState(prev => ({
+                ...prev,
+                authStatus: 'authenticated',
+                isAuthenticated: true,
+                isSessionActive: true,
+                userId: user.userId,
+                sessionId: currentSession.sessionId,
+              }));
+
+              if (optionsRef.current.onSessionStart) {
+                optionsRef.current.onSessionStart(user.userId);
+              }
+              effectExecutionRef.current = false;
+              return;
+            }
+          }
+        }
+
+        // No valid session to restore, start a new one
+        sessionStateRef.current = {
+          isAuthenticated: true,
+          isSessionActive: true,
+          userId: user.userId,
+          sessionId: undefined,
+        };
+
+        setAuthState(prev => ({
+          ...prev,
+          authStatus: 'authenticated',
+          isAuthenticated: true,
+          isSessionActive: true,
+          userId: user.userId,
+        }));
+
+        // Start activity tracking (using ref to avoid dependency issues)
+        if (!isLoggingOutRef.current) {
+          startSessionRef.current().then(() => {
+            const currentSession = SessionService.getCurrentSession();
+            if (currentSession) {
+              sessionStateRef.current.sessionId = currentSession.sessionId;
+              setAuthState(prev => ({
+                ...prev,
+                sessionId: currentSession.sessionId,
+              }));
+            }
+          });
+        }
+
+        if (optionsRef.current.onSessionStart) {
+          optionsRef.current.onSessionStart(user.userId);
+        }
+        effectExecutionRef.current = false;
       };
 
-      // Update consolidated auth state
-      setAuthState(prev => ({
-        ...prev,
-        authStatus: 'authenticated',
-        isAuthenticated: true,
-        isSessionActive: true,
-        userId: user.userId,
-      }));
-
-      // Start activity tracking (using ref to avoid dependency issues)
-      if (!isLoggingOutRef.current) {
-        startSessionRef.current().then(() => {
-          if (sessionStateRef.current.sessionId) {
-            setAuthState(prev => ({
-              ...prev,
-              sessionId: sessionStateRef.current.sessionId,
-            }));
-          }
-        });
-      }
-
-      if (optionsRef.current.onSessionStart) {
-        optionsRef.current.onSessionStart(user.userId);
-      }
+      attemptRestore();
+    } else {
+      effectExecutionRef.current = false;
     }
-    
-    // Reset execution flag after effect completes
-    effectExecutionRef.current = false;
   }, [user?.userId, authStatus]);
 
   // Handle logout when authStatus changes
@@ -232,31 +285,12 @@ export const useSessionManager = (options: UseSessionManagerOptions = {}) => {
     }));
   }, [authStatus]);
 
-  // Add browser close cleanup
+  // Reset restoration flag when user logs out
   useEffect(() => {
-    const handleBeforeUnload = () => {
-      // Mark session as ending to prevent new operations
-      isLoggingOutRef.current = true;
-      
-      // Store cleanup flag for next session
-      localStorage.setItem('session-cleanup-needed', 'true');
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, []);
-
-  // Check for cleanup needed on mount
-  useEffect(() => {
-    const needsCleanup = localStorage.getItem('session-cleanup-needed');
-    if (needsCleanup === 'true') {
-      localStorage.removeItem('session-cleanup-needed');
-      // Perform any necessary cleanup here
+    if (authStatus === 'unauthenticated') {
+      restorationAttemptedRef.current = false;
     }
-  }, []);
+  }, [authStatus]);
 
   return {
     // Consolidated authentication state

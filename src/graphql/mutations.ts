@@ -479,3 +479,18 @@ export const deleteDeletedUserEmail = /* GraphQL */ `mutation DeleteDeletedUserE
   APITypes.DeleteDeletedUserEmailMutationVariables,
   APITypes.DeleteDeletedUserEmailMutation
 >;
+export const upgradeSubscription = /* GraphQL */ `mutation UpgradeSubscription(
+  $planId: String!
+  $userId: String!
+  $paymentMethodId: String
+) {
+  upgradeSubscription(
+    planId: $planId
+    userId: $userId
+    paymentMethodId: $paymentMethodId
+  )
+}
+` as GeneratedMutation<
+  APITypes.UpgradeSubscriptionMutationVariables,
+  APITypes.UpgradeSubscriptionMutation
+>;

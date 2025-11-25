@@ -1,8 +1,8 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { postConfirmation } from "../auth/post-confirmation/resource";
-import { referralApi } from "../functions/referral-api/resource";
 import { referralProcessor } from "../functions/referral-processor/resource";
 import { subscriptionManager } from "../functions/subscription-manager/resource";
+import { sessionCleanup } from "../functions/session-cleanup/resource";
 
 const schema = a.schema({
   // Article Model
@@ -88,6 +88,8 @@ const schema = a.schema({
   })
   .authorization(allow => [
     allow.owner().identityClaim('sub'),
+    // Allow authenticated users to read all subscriptions (for analytics)
+    allow.authenticated().to(['read']),
     // Allow Lambda functions (via API key) to create/update subscriptions during post-confirmation
     allow.publicApiKey().to(['create', 'update', 'read'])
   ]),
@@ -104,7 +106,13 @@ const schema = a.schema({
     userAgent: a.string(),
     isActive: a.boolean().default(true),
   })
-  .authorization(allow => [allow.owner().identityClaim('sub')]),
+  .authorization(allow => [
+    allow.owner().identityClaim('sub'),
+    // Allow authenticated users to read all activities (for analytics)
+    allow.authenticated().to(['read']),
+    // Allow Lambda functions (via API key) to read and update activities for cleanup and analytics
+    allow.publicApiKey().to(['read', 'update'])
+  ]),
 
   // DeletedUserEmail Model - Track deleted account emails to prevent recreation
   DeletedUserEmail: a
@@ -121,6 +129,19 @@ const schema = a.schema({
     // Allow authenticated users to read their own deletion record
     allow.owner().identityClaim('sub').to(['read'])
   ]),
+
+  // Subscription Management Mutation
+  upgradeSubscription: a
+    .mutation()
+    .arguments({
+      planId: a.string().required(),
+      userId: a.string().required(),
+      paymentMethodId: a.string(),
+    })
+    .returns(a.json())
+    .authorization(allow => [allow.authenticated()])
+    .handler(a.handler.function(subscriptionManager)),
+
 });
 
 export type Schema = ClientSchema<typeof schema>;
@@ -135,8 +156,8 @@ export const data = defineData({
   },
   functions: {
     postConfirmation,
-    referralApi,
     referralProcessor,
     subscriptionManager,
+    sessionCleanup,
   }
 });

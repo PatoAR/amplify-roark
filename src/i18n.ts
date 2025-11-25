@@ -145,7 +145,7 @@ const customTranslations = {
     'landing.ctaTitle': 'Ready to transform your business intelligence?',
     'landing.ctaDescription': 'Gain access to Perkins comprehensive business intelligence platform. Keep it free through referrals or subscribe for unlimited access.',
     'landing.getStarted': 'Get Started Today',
-    'landing.copyright': '© 2024 Perkins Intel. All rights reserved.',
+    'landing.copyright': '© 2024 Finu S.A. All rights reserved.',
     'landing.contactHelp': 'Need help? Contact us at <a href="mailto:info@perkinsintel.com" style="text-decoration: none; color: #4f79a6;">info@perkinsintel.com</a>',
     
     // Newsfeed Preview
@@ -295,6 +295,21 @@ const customTranslations = {
     // Disclaimer
     'disclaimer.text': 'News may be delayed by several minutes depending on source publication and retrieval frequency.',
     'disclaimer.understood': 'Understood',
+    
+    // Cookie Consent
+    'cookieConsent.title': 'Cookie Consent',
+    'cookieConsent.message': 'We use cookies to enhance your experience and analyze site usage. By continuing, you agree to our use of cookies.',
+    'cookieConsent.accept': 'Accept',
+    'cookieConsent.decline': 'Decline',
+    'cookieConsent.learnMore': 'Learn more',
+    
+    // Legal
+    'legal.terms.title': 'Terms and Conditions',
+    'legal.terms.content': 'Terms and conditions content will be provided here.',
+    'legal.privacy.title': 'Privacy Policy',
+    'legal.privacy.content': 'Privacy policy content will be provided here.',
+    'legal.footerLinks.terms': 'Terms & Conditions',
+    'legal.footerLinks.privacy': 'Privacy Policy',
   },
   es: {
     // Menu items
@@ -489,6 +504,39 @@ const customTranslations = {
     // Disclaimer
     'disclaimer.text': 'Las noticias pueden retrasarse varios minutos según la publicación de la fuente y la frecuencia de búsqueda.',
     'disclaimer.understood': 'Entendido',
+    
+    // Cookie Consent
+    'cookieConsent.title': 'Consentimiento de Cookies',
+    'cookieConsent.message': 'Utilizamos cookies para mejorar su experiencia y analizar el uso del sitio. Al continuar, acepta nuestro uso de cookies.',
+    'cookieConsent.accept': 'Aceptar',
+    'cookieConsent.decline': 'Rechazar',
+    'cookieConsent.learnMore': 'Más información',
+    
+    // Legal
+    'legal.terms.title': 'Términos y Condiciones',
+    'legal.terms.content': 'El contenido de términos y condiciones se proporcionará aquí.',
+    'legal.privacy.title': 'Política de Privacidad',
+    'legal.privacy.content': 'El contenido de la política de privacidad se proporcionará aquí.',
+    'legal.footerLinks.terms': 'Términos y Condiciones',
+    'legal.footerLinks.privacy': 'Política de Privacidad',
+    
+    // Newsfeed Preview
+    'newsfeedPreview.title': 'Feed de Inteligencia Empresarial en Vivo',
+    'newsfeedPreview.subtitle': 'Regístrate para personalizar el feed de noticias según tu industria y enfoque geográfico específico',
+    
+    // WhatsApp Channels
+    'whatsapp.title': 'Prueba Perkins en WhatsApp',
+    'whatsapp.subtitle': 'Sigue nuestros canales y experimenta inteligencia empresarial en tiempo real para tu región',
+    'whatsapp.argentinaDescription': 'Inteligencia empresarial diaria para Argentina',
+    'whatsapp.brasilDescription': 'Inteligencia empresarial diaria para Brasil',
+    'whatsapp.chileDescription': 'Inteligencia empresarial diaria para Chile',
+    'whatsapp.colombiaDescription': 'Inteligencia empresarial diaria para Colombia',
+    'whatsapp.mexicoDescription': 'Inteligencia empresarial diaria para México',
+    'whatsapp.paraguayDescription': 'Inteligencia empresarial diaria para Paraguay',
+    'whatsapp.peruDescription': 'Inteligencia empresarial diaria para Perú',
+    'whatsapp.uruguayDescription': 'Inteligencia empresarial diaria para Uruguay',
+    'whatsapp.followButton': 'Seguir en WhatsApp',
+    'whatsapp.note': 'Sin registro requerido • Gratis para siempre • Actualizaciones instantáneas',
     
     // Landing Page
     'landing.signIn': 'Iniciar Sesión',
@@ -764,6 +812,39 @@ const customTranslations = {
     // Disclaimer
     'disclaimer.text': 'As notícias podem sofrer atraso de alguns minutos, dependendo da publicação da fonte e da frequência de busca.',
     'disclaimer.understood': 'Entendi',
+    
+    // Cookie Consent
+    'cookieConsent.title': 'Consentimento de Cookies',
+    'cookieConsent.message': 'Usamos cookies para melhorar sua experiência e analisar o uso do site. Ao continuar, você concorda com o uso de cookies.',
+    'cookieConsent.accept': 'Aceitar',
+    'cookieConsent.decline': 'Recusar',
+    'cookieConsent.learnMore': 'Saiba mais',
+    
+    // Legal
+    'legal.terms.title': 'Termos e Condições',
+    'legal.terms.content': 'O conteúdo dos termos e condições será fornecido aqui.',
+    'legal.privacy.title': 'Política de Privacidade',
+    'legal.privacy.content': 'O conteúdo da política de privacidade será fornecido aqui.',
+    'legal.footerLinks.terms': 'Termos e Condições',
+    'legal.footerLinks.privacy': 'Política de Privacidade',
+    
+    // Newsfeed Preview
+    'newsfeedPreview.title': 'Feed de Inteligência Empresarial ao Vivo',
+    'newsfeedPreview.subtitle': 'Cadastre-se para personalizar o feed de notícias de acordo com sua indústria e foco geográfico específico',
+    
+    // WhatsApp Channels
+    'whatsapp.title': 'Experimente Perkins no WhatsApp',
+    'whatsapp.subtitle': 'Siga nossos canais e experimente inteligência empresarial em tempo real para sua região',
+    'whatsapp.argentinaDescription': 'Inteligência empresarial diária para Argentina',
+    'whatsapp.brasilDescription': 'Inteligência empresarial diária para Brasil',
+    'whatsapp.chileDescription': 'Inteligência empresarial diária para Chile',
+    'whatsapp.colombiaDescription': 'Inteligência empresarial diária para Colômbia',
+    'whatsapp.mexicoDescription': 'Inteligência empresarial diária para México',
+    'whatsapp.paraguayDescription': 'Inteligência empresarial diária para Paraguai',
+    'whatsapp.peruDescription': 'Inteligência empresarial diária para Peru',
+    'whatsapp.uruguayDescription': 'Inteligência empresarial diária para Uruguai',
+    'whatsapp.followButton': 'Seguir no WhatsApp',
+    'whatsapp.note': 'Sem cadastro necessário • Grátis para sempre • Atualizações instantâneas',
     
     // Landing Page
     'landing.signIn': 'Entrar',

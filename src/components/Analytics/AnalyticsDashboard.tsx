@@ -1,199 +1,451 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getCurrentUser } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
 import { type Schema } from '../../../amplify/data/resource';
 import { useSession } from '../../context/SessionContext';
+import { listUserActivities, listUserSubscriptions } from '../../graphql/queries';
+import { useTranslation } from '../../i18n';
+import { MASTER_EMAIL } from '../../constants/auth';
 import './AnalyticsDashboard.css';
 
-interface SessionStats {
+interface AggregatedAnalytics {
+  registeredUsers: number;
   totalSessions: number;
-  totalDuration: number;
-  averageSessionLength: number;
+  averageSessionsPerUser: number;
+  averageSessionDuration: number;
+  totalTimeSpent: number;
+  activeUsers: number;
+  subscriptionStatusBreakdown: {
+    free_trial: number;
+    active: number;
+    expired: number;
+    cancelled: number;
+  };
+  sessionsPerUser: Array<{
+    userId: string;
+    sessionCount: number;
+  }>;
+}
+
+async function fetchAllActivities(
+  client: ReturnType<typeof generateClient<Schema>>,
+  startDate?: string
+): Promise<any[]> {
+  let allActivities: any[] = [];
+  let nextToken: string | null = null;
+
+  do {
+    const filter: any = {};
+    if (startDate) {
+      filter.startTime = { ge: startDate };
+    }
+
+    const result = await client.graphql({
+      query: listUserActivities,
+      variables: {
+        filter: Object.keys(filter).length > 0 ? filter : undefined,
+        limit: 1000,
+        nextToken,
+      },
+    }) as any;
+
+    const items = result.data?.listUserActivities?.items || [];
+    allActivities = allActivities.concat(items);
+    nextToken = result.data?.listUserActivities?.nextToken || null;
+  } while (nextToken);
+
+  return allActivities;
+}
+
+async function fetchAllSubscriptions(
+  client: ReturnType<typeof generateClient<Schema>>
+): Promise<any[]> {
+  let allSubscriptions: any[] = [];
+  let nextToken: string | null = null;
+
+  do {
+    const result = await client.graphql({
+      query: listUserSubscriptions,
+      variables: {
+        limit: 1000,
+        nextToken,
+      },
+    }) as any;
+
+    const items = result.data?.listUserSubscriptions?.items || [];
+    allSubscriptions = allSubscriptions.concat(items);
+    nextToken = result.data?.listUserSubscriptions?.nextToken || null;
+  } while (nextToken);
+
+  return allSubscriptions;
+}
+
+function aggregateAnalytics(
+  activities: any[],
+  subscriptions: any[],
+  timeRange: '7d' | '30d' | '90d',
+  masterUserId?: string
+): AggregatedAnalytics {
+  // Calculate date range if provided
+  let startDate: string | undefined;
+  if (timeRange) {
+    const now = new Date();
+    const daysAgo = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
+    const start = new Date(now.getTime() - (daysAgo * 24 * 60 * 60 * 1000));
+    startDate = start.toISOString();
+  }
+
+  // Filter out master user data if masterUserId is provided
+  let filteredActivities = activities;
+  if (masterUserId) {
+    filteredActivities = filteredActivities.filter((activity) => activity.owner !== masterUserId);
+  }
+
+  // Filter activities by date range if needed
+  filteredActivities = startDate
+    ? filteredActivities.filter((activity) => {
+        const activityDate = new Date(activity.startTime);
+        return activityDate >= new Date(startDate!);
+      })
+    : filteredActivities;
+
+  // Filter out master user subscriptions if masterUserId is provided
+  let filteredSubscriptions = subscriptions;
+  if (masterUserId) {
+    filteredSubscriptions = filteredSubscriptions.filter((sub: any) => sub.owner !== masterUserId);
+  }
+
+  // Calculate registered users (excluding master user)
+  const uniqueUserIds = new Set(filteredSubscriptions.map((sub: any) => sub.owner).filter(Boolean));
+  const registeredUsers = uniqueUserIds.size;
+
+  // Calculate sessions per user
+  const sessionsByUser = new Map<string, number>();
+  filteredActivities.forEach((activity: any) => {
+    if (activity.owner) {
+      sessionsByUser.set(activity.owner, (sessionsByUser.get(activity.owner) || 0) + 1);
+    }
+  });
+
+  const totalSessions = filteredActivities.length;
+
+  // Calculate session durations
+  const now = new Date();
+  let totalDuration = 0;
+  let validDurations = 0;
+
+  filteredActivities.forEach((activity: any) => {
+    if (activity.duration) {
+      totalDuration += activity.duration;
+      validDurations++;
+    } else if (activity.isActive && activity.startTime) {
+      // Calculate duration for active sessions
+      const sessionStart = new Date(activity.startTime);
+      const seconds = Math.floor((now.getTime() - sessionStart.getTime()) / 1000);
+      if (seconds > 0) {
+        totalDuration += seconds;
+        validDurations++;
+      }
+    }
+  });
+
+  const averageSessionDuration = validDurations > 0 ? Math.round(totalDuration / validDurations) : 0;
+
+  // Calculate active users (users with active sessions or activity within the selected time range)
+  const activeUserIds = new Set<string>();
+  
+  // filteredActivities already contains activities within the selected time range
+  filteredActivities.forEach((activity: any) => {
+    if (activity.owner) {
+      // Count users with active sessions or any activity in the time range
+      activeUserIds.add(activity.owner);
+    }
+  });
+
+  const activeUsers = activeUserIds.size;
+  
+  // Calculate average sessions per user based on active users (not registered users)
+  const averageSessionsPerUser = activeUsers > 0 ? totalSessions / activeUsers : 0;
+
+  // Calculate subscription status breakdown
+  const statusBreakdown = {
+    free_trial: 0,
+    active: 0,
+    expired: 0,
+    cancelled: 0,
+  };
+
+  filteredSubscriptions.forEach((sub: any) => {
+    const status = sub.subscriptionStatus;
+    if (status && statusBreakdown.hasOwnProperty(status)) {
+      statusBreakdown[status as keyof typeof statusBreakdown]++;
+    }
+  });
+
+  // Get sessions per user (top users)
+  const sessionsPerUser = Array.from(sessionsByUser.entries())
+    .map(([userId, sessionCount]) => ({ userId, sessionCount }))
+    .sort((a, b) => b.sessionCount - a.sessionCount);
+
+  return {
+    registeredUsers,
+    totalSessions,
+    averageSessionsPerUser: Math.round(averageSessionsPerUser * 100) / 100,
+    averageSessionDuration,
+    totalTimeSpent: totalDuration,
+    activeUsers,
+    subscriptionStatusBreakdown: statusBreakdown,
+    sessionsPerUser,
+  };
 }
 
 export const AnalyticsDashboard = () => {
   const { userId } = useSession();
-  const [sessionStats, setSessionStats] = useState<SessionStats>({
-    totalSessions: 0,
-    totalDuration: 0,
-    averageSessionLength: 0,
-  });
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const [isMasterUser, setIsMasterUser] = useState<boolean | null>(null);
+  const [analytics, setAnalytics] = useState<AggregatedAnalytics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d');
 
+  const handleBack = () => {
+    navigate('/');
+  };
+
+  // Check if user is master
+  useEffect(() => {
+    const checkMasterUser = async () => {
+      try {
+        const user = await getCurrentUser();
+        const userEmail = user.signInDetails?.loginId || user.username;
+        setIsMasterUser(userEmail?.toLowerCase() === MASTER_EMAIL.toLowerCase());
+      } catch (error) {
+        console.error('Failed to get current user:', error);
+        setIsMasterUser(false);
+      }
+    };
+
+    if (userId) {
+      checkMasterUser();
+    }
+  }, [userId]);
+
   const loadAnalytics = useCallback(async () => {
-    if (!userId) return;
+    if (!userId || !isMasterUser) return;
 
     setIsLoading(true);
+    setError(null);
     try {
       const client = generateClient<Schema>();
-      
-      // Calculate date range
-      const now = new Date();
-      const daysAgo = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
-      const startDate = new Date(now.getTime() - (daysAgo * 24 * 60 * 60 * 1000));
 
-      // Load session data
-      const { data: activities } = await client.models.UserActivity.list({
-        filter: { 
-          owner: { eq: userId },
-          startTime: { ge: startDate.toISOString() }
-        }
-      });
+      // Fetch all data in parallel
+      const [activities, subscriptions] = await Promise.all([
+        fetchAllActivities(client),
+        fetchAllSubscriptions(client),
+      ]);
 
-      // Calculate session stats
-      const sessions = activities || [];
-      console.log('📊 Loaded sessions:', sessions.length, 'for userId:', userId);
-      console.log('📊 Sessions data:', sessions.map(s => ({ 
-        id: s.id, 
-        startTime: s.startTime, 
-        duration: s.duration, 
-        isActive: s.isActive 
-      })));
-      
-      // Count all sessions, including active ones without duration
-      const totalSessions = sessions.length;
-      const totalDuration = sessions.reduce((sum, session) => {
-        if (session.duration) {
-          return sum + session.duration;
-        }
-        // For active sessions without duration, calculate from startTime
-        if (session.isActive && session.startTime) {
-          const sessionStart = new Date(session.startTime);
-          const now = new Date();
-          const seconds = Math.floor((now.getTime() - sessionStart.getTime()) / 1000);
-          return sum + Math.max(0, seconds);
-        }
-        return sum + 0;
-      }, 0);
-
-      setSessionStats({
-        totalSessions,
-        totalDuration,
-        averageSessionLength: totalSessions > 0 ? Math.round(totalDuration / totalSessions) : 0,
-      });
+      // Aggregate analytics in the frontend (exclude master user data)
+      const aggregated = aggregateAnalytics(activities, subscriptions, timeRange, userId);
+      setAnalytics(aggregated);
     } catch (error) {
       console.error('Failed to load analytics', error);
-      console.error('Error details:', error);
+      setError(error instanceof Error ? error.message : 'Failed to load analytics');
     } finally {
       setIsLoading(false);
     }
-  }, [userId, timeRange]);
+  }, [userId, isMasterUser, timeRange]);
 
   useEffect(() => {
-    if (userId) {
+    if (userId && isMasterUser) {
       loadAnalytics();
+    } else if (isMasterUser === false) {
+      setIsLoading(false);
     }
-  }, [userId, timeRange, loadAnalytics]);
+  }, [userId, isMasterUser, timeRange, loadAnalytics]);
 
   const formatDuration = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    
+
     if (hours > 0) {
-      return `${hours}h ${minutes}m ${secs}s`;
+      return `${hours}h ${minutes}m`;
     } else if (minutes > 0) {
-      return `${minutes}m ${secs}s`;
+      return `${minutes}m`;
     } else {
-      return `${secs}s`;
+      return '0m';
     }
   };
 
-  if (isLoading) {
+  // Show access denied if not master user
+  if (isMasterUser === false) {
     return (
       <div className="analytics-dashboard">
+        <div className="analytics-page-header">
+          <button
+            onClick={handleBack}
+            className="back-button"
+          >
+            {t('settings.backToNews')}
+          </button>
+        </div>
         <div className="analytics-header">
           <h1>Analytics Dashboard</h1>
-          <div className="time-range-selector">
-            <button 
-              className={timeRange === '7d' ? 'active' : ''} 
-              onClick={() => setTimeRange('7d')}
-            >
-              7 Days
-            </button>
-            <button 
-              className={timeRange === '30d' ? 'active' : ''} 
-              onClick={() => setTimeRange('30d')}
-            >
-              30 Days
-            </button>
-            <button 
-              className={timeRange === '90d' ? 'active' : ''} 
-              onClick={() => setTimeRange('90d')}
-            >
-              90 Days
-            </button>
+        </div>
+        <div className="analytics-content">
+          <div className="error-message">
+            <h2>Access Denied</h2>
+            <p>You do not have permission to access this dashboard.</p>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading || isMasterUser === null) {
+    return (
+      <div className="analytics-dashboard">
+        <div className="analytics-page-header">
+          <button
+            onClick={handleBack}
+            className="back-button"
+          >
+            {t('settings.backToNews')}
+          </button>
+        </div>
+        <div className="analytics-header">
+          <h1>Analytics Dashboard</h1>
         </div>
         <div className="loading">Loading analytics...</div>
       </div>
     );
   }
 
-  return (
-    <div className="analytics-dashboard">
-      <div className="analytics-header">
-        <h1>Analytics Dashboard</h1>
-        <div className="time-range-selector">
-          <button 
-            className={timeRange === '7d' ? 'active' : ''} 
-            onClick={() => setTimeRange('7d')}
+  if (error) {
+    return (
+      <div className="analytics-dashboard">
+        <div className="analytics-page-header">
+          <button
+            onClick={handleBack}
+            className="back-button"
           >
-            7 Days
-          </button>
-          <button 
-            className={timeRange === '30d' ? 'active' : ''} 
-            onClick={() => setTimeRange('30d')}
-          >
-            30 Days
-          </button>
-          <button 
-            className={timeRange === '90d' ? 'active' : ''} 
-            onClick={() => setTimeRange('90d')}
-          >
-            90 Days
+            {t('settings.backToNews')}
           </button>
         </div>
+        <div className="analytics-header">
+          <h1>Analytics Dashboard</h1>
+        </div>
+        <div className="analytics-content">
+          <div className="error-message error">
+            <h2>Error</h2>
+            <p>{error}</p>
+            <button onClick={loadAnalytics} className="retry-button">
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!analytics) {
+    return null;
+  }
+
+  return (
+    <div className="analytics-dashboard">
+      <div className="analytics-page-header">
+        <button
+          onClick={handleBack}
+          className="back-button"
+        >
+          {t('settings.backToNews')}
+        </button>
+      </div>
+
+      <div className="analytics-header">
+        <h1>Analytics Dashboard</h1>
+      </div>
+      
+      <div className="time-range-selector">
+        <button
+          className={timeRange === '7d' ? 'active' : ''}
+          onClick={() => setTimeRange('7d')}
+        >
+          7 Days
+        </button>
+        <button
+          className={timeRange === '30d' ? 'active' : ''}
+          onClick={() => setTimeRange('30d')}
+        >
+          30 Days
+        </button>
+        <button
+          className={timeRange === '90d' ? 'active' : ''}
+          onClick={() => setTimeRange('90d')}
+        >
+          90 Days
+        </button>
       </div>
 
       <div className="analytics-content">
         <div className="stats-grid">
           <div className="stat-card">
-            <span className="stat-value">{sessionStats.totalSessions}</span>
+            <span className="stat-value">{analytics.activeUsers}</span>
+            <span className="stat-label">Active Users</span>
+          </div>
+
+          <div className="stat-card">
+            <span className="stat-value">{analytics.totalSessions}</span>
             <span className="stat-label">Total Sessions</span>
           </div>
-          
-          <div className="stat-card">
-            <span className="stat-value">{formatDuration(sessionStats.totalDuration)}</span>
-            <span className="stat-label">Total Time</span>
-          </div>
-          
+
           <div className="stat-card">
             <span className="stat-value">
-              {sessionStats.totalSessions > 0 
-                ? formatDuration(sessionStats.averageSessionLength)
-                : '0s'
-              }
+              {analytics.averageSessionsPerUser.toFixed(1)}
             </span>
-            <span className="stat-label">Average Session Length</span>
+            <span className="stat-label">Avg Sessions Per User</span>
+          </div>
+
+          <div className="stat-card">
+            <span className="stat-value">{analytics.registeredUsers}</span>
+            <span className="stat-label">Registered Users</span>
+          </div>
+
+          <div className="stat-card">
+            <span className="stat-value">{formatDuration(analytics.totalTimeSpent)}</span>
+            <span className="stat-label">Total Time Spent</span>
+          </div>
+
+          <div className="stat-card">
+            <span className="stat-value">{formatDuration(analytics.averageSessionDuration)}</span>
+            <span className="stat-label">Avg Session Duration</span>
           </div>
         </div>
 
-        <div className="analytics-section">
-          <h2>Session Overview</h2>
-          <p>
-            You've had <strong>{sessionStats.totalSessions}</strong> sessions in the last {timeRange === '7d' ? '7 days' : timeRange === '30d' ? '30 days' : '90 days'}.
-          </p>
-          <p>
-            Total time spent: <strong>{formatDuration(sessionStats.totalDuration)}</strong>
-          </p>
-          {sessionStats.totalSessions > 0 && (
-            <p>
-              Average session length: <strong>{formatDuration(sessionStats.averageSessionLength)}</strong>
-            </p>
-          )}
+        <div className="subscription-card">
+          <h2 className="subscription-card-title">Subscription Status Breakdown</h2>
+          <div className="subscription-items">
+            <div className="subscription-item">
+              <span className="subscription-label">Free Trial</span>
+              <span className="subscription-value">{analytics.subscriptionStatusBreakdown.free_trial}</span>
+            </div>
+            <div className="subscription-item">
+              <span className="subscription-label">Active</span>
+              <span className="subscription-value">{analytics.subscriptionStatusBreakdown.active}</span>
+            </div>
+            <div className="subscription-item">
+              <span className="subscription-label">Expired</span>
+              <span className="subscription-value">{analytics.subscriptionStatusBreakdown.expired}</span>
+            </div>
+            <div className="subscription-item">
+              <span className="subscription-label">Cancelled</span>
+              <span className="subscription-value">{analytics.subscriptionStatusBreakdown.cancelled}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
-}; 
+};
