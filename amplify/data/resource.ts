@@ -110,8 +110,8 @@ const schema = a.schema({
     allow.owner().identityClaim('sub'),
     // Allow authenticated users to read all activities (for analytics)
     allow.authenticated().to(['read']),
-    // Allow Lambda functions (via API key) to read all activities for analytics aggregation
-    allow.publicApiKey().to(['read'])
+    // Allow Lambda functions (via API key) to read and update activities for cleanup and analytics
+    allow.publicApiKey().to(['read', 'update'])
   ]),
 
   // DeletedUserEmail Model - Track deleted account emails to prevent recreation
