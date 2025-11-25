@@ -6,6 +6,7 @@ import { type Schema } from '../../../amplify/data/resource';
 import { useSession } from '../../context/SessionContext';
 import { listUserActivities, listUserSubscriptions } from '../../graphql/queries';
 import { useTranslation } from '../../i18n';
+import { MASTER_EMAIL } from '../../constants/auth';
 import './AnalyticsDashboard.css';
 
 interface AggregatedAnalytics {
@@ -26,8 +27,6 @@ interface AggregatedAnalytics {
     sessionCount: number;
   }>;
 }
-
-const MASTER_EMAIL = 'master@perkinsintel.com';
 
 async function fetchAllActivities(
   client: ReturnType<typeof generateClient<Schema>>,
@@ -85,7 +84,8 @@ async function fetchAllSubscriptions(
 function aggregateAnalytics(
   activities: any[],
   subscriptions: any[],
-  timeRange: '7d' | '30d' | '90d'
+  timeRange: '7d' | '30d' | '90d',
+  masterUserId?: string
 ): AggregatedAnalytics {
   // Calculate date range if provided
   let startDate: string | undefined;
@@ -96,16 +96,28 @@ function aggregateAnalytics(
     startDate = start.toISOString();
   }
 
+  // Filter out master user data if masterUserId is provided
+  let filteredActivities = activities;
+  if (masterUserId) {
+    filteredActivities = filteredActivities.filter((activity) => activity.owner !== masterUserId);
+  }
+
   // Filter activities by date range if needed
-  const filteredActivities = startDate
-    ? activities.filter((activity) => {
+  filteredActivities = startDate
+    ? filteredActivities.filter((activity) => {
         const activityDate = new Date(activity.startTime);
         return activityDate >= new Date(startDate!);
       })
-    : activities;
+    : filteredActivities;
 
-  // Calculate registered users
-  const uniqueUserIds = new Set(subscriptions.map((sub: any) => sub.owner).filter(Boolean));
+  // Filter out master user subscriptions if masterUserId is provided
+  let filteredSubscriptions = subscriptions;
+  if (masterUserId) {
+    filteredSubscriptions = filteredSubscriptions.filter((sub: any) => sub.owner !== masterUserId);
+  }
+
+  // Calculate registered users (excluding master user)
+  const uniqueUserIds = new Set(filteredSubscriptions.map((sub: any) => sub.owner).filter(Boolean));
   const registeredUsers = uniqueUserIds.size;
 
   // Calculate sessions per user
@@ -164,7 +176,7 @@ function aggregateAnalytics(
     cancelled: 0,
   };
 
-  subscriptions.forEach((sub: any) => {
+  filteredSubscriptions.forEach((sub: any) => {
     const status = sub.subscriptionStatus;
     if (status && statusBreakdown.hasOwnProperty(status)) {
       statusBreakdown[status as keyof typeof statusBreakdown]++;
@@ -234,8 +246,8 @@ export const AnalyticsDashboard = () => {
         fetchAllSubscriptions(client),
       ]);
 
-      // Aggregate analytics in the frontend
-      const aggregated = aggregateAnalytics(activities, subscriptions, timeRange);
+      // Aggregate analytics in the frontend (exclude master user data)
+      const aggregated = aggregateAnalytics(activities, subscriptions, timeRange, userId);
       setAnalytics(aggregated);
     } catch (error) {
       console.error('Failed to load analytics', error);

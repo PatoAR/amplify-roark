@@ -10,9 +10,8 @@ import { useFreeDaysRemaining } from '../../hooks/useFreeDaysRemaining';
 import { useTranslation } from '../../i18n';
 import LanguageSwitcher from '../LanguageSwitcher/LanguageSwitcher';
 import { COUNTRY_OPTIONS, INDUSTRY_OPTIONS } from '../../constants/countries';
+import { MASTER_EMAIL } from '../../constants/auth';
 import "./HeaderNav.css";
-
-const MASTER_EMAIL = 'master@perkinsintel.com';
 
 const HeaderNav = () => {
   const { t } = useTranslation();
