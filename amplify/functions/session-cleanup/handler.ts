@@ -90,6 +90,15 @@ export const handler = async (
   event: EventBridgeEvent<'Scheduled Event', {}>
 ): Promise<{ success: boolean; expiredCount: number; error?: string }> => {
   console.log('Session cleanup triggered:', new Date().toISOString());
+  
+  // Debug logging to understand environment variable availability
+  console.log('Environment check:', {
+    hasGraphQLApiUrl: !!process.env.GRAPHQL_API_URL,
+    hasGraphQLApiKey: !!process.env.GRAPHQL_API_KEY,
+    hasAmplifyOutput: !!process.env.API_AMPLIFY_GRAPHQLAPIENDPOINTOUTPUT,
+    hasAmplifySsmConfig: !!process.env.AMPLIFY_SSM_ENV_CONFIG,
+    allEnvKeys: Object.keys(process.env).filter(k => k.includes('GRAPHQL') || k.includes('AMPLIFY') || k.includes('API')).sort(),
+  });
 
   try {
     const now = new Date();

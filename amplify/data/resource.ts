@@ -2,6 +2,7 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { postConfirmation } from "../auth/post-confirmation/resource";
 import { referralProcessor } from "../functions/referral-processor/resource";
 import { subscriptionManager } from "../functions/subscription-manager/resource";
+import { sessionCleanup } from "../functions/session-cleanup/resource";
 
 const schema = a.schema({
   // Article Model
@@ -157,5 +158,6 @@ export const data = defineData({
     postConfirmation,
     referralProcessor,
     subscriptionManager,
+    sessionCleanup,
   }
 });
