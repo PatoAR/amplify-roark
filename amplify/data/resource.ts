@@ -130,6 +130,41 @@ const schema = a.schema({
     allow.owner().identityClaim('sub').to(['read'])
   ]),
 
+  // SES Campaign Contact List Model - Stores contact information for email campaign
+  SESCampaignContact: a
+    .model({
+      email: a.string().required(), // Primary key - contact email
+      Company: a.string().required(),
+      FirstName: a.string().required(),
+      LastName: a.string().required(),
+      Sent_Status: a.boolean().default(false),
+      Target_Send_Date: a.string().required(), // YYYY-MM-DD format
+      Send_Group_ID: a.integer().required(),
+      Sent_Date: a.string(), // YYYY-MM-DD format, optional
+      Error_Status: a.string(), // Error details if send fails, optional
+      Company_Sequence: a.integer(), // 1st, 2nd, 3rd contact from same company
+    })
+    .secondaryIndexes((index) => [
+      index('Sent_Status', 'Target_Send_Date'), // GSI for querying unsent contacts ready to send
+    ])
+    .authorization(allow => [
+      // Backend-only access via API key (Lambda functions)
+      allow.publicApiKey().to(['create', 'read', 'update']),
+    ]),
+
+  // SES Campaign Control Model - Controls campaign enable/disable state
+  SESCampaignControl: a
+    .model({
+      control: a.string().required(), // Primary key - fixed value: "main"
+      isEnabled: a.boolean().default(true),
+      lastUpdated: a.string().required(), // ISO timestamp
+      updatedBy: a.string(), // Identifier of who updated, optional
+    })
+    .authorization(allow => [
+      // Backend-only access via API key (Lambda functions)
+      allow.publicApiKey().to(['create', 'read', 'update']),
+    ]),
+
   // Subscription Management Mutation
   upgradeSubscription: a
     .mutation()
