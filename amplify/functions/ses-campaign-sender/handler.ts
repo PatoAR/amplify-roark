@@ -26,7 +26,7 @@ const SENDER_EMAIL = process.env.SENDER_EMAIL || 'info@perkinsintel.com';
 const DAILY_SEND_LIMIT = parseInt(process.env.DAILY_SEND_LIMIT || '50', 10);
 const CONTACT_TABLE_NAME = process.env.CONTACT_TABLE_NAME || 'SESCampaignContact';
 const CAMPAIGN_CONTROL_TABLE_NAME = process.env.CAMPAIGN_CONTROL_TABLE_NAME || 'SESCampaignControl';
-const CONTACT_TABLE_GSI_NAME = process.env.CONTACT_TABLE_GSI_NAME || 'SESCampaignContactSent_StatusTarget_Send_Date';
+const CONTACT_TABLE_GSI_NAME = process.env.CONTACT_TABLE_GSI_NAME || 'SESCampaignContactSent_Status';
 
 // Email template
 const EMAIL_TEMPLATE = `Asunto: Invitación anticipada: Acceso a Perkins Intelligence
@@ -56,7 +56,7 @@ interface Contact {
   FirstName: string;
   LastName: string;
   Company: string;
-  Sent_Status: boolean;
+  Sent_Status: string; // 'true' or 'false' (stored as string for indexing)
   Target_Send_Date: string;
   Send_Group_ID: number;
   Sent_Date?: string;
@@ -166,21 +166,23 @@ async function sendEmail(to: string, firstName: string): Promise<void> {
 async function getContactsReadyToSend(): Promise<Contact[]> {
   const today = getTodayDate();
   
+  // Query GSI by Sent_Status = false, then filter by Target_Send_Date <= today
+  // This is more efficient than scanning the entire table
   const result = await dynamoClient.send(
     new QueryCommand({
       TableName: CONTACT_TABLE_NAME,
-      IndexName: CONTACT_TABLE_GSI_NAME, // Amplify-generated GSI name from environment
-      KeyConditionExpression: 'Sent_Status = :status AND Target_Send_Date <= :today',
+      IndexName: CONTACT_TABLE_GSI_NAME, // GSI on Sent_Status
+      KeyConditionExpression: 'Sent_Status = :status',
+      FilterExpression: 'Target_Send_Date <= :today',
       ExpressionAttributeValues: {
-        ':status': false,
+        ':status': 'false', // Sent_Status stored as string
         ':today': today,
       },
     })
   );
 
+  // Sort by Send_Group_ID ascending (already filtered by Sent_Status='false' via query)
   const contacts = (result.Items || []) as Contact[];
-  
-  // Sort by Send_Group_ID ascending
   contacts.sort((a, b) => (a.Send_Group_ID || 0) - (b.Send_Group_ID || 0));
   
   // Limit to daily send limit
@@ -199,7 +201,7 @@ async function markContactAsSent(email: string): Promise<void> {
       Key: { email },
       UpdateExpression: 'SET Sent_Status = :sent, Sent_Date = :date REMOVE Error_Status',
       ExpressionAttributeValues: {
-        ':sent': true,
+        ':sent': 'true', // Sent_Status stored as string
         ':date': today,
       },
     })

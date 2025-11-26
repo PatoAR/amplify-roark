@@ -137,7 +137,7 @@ const schema = a.schema({
       Company: a.string().required(),
       FirstName: a.string().required(),
       LastName: a.string().required(),
-      Sent_Status: a.boolean().default(false),
+      Sent_Status: a.string().default('false'), // Store as string for indexing: 'true' or 'false'
       Target_Send_Date: a.string().required(), // YYYY-MM-DD format
       Send_Group_ID: a.integer().required(),
       Sent_Date: a.string(), // YYYY-MM-DD format, optional
@@ -145,7 +145,7 @@ const schema = a.schema({
       Company_Sequence: a.integer(), // 1st, 2nd, 3rd contact from same company
     })
     .secondaryIndexes((index) => [
-      index('Sent_Status', 'Target_Send_Date'), // GSI for querying unsent contacts ready to send
+      index('Sent_Status'), // GSI partition key - query by Sent_Status=false, filter by Target_Send_Date
     ])
     .authorization(allow => [
       // Backend-only access via API key (Lambda functions)

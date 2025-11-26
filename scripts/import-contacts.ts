@@ -20,7 +20,7 @@ interface ExcelRow {
 }
 
 interface Contact extends ExcelRow {
-  Sent_Status: boolean;
+  Sent_Status: string; // 'true' or 'false' (stored as string for indexing)
   Target_Send_Date: string;
   Send_Group_ID: number;
   Company_Sequence: number;
@@ -104,7 +104,7 @@ function processContacts(rows: ExcelRow[], startDate?: string): Contact[] {
     for (const contact of companyContacts) {
       contacts.push({
         ...contact,
-        Sent_Status: false,
+        Sent_Status: 'false', // Store as string for indexing
         Target_Send_Date: currentDate,
         Send_Group_ID: sendGroupId++,
         Company_Sequence: companySequence++,
