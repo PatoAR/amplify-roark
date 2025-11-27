@@ -12,6 +12,7 @@ backend:
         - node -v
         - npm -v
         - npm install --build-from-source @parcel/watcher
+        - npm install -g @aws-amplify/backend-cli@latest
         - (cd amplify && rm -f package-lock.json && npm install)
     build:
       commands:
