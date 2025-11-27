@@ -12,7 +12,7 @@ backend:
         - node -v
         - npm -v
         - npm install --build-from-source @parcel/watcher
-        - (cd amplify && rm -f package-lock.json && npm install --legacy-peer-deps)
+        - (cd amplify && rm -f package-lock.json && npm install)
     build:
       commands:
         - npm rebuild @parcel/watcher
@@ -30,7 +30,7 @@ frontend:
         - node -v
         - npm -v
         - npm install -g npm@latest    # update npm to latest to avoid bugs
-        - npm install -g aws-cdk@2.93.0
+        - npm install -g aws-cdk@latest
         - rm -rf node_modules package-lock.json
         - npm install
     build:
