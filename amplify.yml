@@ -12,7 +12,7 @@ backend:
         - node -v
         - npm -v
         - npm install --build-from-source @parcel/watcher
-        - (cd amplify && npm install)
+        - (cd amplify && rm -f package-lock.json && npm install)
     build:
       commands:
         - npm rebuild @parcel/watcher

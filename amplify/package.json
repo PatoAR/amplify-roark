@@ -8,5 +8,9 @@
     "aws-cdk-lib": "^2.93.0",
     "constructs": "^10.3.0",
     "node-fetch": "^3.3.2"
+  },
+  "overrides": {
+    "aws-cdk-lib": "2.93.0",
+    "@aws-cdk/cloud-assembly-schema": "2.93.0"
   }
 }
