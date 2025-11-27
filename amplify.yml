@@ -12,6 +12,7 @@ backend:
         - node -v
         - npm -v
         - npm install --build-from-source @parcel/watcher
+        - (cd amplify && npm install)
     build:
       commands:
         - npm rebuild @parcel/watcher
