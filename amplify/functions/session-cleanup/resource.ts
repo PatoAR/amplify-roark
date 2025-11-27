@@ -5,6 +5,7 @@ export const sessionCleanup = defineFunction({
   entry: './handler.ts',
   runtime: 20,
   timeoutSeconds: 60, // May need more time for large datasets
+  resourceGroupName: 'data', // Assign to data stack since it uses GraphQL API
   environment: {
     GRAPHQL_API_URL: secret('GRAPHQL_API_URL'),
     GRAPHQL_API_KEY: secret('GRAPHQL_API_KEY'),

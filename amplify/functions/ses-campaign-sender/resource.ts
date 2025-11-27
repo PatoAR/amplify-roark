@@ -5,6 +5,7 @@ export const sesCampaignSender = defineFunction({
   entry: './handler.ts',
   runtime: 20,
   timeoutSeconds: 300, // 5 minutes for processing multiple emails
+  resourceGroupName: 'data', // Assign to data stack since it uses data tables
   environment: {
     SENDER_EMAIL: 'info@perkinsintel.com',
     DAILY_SEND_LIMIT: '50',
