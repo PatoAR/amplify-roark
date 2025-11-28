@@ -50,4 +50,7 @@ https://docs.amplify.aws/react/reference/cli-commands/
 - Access days left - dynamic getting close to cero on days
 - Deleted emails
 
+Dynamodb
 542ome > Dev
+mapsc4 > Prod
+326jwi > Appsync

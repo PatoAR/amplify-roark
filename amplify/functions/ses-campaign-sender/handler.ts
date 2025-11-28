@@ -65,6 +65,7 @@ interface Contact {
 }
 
 interface CampaignControl {
+  id: string; // Primary key - stores 'main'
   control: string;
   isEnabled: boolean;
   lastUpdated: string;
@@ -79,7 +80,7 @@ async function isCampaignEnabled(): Promise<boolean> {
     const result = await dynamoClient.send(
       new GetCommand({
         TableName: CAMPAIGN_CONTROL_TABLE_NAME,
-        Key: { control: 'main' },
+        Key: { id: 'main' }, // Use 'id' as primary key, store 'main' as the id value
       })
     );
 
@@ -198,7 +199,7 @@ async function markContactAsSent(email: string): Promise<void> {
   await dynamoClient.send(
     new UpdateCommand({
       TableName: CONTACT_TABLE_NAME,
-      Key: { email },
+      Key: { id: email }, // Use 'id' as primary key, store email as the id value
       UpdateExpression: 'SET Sent_Status = :sent, Sent_Date = :date REMOVE Error_Status',
       ExpressionAttributeValues: {
         ':sent': 'true', // Sent_Status stored as string
@@ -215,7 +216,7 @@ async function markContactWithError(email: string, errorMessage: string): Promis
   await dynamoClient.send(
     new UpdateCommand({
       TableName: CONTACT_TABLE_NAME,
-      Key: { email },
+      Key: { id: email }, // Use 'id' as primary key, store email as the id value
       UpdateExpression: 'SET Error_Status = :error',
       ExpressionAttributeValues: {
         ':error': errorMessage,

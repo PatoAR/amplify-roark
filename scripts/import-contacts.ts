@@ -237,10 +237,9 @@ async function writeContactsToDynamoDB(contacts: Contact[], tableName: string): 
     const putRequests = batch.map(contact => ({
       PutRequest: {
         Item: {
-          // Primary key is 'email' (using .identifier() in schema)
-          // Note: If you get a key mismatch error, the table was created with 'id' as primary key
-          // You'll need to delete the table and redeploy to use the new schema
-          email: contact.email, // Primary key - matches schema with email.identifier()
+          // Amplify Gen 2 uses 'id' as primary key. Store email as the id value for direct lookups
+          id: contact.email, // Primary key - use email as the id value
+          email: contact.email,
           Company: contact.Company,
           FirstName: contact.FirstName,
           LastName: contact.LastName,

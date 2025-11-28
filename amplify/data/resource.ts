@@ -131,9 +131,10 @@ const schema = a.schema({
   ]),
 
   // SES Campaign Contact List Model - Stores contact information for email campaign
+  // Note: Amplify Gen 2 uses 'id' as primary key. We use 'email' as a unique field and query via GSI
   SESCampaignContact: a
     .model({
-      email: a.string().required().identifier(), // Primary key - contact email (custom identifier)
+      email: a.string().required(), // Unique identifier - use GSI to query by email
       Company: a.string().required(),
       FirstName: a.string().required(),
       LastName: a.string().required(),
@@ -146,6 +147,7 @@ const schema = a.schema({
     })
     .secondaryIndexes((index) => [
       index('Sent_Status'), // GSI partition key - query by Sent_Status=false, filter by Target_Send_Date
+      index('email'), // GSI on email for direct lookups
     ])
     .authorization(allow => [
       // Backend-only access via API key (Lambda functions)
@@ -153,13 +155,17 @@ const schema = a.schema({
     ]),
 
   // SES Campaign Control Model - Controls campaign enable/disable state
+  // Note: Amplify Gen 2 uses 'id' as primary key. We use 'control' field with fixed value "main" and query via GSI
   SESCampaignControl: a
     .model({
-      control: a.string().required().identifier(), // Primary key - fixed value: "main" (custom identifier)
+      control: a.string().required(), // Fixed value: "main" - use GSI to query by control
       isEnabled: a.boolean().default(true),
       lastUpdated: a.string().required(), // ISO timestamp
       updatedBy: a.string(), // Identifier of who updated, optional
     })
+    .secondaryIndexes((index) => [
+      index('control'), // GSI on control for direct lookups (will have single item with control="main")
+    ])
     .authorization(allow => [
       // Backend-only access via API key (Lambda functions)
       allow.publicApiKey().to(['create', 'read', 'update']),

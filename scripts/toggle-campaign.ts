@@ -111,6 +111,7 @@ async function discoverTableName(modelName: string): Promise<string> {
 }
 
 interface CampaignControl {
+  id: string; // Primary key - stores 'main'
   control: string;
   isEnabled: boolean;
   lastUpdated: string;
@@ -125,7 +126,7 @@ async function getCampaignStatus(tableName: string): Promise<CampaignControl | n
     const result = await dynamoClient.send(
       new GetCommand({
         TableName: tableName,
-        Key: { control: CONTROL_KEY },
+        Key: { id: CONTROL_KEY }, // Use 'id' as primary key, store 'main' as the id value
       })
     );
 
@@ -143,6 +144,7 @@ async function setCampaignStatus(tableName: string, isEnabled: boolean, updatedB
   const now = new Date().toISOString();
   
   const control: CampaignControl = {
+    id: CONTROL_KEY, // Use 'id' as primary key, store 'main' as the id value
     control: CONTROL_KEY,
     isEnabled,
     lastUpdated: now,
