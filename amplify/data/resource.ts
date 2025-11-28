@@ -133,7 +133,7 @@ const schema = a.schema({
   // SES Campaign Contact List Model - Stores contact information for email campaign
   SESCampaignContact: a
     .model({
-      email: a.string().required(), // Primary key - contact email
+      email: a.string().required().identifier(), // Primary key - contact email (custom identifier)
       Company: a.string().required(),
       FirstName: a.string().required(),
       LastName: a.string().required(),
@@ -155,7 +155,7 @@ const schema = a.schema({
   // SES Campaign Control Model - Controls campaign enable/disable state
   SESCampaignControl: a
     .model({
-      control: a.string().required(), // Primary key - fixed value: "main"
+      control: a.string().required().identifier(), // Primary key - fixed value: "main" (custom identifier)
       isEnabled: a.boolean().default(true),
       lastUpdated: a.string().required(), // ISO timestamp
       updatedBy: a.string(), // Identifier of who updated, optional

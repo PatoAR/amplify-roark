@@ -94,6 +94,8 @@ npm install
 npm run import contacts.xlsx
 ```
 
+**Note:** The script automatically discovers the correct DynamoDB table name by querying CloudFormation stacks. This works across different branches/environments (dev, main) without manual configuration. If you need to override the table name, set the `CONTACT_TABLE_NAME` environment variable.
+
 ### 5. Create Initial Campaign Control Item
 
 After deployment, create the initial control item:
@@ -120,16 +122,24 @@ curl -X POST https://<function-url> \
 
 **Test with PowerShell (Windows):**
 ```powershell
-# Option 1: Use Invoke-RestMethod (recommended)
-Invoke-RestMethod -Uri "https://<function-url>" `
+# Option 1: Use Invoke-RestMethod (recommended - handles JSON automatically)
+Invoke-RestMethod -Uri "https://u4ojnz3dhwjeaet7vq5yncdqha0drxdc.lambda-url.us-east-1.on.aws/" `
   -Method Post `
   -ContentType "application/json" `
-  -Body '{"testEmail": "your-email@example.com", "firstName": "Test"}'
+  -Body '{"testEmail": "pja2004@gmail.com", "firstName": "Patricio"}'
 
-# Option 2: Use curl.exe explicitly (if curl is installed)
-curl.exe -X POST https://<function-url> `
+# Option 2: Use curl.exe with here-string (most reliable for curl.exe)
+$json = @'
+{"testEmail": "pja2004@gmail.com", "firstName": "Patricio"}
+'@
+curl.exe -X POST https://u4ojnz3dhwjeaet7vq5yncdqha0drxdc.lambda-url.us-east-1.on.aws/ `
   -H "Content-Type: application/json" `
-  -d '{\"testEmail\": \"your-email@example.com\", \"firstName\": \"Test\"}'
+  -d $json
+
+# Option 3: Use curl.exe with single quotes (PowerShell 7+)
+curl.exe -X POST https://u4ojnz3dhwjeaet7vq5yncdqha0drxdc.lambda-url.us-east-1.on.aws/ `
+  -H 'Content-Type: application/json' `
+  --data-raw '{"testEmail": "pja2004@gmail.com", "firstName": "Patricio"}'
 ```
 
 ### 7. Verify EventBridge Schedule
@@ -207,8 +217,9 @@ Update `DAILY_SEND_LIMIT` environment variable and redeploy.
 
 1. Verify Excel file has required columns
 2. Check AWS credentials are configured
-3. Verify DynamoDB tables exist
-4. Check table names match exactly
+3. Verify DynamoDB tables exist (script auto-discovers table names via CloudFormation)
+4. If table discovery fails, set `CONTACT_TABLE_NAME` environment variable manually
+5. Ensure you have CloudFormation read permissions (`cloudformation:DescribeStacks`, `cloudformation:DescribeStackResources`)
 
 ## Security Notes
 
