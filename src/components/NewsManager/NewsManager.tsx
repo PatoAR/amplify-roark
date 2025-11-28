@@ -281,7 +281,12 @@ export const NewsManager: React.FC = () => {
         // Fetching initial articles
     try {
       const client = getClient();
-      const result = await client.graphql({ query: listArticles });
+      const result = await client.graphql({ 
+        query: listArticles,
+        variables: {
+          limit: 100
+        }
+      });
       const articles: Article[] = (result as any).data?.listArticles?.items || [];
             
       // Debug: Log article categories

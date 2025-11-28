@@ -3,6 +3,7 @@ import { Stack, Duration } from 'aws-cdk-lib';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { Function as LambdaFunctionConstruct, FunctionUrl, FunctionUrlAuthType, HttpMethod } from 'aws-cdk-lib/aws-lambda';
+import { PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam';
 import { createHash } from 'crypto';
 import { auth } from './auth/resource';
 import { data } from './data/resource';
@@ -80,6 +81,16 @@ const sesCampaignSenderScheduleRule = new Rule(sesCampaignSenderStack, 'SESCampa
 
 // Add Lambda function as target
 sesCampaignSenderScheduleRule.addTarget(new LambdaFunction(sesCampaignSenderFunction));
+
+// Grant SES SendEmail permission to Lambda function
+// Allow sending emails from the verified identity
+sesCampaignSenderFunction.addToRolePolicy(
+  new PolicyStatement({
+    effect: Effect.ALLOW,
+    actions: ['ses:SendEmail', 'ses:SendRawEmail'],
+    resources: ['*'], // Can be restricted to specific identity ARN if needed
+  })
+);
 
 // Enable Function URL for test email endpoint
 // Create Function URL in the same stack as the function (data stack)

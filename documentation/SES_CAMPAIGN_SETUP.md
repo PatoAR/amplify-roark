@@ -111,11 +111,25 @@ After deployment, get the Function URL from AWS Console:
 2. Go to Configuration → Function URL
 3. Copy the Function URL
 
-**Test with curl:**
+**Test with curl (Linux/Mac/Git Bash):**
 ```bash
 curl -X POST https://<function-url> \
   -H "Content-Type: application/json" \
   -d '{"testEmail": "your-email@example.com", "firstName": "Test"}'
+```
+
+**Test with PowerShell (Windows):**
+```powershell
+# Option 1: Use Invoke-RestMethod (recommended)
+Invoke-RestMethod -Uri "https://<function-url>" `
+  -Method Post `
+  -ContentType "application/json" `
+  -Body '{"testEmail": "your-email@example.com", "firstName": "Test"}'
+
+# Option 2: Use curl.exe explicitly (if curl is installed)
+curl.exe -X POST https://<function-url> `
+  -H "Content-Type: application/json" `
+  -d '{\"testEmail\": \"your-email@example.com\", \"firstName\": \"Test\"}'
 ```
 
 ### 7. Verify EventBridge Schedule
