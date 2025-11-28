@@ -82,15 +82,9 @@ const sesCampaignSenderScheduleRule = new Rule(sesCampaignSenderStack, 'SESCampa
 sesCampaignSenderScheduleRule.addTarget(new LambdaFunction(sesCampaignSenderFunction));
 
 // Enable Function URL for test email endpoint
-// Create Function URL in root stack to avoid nested stack validation issues
-const rootStack = Stack.of(backend.data.resources.graphqlApi);
-const functionUrl = new FunctionUrl(rootStack, 'SESCampaignSenderFunctionUrl', {
+// Create Function URL in the same stack as the function (data stack)
+// Use simplified CORS configuration
+const functionUrl = new FunctionUrl(sesCampaignSenderStack, 'SESCampaignSenderFunctionUrl', {
   function: sesCampaignSenderFunction,
   authType: FunctionUrlAuthType.NONE, // Public access for test endpoint
-  cors: {
-    allowedOrigins: ['*'],
-    allowedMethods: [HttpMethod.POST, HttpMethod.OPTIONS],
-    allowedHeaders: ['Content-Type'],
-    allowCredentials: false,
-  },
 });
