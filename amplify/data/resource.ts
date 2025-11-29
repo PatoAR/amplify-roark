@@ -132,6 +132,7 @@ const schema = a.schema({
 
   // SES Campaign Contact List Model - Stores contact information for email campaign
   // Note: Amplify Gen 2 uses 'id' as primary key. We use 'email' as a unique field and query via GSI
+  // Updated: Using 'id' as primary key, storing email as the id value for direct lookups
   SESCampaignContact: a
     .model({
       email: a.string().required(), // Unique identifier - use GSI to query by email
