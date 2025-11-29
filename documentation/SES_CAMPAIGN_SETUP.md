@@ -123,7 +123,7 @@ curl -X POST https://<function-url> \
 **Test with PowerShell (Windows):**
 ```powershell
 # Option 1: Use Invoke-RestMethod (recommended - handles JSON automatically)
-Invoke-RestMethod -Uri "https://u4ojnz3dhwjeaet7vq5yncdqha0drxdc.lambda-url.us-east-1.on.aws/" `
+Invoke-RestMethod -Uri "https://dwqucp2qodpnulglross57uhye0ipasr.lambda-url.us-east-1.on.aws/" `
   -Method Post `
   -ContentType "application/json" `
   -Body '{"testEmail": "pja2004@gmail.com", "firstName": "Patricio"}'

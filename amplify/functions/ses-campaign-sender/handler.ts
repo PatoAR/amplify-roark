@@ -29,27 +29,27 @@ const CAMPAIGN_CONTROL_TABLE_NAME = process.env.CAMPAIGN_CONTROL_TABLE_NAME || '
 const CONTACT_TABLE_GSI_NAME = process.env.CONTACT_TABLE_GSI_NAME || 'SESCampaignContactSent_Status';
 
 // Email template
-const EMAIL_TEMPLATE = `Asunto: Invitación anticipada: Acceso a Perkins Intelligence
+const EMAIL_TEMPLATE = `Asunto: Invitación a Perkins Intelligence
 
 Hola [Nombre del Contacto],
 
-Te escribo porque estamos lanzando la versión profesional de **Perkins Intelligence** y he seleccionado tu perfil para darte acceso prioritario.
+Te escribo porque estamos lanzando la versión profesional de Perkins Intelligence.
 
-Hemos desarrollado una herramienta de inteligencia de mercado similar a las terminales financieras tradicionales (estilo Bloomberg), pero diseñada para ser accesible y 100% personalizable según los sectores y países que tú necesites monitorear.
+Perkins es una herramienta de inteligencia de mercado que te permite recibir información en tiempo real sobre los países, industrias y compañías que tú definas.
 
-¿Qué puedes hacer en Perkins?
-* Filtrar el ruido mediático y recibir solo noticias críticas.
-* Monitorear empresas y mercados en tiempo real.
-* Tomar decisiones informadas sin pagar licencias costosas.
+Es la potencia de una terminal de noticias financiera, pero 100% personalizable y abierta a profesionales como tú.
 
-Ya puedes configurar tu panel de control ingresando directamente en nuestra web segura:
-https://www.perkinsintel.com
+Te invito a crear tu cuenta gratuita y configurar Perkins de acuerdo con tus preferencias aquí: https://www.perkinsintel.com
 
-Me encantaría conocer tu opinión una vez que la pruebes.
+(Si prefieres no hacer clic en enlaces directos, puedes escribir perkinsintel.com en tu navegador e ingresar desde allí).
+
+Nos encantaría conocer tu opinión una vez que la pruebes.
 
 Saludos cordiales,
+*Equipo Perkins Intelligence*
+info@perkinsintel.com
 
-Perkins Intelligence`;
+`;
 
 interface Contact {
   email: string;
@@ -141,7 +141,7 @@ async function sendEmail(to: string, firstName: string): Promise<void> {
 
   await sesClient.send(
     new SendEmailCommand({
-      Source: SENDER_EMAIL,
+      Source: `Perkins Intelligence <${SENDER_EMAIL}>`,
       Destination: {
         ToAddresses: [to],
       },

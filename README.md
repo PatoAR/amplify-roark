@@ -3,6 +3,7 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 
 ## ToDo's
 - SES campaign test launch
+    - Table not found in CloudFormation stacks, trying DynamoDB list tables...
     - Add lang flag to excel, presonalize email text by lang, check for duplicates when building prospects lists from excel
 - Have databses on dynamodb carry the stage (prod-dev) name
 - Migrate email from Zoho to AWS Workmail
