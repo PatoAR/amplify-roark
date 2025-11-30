@@ -17,8 +17,8 @@ backend:
     build:
       commands:
         - npm rebuild @parcel/watcher
-        - echo "Debug: AWS_BRANCH=$AWS_BRANCH"
-        - echo "Debug: Git branch=$(git rev-parse --abbrev-ref HEAD)"
+        - echo "Debug AWS_BRANCH=$AWS_BRANCH"
+        - echo "Debug Git branch=$(git rev-parse --abbrev-ref HEAD)"
         - |
           if [ -z "$AWS_BRANCH" ]; then
             BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
