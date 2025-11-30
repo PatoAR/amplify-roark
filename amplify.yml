@@ -19,7 +19,12 @@ backend:
         - npm rebuild @parcel/watcher
         - echo "Debug: AWS_BRANCH=$AWS_BRANCH"
         - echo "Debug: Git branch=$(git rev-parse --abbrev-ref HEAD)"
-        - "BRANCH_NAME=${AWS_BRANCH:-$(git rev-parse --abbrev-ref HEAD)}"
+        - |
+          if [ -z "$AWS_BRANCH" ]; then
+            BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+          else
+            BRANCH_NAME=$AWS_BRANCH
+          fi
         - npx ampx pipeline-deploy --branch $BRANCH_NAME --app-id $AWS_APP_ID
 frontend:
   phases:
