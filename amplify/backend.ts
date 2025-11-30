@@ -68,13 +68,14 @@ lambdaFunction.addEnvironment('CONTACT_TABLE_GSI_NAME', 'SESCampaignContactSent_
 
 const sesCampaignSenderScheduleRule = new Rule(sesCampaignSenderStack, 'SESCampaignSenderSchedule', {
   ruleName: sesCampaignSenderRuleName,
-  description: 'Triggers SES campaign sender Lambda hourly during business hours (8 AM - 5 PM Buenos Aires time)',
+  description: 'Triggers SES campaign sender Lambda hourly during business hours (10 AM - 4 PM Buenos Aires time, Monday-Friday)',
   schedule: Schedule.cron({
     minute: '0',
-    hour: '8-17',
+    hour: '10-16',
     day: '*',
     month: '*',
     year: '*',
+    weekDay: 'MON-FRI',
   }),
   enabled: true,
 });

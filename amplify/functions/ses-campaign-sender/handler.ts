@@ -2,6 +2,7 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, QueryCommand, UpdateCommand, GetCommand } from '@aws-sdk/lib-dynamodb';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 import { EventBridgeEvent } from 'aws-lambda';
+import { buildEmailContent } from './emailTranslations';
 
 // Type declaration for process.env
 declare global {
@@ -28,34 +29,13 @@ const CONTACT_TABLE_NAME = process.env.CONTACT_TABLE_NAME || 'SESCampaignContact
 const CAMPAIGN_CONTROL_TABLE_NAME = process.env.CAMPAIGN_CONTROL_TABLE_NAME || 'SESCampaignControl';
 const CONTACT_TABLE_GSI_NAME = process.env.CONTACT_TABLE_GSI_NAME || 'SESCampaignContactSent_Status';
 
-// Email template
-const EMAIL_TEMPLATE = `Asunto: Invitación a Perkins Intelligence
-
-Hola [Nombre del Contacto],
-
-Te escribo porque estamos lanzando la versión profesional de Perkins Intelligence.
-
-Perkins es una herramienta de inteligencia de mercado que te permite recibir información en tiempo real sobre los países, industrias y compañías que tú definas.
-
-Es la potencia de una terminal de noticias financiera, pero 100% personalizable y abierta a profesionales como tú.
-
-Te invito a crear tu cuenta gratuita y configurar Perkins de acuerdo con tus preferencias aquí: https://www.perkinsintel.com
-
-(Si prefieres no hacer clic en enlaces directos, puedes escribir perkinsintel.com en tu navegador e ingresar desde allí).
-
-Nos encantaría conocer tu opinión una vez que la pruebes.
-
-Saludos cordiales,
-*Equipo Perkins Intelligence*
-info@perkinsintel.com
-
-`;
 
 interface Contact {
   email: string;
   FirstName: string;
   LastName: string;
   Company: string;
+  Language?: string; // Preferred language: 'es', 'en', or 'pt' (defaults to 'es')
   Sent_Status: string; // 'true' or 'false' (stored as string for indexing)
   Target_Send_Date: string;
   Send_Group_ID: number;
@@ -99,13 +79,13 @@ async function isCampaignEnabled(): Promise<boolean> {
 }
 
 /**
- * Check if current time is within business hours (8 AM - 5 PM Buenos Aires time)
+ * Check if current time is within business hours (10 AM - 4 PM Buenos Aires time)
  */
 function isWithinBusinessHours(): boolean {
   const now = new Date();
   const buenosAiresTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
   const hour = buenosAiresTime.getHours();
-  return hour >= 8 && hour < 17; // 8 AM to 5 PM (17:00)
+  return hour >= 10 && hour <= 16; // 10 AM to 4 PM (16:00)
 }
 
 /**
@@ -120,24 +100,12 @@ function getTodayDate(): string {
   return `${year}-${month}-${day}`;
 }
 
-/**
- * Personalize email template with contact's first name
- */
-function personalizeEmail(firstName: string): string {
-  return EMAIL_TEMPLATE.replace(/\[Nombre del Contacto\]/g, firstName);
-}
 
 /**
  * Send email via SES
  */
-async function sendEmail(to: string, firstName: string): Promise<void> {
-  const personalizedContent = personalizeEmail(firstName);
-  
-  // Extract subject and body from template
-  const lines = personalizedContent.split('\n');
-  const subjectLine = lines[0];
-  const subject = subjectLine.replace('Asunto: ', '').trim();
-  const body = lines.slice(2).join('\n').trim();
+async function sendEmail(to: string, firstName: string, language: string = 'es'): Promise<void> {
+  const { subject, body } = buildEmailContent(firstName, language);
 
   await sesClient.send(
     new SendEmailCommand({
@@ -210,7 +178,54 @@ async function markContactAsSent(email: string): Promise<void> {
 }
 
 /**
- * Mark contact with error status
+ * Check if an error represents a permanent failure (should not retry)
+ * Permanent failures include: invalid email addresses, non-existent domains, etc.
+ */
+function isPermanentFailure(error: unknown): boolean {
+  if (!error) return false;
+  
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  const errorName = (error as any)?.name || '';
+  
+  // Convert to lowercase for case-insensitive matching
+  const messageLower = errorMessage.toLowerCase();
+  const nameLower = errorName.toLowerCase();
+  
+  // AWS SES permanent failure indicators
+  const permanentFailureIndicators = [
+    'message rejected',
+    'invalid email address',
+    'invalidparameter',
+    'invalid email',
+    'email address not verified',
+    'does not exist',
+    'mailbox does not exist',
+    'domain does not exist',
+    'invalid destination',
+    'suppression list',
+    'hard bounce',
+    'mailboxfull', // Some providers treat this as permanent
+    'user unknown',
+    'no such user',
+    'recipient address rejected',
+    'address rejected',
+  ];
+  
+  // Check error name (e.g., "MessageRejected", "InvalidParameterValue")
+  if (nameLower.includes('message rejected') || 
+      nameLower.includes('invalid') ||
+      nameLower.includes('rejected')) {
+    return true;
+  }
+  
+  // Check error message for permanent failure indicators
+  return permanentFailureIndicators.some(indicator => 
+    messageLower.includes(indicator)
+  );
+}
+
+/**
+ * Mark contact with error status (temporary failure - will retry)
  */
 async function markContactWithError(email: string, errorMessage: string): Promise<void> {
   await dynamoClient.send(
@@ -220,6 +235,27 @@ async function markContactWithError(email: string, errorMessage: string): Promis
       UpdateExpression: 'SET Error_Status = :error',
       ExpressionAttributeValues: {
         ':error': errorMessage,
+      },
+    })
+  );
+}
+
+/**
+ * Mark contact as permanently failed (will not retry)
+ * Sets Sent_Status to 'true' to exclude from future retry attempts
+ */
+async function markContactAsPermanentlyFailed(email: string, errorMessage: string): Promise<void> {
+  const today = getTodayDate();
+  
+  await dynamoClient.send(
+    new UpdateCommand({
+      TableName: CONTACT_TABLE_NAME,
+      Key: { id: email }, // Use 'id' as primary key, store email as the id value
+      UpdateExpression: 'SET Sent_Status = :sent, Error_Status = :error, Sent_Date = :date',
+      ExpressionAttributeValues: {
+        ':sent': 'true', // Mark as 'sent' to prevent retries
+        ':error': `PERMANENT_FAILURE: ${errorMessage}`,
+        ':date': today,
       },
     })
   );
@@ -245,7 +281,7 @@ async function processCampaign(): Promise<{ success: boolean; sent: number; erro
 
   // Check timezone
   if (!isWithinBusinessHours()) {
-    console.log('Outside business hours (8 AM - 5 PM Buenos Aires time), skipping');
+    console.log('Outside business hours (10 AM - 4 PM Buenos Aires time), skipping');
     return {
       success: true,
       sent: 0,
@@ -273,8 +309,9 @@ async function processCampaign(): Promise<{ success: boolean; sent: number; erro
   // Process each contact
   for (const contact of contacts) {
     try {
-      console.log(`Sending email to ${contact.email} (${contact.FirstName})`);
-      await sendEmail(contact.email, contact.FirstName);
+      const language = contact.Language || 'es'; // Default to Spanish if not specified
+      console.log(`Sending email to ${contact.email} (${contact.FirstName}) in ${language}`);
+      await sendEmail(contact.email, contact.FirstName, language);
       await markContactAsSent(contact.email);
       sentCount++;
       console.log(`Successfully sent email to ${contact.email}`);
@@ -282,7 +319,15 @@ async function processCampaign(): Promise<{ success: boolean; sent: number; erro
       errorCount++;
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error(`Error sending email to ${contact.email}:`, errorMessage);
-      await markContactWithError(contact.email, errorMessage);
+      
+      // Check if this is a permanent failure (invalid email, etc.)
+      if (isPermanentFailure(error)) {
+        console.log(`Permanent failure detected for ${contact.email}, marking as permanently failed (will not retry)`);
+        await markContactAsPermanentlyFailed(contact.email, errorMessage);
+      } else {
+        // Temporary failure - will retry in future runs
+        await markContactWithError(contact.email, errorMessage);
+      }
     }
   }
 

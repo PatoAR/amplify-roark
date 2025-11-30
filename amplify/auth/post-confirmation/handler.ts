@@ -156,6 +156,7 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
               createUserSubscription(input: $input) {
                 id
                 owner
+                email
                 subscriptionStatus
                 trialStartDate
                 trialEndDate
@@ -170,6 +171,7 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
           const userSubscription = await appsyncRequest(createUserSubscriptionMutation, {
             input: {
               owner: userId,
+              email: userEmail.toLowerCase(), // Store email for campaign conversion tracking
               subscriptionStatus: 'free_trial',
               trialStartDate: trialStartDate.toISOString(),
               trialEndDate: trialEndDate.toISOString(),
@@ -308,10 +310,10 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
           // The user should still be created successfully
         }
       } else {
-        await createBasicUserSubscription(userId);
+        await createBasicUserSubscription(userId, userEmail);
       }
     } else {
-      await createBasicUserSubscription(userId);
+      await createBasicUserSubscription(userId, userEmail);
     }
 
     return event;
@@ -322,7 +324,7 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
   }
 };
 
-async function createBasicUserSubscription(userId: string): Promise<void> {
+async function createBasicUserSubscription(userId: string, userEmail: string): Promise<void> {
   try {
     const trialStartDate = new Date();
     const trialEndDate = new Date();
@@ -333,6 +335,7 @@ async function createBasicUserSubscription(userId: string): Promise<void> {
         createUserSubscription(input: $input) {
           id
           owner
+          email
           subscriptionStatus
           trialStartDate
           trialEndDate
@@ -345,6 +348,7 @@ async function createBasicUserSubscription(userId: string): Promise<void> {
     const userSubscription = await appsyncRequest(createBasicUserSubscriptionMutation, {
       input: {
         owner: userId,
+        email: userEmail.toLowerCase(), // Store email for campaign conversion tracking
         subscriptionStatus: 'free_trial',
         trialStartDate: trialStartDate.toISOString(),
         trialEndDate: trialEndDate.toISOString(),

@@ -1,5 +1,4 @@
 # SES Campaign Setup Guide
-
 This guide explains how to set up and use the SES email campaign system.
 
 ## Overview
@@ -7,7 +6,7 @@ This guide explains how to set up and use the SES email campaign system.
 The SES campaign system automates sending 1,320 professional invitations with:
 - Daily warm-up limits (starting at 50/day)
 - 3-day spacing between contacts from the same company
-- Timezone-aware scheduling (8 AM - 5 PM Buenos Aires time)
+- Timezone-aware scheduling (10 AM - 4 PM Buenos Aires time, Monday-Friday)
 - Test email functionality
 - Campaign on/off control
 
@@ -23,7 +22,7 @@ The SES campaign system automates sending 1,320 professional invitations with:
    - `ses-campaign-sender` - Handles scheduled sends and test emails
 
 3. **EventBridge Schedule**
-   - Runs hourly during business hours (8 AM - 5 PM Buenos Aires time)
+   - Runs hourly during business hours (10 AM - 4 PM Buenos Aires time, Monday-Friday)
 
 4. **Scripts**
    - `import-contacts.ts` - Import contacts from Excel
@@ -86,13 +85,21 @@ git push origin main
 
 ### 4. Import Contacts
 
-1. Prepare Excel file with columns: `Company`, `FirstName`, `LastName`, `email`
+1. Prepare Excel file with columns: `Company`, `FirstName`, `LastName`, `email`, `Language`
+   - `Language` is optional and should be `es` (Spanish), `en` (English), or `pt` (Portuguese)
+   - Defaults to `es` if missing or invalid
 2. Run import script:
 ```bash
 cd scripts
 npm install
 npm run import contacts.xlsx
 ```
+
+**Duplicate Detection:**
+- The script automatically detects and removes duplicates within the Excel file (based on email address)
+- It also checks DynamoDB for existing contacts and skips them to prevent overwriting
+- Email addresses are normalized (lowercase, trimmed) for accurate comparison
+- You'll see a report showing how many duplicates were found and skipped
 
 **Note:** The script automatically discovers the correct DynamoDB table name by querying CloudFormation stacks. This works across different branches/environments (dev, main) without manual configuration. If you need to override the table name, set the `CONTACT_TABLE_NAME` environment variable.
 
@@ -169,6 +176,15 @@ npm run toggle status   # Check status
    - Check `Perkins_Intelligence_Contact_List` table for send status
    - Filter by `Sent_Status = true` to see sent contacts
    - Check `Error_Status` field for failed sends
+   - **Error Handling:**
+     - **Permanent Failures** (invalid email addresses, non-existent domains): 
+       - `Sent_Status` is set to `'true'` to prevent retries
+       - `Error_Status` contains `PERMANENT_FAILURE:` prefix
+       - These contacts will NOT be retried automatically
+     - **Temporary Failures** (server errors, rate limits):
+       - `Sent_Status` remains `'false'`
+       - `Error_Status` contains the error message
+       - These contacts WILL be retried in future runs
 
 3. **SES Metrics:**
    - Go to SES Console → Account dashboard
@@ -199,7 +215,6 @@ Update `DAILY_SEND_LIMIT` environment variable and redeploy.
 ## Troubleshooting
 
 ### Campaign Not Sending
-
 1. Check campaign status: `npm run toggle status`
 2. Verify EventBridge schedule is enabled
 3. Check Lambda logs for errors
@@ -207,22 +222,37 @@ Update `DAILY_SEND_LIMIT` environment variable and redeploy.
 5. Check SES sender email is verified
 
 ### Test Email Not Working
-
 1. Verify Function URL is accessible
 2. Check CORS headers in response
 3. Verify request body format: `{"testEmail": "...", "firstName": "..."}`
 4. Check Lambda logs for errors
 
 ### Import Script Errors
-
 1. Verify Excel file has required columns
 2. Check AWS credentials are configured
 3. Verify DynamoDB tables exist (script auto-discovers table names via CloudFormation)
 4. If table discovery fails, set `CONTACT_TABLE_NAME` environment variable manually
 5. Ensure you have CloudFormation read permissions (`cloudformation:DescribeStacks`, `cloudformation:DescribeStackResources`)
 
-## Security Notes
+### Error Handling and Retries
 
+**Permanent Failures (No Retry):**
+- Invalid email addresses, non-existent domains, or hard bounces are automatically detected
+- These contacts are marked with `Sent_Status = 'true'` and `Error_Status` prefixed with `PERMANENT_FAILURE:`
+- They will NOT be retried to protect sender reputation
+- Examples: "MessageRejected", "InvalidEmailAddress", "Domain does not exist"
+
+**Temporary Failures (Will Retry):**
+- Server errors, rate limits, or temporary SES issues
+- These contacts keep `Sent_Status = 'false'` and will be retried in future runs
+- Examples: "ServiceUnavailable", "Throttling", network timeouts
+
+**To Manually Retry Failed Contacts:**
+- Find contacts with `Error_Status` set (but without `PERMANENT_FAILURE:` prefix)
+- Set `Sent_Status` back to `'false'` in DynamoDB
+- They will be picked up in the next scheduled run
+
+## Security Notes
 - Function URL is public (no auth) - use only for testing
 - Consider adding authentication for production use
 - DynamoDB tables should have appropriate IAM permissions

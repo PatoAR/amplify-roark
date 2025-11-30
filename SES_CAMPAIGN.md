@@ -3,7 +3,7 @@ Goal: Automate the phased sending of 1,320 professional invitations to the perki
 
 Architecture:
 Database: DynamoDB (Perkins_Intelligence_Contact_List).
-Scheduler: AWS EventBridge (runs Lambda hourly, 8 AM - 5 PM Buenos Aires time).
+Scheduler: AWS EventBridge (runs Lambda hourly, 10 AM - 4 PM Buenos Aires time, Monday-Friday).
 Sender: AWS Lambda calling AWS SES.
 
 2. DynamoDB Data Model & Setup
@@ -46,30 +46,3 @@ Update Database: If SES returns success:
 Update the item in DynamoDB: Set Sent_Status = True and Sent_Date = Today's Date.
 
 Error Handling: Log any SES errors or bounces and set a specific error status in DynamoDB.
-
-Email Content (Opción 1: Beta Exclusiva)
-The Lambda function should use this content, dynamically inserting the recipient's name:
-
-"""Asunto: Invitación anticipada: Acceso a Perkins Intelligence
-
-Cuerpo:
-
-Hola [Nombre del Contacto],
-
-Te escribo porque estamos lanzando la versión profesional de **Perkins Intelligence** y he seleccionado tu perfil para darte acceso prioritario.
-
-Hemos desarrollado una herramienta de inteligencia de mercado similar a las terminales financieras tradicionales (estilo Bloomberg), pero diseñada para ser accesible y 100% personalizable según los sectores y países que tú necesites monitorear.
-
-¿Qué puedes hacer en Perkins?
-* Filtrar el ruido mediático y recibir solo noticias críticas.
-* Monitorear empresas y mercados en tiempo real.
-* Tomar decisiones informadas sin pagar licencias costosas.
-
-Ya puedes configurar tu panel de control ingresando directamente en nuestra web segura:
-https://www.perkinsintel.com
-
-Me encantaría conocer tu opinión una vez que la pruebes.
-
-Saludos cordiales,
-
-Perkins Intelligence"""

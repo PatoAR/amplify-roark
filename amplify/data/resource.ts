@@ -78,6 +78,7 @@ const schema = a.schema({
   UserSubscription: a
   .model({
     owner: a.string(),
+    email: a.string().optional(), // User's email address (for campaign conversion tracking) - optional for backward compatibility
     subscriptionStatus: a.enum(['free_trial', 'active', 'expired', 'cancelled']),
     trialStartDate: a.datetime(),
     trialEndDate: a.datetime(),
@@ -139,6 +140,7 @@ const schema = a.schema({
       Company: a.string().required(),
       FirstName: a.string().required(),
       LastName: a.string().required(),
+      Language: a.string().default('es'), // Preferred language: 'es', 'en', or 'pt'
       Sent_Status: a.string().default('false'), // Store as string for indexing: 'true' or 'false'
       Target_Send_Date: a.string().required(), // YYYY-MM-DD format
       Send_Group_ID: a.integer().required(),
@@ -151,8 +153,10 @@ const schema = a.schema({
       index('email'), // GSI on email for direct lookups
     ])
     .authorization(allow => [
-      // Backend-only access via API key (Lambda functions)
+      // Backend access via API key (Lambda functions)
       allow.publicApiKey().to(['create', 'read', 'update']),
+      // Allow authenticated users to read (for analytics dashboard - access controlled at component level)
+      allow.authenticated().to(['read']),
     ]),
 
   // SES Campaign Control Model - Controls campaign enable/disable state

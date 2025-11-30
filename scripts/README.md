@@ -40,13 +40,22 @@ The Excel file must have the following columns:
 - `FirstName` - Contact's first name
 - `LastName` - Contact's last name
 - `email` - Contact's email address
+- `Language` - Preferred language for invitation email: `es` (Spanish), `en` (English), or `pt` (Portuguese). Optional - defaults to `es` if missing or invalid
 
 **What it does:**
 1. Reads contacts from Excel file
-2. Groups contacts by Company
-3. Calculates `Send_Group_ID` (grouped by company, then sequential)
-4. Calculates `Target_Send_Date` with 3-day spacing between contacts from the same company
-5. Writes contacts to `Perkins_Intelligence_Contact_List` DynamoDB table
+2. **Detects and removes duplicates within the Excel file** (based on email address)
+3. **Checks for existing contacts in DynamoDB** to avoid overwriting
+4. Groups contacts by Company
+5. Calculates `Send_Group_ID` (grouped by company, then sequential)
+6. Calculates `Target_Send_Date` with 3-day spacing between contacts from the same company
+7. Writes only new contacts to DynamoDB table (skips duplicates)
+
+**Duplicate Handling:**
+- Duplicates within the Excel file are automatically detected and removed (keeps first occurrence)
+- Contacts already in DynamoDB are skipped (prevents overwriting existing data)
+- Email addresses are normalized (lowercase, trimmed) for comparison
+- The script reports how many duplicates were found and skipped
 
 ### toggle-campaign.ts
 
