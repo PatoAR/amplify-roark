@@ -78,7 +78,7 @@ const schema = a.schema({
   UserSubscription: a
   .model({
     owner: a.string(),
-    email: a.string().optional(), // User's email address (for campaign conversion tracking) - optional for backward compatibility
+    email: a.string(), // User's email address (for campaign conversion tracking) - optional for backward compatibility
     subscriptionStatus: a.enum(['free_trial', 'active', 'expired', 'cancelled']),
     trialStartDate: a.datetime(),
     trialEndDate: a.datetime(),
