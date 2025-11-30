@@ -2,6 +2,9 @@
 Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fetches, processes and stores news articles in dynambodb. The articles are distributed to varios channels (whatsapp, telegram) and to this webapp via AppSync subscriptions or long-polling.
 
 ## ToDo's
+- referralMessage only in english
+- implement bold on invitation email
+- language may not be working on email delivery
 - Have databses on dynamodb carry the stage (prod-dev) name
 - Migrate email from Zoho to AWS Workmail
 - Platform for original content publishers (CGI) self-service.
@@ -34,7 +37,7 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 
 # PROD - AWS - merge dev into main
         1. git checkout main
-        2. git merge appsync (or dev in the future)
+        2. git merge dev / appsync
         3. git push origin main
 
 ## CLI

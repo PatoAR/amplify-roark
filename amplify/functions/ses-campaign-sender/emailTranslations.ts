@@ -19,8 +19,8 @@ export const EMAIL_TRANSLATIONS: Record<string, EmailTemplate> = {
   es: {
     subject: 'Invitación a Perkins Intelligence',
     greeting: 'Hola {firstName},',
-    intro: 'Te escribo porque estamos lanzando la versión profesional de Perkins Intelligence.',
-    description: 'Perkins es una herramienta de inteligencia de mercado que te permite recibir información en tiempo real sobre los países, industrias y compañías que tú definas.',
+    intro: 'Te escribo porque estamos lanzando la <b>versión profesional de Perkins Intelligence.</b>',
+    description: 'Perkins es una herramienta de inteligencia de mercado que te permite recibir información en tiempo real sobre los <b>países, industrias y compañías que tú definas.</b>',
     valueProposition: 'Es la potencia de una terminal de noticias financiera, pero 100% personalizable y abierta a profesionales como tú.',
     invitation: 'Te invito a crear tu cuenta gratuita y configurar Perkins de acuerdo con tus preferencias aquí: https://www.perkinsintel.com',
     linkNote: '(Si prefieres no hacer clic en enlaces directos, puedes escribir perkinsintel.com en tu navegador e ingresar desde allí).',

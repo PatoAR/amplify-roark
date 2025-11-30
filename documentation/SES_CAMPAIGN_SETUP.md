@@ -15,7 +15,7 @@ The SES campaign system automates sending 1,320 professional invitations with:
 ### Components
 
 1. **DynamoDB Tables**
-   - `Perkins_Intelligence_Contact_List` - Stores contact information and send status
+   - `SES_Campaign_Contact` - Stores contact information and send status
    - `SES_Campaign_Control` - Controls campaign enable/disable state
 
 2. **Lambda Function**
@@ -133,7 +133,7 @@ curl -X POST https://<function-url> \
 Invoke-RestMethod -Uri "https://dwqucp2qodpnulglross57uhye0ipasr.lambda-url.us-east-1.on.aws/" `
   -Method Post `
   -ContentType "application/json" `
-  -Body '{"testEmail": "pja2004@gmail.com", "firstName": "Patricio"}'
+  -Body '{"testEmail": "pja2004@gmail.com", "firstName": "Patricio", "language": "en"}'
 
 # Option 2: Use curl.exe with here-string (most reliable for curl.exe)
 $json = @'
