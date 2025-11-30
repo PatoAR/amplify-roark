@@ -72,7 +72,7 @@ const sesCampaignSenderScheduleRule = new Rule(sesCampaignSenderStack, 'SESCampa
   schedule: Schedule.cron({
     minute: '0',
     hour: '10-16',
-    day: '*',
+    day: '?', // Use '?' when weekDay is specified
     month: '*',
     year: '*',
     weekDay: 'MON-FRI',
