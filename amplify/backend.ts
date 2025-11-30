@@ -69,14 +69,7 @@ lambdaFunction.addEnvironment('CONTACT_TABLE_GSI_NAME', 'SESCampaignContactSent_
 const sesCampaignSenderScheduleRule = new Rule(sesCampaignSenderStack, 'SESCampaignSenderSchedule', {
   ruleName: sesCampaignSenderRuleName,
   description: 'Triggers SES campaign sender Lambda hourly during business hours (10 AM - 4 PM Buenos Aires time, Monday-Friday)',
-  schedule: Schedule.cron({
-    minute: '0',
-    hour: '10-16',
-    day: '?', // Use '?' when weekDay is specified
-    month: '*',
-    year: '*',
-    weekDay: 'MON-FRI',
-  }),
+  schedule: Schedule.expression('cron(0 10-16 ? * MON-FRI *)'), // Every hour from 10 AM to 4 PM, Monday-Friday
   enabled: true,
 });
 
@@ -90,6 +83,24 @@ sesCampaignSenderFunction.addToRolePolicy(
     effect: Effect.ALLOW,
     actions: ['ses:SendEmail', 'ses:SendRawEmail'],
     resources: ['*'], // Can be restricted to specific identity ARN if needed
+  })
+);
+
+// Grant DynamoDB permissions to Lambda function
+// Allow reading campaign control and querying/updating contacts
+sesCampaignSenderFunction.addToRolePolicy(
+  new PolicyStatement({
+    effect: Effect.ALLOW,
+    actions: [
+      'dynamodb:GetItem',
+      'dynamodb:Query',
+      'dynamodb:UpdateItem',
+    ],
+    resources: [
+      contactTable.tableArn,
+      `${contactTable.tableArn}/index/*`, // Allow access to all GSIs
+      controlTable.tableArn,
+    ],
   })
 );
 
