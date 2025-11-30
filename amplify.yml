@@ -4,10 +4,10 @@ backend:
     preBuild:
       commands:
         - export N_PREFIX=$HOME/n
-        - export PATH=$N_PREFIX/bin:$PATH
+        - "export PATH=$N_PREFIX/bin:$PATH"
         - npm install -g n
         - n 20
-        - export PATH=$HOME/n/bin:$PATH
+        - "export PATH=$HOME/n/bin:$PATH"
         - hash -r
         - node -v
         - npm -v
@@ -25,10 +25,10 @@ frontend:
     preBuild:
       commands:
         - export N_PREFIX=$HOME/n
-        - export PATH=$N_PREFIX/bin:$PATH
+        - "export PATH=$N_PREFIX/bin:$PATH"
         - npm install -g n
         - n 20
-        - export PATH=$HOME/n/bin:$PATH
+        - "export PATH=$HOME/n/bin:$PATH"
         - hash -r
         - node -v
         - npm -v
