@@ -17,7 +17,9 @@ backend:
     build:
       commands:
         - npm rebuild @parcel/watcher
-        - npx ampx pipeline-deploy --branch $AWS_BRANCH --app-id $AWS_APP_ID
+        - echo "Debug: AWS_BRANCH=$AWS_BRANCH"
+        - echo "Debug: Git branch=$(git rev-parse --abbrev-ref HEAD)"
+        - npx ampx pipeline-deploy --branch ${AWS_BRANCH:-$(git rev-parse --abbrev-ref HEAD)} --app-id $AWS_APP_ID
 frontend:
   phases:
     preBuild:
