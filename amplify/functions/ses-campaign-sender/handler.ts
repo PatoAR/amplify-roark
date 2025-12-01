@@ -342,10 +342,16 @@ async function processCampaign(): Promise<{ success: boolean; sent: number; erro
 /**
  * Handle test email request
  */
-async function handleTestEmail(testEmail: string, firstName: string): Promise<{ success: boolean; message: string }> {
+async function handleTestEmail(testEmail: string, firstName: string, language: string = 'es'): Promise<{ success: boolean; message: string }> {
   try {
-    console.log(`Sending test email to ${testEmail} with firstName: ${firstName}`);
-    await sendEmail(testEmail, firstName);
+    // Validate and normalize language
+    const supportedLanguages = ['es', 'en', 'pt'];
+    const normalizedLanguage = supportedLanguages.includes(language.toLowerCase()) 
+      ? language.toLowerCase() 
+      : 'es';
+    
+    console.log(`Sending test email to ${testEmail} with firstName: ${firstName} in language: ${normalizedLanguage}`);
+    await sendEmail(testEmail, firstName, normalizedLanguage);
     return {
       success: true,
       message: `Test email sent successfully to ${testEmail}`,
@@ -387,7 +393,7 @@ export const handler = async (
 
     try {
       const body = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
-      const { testEmail, firstName } = body;
+      const { testEmail, firstName, language } = body;
 
       if (!testEmail || !firstName) {
         return {
@@ -400,7 +406,7 @@ export const handler = async (
         };
       }
 
-      const result = await handleTestEmail(testEmail, firstName);
+      const result = await handleTestEmail(testEmail, firstName, language);
       
       return {
         statusCode: result.success ? 200 : 500,

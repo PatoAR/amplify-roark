@@ -31,13 +31,10 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
             >> downloads schema from the server
             >> updates src/API.ts and graphql/files
 
-# PROD - AWS - merge dev into main
+# Deploy to PROD - merge dev into main
         1. git checkout main
-        2. git merge dev / appsync
+        2. git merge dev [or branch name]
         3. git push origin main
-
-## CLI
-https://docs.amplify.aws/react/reference/cli-commands/
 
 ## Tests
 - Login / Logout
