@@ -123,7 +123,7 @@ async function fetchAllSESCampaignContacts(
       nextToken,
     });
 
-    const items = result.data || [];
+    const items = (result.data || []).filter((item): item is NonNullable<typeof item> => item !== null && item !== undefined);
     allContacts = allContacts.concat(items);
     nextToken = result.nextToken || null;
   } while (nextToken);
@@ -131,18 +131,22 @@ async function fetchAllSESCampaignContacts(
   return allContacts;
 }
 
-function normalizeEmail(email: string): string {
+function normalizeEmail(email: string | null | undefined): string {
+  if (!email) return '';
   return email.trim().toLowerCase();
 }
 
 function calculateSESCampaignMetrics(contacts: any[], registeredUsers: any[]): SESCampaignMetrics {
-  const totalContacts = contacts.length;
+  // Filter out null/undefined contacts to prevent errors
+  // Use type guard for better type safety
+  const validContacts = contacts.filter((c): c is NonNullable<typeof c> => c !== null && c !== undefined);
+  const totalContacts = validContacts.length;
   
   // Count by status
-  const contactsSent = contacts.filter(c => c.Sent_Status === 'true').length;
-  const contactsPending = contacts.filter(c => c.Sent_Status === 'false').length;
-  const contactsWithErrors = contacts.filter(c => c.Error_Status).length;
-  const permanentFailures = contacts.filter(c => 
+  const contactsSent = validContacts.filter(c => c.Sent_Status === 'true').length;
+  const contactsPending = validContacts.filter(c => c.Sent_Status === 'false').length;
+  const contactsWithErrors = validContacts.filter(c => c.Error_Status).length;
+  const permanentFailures = validContacts.filter(c => 
     c.Error_Status && c.Error_Status.includes('PERMANENT_FAILURE:')
   ).length;
   const temporaryFailures = contactsWithErrors - permanentFailures;
@@ -154,14 +158,14 @@ function calculateSESCampaignMetrics(contacts: any[], registeredUsers: any[]): S
   
   // Language distribution
   const languageDistribution = {
-    es: contacts.filter(c => (c.Language || 'es') === 'es').length,
-    en: contacts.filter(c => c.Language === 'en').length,
-    pt: contacts.filter(c => c.Language === 'pt').length,
+    es: validContacts.filter(c => (c.Language || 'es') === 'es').length,
+    en: validContacts.filter(c => c.Language === 'en').length,
+    pt: validContacts.filter(c => c.Language === 'pt').length,
   };
   
   // Top companies
   const companyCounts = new Map<string, number>();
-  contacts.forEach(c => {
+  validContacts.forEach(c => {
     const company = c.Company || 'Unknown';
     companyCounts.set(company, (companyCounts.get(company) || 0) + 1);
   });
@@ -172,7 +176,7 @@ function calculateSESCampaignMetrics(contacts: any[], registeredUsers: any[]): S
     .slice(0, 10);
   
   // Calculate daily send rate (average sends per day)
-  const sentContacts = contacts.filter(c => c.Sent_Status === 'true' && c.Sent_Date);
+  const sentContacts = validContacts.filter(c => c.Sent_Status === 'true' && c.Sent_Date);
   const sentDates = sentContacts.map(c => c.Sent_Date).filter(Boolean);
   const uniqueDays = new Set(sentDates).size;
   const dailySendRate = uniqueDays > 0 ? sentContacts.length / uniqueDays : 0;
@@ -196,12 +200,14 @@ function calculateSESCampaignMetrics(contacts: any[], registeredUsers: any[]): S
   // Calculate conversion metrics - match campaign contacts with registered users by email
   const registeredEmails = new Set(
     registeredUsers
-      .filter(u => u.email)
+      .filter((u): u is NonNullable<typeof u> & { email: string } => u !== null && u !== undefined && Boolean(u.email))
       .map(u => normalizeEmail(u.email))
+      .filter(email => email !== '') // Filter out empty emails after normalization
   );
   
   // Find contacts that registered (were sent and registered)
-  const contactsRegistered = contacts.filter(c => {
+  const contactsRegistered = validContacts.filter(c => {
+    if (!c.email) return false;
     const contactEmail = normalizeEmail(c.email);
     return c.Sent_Status === 'true' && registeredEmails.has(contactEmail);
   }).length;
@@ -212,24 +218,27 @@ function calculateSESCampaignMetrics(contacts: any[], registeredUsers: any[]): S
   // Calculate conversion rate by language
   const conversionRateByLanguage = {
     es: (() => {
-      const sentES = contacts.filter(c => c.Sent_Status === 'true' && (c.Language || 'es') === 'es').length;
-      const registeredES = contacts.filter(c => {
+      const sentES = validContacts.filter(c => c.Sent_Status === 'true' && (c.Language || 'es') === 'es').length;
+      const registeredES = validContacts.filter(c => {
+        if (!c.email) return false;
         const contactEmail = normalizeEmail(c.email);
         return c.Sent_Status === 'true' && (c.Language || 'es') === 'es' && registeredEmails.has(contactEmail);
       }).length;
       return sentES > 0 ? (registeredES / sentES) * 100 : 0;
     })(),
     en: (() => {
-      const sentEN = contacts.filter(c => c.Sent_Status === 'true' && c.Language === 'en').length;
-      const registeredEN = contacts.filter(c => {
+      const sentEN = validContacts.filter(c => c.Sent_Status === 'true' && c.Language === 'en').length;
+      const registeredEN = validContacts.filter(c => {
+        if (!c.email) return false;
         const contactEmail = normalizeEmail(c.email);
         return c.Sent_Status === 'true' && c.Language === 'en' && registeredEmails.has(contactEmail);
       }).length;
       return sentEN > 0 ? (registeredEN / sentEN) * 100 : 0;
     })(),
     pt: (() => {
-      const sentPT = contacts.filter(c => c.Sent_Status === 'true' && c.Language === 'pt').length;
-      const registeredPT = contacts.filter(c => {
+      const sentPT = validContacts.filter(c => c.Sent_Status === 'true' && c.Language === 'pt').length;
+      const registeredPT = validContacts.filter(c => {
+        if (!c.email) return false;
         const contactEmail = normalizeEmail(c.email);
         return c.Sent_Status === 'true' && c.Language === 'pt' && registeredEmails.has(contactEmail);
       }).length;

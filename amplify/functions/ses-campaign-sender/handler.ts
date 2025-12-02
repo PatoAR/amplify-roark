@@ -27,7 +27,8 @@ const SENDER_EMAIL = process.env.SENDER_EMAIL || 'info@perkinsintel.com';
 const DAILY_SEND_LIMIT = parseInt(process.env.DAILY_SEND_LIMIT || '50', 10);
 const CONTACT_TABLE_NAME = process.env.CONTACT_TABLE_NAME || 'SESCampaignContact';
 const CAMPAIGN_CONTROL_TABLE_NAME = process.env.CAMPAIGN_CONTROL_TABLE_NAME || 'SESCampaignControl';
-const CONTACT_TABLE_GSI_NAME = process.env.CONTACT_TABLE_GSI_NAME || 'SESCampaignContactSent_Status';
+// Amplify Gen 2 GSI naming convention: {modelName}sBy{FieldName}
+const CONTACT_TABLE_GSI_NAME = process.env.CONTACT_TABLE_GSI_NAME || 'sESCampaignContactsBySent_Status';
 
 
 interface Contact {

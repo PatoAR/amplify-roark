@@ -2,36 +2,21 @@
 Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fetches, processes and stores news articles in dynambodb. The articles are distributed to varios channels (whatsapp, telegram) and to this webapp via AppSync subscriptions or long-polling.
 
 ## ToDo's
+- Verify how does session resumes when user come back to the webapp tab, seems that sometimes the news flow freezes after 30 minutes, does it resume when user makes tab visible again?
 - Migrate email from Zoho to AWS Workmail
 - Platform for original content publishers (CGI) self-service.
 - Follow companies
 
 - Platform for publicity self-service
 - Implement subscription workflow. Use MPago account.
-
 - Native IOS / Android App
 
-## CI/CD
-# DEV - LOCAL
-    - Font-end local instance: npm run dev
-    - Back-end sandbox: npx amplify sandbox
-        > deploys schema on changes on files in amplify/folder
-        > updates local amplify_outputs.json
-        ?> Run: npx ampx generate graphql-client-code --format graphql-codegen --out ./src/graphql/ 
-            >> generates API.ts, and graphql files based on local schema and amplify_outputs.json
-    - Howard feed not connected - will not feed news to backend
+## Notes
+- Font-end local instance: npm run dev
+- If changes on amplify backend folder affect schema run: npx @aws-amplify/cli codegen, then git commit/push again.
+- When adding a new branch, need to create GRAPHQL_API_KEY and GRAPHQL_API_URL manually on AWS Systems Manager > Parameter Store
 
-# DEV - AWS
-    - Git commit / push to deploy changes to AWS
-    - To use "npm run dev" frontend with "DEV AWS" backend (if previously working with sandbox):
-        > Download new amplify_outputs.json 
-        > Run: npx ampx generate graphql-client-code --format graphql-codegen --out ./src/graphql/ 
-            >> generates API.ts, and graphql files based on local schema and amplify_outputs.json 
-        - npx @aws-amplify/cli codegen
-            >> downloads schema from the server
-            >> updates src/API.ts and graphql/files
-
-# Deploy to PROD - merge dev into main
+## Deploy to PROD - merge dev into main
         1. git checkout main
         2. git merge dev [or branch name]
         3. git push origin main
@@ -43,3 +28,15 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 - Referrals
 - Access days left - dynamic getting close to cero on days
 - Deleted emails
+
+## Cursor Prompt
+I need to xxx. 
+
+Analyze the problem in detail and then design a solution that:
+1. Is robust yet concise and simple
+2. Is secure and maintainable
+3. Best Practice: Aligns with AWS and Amplify Gen 2 recommendations
+4. Follows Codebase Patterns: Consistent with existing code style
+5. Maintains consistency with our error handling approach
+
+Please explain your approach before showing code.
