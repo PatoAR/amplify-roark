@@ -2,7 +2,6 @@
 Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fetches, processes and stores news articles in dynambodb. The articles are distributed to varios channels (whatsapp, telegram) and to this webapp via AppSync subscriptions or long-polling.
 
 ## ToDo's
-- Verify how does session resumes when user come back to the webapp tab, seems that sometimes the news flow freezes after 30 minutes, does it resume when user makes tab visible again?
 - Migrate email from Zoho to AWS Workmail
 - Platform for original content publishers (CGI) self-service.
 - Follow companies
@@ -29,14 +28,12 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 - Access days left - dynamic getting close to cero on days
 - Deleted emails
 
-## Cursor Prompt
-I need to xxx. 
+## Script Utilities
+Scripts for managing SES campaigns and importing contacts are located in the `scripts/` directory. See `scripts/README.md` for detailed usage instructions.
 
-Analyze the problem in detail and then design a solution that:
-1. Is robust yet concise and simple
-2. Is secure and maintainable
-3. Best Practice: Aligns with AWS and Amplify Gen 2 recommendations
-4. Follows Codebase Patterns: Consistent with existing code style
-5. Maintains consistency with our error handling approach
+**Key Features:**
+- Branch-aware table discovery (safe for multi-branch deployments)
+- Duplicate detection and prevention
+- CloudFormation-based resource discovery
 
 Please explain your approach before showing code.

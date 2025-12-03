@@ -65,6 +65,20 @@ lambdaFunction.addEnvironment('CONTACT_TABLE_NAME', contactTable.tableName);
 lambdaFunction.addEnvironment('CAMPAIGN_CONTROL_TABLE_NAME', controlTable.tableName);
 lambdaFunction.addEnvironment('CONTACT_TABLE_GSI_NAME', 'sESCampaignContactsBySent_Status');
 
+// Export table names as CloudFormation outputs for use by local scripts
+// This enables scripts to discover the correct tables for the current branch/environment
+const dataStack = backend.data.stack;
+dataStack.addOutputs({
+  SESCampaignContactTableName: {
+    value: contactTable.tableName,
+    description: 'DynamoDB table name for SES Campaign Contacts',
+  },
+  SESCampaignControlTableName: {
+    value: controlTable.tableName,
+    description: 'DynamoDB table name for SES Campaign Control',
+  },
+});
+
 const sesCampaignSenderScheduleRule = new Rule(sesCampaignSenderStack, 'SESCampaignSenderSchedule', {
   ruleName: sesCampaignSenderRuleName,
   description: 'Triggers SES campaign sender Lambda hourly during business hours (10 AM - 4 PM Buenos Aires time, Monday-Friday)',

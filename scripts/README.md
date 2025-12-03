@@ -84,7 +84,38 @@ npm run toggle status   # Show current status
 - **SESCampaignContact** - Contact list table (auto-created)
 - **SESCampaignControl** - Campaign control table (auto-created)
 
-**Note:** Table names will have a hash suffix (e.g., `SESCampaignContact-abc123`). The Lambda function automatically gets the correct table names from environment variables set by Amplify.
+**Note:** Table names will have a hash suffix (e.g., `SESCampaignContact-abc123-NONE`). The scripts automatically discover the correct table names.
+
+### Table Discovery
+
+Scripts automatically discover table names using a **branch-aware** approach that prevents accidentally operating on tables from different branches/environments.
+
+**Discovery Order:**
+
+1. **Environment variables** (explicit override - highest priority):
+   ```bash
+   CONTACT_TABLE_NAME=SESCampaignContact-abc123-main npm run import contacts.xlsx
+   CAMPAIGN_CONTROL_TABLE_NAME=SESCampaignControl-xyz789-main npm run toggle status
+   ```
+
+2. **CloudFormation stack outputs** (recommended - branch-safe):
+   - Queries CloudFormation for deployed Amplify data stacks
+   - Automatically identifies tables for the current environment
+   - Requires `cloudformation:DescribeStacks` permission
+   - **Safe for multi-branch deployments**
+
+3. **DynamoDB ListTables** (fallback):
+   - Direct table listing by name prefix
+   - Requires `dynamodb:ListTables` permission
+   - ⚠️ **Warns if multiple matching tables found** (multi-branch scenario)
+
+**Multi-Branch Safety:**
+When multiple branches are deployed to the same AWS account (e.g., `main`, `dev`, `feature`), the CloudFormation-based discovery ensures you're operating on the correct environment's tables. If CloudFormation access is unavailable, the script will warn you if multiple matching tables are found.
+
+**Best Practices:**
+- **Development:** CloudFormation discovery works automatically
+- **CI/CD pipelines:** Use environment variables for explicit control
+- **Multi-branch setups:** Ensure `cloudformation:DescribeStacks` permission is granted
 
 **Initial Control Item:**
 After deployment, create the initial control item using the toggle script:
@@ -95,20 +126,43 @@ npm run toggle enable
 Or manually via AWS Console:
 1. Go to DynamoDB Console → Find table starting with `SESCampaignControl`
 2. Items tab → Create item
-3. Add: `control` = `"main"`, `isEnabled` = `true`, `lastUpdated` = current ISO timestamp
+3. Add: `id` = `"main"`, `control` = `"main"`, `isEnabled` = `true`, `lastUpdated` = current ISO timestamp
 4. Save
 
 ## Troubleshooting
 
 **Error: Table not found**
-- Ensure DynamoDB tables are created before running scripts
-- Check table names match exactly: `Perkins_Intelligence_Contact_List` and `SES_Campaign_Control`
+- Ensure the Amplify backend is deployed: `npx ampx sandbox` or push to Git
+- Verify you're connected to the correct AWS account and region: `aws sts get-caller-identity`
+- Check available tables in AWS Console → DynamoDB
+- Manually specify table name via environment variable:
+  ```bash
+  CONTACT_TABLE_NAME=YourTableName npm run import contacts.xlsx
+  ```
 
 **Error: Access denied**
-- Verify AWS credentials are configured correctly
-- Ensure IAM user/role has DynamoDB read/write permissions
+- Verify AWS credentials are configured correctly: `aws configure`
+- Ensure IAM user/role has required permissions:
+  - `cloudformation:DescribeStacks` (recommended for branch-safe discovery)
+  - `dynamodb:ListTables` (fallback discovery)
+  - `dynamodb:GetItem`, `dynamodb:PutItem`, `dynamodb:BatchWriteItem`, `dynamodb:BatchGetItem`
+- Alternative: Use environment variables to bypass discovery (only needs table-level permissions)
 
 **Error: Missing columns**
-- Verify Excel file has required columns: Company, FirstName, LastName, email
+- Verify Excel file has required columns: `Company`, `FirstName`, `LastName`, `email`
 - Column names are case-sensitive
+- Optional column: `Language` (defaults to 'es' if missing)
+
+**Slow table discovery**
+- CloudFormation queries are fast and efficient
+- DynamoDB ListTables fallback may take a few seconds
+- Speed up by using environment variables (no API call needed)
+- The discovered table name is logged for future reference
+
+**Multiple tables found warning**
+- Occurs when multiple branches are deployed to the same AWS account
+- The script will warn you and show all matching tables
+- Ensure you're using the correct table by:
+  1. Granting `cloudformation:DescribeStacks` permission (recommended)
+  2. Using environment variables to explicitly specify the table
 
