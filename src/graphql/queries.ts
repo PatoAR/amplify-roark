@@ -379,3 +379,51 @@ export const listDeletedUserEmails = /* GraphQL */ `query ListDeletedUserEmails(
   APITypes.ListDeletedUserEmailsQueryVariables,
   APITypes.ListDeletedUserEmailsQuery
 >;
+export const getSESCampaignContact = /* GraphQL */ `query GetSESCampaignContact($id: ID!) {
+  getSESCampaignContact(id: $id) {
+    id
+    email
+    Company
+    FirstName
+    LastName
+    Language
+    Sent_Status
+    Target_Send_Date
+    Send_Group_ID
+    Sent_Date
+    Error_Status
+    Company_Sequence
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+`;
+export const listSESCampaignContacts = /* GraphQL */ `query ListSESCampaignContacts(
+  $filter: ModelSESCampaignContactFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listSESCampaignContacts(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      email
+      Company
+      FirstName
+      LastName
+      Language
+      Sent_Status
+      Target_Send_Date
+      Send_Group_ID
+      Sent_Date
+      Error_Status
+      Company_Sequence
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+`;

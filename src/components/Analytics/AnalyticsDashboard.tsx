@@ -4,7 +4,7 @@ import { getCurrentUser } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
 import { type Schema } from '../../../amplify/data/resource';
 import { useSession } from '../../context/SessionContext';
-import { listUserActivities, listUserSubscriptions } from '../../graphql/queries';
+import { listUserActivities, listUserSubscriptions, listSESCampaignContacts } from '../../graphql/queries';
 import { useTranslation } from '../../i18n';
 import { MASTER_EMAIL } from '../../constants/auth';
 import './AnalyticsDashboard.css';
@@ -114,21 +114,114 @@ async function fetchAllSubscriptions(
 async function fetchAllSESCampaignContacts(
   client: ReturnType<typeof generateClient<Schema>>,
 ): Promise<any[]> {
+  console.log('[AnalyticsDashboard] Fetching SES Campaign Contacts...');
   let allContacts: any[] = [];
   let nextToken: string | null = null;
+  let pageCount = 0;
 
-  do {
-    const result: { data: any[]; nextToken?: string | null } = await client.models.SESCampaignContact.list({
-      limit: 1000,
-      nextToken,
-    });
+  try {
+    do {
+      pageCount++;
+      console.log(`[AnalyticsDashboard] Fetching page ${pageCount} of SES contacts...`);
+      
+      // Use GraphQL approach (consistent with fetchAllSubscriptions)
+      const result = await client.graphql({
+        query: listSESCampaignContacts,
+        variables: {
+          limit: 1000,
+          nextToken,
+        },
+      }) as any;
 
-    const items = (result.data || []).filter((item): item is NonNullable<typeof item> => item !== null && item !== undefined);
-    allContacts = allContacts.concat(items);
-    nextToken = result.nextToken || null;
-  } while (nextToken);
+      // Log any errors returned
+      if (result.errors && result.errors.length > 0) {
+        console.error('[AnalyticsDashboard] GraphQL Errors fetching SES contacts:');
+        result.errors.forEach((error: any, index: number) => {
+          console.error(`  Error ${index + 1}:`, {
+            message: error.message,
+            errorType: error.errorType,
+            path: error.path,
+            locations: error.locations,
+            fullError: error,
+          });
+        });
+      }
 
-  return allContacts;
+      // Log raw result structure for debugging
+      console.log('[AnalyticsDashboard] Raw result structure:', {
+        hasData: !!result.data?.listSESCampaignContacts,
+        dataLength: result.data?.listSESCampaignContacts?.items?.length ?? 0,
+        hasNextToken: !!result.data?.listSESCampaignContacts?.nextToken,
+      });
+
+      const items = result.data?.listSESCampaignContacts?.items || [];
+      
+      // Sample first item to see structure
+      if (items.length > 0) {
+        console.log('[AnalyticsDashboard] Sample contact structure:', {
+          keys: Object.keys(items[0] || {}),
+          sample: items[0],
+        });
+      }
+
+      console.log(`[AnalyticsDashboard] Page ${pageCount}: Fetched ${items.length} valid contacts`);
+      
+      allContacts = allContacts.concat(items.filter((item: any) => item !== null && item !== undefined));
+      nextToken = result.data?.listSESCampaignContacts?.nextToken || null;
+    } while (nextToken);
+
+    console.log(`[AnalyticsDashboard] Total SES contacts fetched: ${allContacts.length} across ${pageCount} pages`);
+    
+    // Log statistics about the fetched data
+    if (allContacts.length > 0) {
+      const sentCount = allContacts.filter(c => c.Sent_Status === 'true').length;
+      const pendingCount = allContacts.filter(c => c.Sent_Status === 'false').length;
+      const withErrors = allContacts.filter(c => c.Error_Status).length;
+      
+      console.log('[AnalyticsDashboard] SES contacts breakdown:', {
+        total: allContacts.length,
+        sent: sentCount,
+        pending: pendingCount,
+        withErrors: withErrors,
+        companies: new Set(allContacts.map(c => c.Company)).size,
+        languages: {
+          es: allContacts.filter(c => (c.Language || 'es') === 'es').length,
+          en: allContacts.filter(c => c.Language === 'en').length,
+          pt: allContacts.filter(c => c.Language === 'pt').length,
+        }
+      });
+    } else {
+      console.warn('[AnalyticsDashboard] No SES contacts found in database!');
+    }
+
+    return allContacts;
+  } catch (error) {
+    console.error('[AnalyticsDashboard] Error fetching SES Campaign Contacts:', error);
+    
+    // Better error logging
+    if (typeof error === 'object' && error !== null) {
+      console.error('[AnalyticsDashboard] Error details:', {
+        message: (error as any).message,
+        errors: (error as any).errors,
+        data: (error as any).data,
+        stack: (error as any).stack,
+        fullError: error,
+      });
+      
+      // If there are GraphQL errors, log them individually
+      if ((error as any).errors && Array.isArray((error as any).errors)) {
+        console.error('[AnalyticsDashboard] GraphQL Errors:');
+        (error as any).errors.forEach((err: any, idx: number) => {
+          console.error(`  Error ${idx + 1}:`, err);
+        });
+      }
+    } else {
+      console.error('[AnalyticsDashboard] Error (not an object):', String(error));
+    }
+    
+    // Return empty array instead of throwing to allow dashboard to render
+    return [];
+  }
 }
 
 function normalizeEmail(email: string | null | undefined): string {
@@ -137,10 +230,31 @@ function normalizeEmail(email: string | null | undefined): string {
 }
 
 function calculateSESCampaignMetrics(contacts: any[], registeredUsers: any[]): SESCampaignMetrics {
+  console.log('[AnalyticsDashboard] Calculating SES Campaign Metrics...');
+  console.log('[AnalyticsDashboard] Input:', {
+    contactsCount: contacts.length,
+    registeredUsersCount: registeredUsers.length,
+  });
+
   // Filter out null/undefined contacts to prevent errors
   // Use type guard for better type safety
   const validContacts = contacts.filter((c): c is NonNullable<typeof c> => c !== null && c !== undefined);
   const totalContacts = validContacts.length;
+  
+  console.log(`[AnalyticsDashboard] Valid contacts after filtering: ${totalContacts}`);
+  
+  // Log a sample contact to verify structure
+  if (validContacts.length > 0) {
+    console.log('[AnalyticsDashboard] Sample contact for verification:', {
+      hasEmail: !!validContacts[0].email,
+      hasCompany: !!validContacts[0].Company,
+      hasSentStatus: !!validContacts[0].Sent_Status,
+      sentStatusValue: validContacts[0].Sent_Status,
+      hasLanguage: !!validContacts[0].Language,
+      languageValue: validContacts[0].Language,
+      keys: Object.keys(validContacts[0]),
+    });
+  }
   
   // Count by status
   const contactsSent = validContacts.filter(c => c.Sent_Status === 'true').length;
@@ -150,6 +264,15 @@ function calculateSESCampaignMetrics(contacts: any[], registeredUsers: any[]): S
     c.Error_Status && c.Error_Status.includes('PERMANENT_FAILURE:')
   ).length;
   const temporaryFailures = contactsWithErrors - permanentFailures;
+  
+  console.log('[AnalyticsDashboard] Status breakdown:', {
+    total: totalContacts,
+    sent: contactsSent,
+    pending: contactsPending,
+    withErrors: contactsWithErrors,
+    permanentFailures,
+    temporaryFailures,
+  });
   
   // Calculate rates
   const attempted = contactsSent + contactsWithErrors;
@@ -246,7 +369,7 @@ function calculateSESCampaignMetrics(contacts: any[], registeredUsers: any[]): S
     })(),
   };
   
-  return {
+  const metrics = {
     totalContacts,
     contactsSent,
     contactsPending,
@@ -267,6 +390,10 @@ function calculateSESCampaignMetrics(contacts: any[], registeredUsers: any[]): S
       pt: Math.round(conversionRateByLanguage.pt * 100) / 100,
     },
   };
+  
+  console.log('[AnalyticsDashboard] Calculated SES metrics:', metrics);
+  
+  return metrics;
 }
 
 function aggregateAnalytics(
@@ -422,29 +549,49 @@ export const AnalyticsDashboard = () => {
   }, [userId]);
 
   const loadAnalytics = useCallback(async () => {
-    if (!userId || !isMasterUser) return;
+    if (!userId || !isMasterUser) {
+      console.log('[AnalyticsDashboard] Skipping analytics load - userId:', userId, 'isMasterUser:', isMasterUser);
+      return;
+    }
 
+    console.log('[AnalyticsDashboard] Starting analytics load for userId:', userId, 'timeRange:', timeRange);
     setIsLoading(true);
     setError(null);
     try {
       const client = generateClient<Schema>();
 
       // Fetch all data in parallel
+      console.log('[AnalyticsDashboard] Fetching all data sources in parallel...');
       const [activities, subscriptions, sesContacts] = await Promise.all([
         fetchAllActivities(client),
         fetchAllSubscriptions(client),
         fetchAllSESCampaignContacts(client),
       ]);
 
+      console.log('[AnalyticsDashboard] Data fetch complete:', {
+        activitiesCount: activities.length,
+        subscriptionsCount: subscriptions.length,
+        sesContactsCount: sesContacts.length,
+      });
+
       // Aggregate analytics in the frontend (exclude master user data)
+      console.log('[AnalyticsDashboard] Aggregating user analytics...');
       const aggregated = aggregateAnalytics(activities, subscriptions, timeRange, userId);
       setAnalytics(aggregated);
+      console.log('[AnalyticsDashboard] User analytics aggregated:', {
+        registeredUsers: aggregated.registeredUsers,
+        totalSessions: aggregated.totalSessions,
+        activeUsers: aggregated.activeUsers,
+      });
       
       // Calculate SES campaign metrics (pass subscriptions to match with registered users)
+      console.log('[AnalyticsDashboard] Calculating SES campaign metrics...');
       const sesCampaignMetrics = calculateSESCampaignMetrics(sesContacts, subscriptions);
       setSESMetrics(sesCampaignMetrics);
+      console.log('[AnalyticsDashboard] ✅ Analytics load complete');
     } catch (error) {
-      console.error('Failed to load analytics', error);
+      console.error('[AnalyticsDashboard] ❌ Failed to load analytics:', error);
+      console.error('[AnalyticsDashboard] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
       setError(error instanceof Error ? error.message : 'Failed to load analytics');
     } finally {
       setIsLoading(false);
