@@ -284,61 +284,6 @@ export const NewsManager: React.FC = () => {
     return false;
   }, []);
 
-  // Resume news flow if needed (called on visibility change or session restart)
-  const resumeNewsFlowIfNeeded = useCallback(async () => {
-    // Prevent rapid re-initialization (debounce)
-    const now = Date.now();
-    if (now - lastVisibilityCheckRef.current < 2000) {
-      return; // Debounce: wait at least 2 seconds between checks
-    }
-    lastVisibilityCheckRef.current = now;
-
-    // Only resume if authenticated and component is mounted
-    if (!isComponentMountedRef.current || authStatus !== 'authenticated' || !userId) {
-      return;
-    }
-
-    // Don't resume if already initializing
-    if (isInitializingRef.current) {
-      return;
-    }
-
-    // Check if news flow is healthy
-    if (isNewsFlowHealthy() && isInitialized) {
-      return; // News flow is healthy, no action needed
-    }
-
-    // News flow is not healthy, re-initialize
-    isInitializingRef.current = true;
-    try {
-      // If not initialized, fetch initial articles first
-      if (!isInitialized) {
-        await fetchInitialArticles();
-      }
-      
-      // Ensure subscription or polling is active
-      if (isComponentMountedRef.current) {
-        if (!unsubscribeRef.current && !pollingIntervalRef.current) {
-          // Neither subscription nor polling is active, start subscription
-          await trySubscribe();
-        } else if (!unsubscribeRef.current && pollingIntervalRef.current) {
-          // Polling is active but subscription is not, try to upgrade to subscription
-          await trySubscribe();
-        }
-      }
-    } catch (error: any) {
-      // Don't log auth errors as they're expected during logout
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      if (!errorMessage.includes('NoValidAuthTokens') && !errorMessage.includes('No federated jwt')) {
-        console.error('[NewsManager] Failed to resume news flow', error);
-      }
-    } finally {
-      if (isComponentMountedRef.current) {
-        isInitializingRef.current = false;
-      }
-    }
-  }, [authStatus, userId, isInitialized, isNewsFlowHealthy, fetchInitialArticles, trySubscribe]);
-
   // Fetch initial articles
   const fetchInitialArticles = useCallback(async () => {
     if (!isComponentMountedRef.current) {
@@ -712,6 +657,61 @@ export const NewsManager: React.FC = () => {
       }
     }
   }, [addArticle, isArticleSeen, startPolling, getClient, authStatus]);
+
+  // Resume news flow if needed (called on visibility change or session restart)
+  const resumeNewsFlowIfNeeded = useCallback(async () => {
+    // Prevent rapid re-initialization (debounce)
+    const now = Date.now();
+    if (now - lastVisibilityCheckRef.current < 2000) {
+      return; // Debounce: wait at least 2 seconds between checks
+    }
+    lastVisibilityCheckRef.current = now;
+
+    // Only resume if authenticated and component is mounted
+    if (!isComponentMountedRef.current || authStatus !== 'authenticated' || !userId) {
+      return;
+    }
+
+    // Don't resume if already initializing
+    if (isInitializingRef.current) {
+      return;
+    }
+
+    // Check if news flow is healthy
+    if (isNewsFlowHealthy() && isInitialized) {
+      return; // News flow is healthy, no action needed
+    }
+
+    // News flow is not healthy, re-initialize
+    isInitializingRef.current = true;
+    try {
+      // If not initialized, fetch initial articles first
+      if (!isInitialized) {
+        await fetchInitialArticles();
+      }
+      
+      // Ensure subscription or polling is active
+      if (isComponentMountedRef.current) {
+        if (!unsubscribeRef.current && !pollingIntervalRef.current) {
+          // Neither subscription nor polling is active, start subscription
+          await trySubscribe();
+        } else if (!unsubscribeRef.current && pollingIntervalRef.current) {
+          // Polling is active but subscription is not, try to upgrade to subscription
+          await trySubscribe();
+        }
+      }
+    } catch (error: any) {
+      // Don't log auth errors as they're expected during logout
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (!errorMessage.includes('NoValidAuthTokens') && !errorMessage.includes('No federated jwt')) {
+        console.error('[NewsManager] Failed to resume news flow', error);
+      }
+    } finally {
+      if (isComponentMountedRef.current) {
+        isInitializingRef.current = false;
+      }
+    }
+  }, [authStatus, userId, isInitialized, isNewsFlowHealthy, fetchInitialArticles, trySubscribe]);
 
   // Initialize when user changes
   useEffect(() => {
