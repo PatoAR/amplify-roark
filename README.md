@@ -28,12 +28,13 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 - Access days left - dynamic getting close to cero on days
 - Deleted emails
 
-## Script Utilities
-Scripts for managing SES campaigns and importing contacts are located in the `scripts/` directory. See `scripts/README.md` for detailed usage instructions.
 
-**Key Features:**
-- Branch-aware table discovery (safe for multi-branch deployments)
-- Duplicate detection and prevention
-- CloudFormation-based resource discovery
+Take enough time to analyze the problem in detail, speed is not a priority. Then design a solution that:
+1. Is robust yet concise and simple
+2. Is secure and maintainable
+3. Best Practice: Aligns with AWS and Amplify Gen 2 recommendations
+4. Follows Codebase Patterns: Consistent with existing code style
+5. Maintains consistency with our error handling approach
+6. Checks for Typescript and AWS build errors.
 
 Please explain your approach before showing code.

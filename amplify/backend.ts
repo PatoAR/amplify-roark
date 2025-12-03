@@ -1,5 +1,5 @@
 import { defineBackend } from '@aws-amplify/backend';
-import { Stack, Duration } from 'aws-cdk-lib';
+import { Stack, Duration, CfnOutput } from 'aws-cdk-lib';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { Function as LambdaFunctionConstruct, FunctionUrl, FunctionUrlAuthType, HttpMethod } from 'aws-cdk-lib/aws-lambda';
@@ -68,15 +68,13 @@ lambdaFunction.addEnvironment('CONTACT_TABLE_GSI_NAME', 'sESCampaignContactsBySe
 // Export table names as CloudFormation outputs for use by local scripts
 // This enables scripts to discover the correct tables for the current branch/environment
 const dataStack = backend.data.stack;
-dataStack.addOutputs({
-  SESCampaignContactTableName: {
-    value: contactTable.tableName,
-    description: 'DynamoDB table name for SES Campaign Contacts',
-  },
-  SESCampaignControlTableName: {
-    value: controlTable.tableName,
-    description: 'DynamoDB table name for SES Campaign Control',
-  },
+new CfnOutput(dataStack, 'SESCampaignContactTableName', {
+  value: contactTable.tableName,
+  description: 'DynamoDB table name for SES Campaign Contacts',
+});
+new CfnOutput(dataStack, 'SESCampaignControlTableName', {
+  value: controlTable.tableName,
+  description: 'DynamoDB table name for SES Campaign Control',
 });
 
 const sesCampaignSenderScheduleRule = new Rule(sesCampaignSenderStack, 'SESCampaignSenderSchedule', {
