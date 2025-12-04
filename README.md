@@ -11,8 +11,12 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 - Native IOS / Android App
 
 ## Notes
-- Font-end local instance: npm run dev
-- If changes on amplify backend folder affect schema run: npx @aws-amplify/cli codegen, then git commit/push again.
+- Front-end local instance: npm run dev
+- **GraphQL Code Generation (Amplify Gen 2):**
+  - After schema changes in `amplify/data/resource.ts`, run: `npx ampx generate graphql-client-code --format graphql-codegen --out ./src/graphql/`
+  - This generates TypeScript types and GraphQL queries in `src/graphql/` (API.ts, queries.ts, mutations.ts, subscriptions.ts)
+  - **DO NOT** use `npx @aws-amplify/cli codegen` - it's for Amplify Gen 1 only
+  - After generation, commit and push changes
 - When adding a new branch, need to create GRAPHQL_API_KEY and GRAPHQL_API_URL manually on AWS Systems Manager > Parameter Store
 
 ## Deploy to PROD - merge dev into main
