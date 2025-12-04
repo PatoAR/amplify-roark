@@ -236,6 +236,7 @@ async function writeContactsToDynamoDB(
   // Split into batches
   for (let i = 0; i < contactsToWrite.length; i += BATCH_SIZE) {
     const batch = contactsToWrite.slice(i, i + BATCH_SIZE);
+    const now = new Date().toISOString();
     
     const putRequests = batch.map(contact => ({
       PutRequest: {
@@ -251,6 +252,8 @@ async function writeContactsToDynamoDB(
           Target_Send_Date: contact.Target_Send_Date,
           Send_Group_ID: contact.Send_Group_ID,
           Company_Sequence: contact.Company_Sequence,
+          createdAt: now, // Amplify-required field
+          updatedAt: now, // Amplify-required field
         },
       },
     }));
