@@ -137,13 +137,10 @@ async function fetchAllSESCampaignContacts(
       if (result.errors && result.errors.length > 0) {
         console.error('[AnalyticsDashboard] GraphQL Errors fetching SES contacts:');
         result.errors.forEach((error: any, index: number) => {
-          console.error(`  Error ${index + 1}:`, {
-            message: error.message,
-            errorType: error.errorType,
-            path: error.path,
-            locations: error.locations,
-            fullError: error,
-          });
+          console.error(`  Error ${index + 1}: ${error.message}`);
+          console.error(`    Type: ${error.errorType}`);
+          console.error(`    Path: ${JSON.stringify(error.path)}`);
+          console.error(`    Full error:`, error);
         });
       }
 
