@@ -128,14 +128,17 @@ const functionUrl = new FunctionUrl(sesCampaignSenderStack, 'SESCampaignSenderFu
 // Configure SES Bounce Handler
 const sesBounceHandlerFunction = backend.sesBounceHandler.resources.lambda;
 
+// Set the correct table name as environment variable
+sesBounceHandlerFunction.addEnvironment('CONTACT_TABLE_NAME', contactTable.tableName);
+
 // Grant DynamoDB permissions to bounce handler
-// Allow updating ANY SESCampaignContact table (for multi-branch support)
+// Allow updating the SESCampaignContact table
 sesBounceHandlerFunction.addToRolePolicy(
   new PolicyStatement({
     effect: Effect.ALLOW,
     actions: ['dynamodb:UpdateItem'],
     resources: [
-      `arn:aws:dynamodb:${Stack.of(contactTable).region}:${Stack.of(contactTable).account}:table/SESCampaignContact*`
+      contactTable.tableArn, // This branch's table
     ],
   })
 );

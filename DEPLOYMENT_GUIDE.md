@@ -87,6 +87,7 @@ git push origin dev
    - **Display name**: `SES Bounce Notifications`
 4. Click **Create topic**
 5. **Copy the ARN** (you'll need it later)
+arn:aws:sns:us-east-1:038023955765:ses-bounces
 
 ### 2.2 Create Complaint Topic
 
@@ -97,6 +98,7 @@ git push origin dev
    - **Display name**: `SES Complaint Notifications`
 3. Click **Create topic**
 4. **Copy the ARN**
+arn:aws:sns:us-east-1:038023955765:ses-complaints
 
 **Result**: Two SNS topics created ✅
 
@@ -174,7 +176,7 @@ Open PowerShell and run:
 
 ```powershell
 # Test hard bounce (permanent failure)
-Invoke-RestMethod -Uri "https://YOUR-FUNCTION-URL" `
+Invoke-RestMethod -Uri "https://dwqucp2qodpnulglross57uhye0ipasr.lambda-url.us-east-1.on.aws/" `
   -Method Post `
   -ContentType "application/json" `
   -Body '{"testEmail": "bounce@simulator.amazonses.com", "firstName": "Test"}'
