@@ -6,7 +6,8 @@
   "scripts": {
     "import": "ts-node import-contacts.ts",
     "toggle": "ts-node toggle-campaign.ts",
-    "fix-timestamps": "ts-node fix-timestamps.ts"
+    "fix-timestamps": "ts-node fix-timestamps.ts",
+    "test-bounce": "ts-node test-bounce.ts"
   },
   "dependencies": {
     "@aws-sdk/client-cloudformation": "^3.700.0",
