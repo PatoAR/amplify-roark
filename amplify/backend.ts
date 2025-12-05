@@ -3,7 +3,7 @@ import { Stack, Duration, CfnOutput } from 'aws-cdk-lib';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { Function as LambdaFunctionConstruct, FunctionUrl, FunctionUrlAuthType, HttpMethod } from 'aws-cdk-lib/aws-lambda';
-import { PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam';
+import { PolicyStatement, Effect, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { createHash } from 'crypto';
 import { auth } from './auth/resource';
 import { data } from './data/resource';
@@ -143,3 +143,7 @@ bounceHandlerLambda.addToRolePolicy(
     ],
   })
 );
+
+// Grant SNS permission to invoke the bounce handler Lambda
+// This is required for SNS to deliver bounce notifications to the Lambda
+bounceHandlerLambda.grantInvoke(new ServicePrincipal('sns.amazonaws.com'));

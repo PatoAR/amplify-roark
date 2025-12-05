@@ -27,6 +27,13 @@ B. Subscribe the **main** branch Lambda to SNS topics:
 3. Repeat for **ses-complaints**
 **Why?** Each branch has its own Lambda function that needs to subscribe.
 
+## Sandbox
+Quick check before deployment
+# Start sandbox: npx ampx sandbox
+# Stop sandbox (keeps resources): Ctrl+C
+# Delete sandbox (removes all resources): npx ampx sandbox delete
+
+
 ## Deploy to PROD - merge dev into main
         1. git checkout main
         2. git merge dev [or branch name]
