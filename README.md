@@ -17,7 +17,15 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
   - This generates TypeScript types and GraphQL queries in `src/graphql/` (API.ts, queries.ts, mutations.ts, subscriptions.ts)
   - **DO NOT** use `npx @aws-amplify/cli codegen` - it's for Amplify Gen 1 only
   - After generation, commit and push changes
-- When adding a new branch, need to create GRAPHQL_API_KEY and GRAPHQL_API_URL manually on AWS Systems Manager > Parameter Store
+
+**Important**: 
+A. When adding a new branch, need to create GRAPHQL_API_KEY and GRAPHQL_API_URL manually on AWS Systems Manager > Parameter Store
+
+B. Subscribe the **main** branch Lambda to SNS topics:
+1. SNS Console → **ses-bounces** → Create subscription
+2. Select `ses-bounce-handler-main-{hash}`
+3. Repeat for **ses-complaints**
+**Why?** Each branch has its own Lambda function that needs to subscribe.
 
 ## Deploy to PROD - merge dev into main
         1. git checkout main

@@ -127,13 +127,14 @@ const functionUrl = new FunctionUrl(sesCampaignSenderStack, 'SESCampaignSenderFu
 
 // Configure SES Bounce Handler
 const sesBounceHandlerFunction = backend.sesBounceHandler.resources.lambda;
+const bounceHandlerLambda = sesBounceHandlerFunction as LambdaFunctionConstruct;
 
 // Set the correct table name as environment variable
-sesBounceHandlerFunction.addEnvironment('CONTACT_TABLE_NAME', contactTable.tableName);
+bounceHandlerLambda.addEnvironment('CONTACT_TABLE_NAME', contactTable.tableName);
 
 // Grant DynamoDB permissions to bounce handler
 // Allow updating the SESCampaignContact table
-sesBounceHandlerFunction.addToRolePolicy(
+bounceHandlerLambda.addToRolePolicy(
   new PolicyStatement({
     effect: Effect.ALLOW,
     actions: ['dynamodb:UpdateItem'],
