@@ -11,6 +11,7 @@ import { referralProcessor } from './functions/referral-processor/resource';
 import { subscriptionManager } from './functions/subscription-manager/resource';
 import { sessionCleanup } from './functions/session-cleanup/resource';
 import { sesCampaignSender } from './functions/ses-campaign-sender/resource';
+import { sesBounceHandler } from './functions/ses-bounce-handler/resource';
 
 export const backend = defineBackend({
   auth,
@@ -19,6 +20,7 @@ export const backend = defineBackend({
   subscriptionManager,
   sessionCleanup,
   sesCampaignSender,
+  sesBounceHandler,
 });
 
 // Add EventBridge schedule for session cleanup function
@@ -122,3 +124,18 @@ const functionUrl = new FunctionUrl(sesCampaignSenderStack, 'SESCampaignSenderFu
   function: sesCampaignSenderFunction,
   authType: FunctionUrlAuthType.NONE, // Public access for test endpoint
 });
+
+// Configure SES Bounce Handler
+const sesBounceHandlerFunction = backend.sesBounceHandler.resources.lambda;
+
+// Grant DynamoDB permissions to bounce handler
+// Allow updating ANY SESCampaignContact table (for multi-branch support)
+sesBounceHandlerFunction.addToRolePolicy(
+  new PolicyStatement({
+    effect: Effect.ALLOW,
+    actions: ['dynamodb:UpdateItem'],
+    resources: [
+      `arn:aws:dynamodb:${Stack.of(contactTable).region}:${Stack.of(contactTable).account}:table/SESCampaignContact*`
+    ],
+  })
+);

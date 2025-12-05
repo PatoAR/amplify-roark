@@ -126,6 +126,13 @@ async function sendEmail(to: string, firstName: string, language: string = 'es')
           },
         },
       },
+      // Add custom headers to track which branch/table this email belongs to
+      Tags: [
+        {
+          Name: 'campaign-table',
+          Value: CONTACT_TABLE_NAME, // Full table name with branch identifier
+        },
+      ],
     })
   );
 }
