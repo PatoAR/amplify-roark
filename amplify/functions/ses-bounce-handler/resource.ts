@@ -4,7 +4,8 @@ export const sesBounceHandler = defineFunction({
   name: 'ses-bounce-handler',
   entry: './handler.ts',
   timeoutSeconds: 60,
-  // No hardcoded environment variables - table name comes from email tags
+  // Assign to data stack to avoid circular dependency (function depends on DynamoDB table)
+  resourceGroupName: 'data',
   environment: {
     // Fallback table name for backwards compatibility (if tags missing)
     CONTACT_TABLE_NAME: 'SESCampaignContact',
