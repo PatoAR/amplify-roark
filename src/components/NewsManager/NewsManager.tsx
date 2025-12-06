@@ -3,7 +3,8 @@ import { generateClient } from 'aws-amplify/api';
 import { type Schema } from '../../../amplify/data/resource';
 import { useNews } from '../../context/NewsContext';
 import { useSession } from '../../context/SessionContext';
-import { listArticles } from '../../graphql/queries';
+import { listArticles, listArticleByCreatedAt } from '../../graphql/queries';
+import { ModelSortDirection } from '../../graphql/API';
 import { onCreateArticle } from '../../graphql/subscriptions';
 import { isArticlePriority, sortArticlesByPriority } from '../../utils/articleSorting';
 import { SessionService } from '../../utils/sessionService';
@@ -293,16 +294,24 @@ export const NewsManager: React.FC = () => {
             return;
     }
     
-        // Fetching initial articles
+        // Fetching initial articles using GSI query for sorted results
     try {
       const client = getClient();
+      // Use current timestamp to get all articles up to now, sorted by newest first
+      const currentTimestamp = new Date().toISOString();
+      console.log('[NewsManager] Fetching initial articles with GSI query, createdAt:', currentTimestamp);
+      
       const result = await client.graphql({ 
-        query: listArticles,
+        query: listArticleByCreatedAt,
         variables: {
+          createdAt: currentTimestamp,
+          sortDirection: ModelSortDirection.DESC, // Newest first
           limit: 100
         }
       });
-      const articles: Article[] = (result as any).data?.listArticles?.items || [];
+      const articles: Article[] = (result as any).data?.listArticleByCreatedAt?.items || [];
+      
+      console.log(`[NewsManager] GSI query returned ${articles.length} articles`);
             
       // Debug: Log article categories
       const categoryCounts = articles.reduce((acc, article) => {
