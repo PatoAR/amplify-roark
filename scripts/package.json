@@ -1,0 +1,25 @@
+{
+  "name": "ses-campaign-scripts",
+  "version": "1.0.0",
+  "description": "Scripts for SES campaign data import and control",
+  "main": "index.js",
+  "scripts": {
+    "import": "ts-node import-contacts.ts",
+    "toggle": "ts-node toggle-campaign.ts",
+    "fix-timestamps": "ts-node fix-timestamps.ts",
+    "test-bounce": "ts-node test-bounce.ts",
+    "verify-email-tags": "ts-node verify-email-tags.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cloudformation": "^3.700.0",
+    "@aws-sdk/client-cloudwatch-logs": "^3.700.0",
+    "@aws-sdk/client-dynamodb": "^3.700.0",
+    "@aws-sdk/lib-dynamodb": "^3.700.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.0"
+  }
+}

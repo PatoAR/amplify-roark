@@ -30,7 +30,7 @@ interface CustomSignUpProps {
 
 const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
   const { tokens } = useTheme();
-  const { t } = useTranslation();
+  const { t, currentLanguage } = useTranslation();
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -121,7 +121,10 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
         password,
         options: {
           userAttributes,
-          clientMetadata: referralCode ? { referralCode, referrerId: 'pending' } : undefined,
+          clientMetadata: {
+            ...(referralCode ? { referralCode, referrerId: 'pending' } : {}),
+            language: currentLanguage,
+          },
         },
       };
 

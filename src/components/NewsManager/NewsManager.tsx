@@ -122,7 +122,7 @@ function processArticle(a: Article, receivedAt: number): ArticleForState {
 }
 
 export const NewsManager: React.FC = () => {
-  const { authStatus, userId } = useSession();
+  const { authStatus, userId, sessionId } = useSession();
   const { articles, setArticles, addArticle, isInitialized, setIsInitialized, seenArticlesRef } = useNews();
   const clientRef = useRef<ReturnType<typeof generateClient<Schema>> | null>(null);
 
@@ -146,6 +146,8 @@ export const NewsManager: React.FC = () => {
   const isInitializingRef = useRef<boolean>(false);
   const appSyncHasReceivedArticlesRef = useRef<boolean>(false);
   const previousUserIdRef = useRef<string | undefined>(undefined);
+  const previousSessionIdRef = useRef<string | undefined>(undefined);
+  const lastVisibilityCheckRef = useRef<number>(0);
 
   // Keep articlesRef in sync with articles
   useEffect(() => {
@@ -269,6 +271,19 @@ export const NewsManager: React.FC = () => {
     return seenArticlesRef.current.has(articleId);
   }, [seenArticlesRef]);
 
+  // Check if news flow is healthy (subscription or polling active)
+  const isNewsFlowHealthy = useCallback((): boolean => {
+    // Check if subscription is active
+    if (unsubscribeRef.current && subscriptionEstablishedRef.current) {
+      return true;
+    }
+    // Check if polling is active
+    if (pollingIntervalRef.current) {
+      return true;
+    }
+    return false;
+  }, []);
+
   // Fetch initial articles
   const fetchInitialArticles = useCallback(async () => {
     if (!isComponentMountedRef.current) {
@@ -281,7 +296,12 @@ export const NewsManager: React.FC = () => {
         // Fetching initial articles
     try {
       const client = getClient();
-      const result = await client.graphql({ query: listArticles });
+      const result = await client.graphql({ 
+        query: listArticles,
+        variables: {
+          limit: 100
+        }
+      });
       const articles: Article[] = (result as any).data?.listArticles?.items || [];
             
       // Debug: Log article categories
@@ -638,6 +658,61 @@ export const NewsManager: React.FC = () => {
     }
   }, [addArticle, isArticleSeen, startPolling, getClient, authStatus]);
 
+  // Resume news flow if needed (called on visibility change or session restart)
+  const resumeNewsFlowIfNeeded = useCallback(async () => {
+    // Prevent rapid re-initialization (debounce)
+    const now = Date.now();
+    if (now - lastVisibilityCheckRef.current < 2000) {
+      return; // Debounce: wait at least 2 seconds between checks
+    }
+    lastVisibilityCheckRef.current = now;
+
+    // Only resume if authenticated and component is mounted
+    if (!isComponentMountedRef.current || authStatus !== 'authenticated' || !userId) {
+      return;
+    }
+
+    // Don't resume if already initializing
+    if (isInitializingRef.current) {
+      return;
+    }
+
+    // Check if news flow is healthy
+    if (isNewsFlowHealthy() && isInitialized) {
+      return; // News flow is healthy, no action needed
+    }
+
+    // News flow is not healthy, re-initialize
+    isInitializingRef.current = true;
+    try {
+      // If not initialized, fetch initial articles first
+      if (!isInitialized) {
+        await fetchInitialArticles();
+      }
+      
+      // Ensure subscription or polling is active
+      if (isComponentMountedRef.current) {
+        if (!unsubscribeRef.current && !pollingIntervalRef.current) {
+          // Neither subscription nor polling is active, start subscription
+          await trySubscribe();
+        } else if (!unsubscribeRef.current && pollingIntervalRef.current) {
+          // Polling is active but subscription is not, try to upgrade to subscription
+          await trySubscribe();
+        }
+      }
+    } catch (error: any) {
+      // Don't log auth errors as they're expected during logout
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (!errorMessage.includes('NoValidAuthTokens') && !errorMessage.includes('No federated jwt')) {
+        console.error('[NewsManager] Failed to resume news flow', error);
+      }
+    } finally {
+      if (isComponentMountedRef.current) {
+        isInitializingRef.current = false;
+      }
+    }
+  }, [authStatus, userId, isInitialized, isNewsFlowHealthy, fetchInitialArticles, trySubscribe]);
+
   // Initialize when user changes
   useEffect(() => {
     // Add a small delay to prevent rapid re-initialization
@@ -650,6 +725,7 @@ export const NewsManager: React.FC = () => {
         if (previousUserIdRef.current) {
                     cleanupResources();
           previousUserIdRef.current = undefined;
+          previousSessionIdRef.current = undefined;
           isInitializingRef.current = false;
           setIsInitialized(false); // Reset initialization state
         }
@@ -661,6 +737,7 @@ export const NewsManager: React.FC = () => {
       }
     
             previousUserIdRef.current = userId;
+      previousSessionIdRef.current = sessionId;
       isComponentMountedRef.current = true;
       isInitializingRef.current = true;
       // Don't cleanup during login - only during logout
@@ -677,7 +754,65 @@ export const NewsManager: React.FC = () => {
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [userId, authStatus, cleanupResources, fetchInitialArticles, trySubscribe, setIsInitialized]); // Depend on user ID and auth status
+  }, [userId, authStatus, sessionId, cleanupResources, fetchInitialArticles, trySubscribe, setIsInitialized]); // Depend on user ID and auth status
+
+  // Monitor sessionId changes (session restart detection)
+  useEffect(() => {
+    // Skip on initial mount or if not authenticated
+    if (!sessionId || authStatus !== 'authenticated' || !userId) {
+      return;
+    }
+
+    // Check if sessionId actually changed (not just initial set)
+    if (previousSessionIdRef.current === undefined) {
+      // Initial set, just track it
+      previousSessionIdRef.current = sessionId;
+      return;
+    }
+
+    if (previousSessionIdRef.current === sessionId) {
+      // SessionId hasn't changed
+      return;
+    }
+
+    // SessionId changed - session was restarted
+    previousSessionIdRef.current = sessionId;
+    
+    // Resume news flow if needed (with small delay to allow session to stabilize)
+    const timeoutId = setTimeout(() => {
+      if (isComponentMountedRef.current && authStatus === 'authenticated' && userId) {
+        resumeNewsFlowIfNeeded();
+      }
+    }, 500); // Small delay to allow session to stabilize
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [sessionId, authStatus, userId, resumeNewsFlowIfNeeded]);
+
+  // Handle visibility changes to resume news flow when tab becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      // Only act when tab becomes visible
+      if (document.hidden) {
+        return;
+      }
+
+      // Only resume if authenticated and component is mounted
+      if (!isComponentMountedRef.current || authStatus !== 'authenticated' || !userId) {
+        return;
+      }
+
+      // Resume news flow if needed (with debouncing handled inside)
+      resumeNewsFlowIfNeeded();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [authStatus, userId, resumeNewsFlowIfNeeded]);
 
   // Cleanup on unmount
   useEffect(() => {

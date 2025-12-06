@@ -78,6 +78,7 @@ const schema = a.schema({
   UserSubscription: a
   .model({
     owner: a.string(),
+    email: a.string(), // User's email address (for campaign conversion tracking) - optional for backward compatibility
     subscriptionStatus: a.enum(['free_trial', 'active', 'expired', 'cancelled']),
     trialStartDate: a.datetime(),
     trialEndDate: a.datetime(),
@@ -129,6 +130,51 @@ const schema = a.schema({
     // Allow authenticated users to read their own deletion record
     allow.owner().identityClaim('sub').to(['read'])
   ]),
+
+  // SES Campaign Contact List Model - Stores contact information for email campaign
+  // Note: Amplify Gen 2 uses 'id' as primary key. We use 'email' as a unique field and query via GSI
+  // Updated: Using 'id' as primary key, storing email as the id value for direct lookups
+  SESCampaignContact: a
+    .model({
+      email: a.string().required(), // Unique identifier - use GSI to query by email
+      Company: a.string().required(),
+      FirstName: a.string().required(),
+      LastName: a.string().required(),
+      Language: a.string().default('es'), // Preferred language: 'es', 'en', or 'pt'
+      Sent_Status: a.string().default('false'), // Store as string for indexing: 'true' or 'false'
+      Target_Send_Date: a.string().required(), // YYYY-MM-DD format
+      Send_Group_ID: a.integer().required(),
+      Sent_Date: a.string(), // YYYY-MM-DD format, optional
+      Error_Status: a.string(), // Error details if send fails, optional
+      Company_Sequence: a.integer(), // 1st, 2nd, 3rd contact from same company
+    })
+    .secondaryIndexes((index) => [
+      index('Sent_Status'), // GSI partition key - query by Sent_Status=false, filter by Target_Send_Date
+      index('email'), // GSI on email for direct lookups
+    ])
+    .authorization(allow => [
+      // Backend access via API key (Lambda functions)
+      allow.publicApiKey().to(['create', 'read', 'update']),
+      // Allow authenticated users to read (for analytics dashboard - access controlled at component level)
+      allow.authenticated().to(['read']),
+    ]),
+
+  // SES Campaign Control Model - Controls campaign enable/disable state
+  // Note: Amplify Gen 2 uses 'id' as primary key. We use 'control' field with fixed value "main" and query via GSI
+  SESCampaignControl: a
+    .model({
+      control: a.string().required(), // Fixed value: "main" - use GSI to query by control
+      isEnabled: a.boolean().default(true),
+      lastUpdated: a.string().required(), // ISO timestamp
+      updatedBy: a.string(), // Identifier of who updated, optional
+    })
+    .secondaryIndexes((index) => [
+      index('control'), // GSI on control for direct lookups (will have single item with control="main")
+    ])
+    .authorization(allow => [
+      // Backend-only access via API key (Lambda functions)
+      allow.publicApiKey().to(['create', 'read', 'update']),
+    ]),
 
   // Subscription Management Mutation
   upgradeSubscription: a

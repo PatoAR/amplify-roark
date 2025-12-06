@@ -2,44 +2,42 @@
 Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fetches, processes and stores news articles in dynambodb. The articles are distributed to varios channels (whatsapp, telegram) and to this webapp via AppSync subscriptions or long-polling.
 
 ## ToDo's
-- Implement SES for email campaign
 - Migrate email from Zoho to AWS Workmail
-
 - Platform for original content publishers (CGI) self-service.
 - Follow companies
 
 - Platform for publicity self-service
 - Implement subscription workflow. Use MPago account.
-
 - Native IOS / Android App
 
-## CI/CD
-# DEV - LOCAL
-    - Font-end local instance: npm run dev
-    - Back-end sandbox: npx amplify sandbox
-        > deploys schema on changes on files in amplify/folder
-        > updates local amplify_outputs.json
-        ?> Run: npx ampx generate graphql-client-code --format graphql-codegen --out ./src/graphql/ 
-            >> generates API.ts, and graphql files based on local schema and amplify_outputs.json
-    - Howard feed not connected - will not feed news to backend
+## Notes
+- Front-end local instance: npm run dev
+- **GraphQL Code Generation (Amplify Gen 2):**
+  - After schema changes in `amplify/data/resource.ts`, run: `npx ampx generate graphql-client-code --format graphql-codegen --out ./src/graphql/`
+  - This generates TypeScript types and GraphQL queries in `src/graphql/` (API.ts, queries.ts, mutations.ts, subscriptions.ts)
+  - **DO NOT** use `npx @aws-amplify/cli codegen` - it's for Amplify Gen 1 only
+  - After generation, commit and push changes
 
-# DEV - AWS
-    - Git commit / push to deploy changes to AWS
-    - To use "npm run dev" frontend with "DEV AWS" backend (if previously working with sandbox):
-        > Download new amplify_outputs.json 
-        > Run: npx ampx generate graphql-client-code --format graphql-codegen --out ./src/graphql/ 
-            >> generates API.ts, and graphql files based on local schema and amplify_outputs.json 
-        - npx @aws-amplify/cli codegen
-            >> downloads schema from the server
-            >> updates src/API.ts and graphql/files
+**Important**: 
+A. When adding a new branch, need to create GRAPHQL_API_KEY and GRAPHQL_API_URL manually on AWS Systems Manager > Parameter Store
 
-# PROD - AWS - merge dev into main
+B. Subscribe the **main** branch Lambda to SNS topics:
+1. SNS Console → **ses-bounces** → Create subscription
+2. Select `ses-bounce-handler-main-{hash}`
+3. Repeat for **ses-complaints**
+**Why?** Each branch has its own Lambda function that needs to subscribe.
+
+## Sandbox
+Quick check before deployment
+# Start sandbox: npx ampx sandbox
+# Stop sandbox (keeps resources): Ctrl+C
+# Restart sandbox: npx ampx sandbox (can restart without deleting - resources persist)
+# Delete sandbox (removes all resources): npx ampx sandbox delete
+
+## Deploy to PROD - merge dev into main
         1. git checkout main
-        2. git merge appsync (or dev in the future)
+        2. git merge dev [or branch name]
         3. git push origin main
-
-## CLI
-https://docs.amplify.aws/react/reference/cli-commands/
 
 ## Tests
 - Login / Logout

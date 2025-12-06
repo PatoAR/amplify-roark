@@ -12,10 +12,20 @@ backend:
         - node -v
         - npm -v
         - npm install --build-from-source @parcel/watcher
+        - npm install -g @aws-amplify/backend-cli@latest
+        - (cd amplify && rm -f package-lock.json && npm install)
     build:
       commands:
         - npm rebuild @parcel/watcher
-        - npx ampx pipeline-deploy --branch $AWS_BRANCH --app-id $AWS_APP_ID
+        - echo "Debug AWS_BRANCH=$AWS_BRANCH"
+        - echo "Debug Git branch=$(git rev-parse --abbrev-ref HEAD)"
+        - |
+          if [ -z "$AWS_BRANCH" ]; then
+            BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+          else
+            BRANCH_NAME=$AWS_BRANCH
+          fi
+        - npx ampx pipeline-deploy --branch $BRANCH_NAME --app-id $AWS_APP_ID
 frontend:
   phases:
     preBuild:
@@ -29,7 +39,7 @@ frontend:
         - node -v
         - npm -v
         - npm install -g npm@latest    # update npm to latest to avoid bugs
-        - npm install -g aws-cdk@2.93.0
+        - npm install -g aws-cdk@latest
         - rm -rf node_modules package-lock.json
         - npm install
     build:

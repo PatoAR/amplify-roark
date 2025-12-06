@@ -181,6 +181,14 @@
   color: var(--color-text-primary);
 }
 
+.section-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  padding-bottom: var(--space-md);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
 .subscription-items {
   display: flex;
   flex-direction: column;

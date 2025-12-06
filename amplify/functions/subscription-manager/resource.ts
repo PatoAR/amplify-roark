@@ -5,5 +5,6 @@ export const subscriptionManager = defineFunction({
   entry: './handler.ts',
   runtime: 20,
   timeoutSeconds: 30,
+  resourceGroupName: 'data', // Assign to data stack since it's used as AppSync resolver
 });
 

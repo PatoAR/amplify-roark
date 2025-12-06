@@ -4,7 +4,7 @@ import { getCurrentUser } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
 import { type Schema } from '../../../amplify/data/resource';
 import { useSession } from '../../context/SessionContext';
-import { listUserActivities, listUserSubscriptions } from '../../graphql/queries';
+import { listUserActivities, listUserSubscriptions, listSESCampaignContacts } from '../../graphql/queries';
 import { useTranslation } from '../../i18n';
 import { MASTER_EMAIL } from '../../constants/auth';
 import './AnalyticsDashboard.css';
@@ -26,6 +26,36 @@ interface AggregatedAnalytics {
     userId: string;
     sessionCount: number;
   }>;
+}
+
+interface SESCampaignMetrics {
+  totalContacts: number;
+  contactsSent: number;
+  contactsPending: number;
+  contactsWithErrors: number;
+  permanentFailures: number;
+  temporaryFailures: number;
+  successRate: number;
+  errorRate: number;
+  languageDistribution: {
+    es: number;
+    en: number;
+    pt: number;
+  };
+  topCompanies: Array<{
+    company: string;
+    contactCount: number;
+  }>;
+  dailySendRate: number;
+  averageDaysToSend: number;
+  // Conversion metrics
+  contactsRegistered: number;
+  conversionRate: number;
+  conversionRateByLanguage: {
+    es: number;
+    en: number;
+    pt: number;
+  };
 }
 
 async function fetchAllActivities(
@@ -79,6 +109,288 @@ async function fetchAllSubscriptions(
   } while (nextToken);
 
   return allSubscriptions;
+}
+
+async function fetchAllSESCampaignContacts(
+  client: ReturnType<typeof generateClient<Schema>>,
+): Promise<any[]> {
+  console.log('[AnalyticsDashboard] Fetching SES Campaign Contacts...');
+  let allContacts: any[] = [];
+  let nextToken: string | null = null;
+  let pageCount = 0;
+
+  try {
+    do {
+      pageCount++;
+      console.log(`[AnalyticsDashboard] Fetching page ${pageCount} of SES contacts...`);
+      
+      // Use GraphQL approach (consistent with fetchAllSubscriptions)
+      const result = await client.graphql({
+        query: listSESCampaignContacts,
+        variables: {
+          limit: 1000,
+          nextToken,
+        },
+      }) as any;
+
+      // Log any errors returned
+      if (result.errors && result.errors.length > 0) {
+        console.error('[AnalyticsDashboard] GraphQL Errors fetching SES contacts:');
+        result.errors.forEach((error: any, index: number) => {
+          console.error(`  Error ${index + 1}: ${error.message}`);
+          console.error(`    Type: ${error.errorType}`);
+          console.error(`    Path: ${JSON.stringify(error.path)}`);
+          console.error(`    Full error:`, error);
+        });
+      }
+
+      // Log raw result structure for debugging
+      console.log('[AnalyticsDashboard] Raw result structure:', {
+        hasData: !!result.data?.listSESCampaignContacts,
+        dataLength: result.data?.listSESCampaignContacts?.items?.length ?? 0,
+        hasNextToken: !!result.data?.listSESCampaignContacts?.nextToken,
+      });
+
+      const items = result.data?.listSESCampaignContacts?.items || [];
+      
+      // Sample first item to see structure
+      if (items.length > 0) {
+        console.log('[AnalyticsDashboard] Sample contact structure:', {
+          keys: Object.keys(items[0] || {}),
+          sample: items[0],
+        });
+      }
+
+      console.log(`[AnalyticsDashboard] Page ${pageCount}: Fetched ${items.length} valid contacts`);
+      
+      allContacts = allContacts.concat(items.filter((item: any) => item !== null && item !== undefined));
+      nextToken = result.data?.listSESCampaignContacts?.nextToken || null;
+    } while (nextToken);
+
+    console.log(`[AnalyticsDashboard] Total SES contacts fetched: ${allContacts.length} across ${pageCount} pages`);
+    
+    // Log statistics about the fetched data
+    if (allContacts.length > 0) {
+      const sentCount = allContacts.filter(c => c.Sent_Status === 'true').length;
+      const pendingCount = allContacts.filter(c => c.Sent_Status === 'false').length;
+      const withErrors = allContacts.filter(c => c.Error_Status).length;
+      
+      console.log('[AnalyticsDashboard] SES contacts breakdown:', {
+        total: allContacts.length,
+        sent: sentCount,
+        pending: pendingCount,
+        withErrors: withErrors,
+        companies: new Set(allContacts.map(c => c.Company)).size,
+        languages: {
+          es: allContacts.filter(c => (c.Language || 'es') === 'es').length,
+          en: allContacts.filter(c => c.Language === 'en').length,
+          pt: allContacts.filter(c => c.Language === 'pt').length,
+        }
+      });
+    } else {
+      console.warn('[AnalyticsDashboard] No SES contacts found in database!');
+    }
+
+    return allContacts;
+  } catch (error) {
+    console.error('[AnalyticsDashboard] Error fetching SES Campaign Contacts:', error);
+    
+    // Better error logging
+    if (typeof error === 'object' && error !== null) {
+      console.error('[AnalyticsDashboard] Error details:', {
+        message: (error as any).message,
+        errors: (error as any).errors,
+        data: (error as any).data,
+        stack: (error as any).stack,
+        fullError: error,
+      });
+      
+      // If there are GraphQL errors, log them individually
+      if ((error as any).errors && Array.isArray((error as any).errors)) {
+        console.error('[AnalyticsDashboard] GraphQL Errors:');
+        (error as any).errors.forEach((err: any, idx: number) => {
+          console.error(`  Error ${idx + 1}:`, err);
+        });
+      }
+    } else {
+      console.error('[AnalyticsDashboard] Error (not an object):', String(error));
+    }
+    
+    // Return empty array instead of throwing to allow dashboard to render
+    return [];
+  }
+}
+
+function normalizeEmail(email: string | null | undefined): string {
+  if (!email) return '';
+  return email.trim().toLowerCase();
+}
+
+function calculateSESCampaignMetrics(contacts: any[], registeredUsers: any[]): SESCampaignMetrics {
+  console.log('[AnalyticsDashboard] Calculating SES Campaign Metrics...');
+  console.log('[AnalyticsDashboard] Input:', {
+    contactsCount: contacts.length,
+    registeredUsersCount: registeredUsers.length,
+  });
+
+  // Filter out null/undefined contacts to prevent errors
+  // Use type guard for better type safety
+  const validContacts = contacts.filter((c): c is NonNullable<typeof c> => c !== null && c !== undefined);
+  const totalContacts = validContacts.length;
+  
+  console.log(`[AnalyticsDashboard] Valid contacts after filtering: ${totalContacts}`);
+  
+  // Log a sample contact to verify structure
+  if (validContacts.length > 0) {
+    console.log('[AnalyticsDashboard] Sample contact for verification:', {
+      hasEmail: !!validContacts[0].email,
+      hasCompany: !!validContacts[0].Company,
+      hasSentStatus: !!validContacts[0].Sent_Status,
+      sentStatusValue: validContacts[0].Sent_Status,
+      hasLanguage: !!validContacts[0].Language,
+      languageValue: validContacts[0].Language,
+      keys: Object.keys(validContacts[0]),
+    });
+  }
+  
+  // Count by status
+  const contactsSent = validContacts.filter(c => c.Sent_Status === 'true').length;
+  const contactsPending = validContacts.filter(c => c.Sent_Status === 'false').length;
+  const contactsWithErrors = validContacts.filter(c => c.Error_Status).length;
+  const permanentFailures = validContacts.filter(c => 
+    c.Error_Status && c.Error_Status.includes('PERMANENT_FAILURE:')
+  ).length;
+  const temporaryFailures = contactsWithErrors - permanentFailures;
+  
+  console.log('[AnalyticsDashboard] Status breakdown:', {
+    total: totalContacts,
+    sent: contactsSent,
+    pending: contactsPending,
+    withErrors: contactsWithErrors,
+    permanentFailures,
+    temporaryFailures,
+  });
+  
+  // Calculate rates
+  const attempted = contactsSent + contactsWithErrors;
+  const successRate = attempted > 0 ? (contactsSent / attempted) * 100 : 0;
+  const errorRate = attempted > 0 ? (contactsWithErrors / attempted) * 100 : 0;
+  
+  // Language distribution
+  const languageDistribution = {
+    es: validContacts.filter(c => (c.Language || 'es') === 'es').length,
+    en: validContacts.filter(c => c.Language === 'en').length,
+    pt: validContacts.filter(c => c.Language === 'pt').length,
+  };
+  
+  // Top companies
+  const companyCounts = new Map<string, number>();
+  validContacts.forEach(c => {
+    const company = c.Company || 'Unknown';
+    companyCounts.set(company, (companyCounts.get(company) || 0) + 1);
+  });
+  
+  const topCompanies = Array.from(companyCounts.entries())
+    .map(([company, contactCount]) => ({ company, contactCount }))
+    .sort((a, b) => b.contactCount - a.contactCount)
+    .slice(0, 10);
+  
+  // Calculate daily send rate (average sends per day)
+  const sentContacts = validContacts.filter(c => c.Sent_Status === 'true' && c.Sent_Date);
+  const sentDates = sentContacts.map(c => c.Sent_Date).filter(Boolean);
+  const uniqueDays = new Set(sentDates).size;
+  const dailySendRate = uniqueDays > 0 ? sentContacts.length / uniqueDays : 0;
+  
+  // Calculate average days to send (from target date to sent date)
+  let totalDaysToSend = 0;
+  let validDaysToSend = 0;
+  sentContacts.forEach(c => {
+    if (c.Target_Send_Date && c.Sent_Date) {
+      const targetDate = new Date(c.Target_Send_Date);
+      const sentDate = new Date(c.Sent_Date);
+      const daysDiff = Math.ceil((sentDate.getTime() - targetDate.getTime()) / (1000 * 60 * 60 * 24));
+      if (daysDiff >= 0) {
+        totalDaysToSend += daysDiff;
+        validDaysToSend++;
+      }
+    }
+  });
+  const averageDaysToSend = validDaysToSend > 0 ? totalDaysToSend / validDaysToSend : 0;
+  
+  // Calculate conversion metrics - match campaign contacts with registered users by email
+  const registeredEmails = new Set(
+    registeredUsers
+      .filter((u): u is NonNullable<typeof u> & { email: string } => u !== null && u !== undefined && Boolean(u.email))
+      .map(u => normalizeEmail(u.email))
+      .filter(email => email !== '') // Filter out empty emails after normalization
+  );
+  
+  // Find contacts that registered (were sent and registered)
+  const contactsRegistered = validContacts.filter(c => {
+    if (!c.email) return false;
+    const contactEmail = normalizeEmail(c.email);
+    return c.Sent_Status === 'true' && registeredEmails.has(contactEmail);
+  }).length;
+  
+  // Calculate overall conversion rate (registered / sent)
+  const conversionRate = contactsSent > 0 ? (contactsRegistered / contactsSent) * 100 : 0;
+  
+  // Calculate conversion rate by language
+  const conversionRateByLanguage = {
+    es: (() => {
+      const sentES = validContacts.filter(c => c.Sent_Status === 'true' && (c.Language || 'es') === 'es').length;
+      const registeredES = validContacts.filter(c => {
+        if (!c.email) return false;
+        const contactEmail = normalizeEmail(c.email);
+        return c.Sent_Status === 'true' && (c.Language || 'es') === 'es' && registeredEmails.has(contactEmail);
+      }).length;
+      return sentES > 0 ? (registeredES / sentES) * 100 : 0;
+    })(),
+    en: (() => {
+      const sentEN = validContacts.filter(c => c.Sent_Status === 'true' && c.Language === 'en').length;
+      const registeredEN = validContacts.filter(c => {
+        if (!c.email) return false;
+        const contactEmail = normalizeEmail(c.email);
+        return c.Sent_Status === 'true' && c.Language === 'en' && registeredEmails.has(contactEmail);
+      }).length;
+      return sentEN > 0 ? (registeredEN / sentEN) * 100 : 0;
+    })(),
+    pt: (() => {
+      const sentPT = validContacts.filter(c => c.Sent_Status === 'true' && c.Language === 'pt').length;
+      const registeredPT = validContacts.filter(c => {
+        if (!c.email) return false;
+        const contactEmail = normalizeEmail(c.email);
+        return c.Sent_Status === 'true' && c.Language === 'pt' && registeredEmails.has(contactEmail);
+      }).length;
+      return sentPT > 0 ? (registeredPT / sentPT) * 100 : 0;
+    })(),
+  };
+  
+  const metrics = {
+    totalContacts,
+    contactsSent,
+    contactsPending,
+    contactsWithErrors,
+    permanentFailures,
+    temporaryFailures,
+    successRate: Math.round(successRate * 100) / 100,
+    errorRate: Math.round(errorRate * 100) / 100,
+    languageDistribution,
+    topCompanies,
+    dailySendRate: Math.round(dailySendRate * 100) / 100,
+    averageDaysToSend: Math.round(averageDaysToSend * 100) / 100,
+    contactsRegistered,
+    conversionRate: Math.round(conversionRate * 100) / 100,
+    conversionRateByLanguage: {
+      es: Math.round(conversionRateByLanguage.es * 100) / 100,
+      en: Math.round(conversionRateByLanguage.en * 100) / 100,
+      pt: Math.round(conversionRateByLanguage.pt * 100) / 100,
+    },
+  };
+  
+  console.log('[AnalyticsDashboard] Calculated SES metrics:', metrics);
+  
+  return metrics;
 }
 
 function aggregateAnalytics(
@@ -206,6 +518,7 @@ export const AnalyticsDashboard = () => {
   const { t } = useTranslation();
   const [isMasterUser, setIsMasterUser] = useState<boolean | null>(null);
   const [analytics, setAnalytics] = useState<AggregatedAnalytics | null>(null);
+  const [sesMetrics, setSESMetrics] = useState<SESCampaignMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d');
@@ -233,24 +546,49 @@ export const AnalyticsDashboard = () => {
   }, [userId]);
 
   const loadAnalytics = useCallback(async () => {
-    if (!userId || !isMasterUser) return;
+    if (!userId || !isMasterUser) {
+      console.log('[AnalyticsDashboard] Skipping analytics load - userId:', userId, 'isMasterUser:', isMasterUser);
+      return;
+    }
 
+    console.log('[AnalyticsDashboard] Starting analytics load for userId:', userId, 'timeRange:', timeRange);
     setIsLoading(true);
     setError(null);
     try {
       const client = generateClient<Schema>();
 
       // Fetch all data in parallel
-      const [activities, subscriptions] = await Promise.all([
+      console.log('[AnalyticsDashboard] Fetching all data sources in parallel...');
+      const [activities, subscriptions, sesContacts] = await Promise.all([
         fetchAllActivities(client),
         fetchAllSubscriptions(client),
+        fetchAllSESCampaignContacts(client),
       ]);
 
+      console.log('[AnalyticsDashboard] Data fetch complete:', {
+        activitiesCount: activities.length,
+        subscriptionsCount: subscriptions.length,
+        sesContactsCount: sesContacts.length,
+      });
+
       // Aggregate analytics in the frontend (exclude master user data)
+      console.log('[AnalyticsDashboard] Aggregating user analytics...');
       const aggregated = aggregateAnalytics(activities, subscriptions, timeRange, userId);
       setAnalytics(aggregated);
+      console.log('[AnalyticsDashboard] User analytics aggregated:', {
+        registeredUsers: aggregated.registeredUsers,
+        totalSessions: aggregated.totalSessions,
+        activeUsers: aggregated.activeUsers,
+      });
+      
+      // Calculate SES campaign metrics (pass subscriptions to match with registered users)
+      console.log('[AnalyticsDashboard] Calculating SES campaign metrics...');
+      const sesCampaignMetrics = calculateSESCampaignMetrics(sesContacts, subscriptions);
+      setSESMetrics(sesCampaignMetrics);
+      console.log('[AnalyticsDashboard] ✅ Analytics load complete');
     } catch (error) {
-      console.error('Failed to load analytics', error);
+      console.error('[AnalyticsDashboard] ❌ Failed to load analytics:', error);
+      console.error('[AnalyticsDashboard] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
       setError(error instanceof Error ? error.message : 'Failed to load analytics');
     } finally {
       setIsLoading(false);
@@ -445,6 +783,121 @@ export const AnalyticsDashboard = () => {
             </div>
           </div>
         </div>
+
+        {sesMetrics && (
+          <>
+            <h2 className="section-title" style={{ marginTop: 'var(--space-2xl)', marginBottom: 'var(--space-lg)' }}>
+              SES Campaign Metrics
+            </h2>
+            
+            <div className="stats-grid">
+              <div className="stat-card">
+                <span className="stat-value">{sesMetrics.totalContacts}</span>
+                <span className="stat-label">Total Contacts</span>
+              </div>
+
+              <div className="stat-card">
+                <span className="stat-value">{sesMetrics.contactsSent}</span>
+                <span className="stat-label">Contacts Sent</span>
+              </div>
+
+              <div className="stat-card">
+                <span className="stat-value">{sesMetrics.contactsPending}</span>
+                <span className="stat-label">Contacts Pending</span>
+              </div>
+
+              <div className="stat-card">
+                <span className="stat-value">{sesMetrics.contactsWithErrors}</span>
+                <span className="stat-label">Contacts With Errors</span>
+              </div>
+
+              <div className="stat-card">
+                <span className="stat-value">{sesMetrics.successRate.toFixed(0)}%</span>
+                <span className="stat-label">Success Rate</span>
+              </div>
+
+              <div className="stat-card">
+                <span className="stat-value">{sesMetrics.errorRate.toFixed(0)}%</span>
+                <span className="stat-label">Error Rate</span>
+              </div>
+
+              <div className="stat-card">
+                <span className="stat-value">{sesMetrics.permanentFailures}</span>
+                <span className="stat-label">Permanent Failures</span>
+              </div>
+
+              <div className="stat-card">
+                <span className="stat-value">{sesMetrics.temporaryFailures}</span>
+                <span className="stat-label">Temporary Failures</span>
+              </div>
+
+              <div className="stat-card">
+                <span className="stat-value">{sesMetrics.dailySendRate.toFixed(1)}</span>
+                <span className="stat-label">Avg Daily Send Rate</span>
+              </div>
+
+              <div className="stat-card" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-primary)' }}>
+                <span className="stat-value">{sesMetrics.contactsRegistered}</span>
+                <span className="stat-label">Contacts Registered</span>
+              </div>
+
+              <div className="stat-card" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-primary)' }}>
+                <span className="stat-value">{sesMetrics.conversionRate.toFixed(0)}%</span>
+                <span className="stat-label">Conversion Rate</span>
+              </div>
+            </div>
+
+            <div className="subscription-card">
+              <h2 className="subscription-card-title">Language Distribution</h2>
+              <div className="subscription-items">
+                <div className="subscription-item">
+                  <span className="subscription-label">Spanish (es)</span>
+                  <span className="subscription-value">{sesMetrics.languageDistribution.es}</span>
+                </div>
+                <div className="subscription-item">
+                  <span className="subscription-label">English (en)</span>
+                  <span className="subscription-value">{sesMetrics.languageDistribution.en}</span>
+                </div>
+                <div className="subscription-item">
+                  <span className="subscription-label">Portuguese (pt)</span>
+                  <span className="subscription-value">{sesMetrics.languageDistribution.pt}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="subscription-card">
+              <h2 className="subscription-card-title">Conversion Rate by Language</h2>
+              <div className="subscription-items">
+                <div className="subscription-item">
+                  <span className="subscription-label">Spanish (es)</span>
+                  <span className="subscription-value">{sesMetrics.conversionRateByLanguage.es.toFixed(0)}%</span>
+                </div>
+                <div className="subscription-item">
+                  <span className="subscription-label">English (en)</span>
+                  <span className="subscription-value">{sesMetrics.conversionRateByLanguage.en.toFixed(0)}%</span>
+                </div>
+                <div className="subscription-item">
+                  <span className="subscription-label">Portuguese (pt)</span>
+                  <span className="subscription-value">{sesMetrics.conversionRateByLanguage.pt.toFixed(0)}%</span>
+                </div>
+              </div>
+            </div>
+
+            {sesMetrics.topCompanies.length > 0 && (
+              <div className="subscription-card">
+                <h2 className="subscription-card-title">Top Companies</h2>
+                <div className="subscription-items">
+                  {sesMetrics.topCompanies.map((company, index) => (
+                    <div key={index} className="subscription-item">
+                      <span className="subscription-label">{company.company}</span>
+                      <span className="subscription-value">{company.contactCount}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
