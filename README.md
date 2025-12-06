@@ -33,7 +33,6 @@ Quick check before deployment
 # Stop sandbox (keeps resources): Ctrl+C
 # Delete sandbox (removes all resources): npx ampx sandbox delete
 
-
 ## Deploy to PROD - merge dev into main
         1. git checkout main
         2. git merge dev [or branch name]
@@ -46,14 +45,3 @@ Quick check before deployment
 - Referrals
 - Access days left - dynamic getting close to cero on days
 - Deleted emails
-
-
-Take enough time to analyze the problem in detail, speed is not a priority. Then design a solution that:
-1. Is robust yet concise and simple
-2. Is secure and maintainable
-3. Best Practice: Aligns with AWS and Amplify Gen 2 recommendations
-4. Follows Codebase Patterns: Consistent with existing code style
-5. Maintains consistency with our error handling approach
-6. Checks for Typescript and AWS build errors.
-
-Please explain your approach before showing code.

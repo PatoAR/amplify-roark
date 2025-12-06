@@ -125,14 +125,15 @@ async function sendEmail(to: string, firstName: string, language: string = 'es')
             Charset: 'UTF-8',
           },
         },
+        // Add custom header to track which branch/table this email belongs to
+        // Headers are reliably included in SNS bounce notifications
+        Headers: [
+          {
+            Name: 'X-Campaign-Table',
+            Value: CONTACT_TABLE_NAME, // Full table name with branch identifier
+          },
+        ],
       },
-      // Add custom headers to track which branch/table this email belongs to
-      Tags: [
-        {
-          Name: 'campaign-table',
-          Value: CONTACT_TABLE_NAME, // Full table name with branch identifier
-        },
-      ],
     })
   );
 }

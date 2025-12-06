@@ -812,12 +812,12 @@ export const AnalyticsDashboard = () => {
               </div>
 
               <div className="stat-card">
-                <span className="stat-value">{sesMetrics.successRate.toFixed(1)}%</span>
+                <span className="stat-value">{sesMetrics.successRate.toFixed(0)}%</span>
                 <span className="stat-label">Success Rate</span>
               </div>
 
               <div className="stat-card">
-                <span className="stat-value">{sesMetrics.errorRate.toFixed(1)}%</span>
+                <span className="stat-value">{sesMetrics.errorRate.toFixed(0)}%</span>
                 <span className="stat-label">Error Rate</span>
               </div>
 
@@ -842,7 +842,7 @@ export const AnalyticsDashboard = () => {
               </div>
 
               <div className="stat-card" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-primary)' }}>
-                <span className="stat-value">{sesMetrics.conversionRate.toFixed(2)}%</span>
+                <span className="stat-value">{sesMetrics.conversionRate.toFixed(0)}%</span>
                 <span className="stat-label">Conversion Rate</span>
               </div>
             </div>
@@ -870,15 +870,15 @@ export const AnalyticsDashboard = () => {
               <div className="subscription-items">
                 <div className="subscription-item">
                   <span className="subscription-label">Spanish (es)</span>
-                  <span className="subscription-value">{sesMetrics.conversionRateByLanguage.es.toFixed(2)}%</span>
+                  <span className="subscription-value">{sesMetrics.conversionRateByLanguage.es.toFixed(0)}%</span>
                 </div>
                 <div className="subscription-item">
                   <span className="subscription-label">English (en)</span>
-                  <span className="subscription-value">{sesMetrics.conversionRateByLanguage.en.toFixed(2)}%</span>
+                  <span className="subscription-value">{sesMetrics.conversionRateByLanguage.en.toFixed(0)}%</span>
                 </div>
                 <div className="subscription-item">
                   <span className="subscription-label">Portuguese (pt)</span>
-                  <span className="subscription-value">{sesMetrics.conversionRateByLanguage.pt.toFixed(2)}%</span>
+                  <span className="subscription-value">{sesMetrics.conversionRateByLanguage.pt.toFixed(0)}%</span>
                 </div>
               </div>
             </div>

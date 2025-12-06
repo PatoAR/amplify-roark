@@ -52,9 +52,7 @@ interface SESBounceNotification {
     messageId: string;
     source: string;
     destination: string[];
-    tags?: {
-      [key: string]: string[];
-    };
+    headers?: Array<{ name: string; value: string }>;
   };
 }
 
@@ -166,17 +164,22 @@ async function processBounce(notification: SESBounceNotification): Promise<void>
   const bounce = notification.bounce;
   if (!bounce) return;
   
-  // Extract and validate table name from email tags
-  const rawTableName = notification.mail.tags?.['campaign-table']?.[0];
+  // Extract and validate table name from email header
+  // Headers are reliably included in SNS bounce notifications
+  const headers = notification.mail.headers || [];
+  const campaignTableHeader = headers.find((h: any) => h.name === 'X-Campaign-Table');
+  const rawTableName = campaignTableHeader?.value;
+  
   const tableName = rawTableName && validateTableName(rawTableName)
     ? rawTableName
     : CONTACT_TABLE_NAME;
   
   if (rawTableName && !validateTableName(rawTableName)) {
-    console.warn(`⚠️  Invalid table name from tags: "${rawTableName}", using fallback: ${CONTACT_TABLE_NAME}`);
+    console.warn(`⚠️  Invalid table name from header: "${rawTableName}", using fallback: ${CONTACT_TABLE_NAME}`);
   }
   
-  console.log(`Processing ${bounce.bounceType} bounce with ${bounce.bouncedRecipients.length} recipients for table: ${tableName}`);
+  const source = campaignTableHeader ? 'header' : 'fallback';
+  console.log(`Processing ${bounce.bounceType} bounce with ${bounce.bouncedRecipients.length} recipients for table: ${tableName} (from ${source})`);
   
   for (const recipient of bounce.bouncedRecipients) {
     const email = recipient.emailAddress;
@@ -209,17 +212,22 @@ async function processComplaint(notification: SESBounceNotification): Promise<vo
   const complaint = notification.complaint;
   if (!complaint) return;
   
-  // Extract and validate table name from email tags
-  const rawTableName = notification.mail.tags?.['campaign-table']?.[0];
+  // Extract and validate table name from email header
+  // Headers are reliably included in SNS bounce notifications
+  const headers = notification.mail.headers || [];
+  const campaignTableHeader = headers.find((h: any) => h.name === 'X-Campaign-Table');
+  const rawTableName = campaignTableHeader?.value;
+  
   const tableName = rawTableName && validateTableName(rawTableName)
     ? rawTableName
     : CONTACT_TABLE_NAME;
   
   if (rawTableName && !validateTableName(rawTableName)) {
-    console.warn(`⚠️  Invalid table name from tags: "${rawTableName}", using fallback: ${CONTACT_TABLE_NAME}`);
+    console.warn(`⚠️  Invalid table name from header: "${rawTableName}", using fallback: ${CONTACT_TABLE_NAME}`);
   }
   
-  console.log(`Processing complaint with ${complaint.complainedRecipients.length} recipients for table: ${tableName}`);
+  const source = campaignTableHeader ? 'header' : 'fallback';
+  console.log(`Processing complaint with ${complaint.complainedRecipients.length} recipients for table: ${tableName} (from ${source})`);
   
   for (const recipient of complaint.complainedRecipients) {
     await markContactAsComplained(
