@@ -1,6 +1,6 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, QueryCommand, UpdateCommand, GetCommand } from '@aws-sdk/lib-dynamodb';
-import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
+import { SESClient, SendRawEmailCommand } from '@aws-sdk/client-ses';
 import { EventBridgeEvent } from 'aws-lambda';
 import { buildEmailContent } from './emailTranslations';
 
@@ -103,36 +103,29 @@ function getTodayDate(): string {
 
 
 /**
- * Send email via SES
+ * Send email via SES with custom header for multi-branch support
  */
 async function sendEmail(to: string, firstName: string, language: string = 'es'): Promise<void> {
   const { subject, body } = buildEmailContent(firstName, language);
 
+  // Construct raw email with custom header for table tracking
+  // Headers are reliably included in SNS bounce notifications
+  const rawEmail = [
+    `From: Perkins Intelligence <${SENDER_EMAIL}>`,
+    `To: ${to}`,
+    `Subject: ${subject}`,
+    `X-Campaign-Table: ${CONTACT_TABLE_NAME}`, // Custom header for multi-branch support
+    `MIME-Version: 1.0`,
+    `Content-Type: text/plain; charset=UTF-8`,
+    `Content-Transfer-Encoding: quoted-printable`,
+    ``,
+    body,
+  ].join('\r\n');
+
   await sesClient.send(
-    new SendEmailCommand({
-      Source: `Perkins Intelligence <${SENDER_EMAIL}>`,
-      Destination: {
-        ToAddresses: [to],
-      },
-      Message: {
-        Subject: {
-          Data: subject,
-          Charset: 'UTF-8',
-        },
-        Body: {
-          Text: {
-            Data: body,
-            Charset: 'UTF-8',
-          },
-        },
-        // Add custom header to track which branch/table this email belongs to
-        // Headers are reliably included in SNS bounce notifications
-        Headers: [
-          {
-            Name: 'X-Campaign-Table',
-            Value: CONTACT_TABLE_NAME, // Full table name with branch identifier
-          },
-        ],
+    new SendRawEmailCommand({
+      RawMessage: {
+        Data: Buffer.from(rawEmail),
       },
     })
   );

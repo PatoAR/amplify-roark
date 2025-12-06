@@ -31,6 +31,7 @@ B. Subscribe the **main** branch Lambda to SNS topics:
 Quick check before deployment
 # Start sandbox: npx ampx sandbox
 # Stop sandbox (keeps resources): Ctrl+C
+# Restart sandbox: npx ampx sandbox (can restart without deleting - resources persist)
 # Delete sandbox (removes all resources): npx ampx sandbox delete
 
 ## Deploy to PROD - merge dev into main
