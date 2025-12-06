@@ -865,7 +865,7 @@ export const AnalyticsDashboard = () => {
               </div>
             </div>
 
-            <div className="subscription-card">
+            <div className="subscription-card" style={{ marginTop: 'var(--space-2xl)' }}>
               <h2 className="subscription-card-title">Conversion Rate by Language</h2>
               <div className="subscription-items">
                 <div className="subscription-item">
