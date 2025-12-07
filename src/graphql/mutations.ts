@@ -13,6 +13,7 @@ export const createArticle = /* GraphQL */ `mutation CreateArticle(
   $input: CreateArticleInput!
 ) {
   createArticle(condition: $condition, input: $input) {
+    articleType
     callToAction
     category
     companies
@@ -216,6 +217,7 @@ export const deleteArticle = /* GraphQL */ `mutation DeleteArticle(
   $input: DeleteArticleInput!
 ) {
   deleteArticle(condition: $condition, input: $input) {
+    articleType
     callToAction
     category
     companies
@@ -419,6 +421,7 @@ export const updateArticle = /* GraphQL */ `mutation UpdateArticle(
   $input: UpdateArticleInput!
 ) {
   updateArticle(condition: $condition, input: $input) {
+    articleType
     callToAction
     category
     companies

@@ -1,7 +1,6 @@
 PROMPT:
 
-Analyze the proposed changes in detail and then evaluate the proposed solution 
-on the following aspects: 
+Think deeply and analyze the situation in detail, speed of answer is not critical. It is very imprortant that the proposed solution follows this criteria: 
 
 1. Does not break existing functionality
 2. Is robust yet concise and simple

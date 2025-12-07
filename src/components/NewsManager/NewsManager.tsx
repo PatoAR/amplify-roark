@@ -3,8 +3,13 @@ import { generateClient } from 'aws-amplify/api';
 import { type Schema } from '../../../amplify/data/resource';
 import { useNews } from '../../context/NewsContext';
 import { useSession } from '../../context/SessionContext';
-import { listArticles, listArticleByCreatedAt } from '../../graphql/queries';
+import { listArticles } from '../../graphql/queries';
 import { ModelSortDirection } from '../../graphql/API';
+// Note: listArticleByArticleType will be available after running GraphQL code generation:
+// npx ampx generate graphql-client-code --format graphql-codegen --out ./src/graphql/
+// Import it conditionally to avoid build errors until GraphQL code is regenerated
+import * as queriesModule from '../../graphql/queries';
+const listArticleByArticleType = (queriesModule as any).listArticleByArticleType || null;
 import { onCreateArticle } from '../../graphql/subscriptions';
 import { isArticlePriority, sortArticlesByPriority } from '../../utils/articleSorting';
 import { SessionService } from '../../utils/sessionService';
@@ -34,6 +39,7 @@ interface Article {
   callToAction?: string | null;
   sponsorLink?: string | null;
   priorityUntil?: string | null;
+  articleType?: string | null; // Constant partition key for GSI - defaults to 'ARTICLE' in schema
   createdAt: string;
 }
 
@@ -294,24 +300,85 @@ export const NewsManager: React.FC = () => {
             return;
     }
     
-        // Fetching initial articles using GSI query for sorted results
+        // Fetching initial articles - try GSI query first, fallback to regular query
     try {
       const client = getClient();
-      // Use current timestamp to get all articles up to now, sorted by newest first
-      const currentTimestamp = new Date().toISOString();
-      console.log('[NewsManager] Fetching initial articles with GSI query, createdAt:', currentTimestamp);
+      let articles: Article[] = [];
+      let useGSI = false;
       
-      const result = await client.graphql({ 
-        query: listArticleByCreatedAt,
-        variables: {
-          createdAt: currentTimestamp,
-          sortDirection: ModelSortDirection.DESC, // Newest first
-          limit: 100
+      // Try new composite GSI query (articleType + createdAt) for efficient time-sorted queries
+      // This uses the new GSI with articleType as partition key and createdAt as sort key
+      // Query all articles (articleType='ARTICLE') sorted by newest first
+      if (listArticleByArticleType) {
+        try {
+          console.log('[NewsManager] Attempting composite GSI query (articleType + createdAt)');
+          
+          const gsiResult = await client.graphql({ 
+            query: listArticleByArticleType,
+            variables: {
+              articleType: 'ARTICLE', // Constant partition key value
+              sortDirection: ModelSortDirection.DESC, // Newest first (descending by createdAt)
+              limit: 100
+            }
+          });
+        
+        // Check for errors
+        if ((gsiResult as any).errors) {
+          const errorDetails = (gsiResult as any).errors.map((e: any) => ({
+            message: e.message,
+            errorType: e.errorType,
+            path: e.path
+          }));
+          console.warn('[NewsManager] Composite GSI query failed with errors:', errorDetails);
+          throw new Error('Composite GSI query failed');
         }
-      });
-      const articles: Article[] = (result as any).data?.listArticleByCreatedAt?.items || [];
+        
+        articles = (gsiResult as any).data?.listArticleByArticleType?.items || [];
+        if (articles.length > 0) {
+          useGSI = true;
+          console.log(`[NewsManager] Composite GSI query succeeded, returned ${articles.length} articles (sorted by newest first)`);
+          
+          // Log first few to verify sorting
+          if (articles.length > 0) {
+            const firstFew = articles.slice(0, 3).map(a => ({
+              id: a.id.substring(0, 8),
+              createdAt: a.createdAt,
+              timestamp: a.timestamp
+            }));
+            console.log('[NewsManager] First 3 articles from GSI (should be newest):', firstFew);
+          }
+        } else {
+          console.warn('[NewsManager] Composite GSI query returned 0 articles, falling back to listArticles');
+        }
+      } catch (gsiError) {
+        // Log error but don't expose sensitive details
+        const errorMessage = gsiError instanceof Error ? gsiError.message : String(gsiError);
+        console.warn('[NewsManager] Composite GSI query failed, falling back:', errorMessage);
+      }
+      } else {
+        console.log('[NewsManager] Composite GSI query not available yet (GraphQL code needs regeneration), using fallback');
+      }
       
-      console.log(`[NewsManager] GSI query returned ${articles.length} articles`);
+      // Fallback to regular listArticles query if GSI failed or returned no results
+      if (!useGSI) {
+        console.log('[NewsManager] Using fallback listArticles query');
+        const fallbackResult = await client.graphql({ 
+          query: listArticles,
+          variables: {
+            limit: 100
+          }
+        });
+        articles = (fallbackResult as any).data?.listArticles?.items || [];
+        console.log(`[NewsManager] Fallback query returned ${articles.length} articles`);
+        
+        // Sort by createdAt descending since listArticles doesn't guarantee order
+        articles.sort((a, b) => {
+          const aTime = new Date(a.createdAt || 0).getTime();
+          const bTime = new Date(b.createdAt || 0).getTime();
+          return bTime - aTime; // Newest first
+        });
+        console.log('[NewsManager] Articles sorted by createdAt (newest first)');
+      }
             
       // Debug: Log article categories
       const categoryCounts = articles.reduce((acc, article) => {

@@ -23,10 +23,11 @@ const schema = a.schema({
       callToAction: a.string(),
       sponsorLink: a.string(),
       priorityUntil: a.datetime(),
+      articleType: a.string().default('ARTICLE'), // Constant partition key for GSI - all articles use 'ARTICLE'
       createdAt: a.datetime(), // Explicit field for indexing
     })
     .secondaryIndexes((index) => [
-      index('createdAt'), // GSI for efficient time-based queries
+      index('articleType').sortKeys(['createdAt']), // Composite GSI: partition key (articleType) + sort key (createdAt) for efficient time-sorted queries
     ])
     .authorization(allow => [
       // Allow API keys to create articles for backend ingestion

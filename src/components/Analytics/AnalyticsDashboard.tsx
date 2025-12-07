@@ -884,7 +884,7 @@ export const AnalyticsDashboard = () => {
             </div>
 
             {sesMetrics.topCompanies.length > 0 && (
-              <div className="subscription-card">
+              <div className="subscription-card" style={{ marginTop: 'var(--space-2xl)' }}>
                 <h2 className="subscription-card-title">Top Companies</h2>
                 <div className="subscription-items">
                   {sesMetrics.topCompanies.map((company, index) => (
