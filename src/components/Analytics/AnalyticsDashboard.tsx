@@ -399,6 +399,13 @@ function aggregateAnalytics(
   timeRange: '7d' | '30d' | '90d',
   masterUserId?: string
 ): AggregatedAnalytics {
+  console.log('[aggregateAnalytics] Starting aggregation:', {
+    totalActivities: activities.length,
+    totalSubscriptions: subscriptions.length,
+    timeRange,
+    masterUserId,
+  });
+
   // Calculate date range if provided
   let startDate: string | undefined;
   if (timeRange) {
@@ -410,44 +417,70 @@ function aggregateAnalytics(
 
   // Filter out master user data if masterUserId is provided
   let filteredActivities = activities;
+  const masterActivityCount = masterUserId 
+    ? activities.filter((activity) => activity.owner === masterUserId).length 
+    : 0;
   if (masterUserId) {
     filteredActivities = filteredActivities.filter((activity) => activity.owner !== masterUserId);
   }
 
   // Filter activities by date range if needed
+  const beforeDateFilter = filteredActivities.length;
   filteredActivities = startDate
     ? filteredActivities.filter((activity) => {
         const activityDate = new Date(activity.startTime);
         return activityDate >= new Date(startDate!);
       })
     : filteredActivities;
+  const afterDateFilter = filteredActivities.length;
 
   // Filter out master user subscriptions if masterUserId is provided
   let filteredSubscriptions = subscriptions;
+  const masterSubscriptionCount = masterUserId
+    ? subscriptions.filter((sub: any) => sub.owner === masterUserId).length
+    : 0;
   if (masterUserId) {
     filteredSubscriptions = filteredSubscriptions.filter((sub: any) => sub.owner !== masterUserId);
   }
 
-  // Calculate registered users (excluding master user)
-  const uniqueUserIds = new Set(filteredSubscriptions.map((sub: any) => sub.owner).filter(Boolean));
-  const registeredUsers = uniqueUserIds.size;
+  console.log('[aggregateAnalytics] After filtering:', {
+    filteredActivities: filteredActivities.length,
+    filteredSubscriptions: filteredSubscriptions.length,
+    masterActivitiesExcluded: masterActivityCount,
+    masterSubscriptionsExcluded: masterSubscriptionCount,
+    activitiesExcludedByDateRange: beforeDateFilter - afterDateFilter,
+  });
 
-  // Calculate sessions per user
+  // Calculate registered users (excluding master user)
+  const registeredUserIds = new Set(filteredSubscriptions.map((sub: any) => sub.owner).filter(Boolean));
+  const registeredUsers = registeredUserIds.size;
+
+  console.log('[aggregateAnalytics] Registered users:', {
+    count: registeredUsers,
+    userIds: Array.from(registeredUserIds),
+  });
+
+  // Calculate sessions per user (only for registered users)
   const sessionsByUser = new Map<string, number>();
   filteredActivities.forEach((activity: any) => {
-    if (activity.owner) {
+    if (activity.owner && registeredUserIds.has(activity.owner)) {
       sessionsByUser.set(activity.owner, (sessionsByUser.get(activity.owner) || 0) + 1);
     }
   });
 
-  const totalSessions = filteredActivities.length;
+  // Filter activities to only include those from registered users
+  const registeredUserActivities = filteredActivities.filter((activity: any) => 
+    activity.owner && registeredUserIds.has(activity.owner)
+  );
 
-  // Calculate session durations
+  const totalSessions = registeredUserActivities.length;
+
+  // Calculate session durations (only for registered users)
   const now = new Date();
   let totalDuration = 0;
   let validDurations = 0;
 
-  filteredActivities.forEach((activity: any) => {
+  registeredUserActivities.forEach((activity: any) => {
     if (activity.duration) {
       totalDuration += activity.duration;
       validDurations++;
@@ -464,18 +497,38 @@ function aggregateAnalytics(
 
   const averageSessionDuration = validDurations > 0 ? Math.round(totalDuration / validDurations) : 0;
 
-  // Calculate active users (users with active sessions or activity within the selected time range)
+  // Calculate active users (registered users with activity within the selected time range)
+  // Active users = registered users who have activities in the time range
   const activeUserIds = new Set<string>();
   
-  // filteredActivities already contains activities within the selected time range
-  filteredActivities.forEach((activity: any) => {
+  registeredUserActivities.forEach((activity: any) => {
     if (activity.owner) {
-      // Count users with active sessions or any activity in the time range
       activeUserIds.add(activity.owner);
     }
   });
 
   const activeUsers = activeUserIds.size;
+
+  // Log activities from users without subscriptions (for debugging)
+  const activitiesFromUnregisteredUsers = filteredActivities.filter(
+    (activity: any) => activity.owner && !registeredUserIds.has(activity.owner)
+  );
+  if (activitiesFromUnregisteredUsers.length > 0) {
+    const unregisteredUserIds = new Set(
+      activitiesFromUnregisteredUsers.map((a: any) => a.owner).filter(Boolean)
+    );
+    console.warn('[aggregateAnalytics] Found activities from users without subscriptions:', {
+      activityCount: activitiesFromUnregisteredUsers.length,
+      uniqueUserIds: Array.from(unregisteredUserIds),
+      note: 'These are excluded from Active Users calculation',
+    });
+  }
+
+  console.log('[aggregateAnalytics] Active users:', {
+    count: activeUsers,
+    userIds: Array.from(activeUserIds),
+    registeredUserActivities: registeredUserActivities.length,
+  });
   
   // Calculate average sessions per user based on active users (not registered users)
   const averageSessionsPerUser = activeUsers > 0 ? totalSessions / activeUsers : 0;
@@ -500,7 +553,7 @@ function aggregateAnalytics(
     .map(([userId, sessionCount]) => ({ userId, sessionCount }))
     .sort((a, b) => b.sessionCount - a.sessionCount);
 
-  return {
+  const result = {
     registeredUsers,
     totalSessions,
     averageSessionsPerUser: Math.round(averageSessionsPerUser * 100) / 100,
@@ -510,6 +563,16 @@ function aggregateAnalytics(
     subscriptionStatusBreakdown: statusBreakdown,
     sessionsPerUser,
   };
+
+  console.log('[aggregateAnalytics] Final metrics:', {
+    registeredUsers: result.registeredUsers,
+    activeUsers: result.activeUsers,
+    totalSessions: result.totalSessions,
+    averageSessionsPerUser: result.averageSessionsPerUser,
+    subscriptionStatusBreakdown: result.subscriptionStatusBreakdown,
+  });
+
+  return result;
 }
 
 export const AnalyticsDashboard = () => {
@@ -573,6 +636,25 @@ export const AnalyticsDashboard = () => {
 
       // Aggregate analytics in the frontend (exclude master user data)
       console.log('[AnalyticsDashboard] Aggregating user analytics...');
+      console.log('[AnalyticsDashboard] Master user info:', {
+        userId,
+        isMasterUser,
+        totalActivitiesBeforeFilter: activities.length,
+        totalSubscriptionsBeforeFilter: subscriptions.length,
+      });
+      
+      // Log master user's activities and subscriptions for verification
+      if (userId) {
+        const masterActivities = activities.filter((a: any) => a.owner === userId);
+        const masterSubscriptions = subscriptions.filter((s: any) => s.owner === userId);
+        console.log('[AnalyticsDashboard] Master user data to be excluded:', {
+          activities: masterActivities.length,
+          subscriptions: masterSubscriptions.length,
+          activityOwners: masterActivities.map((a: any) => a.owner).slice(0, 5),
+          subscriptionOwners: masterSubscriptions.map((s: any) => s.owner).slice(0, 5),
+        });
+      }
+      
       const aggregated = aggregateAnalytics(activities, subscriptions, timeRange, userId);
       setAnalytics(aggregated);
       console.log('[AnalyticsDashboard] User analytics aggregated:', {
@@ -581,9 +663,17 @@ export const AnalyticsDashboard = () => {
         activeUsers: aggregated.activeUsers,
       });
       
-      // Calculate SES campaign metrics (pass subscriptions to match with registered users)
+      // Calculate SES campaign metrics (pass filtered subscriptions to exclude master user)
       console.log('[AnalyticsDashboard] Calculating SES campaign metrics...');
-      const sesCampaignMetrics = calculateSESCampaignMetrics(sesContacts, subscriptions);
+      const filteredSubscriptionsForSES = userId
+        ? subscriptions.filter((sub: any) => sub.owner !== userId)
+        : subscriptions;
+      console.log('[AnalyticsDashboard] SES metrics - subscriptions:', {
+        total: subscriptions.length,
+        filtered: filteredSubscriptionsForSES.length,
+        masterExcluded: subscriptions.length - filteredSubscriptionsForSES.length,
+      });
+      const sesCampaignMetrics = calculateSESCampaignMetrics(sesContacts, filteredSubscriptionsForSES);
       setSESMetrics(sesCampaignMetrics);
       console.log('[AnalyticsDashboard] ✅ Analytics load complete');
     } catch (error) {
