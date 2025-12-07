@@ -5,11 +5,8 @@ import { useNews } from '../../context/NewsContext';
 import { useSession } from '../../context/SessionContext';
 import { listArticles } from '../../graphql/queries';
 import { ModelSortDirection } from '../../graphql/API';
-// Note: listArticleByArticleType will be available after running GraphQL code generation:
-// npx ampx generate graphql-client-code --format graphql-codegen --out ./src/graphql/
-// Import it conditionally to avoid build errors until GraphQL code is regenerated
-import * as queriesModule from '../../graphql/queries';
-const listArticleByArticleType = (queriesModule as any).listArticleByArticleType || null;
+// Import the generated query for composite GSI (articleType + createdAt)
+import { listArticleByArticleTypeAndCreatedAt } from '../../graphql/queries';
 import { onCreateArticle } from '../../graphql/subscriptions';
 import { isArticlePriority, sortArticlesByPriority } from '../../utils/articleSorting';
 import { SessionService } from '../../utils/sessionService';
@@ -309,19 +306,18 @@ export const NewsManager: React.FC = () => {
       // Try new composite GSI query (articleType + createdAt) for efficient time-sorted queries
       // This uses the new GSI with articleType as partition key and createdAt as sort key
       // Query all articles (articleType='ARTICLE') sorted by newest first
-      if (listArticleByArticleType) {
-        try {
-          console.log('[NewsManager] Attempting composite GSI query (articleType + createdAt)');
-          
-          const gsiResult = await client.graphql({ 
-            query: listArticleByArticleType,
-            variables: {
-              articleType: 'ARTICLE', // Constant partition key value
-              sortDirection: ModelSortDirection.DESC, // Newest first (descending by createdAt)
-              limit: 100
-            }
-          });
+      try {
+        console.log('[NewsManager] Attempting composite GSI query (articleType + createdAt)');
         
+        const gsiResult = await client.graphql({ 
+          query: listArticleByArticleTypeAndCreatedAt,
+          variables: {
+            articleType: 'ARTICLE', // Constant partition key value
+            sortDirection: ModelSortDirection.DESC, // Newest first (descending by createdAt)
+            limit: 100
+          }
+        });
+      
         // Check for errors
         if ((gsiResult as any).errors) {
           const errorDetails = (gsiResult as any).errors.map((e: any) => ({
@@ -333,7 +329,7 @@ export const NewsManager: React.FC = () => {
           throw new Error('Composite GSI query failed');
         }
         
-        articles = (gsiResult as any).data?.listArticleByArticleType?.items || [];
+        articles = (gsiResult as any).data?.listArticleByArticleTypeAndCreatedAt?.items || [];
         if (articles.length > 0) {
           useGSI = true;
           console.log(`[NewsManager] Composite GSI query succeeded, returned ${articles.length} articles (sorted by newest first)`);
@@ -354,9 +350,6 @@ export const NewsManager: React.FC = () => {
         // Log error but don't expose sensitive details
         const errorMessage = gsiError instanceof Error ? gsiError.message : String(gsiError);
         console.warn('[NewsManager] Composite GSI query failed, falling back:', errorMessage);
-      }
-      } else {
-        console.log('[NewsManager] Composite GSI query not available yet (GraphQL code needs regeneration), using fallback');
       }
       
       // Fallback to regular listArticles query if GSI failed or returned no results
