@@ -10,6 +10,7 @@ type GeneratedQuery<InputType, OutputType> = string & {
 
 export const getArticle = /* GraphQL */ `query GetArticle($id: ID!) {
   getArticle(id: $id) {
+    articleType
     callToAction
     category
     companies
@@ -184,14 +185,16 @@ export const getUserSubscription = /* GraphQL */ `query GetUserSubscription($id:
   APITypes.GetUserSubscriptionQueryVariables,
   APITypes.GetUserSubscriptionQuery
 >;
-export const listArticleByCreatedAt = /* GraphQL */ `query ListArticleByCreatedAt(
-  $createdAt: AWSDateTime!
+export const listArticleByArticleTypeAndCreatedAt = /* GraphQL */ `query ListArticleByArticleTypeAndCreatedAt(
+  $articleType: String!
+  $createdAt: ModelStringKeyConditionInput
   $filter: ModelArticleFilterInput
   $limit: Int
   $nextToken: String
   $sortDirection: ModelSortDirection
 ) {
-  listArticleByCreatedAt(
+  listArticleByArticleTypeAndCreatedAt(
+    articleType: $articleType
     createdAt: $createdAt
     filter: $filter
     limit: $limit
@@ -199,6 +202,7 @@ export const listArticleByCreatedAt = /* GraphQL */ `query ListArticleByCreatedA
     sortDirection: $sortDirection
   ) {
     items {
+      articleType
       callToAction
       category
       companies
@@ -224,8 +228,8 @@ export const listArticleByCreatedAt = /* GraphQL */ `query ListArticleByCreatedA
   }
 }
 ` as GeneratedQuery<
-  APITypes.ListArticleByCreatedAtQueryVariables,
-  APITypes.ListArticleByCreatedAtQuery
+  APITypes.ListArticleByArticleTypeAndCreatedAtQueryVariables,
+  APITypes.ListArticleByArticleTypeAndCreatedAtQuery
 >;
 export const listArticles = /* GraphQL */ `query ListArticles(
   $filter: ModelArticleFilterInput
@@ -234,6 +238,7 @@ export const listArticles = /* GraphQL */ `query ListArticles(
 ) {
   listArticles(filter: $filter, limit: $limit, nextToken: $nextToken) {
     items {
+      articleType
       callToAction
       category
       companies

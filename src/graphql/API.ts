@@ -4,6 +4,7 @@
 
 export type Article = {
   __typename: "Article",
+  articleType?: string | null,
   callToAction?: string | null,
   category?: ArticleCategory | null,
   companies?: string | null,
@@ -155,8 +156,19 @@ export enum UserSubscriptionSubscriptionStatus {
 }
 
 
+export type ModelStringKeyConditionInput = {
+  beginsWith?: string | null,
+  between?: Array< string | null > | null,
+  eq?: string | null,
+  ge?: string | null,
+  gt?: string | null,
+  le?: string | null,
+  lt?: string | null,
+};
+
 export type ModelArticleFilterInput = {
   and?: Array< ModelArticleFilterInput | null > | null,
+  articleType?: ModelStringInput | null,
   callToAction?: ModelStringInput | null,
   category?: ModelArticleCategoryInput | null,
   companies?: ModelStringInput | null,
@@ -456,6 +468,7 @@ export type ModelUserSubscriptionConnection = {
 
 export type ModelArticleConditionInput = {
   and?: Array< ModelArticleConditionInput | null > | null,
+  articleType?: ModelStringInput | null,
   callToAction?: ModelStringInput | null,
   category?: ModelArticleCategoryInput | null,
   companies?: ModelStringInput | null,
@@ -478,6 +491,7 @@ export type ModelArticleConditionInput = {
 };
 
 export type CreateArticleInput = {
+  articleType?: string | null,
   callToAction?: string | null,
   category?: ArticleCategory | null,
   companies?: string | null,
@@ -734,6 +748,7 @@ export type DeleteUserSubscriptionInput = {
 };
 
 export type UpdateArticleInput = {
+  articleType?: string | null,
   callToAction?: string | null,
   category?: ArticleCategory | null,
   companies?: string | null,
@@ -838,6 +853,7 @@ export type UpdateUserSubscriptionInput = {
 
 export type ModelSubscriptionArticleFilterInput = {
   and?: Array< ModelSubscriptionArticleFilterInput | null > | null,
+  articleType?: ModelSubscriptionStringInput | null,
   callToAction?: ModelSubscriptionStringInput | null,
   category?: ModelSubscriptionStringInput | null,
   companies?: ModelSubscriptionStringInput | null,
@@ -1030,6 +1046,7 @@ export type GetArticleQueryVariables = {
 export type GetArticleQuery = {
   getArticle?:  {
     __typename: "Article",
+    articleType?: string | null,
     callToAction?: string | null,
     category?: ArticleCategory | null,
     companies?: string | null,
@@ -1208,19 +1225,21 @@ export type GetUserSubscriptionQuery = {
   } | null,
 };
 
-export type ListArticleByCreatedAtQueryVariables = {
-  createdAt: string,
+export type ListArticleByArticleTypeAndCreatedAtQueryVariables = {
+  articleType: string,
+  createdAt?: ModelStringKeyConditionInput | null,
   filter?: ModelArticleFilterInput | null,
   limit?: number | null,
   nextToken?: string | null,
   sortDirection?: ModelSortDirection | null,
 };
 
-export type ListArticleByCreatedAtQuery = {
-  listArticleByCreatedAt?:  {
+export type ListArticleByArticleTypeAndCreatedAtQuery = {
+  listArticleByArticleTypeAndCreatedAt?:  {
     __typename: "ModelArticleConnection",
     items:  Array< {
       __typename: "Article",
+      articleType?: string | null,
       callToAction?: string | null,
       category?: ArticleCategory | null,
       companies?: string | null,
@@ -1255,6 +1274,7 @@ export type ListArticlesQuery = {
     __typename: "ModelArticleConnection",
     items:  Array< {
       __typename: "Article",
+      articleType?: string | null,
       callToAction?: string | null,
       category?: ArticleCategory | null,
       companies?: string | null,
@@ -1580,6 +1600,7 @@ export type CreateArticleMutationVariables = {
 export type CreateArticleMutation = {
   createArticle?:  {
     __typename: "Article",
+    articleType?: string | null,
     callToAction?: string | null,
     category?: ArticleCategory | null,
     companies?: string | null,
@@ -1774,6 +1795,7 @@ export type DeleteArticleMutationVariables = {
 export type DeleteArticleMutation = {
   deleteArticle?:  {
     __typename: "Article",
+    articleType?: string | null,
     callToAction?: string | null,
     category?: ArticleCategory | null,
     companies?: string | null,
@@ -1968,6 +1990,7 @@ export type UpdateArticleMutationVariables = {
 export type UpdateArticleMutation = {
   updateArticle?:  {
     __typename: "Article",
+    articleType?: string | null,
     callToAction?: string | null,
     category?: ArticleCategory | null,
     companies?: string | null,
@@ -2171,6 +2194,7 @@ export type OnCreateArticleSubscriptionVariables = {
 export type OnCreateArticleSubscription = {
   onCreateArticle?:  {
     __typename: "Article",
+    articleType?: string | null,
     callToAction?: string | null,
     category?: ArticleCategory | null,
     companies?: string | null,
@@ -2362,6 +2386,7 @@ export type OnDeleteArticleSubscriptionVariables = {
 export type OnDeleteArticleSubscription = {
   onDeleteArticle?:  {
     __typename: "Article",
+    articleType?: string | null,
     callToAction?: string | null,
     category?: ArticleCategory | null,
     companies?: string | null,
@@ -2553,6 +2578,7 @@ export type OnUpdateArticleSubscriptionVariables = {
 export type OnUpdateArticleSubscription = {
   onUpdateArticle?:  {
     __typename: "Article",
+    articleType?: string | null,
     callToAction?: string | null,
     category?: ArticleCategory | null,
     companies?: string | null,

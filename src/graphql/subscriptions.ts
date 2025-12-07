@@ -10,6 +10,7 @@ type GeneratedSubscription<InputType, OutputType> = string & {
 
 export const onCreateArticle = /* GraphQL */ `subscription OnCreateArticle($filter: ModelSubscriptionArticleFilterInput) {
   onCreateArticle(filter: $filter) {
+    articleType
     callToAction
     category
     companies
@@ -208,6 +209,7 @@ export const onCreateUserSubscription = /* GraphQL */ `subscription OnCreateUser
 >;
 export const onDeleteArticle = /* GraphQL */ `subscription OnDeleteArticle($filter: ModelSubscriptionArticleFilterInput) {
   onDeleteArticle(filter: $filter) {
+    articleType
     callToAction
     category
     companies
@@ -406,6 +408,7 @@ export const onDeleteUserSubscription = /* GraphQL */ `subscription OnDeleteUser
 >;
 export const onUpdateArticle = /* GraphQL */ `subscription OnUpdateArticle($filter: ModelSubscriptionArticleFilterInput) {
   onUpdateArticle(filter: $filter) {
+    articleType
     callToAction
     category
     companies

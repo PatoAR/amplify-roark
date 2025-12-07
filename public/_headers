@@ -1,0 +1,10 @@
+# Cache control headers for AWS Amplify
+# Only HTML needs to be fresh - Vite already handles asset cache busting with hashes
+
+# HTML files - never cache (always fetch fresh)
+# This ensures users always get the latest HTML that references the latest JS/CSS files
+/*.html
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+  Expires: 0
+

@@ -116,8 +116,7 @@ async function sendEmail(to: string, firstName: string, language: string = 'es')
     `Subject: ${subject}`,
     `X-Campaign-Table: ${CONTACT_TABLE_NAME}`, // Custom header for multi-branch support
     `MIME-Version: 1.0`,
-    `Content-Type: text/plain; charset=UTF-8`,
-    `Content-Transfer-Encoding: quoted-printable`,
+    `Content-Type: text/html; charset=UTF-8`,
     ``,
     body,
   ].join('\r\n');
