@@ -115,9 +115,22 @@ async function fetchAllSubscriptions(
 async function fetchAllSESCampaignContacts(
   client: ReturnType<typeof generateClient<Schema>>,
 ): Promise<any[]> {
+  // CRITICAL: This must be the FIRST line - if we don't see this, the function isn't being called
   console.log('[AnalyticsDashboard] ===== Starting SES Campaign Contacts Fetch =====');
+  console.log('[AnalyticsDashboard] Function entry timestamp:', new Date().toISOString());
   console.log('[AnalyticsDashboard] Client type:', typeof client);
   console.log('[AnalyticsDashboard] Query imported:', typeof listSESCampaignContacts);
+  
+  // Log Amplify config immediately to diagnose environment issues
+  try {
+    const config = Amplify.getConfig();
+    const apiEndpoint = config.API?.GraphQL?.endpoint || 'NOT CONFIGURED';
+    console.log('[AnalyticsDashboard] Current GraphQL Endpoint:', apiEndpoint);
+    console.log('[AnalyticsDashboard] API Region:', config.API?.GraphQL?.region || 'NOT SET');
+    console.log('[AnalyticsDashboard] Default Auth Mode:', config.API?.GraphQL?.defaultAuthMode || 'NOT SET');
+  } catch (configErr) {
+    console.error('[AnalyticsDashboard] Failed to read Amplify config:', configErr);
+  }
   
   let allContacts: any[] = [];
   let nextToken: string | null = null;
@@ -701,10 +714,26 @@ export const AnalyticsDashboard = () => {
       console.log('[AnalyticsDashboard] Fetching all data sources in parallel...');
       console.log('[AnalyticsDashboard] Starting Promise.all for activities, subscriptions, and SES contacts...');
       
-      const [activities, subscriptions, sesContacts] = await Promise.all([
+      // Wrap SES contacts fetch individually to catch any errors
+      let sesContacts: any[] = [];
+      try {
+        console.log('[AnalyticsDashboard] About to call fetchAllSESCampaignContacts...');
+        sesContacts = await fetchAllSESCampaignContacts(client);
+        console.log('[AnalyticsDashboard] fetchAllSESCampaignContacts returned:', sesContacts.length, 'contacts');
+      } catch (sesError) {
+        console.error('[AnalyticsDashboard] ❌ ERROR in fetchAllSESCampaignContacts:', sesError);
+        console.error('[AnalyticsDashboard] Error details:', {
+          message: sesError instanceof Error ? sesError.message : String(sesError),
+          stack: sesError instanceof Error ? sesError.stack : undefined,
+          fullError: sesError,
+        });
+        sesContacts = []; // Continue with empty array
+      }
+      
+      // Fetch other data in parallel
+      const [activities, subscriptions] = await Promise.all([
         fetchAllActivities(client),
         fetchAllSubscriptions(client),
-        fetchAllSESCampaignContacts(client),
       ]);
 
       console.log('[AnalyticsDashboard] ===== Promise.all complete =====');
