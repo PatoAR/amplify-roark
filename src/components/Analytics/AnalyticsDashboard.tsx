@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCurrentUser } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
+import { Amplify } from 'aws-amplify';
 import { type Schema } from '../../../amplify/data/resource';
 import { useSession } from '../../context/SessionContext';
 import { listUserActivities, listUserSubscriptions, listSESCampaignContacts } from '../../graphql/queries';
@@ -114,15 +115,21 @@ async function fetchAllSubscriptions(
 async function fetchAllSESCampaignContacts(
   client: ReturnType<typeof generateClient<Schema>>,
 ): Promise<any[]> {
-  console.log('[AnalyticsDashboard] Fetching SES Campaign Contacts...');
+  console.log('[AnalyticsDashboard] ===== Starting SES Campaign Contacts Fetch =====');
+  console.log('[AnalyticsDashboard] Client type:', typeof client);
+  console.log('[AnalyticsDashboard] Query imported:', typeof listSESCampaignContacts);
+  
   let allContacts: any[] = [];
   let nextToken: string | null = null;
   let pageCount = 0;
 
   try {
+    // First attempt - check if query works at all
+    console.log('[AnalyticsDashboard] Attempting first GraphQL query...');
+    
     do {
       pageCount++;
-      console.log(`[AnalyticsDashboard] Fetching page ${pageCount} of SES contacts...`);
+      console.log(`[AnalyticsDashboard] === Fetching page ${pageCount} of SES contacts ===`);
       
       // Use GraphQL approach (consistent with fetchAllSubscriptions)
       const result = await client.graphql({
@@ -133,41 +140,76 @@ async function fetchAllSESCampaignContacts(
         },
       }) as any;
 
-      // Log any errors returned
+      console.log('[AnalyticsDashboard] GraphQL query completed. Checking result...');
+
+      // Log any errors returned (check both result.errors and nested structure)
       if (result.errors && result.errors.length > 0) {
-        console.error('[AnalyticsDashboard] GraphQL Errors fetching SES contacts:');
+        console.error('[AnalyticsDashboard] ❌ GraphQL Errors in result.errors:');
         result.errors.forEach((error: any, index: number) => {
           console.error(`  Error ${index + 1}: ${error.message}`);
           console.error(`    Type: ${error.errorType}`);
           console.error(`    Path: ${JSON.stringify(error.path)}`);
-          console.error(`    Full error:`, error);
+          console.error(`    Full error:`, JSON.stringify(error, null, 2));
         });
+      }
+
+      // Check if result.data exists at all
+      if (!result.data) {
+        console.error('[AnalyticsDashboard] ❌ No data field in GraphQL result!');
+        console.error('[AnalyticsDashboard] Full result:', JSON.stringify(result, null, 2));
+        break;
+      }
+
+      // Check if listSESCampaignContacts exists
+      if (!result.data.listSESCampaignContacts) {
+        console.error('[AnalyticsDashboard] ❌ listSESCampaignContacts is null/undefined in result.data!');
+        console.error('[AnalyticsDashboard] Available keys in result.data:', Object.keys(result.data));
+        console.error('[AnalyticsDashboard] Full result.data:', JSON.stringify(result.data, null, 2));
+        break;
       }
 
       // Log raw result structure for debugging
       console.log('[AnalyticsDashboard] Raw result structure:', {
         hasData: !!result.data?.listSESCampaignContacts,
+        dataIsNull: result.data?.listSESCampaignContacts === null,
+        dataIsUndefined: result.data?.listSESCampaignContacts === undefined,
+        hasItems: !!result.data?.listSESCampaignContacts?.items,
+        itemsIsArray: Array.isArray(result.data?.listSESCampaignContacts?.items),
         dataLength: result.data?.listSESCampaignContacts?.items?.length ?? 0,
         hasNextToken: !!result.data?.listSESCampaignContacts?.nextToken,
       });
 
       const items = result.data?.listSESCampaignContacts?.items || [];
       
+      console.log(`[AnalyticsDashboard] Extracted items array length: ${items.length}`);
+      
       // Sample first item to see structure
       if (items.length > 0) {
-        console.log('[AnalyticsDashboard] Sample contact structure:', {
+        console.log('[AnalyticsDashboard] ✅ Sample contact structure:', {
           keys: Object.keys(items[0] || {}),
           sample: items[0],
         });
+      } else if (pageCount === 1) {
+        console.warn('[AnalyticsDashboard] ⚠️ First page returned 0 items. Result structure:', {
+          hasListSESCampaignContacts: !!result.data?.listSESCampaignContacts,
+          listSESCampaignContactsType: typeof result.data?.listSESCampaignContacts,
+          listSESCampaignContactsValue: result.data?.listSESCampaignContacts,
+        });
       }
 
-      console.log(`[AnalyticsDashboard] Page ${pageCount}: Fetched ${items.length} valid contacts`);
+      console.log(`[AnalyticsDashboard] Page ${pageCount}: Fetched ${items.length} contacts`);
       
-      allContacts = allContacts.concat(items.filter((item: any) => item !== null && item !== undefined));
+      const validItems = items.filter((item: any) => item !== null && item !== undefined);
+      console.log(`[AnalyticsDashboard] Page ${pageCount}: ${validItems.length} valid contacts after null filter`);
+      
+      allContacts = allContacts.concat(validItems);
       nextToken = result.data?.listSESCampaignContacts?.nextToken || null;
+      
+      console.log(`[AnalyticsDashboard] Page ${pageCount} complete. Total so far: ${allContacts.length}, hasNextToken: ${!!nextToken}`);
     } while (nextToken);
 
-    console.log(`[AnalyticsDashboard] Total SES contacts fetched: ${allContacts.length} across ${pageCount} pages`);
+    console.log(`[AnalyticsDashboard] ===== Fetch Complete =====`);
+    console.log(`[AnalyticsDashboard] Total SES contacts fetched: ${allContacts.length} across ${pageCount} page(s)`);
     
     // Log statistics about the fetched data
     if (allContacts.length > 0) {
@@ -175,7 +217,7 @@ async function fetchAllSESCampaignContacts(
       const pendingCount = allContacts.filter(c => c.Sent_Status === 'false').length;
       const withErrors = allContacts.filter(c => c.Error_Status).length;
       
-      console.log('[AnalyticsDashboard] SES contacts breakdown:', {
+      console.log('[AnalyticsDashboard] ✅ SES contacts breakdown:', {
         total: allContacts.length,
         sent: sentCount,
         pending: pendingCount,
@@ -188,34 +230,55 @@ async function fetchAllSESCampaignContacts(
         }
       });
     } else {
-      console.warn('[AnalyticsDashboard] No SES contacts found in database!');
+      console.warn('[AnalyticsDashboard] ⚠️⚠️⚠️ WARNING: No SES contacts found in database!');
+      console.warn('[AnalyticsDashboard] This could indicate:');
+      console.warn('[AnalyticsDashboard] 1. GraphQL API endpoint is pointing to wrong environment');
+      console.warn('[AnalyticsDashboard] 2. Authorization rules are blocking access');
+      console.warn('[AnalyticsDashboard] 3. Data doesn\'t exist in this environment');
+      console.warn('[AnalyticsDashboard] 4. Table name mismatch between branches');
     }
 
     return allContacts;
   } catch (error) {
-    console.error('[AnalyticsDashboard] Error fetching SES Campaign Contacts:', error);
+    console.error('[AnalyticsDashboard] ❌❌❌ CRITICAL ERROR fetching SES Campaign Contacts ❌❌❌');
+    console.error('[AnalyticsDashboard] Error object:', error);
     
     // Better error logging
     if (typeof error === 'object' && error !== null) {
+      const errorObj = error as any;
       console.error('[AnalyticsDashboard] Error details:', {
-        message: (error as any).message,
-        errors: (error as any).errors,
-        data: (error as any).data,
-        stack: (error as any).stack,
-        fullError: error,
+        message: errorObj.message,
+        name: errorObj.name,
+        errors: errorObj.errors,
+        data: errorObj.data,
+        stack: errorObj.stack,
       });
       
       // If there are GraphQL errors, log them individually
-      if ((error as any).errors && Array.isArray((error as any).errors)) {
-        console.error('[AnalyticsDashboard] GraphQL Errors:');
-        (error as any).errors.forEach((err: any, idx: number) => {
-          console.error(`  Error ${idx + 1}:`, err);
+      if (errorObj.errors && Array.isArray(errorObj.errors)) {
+        console.error('[AnalyticsDashboard] GraphQL Errors in catch block:');
+        errorObj.errors.forEach((err: any, idx: number) => {
+          console.error(`  Error ${idx + 1}:`, JSON.stringify(err, null, 2));
         });
+      }
+      
+      // Check for network/API errors
+      if (errorObj.message) {
+        if (errorObj.message.includes('Network')) {
+          console.error('[AnalyticsDashboard] ⚠️ Network error - check API endpoint configuration');
+        }
+        if (errorObj.message.includes('Unauthorized') || errorObj.message.includes('401')) {
+          console.error('[AnalyticsDashboard] ⚠️ Authorization error - check API key and auth rules');
+        }
+        if (errorObj.message.includes('Forbidden') || errorObj.message.includes('403')) {
+          console.error('[AnalyticsDashboard] ⚠️ Forbidden error - check authorization rules');
+        }
       }
     } else {
       console.error('[AnalyticsDashboard] Error (not an object):', String(error));
     }
     
+    console.error('[AnalyticsDashboard] Returning empty array to allow dashboard to render');
     // Return empty array instead of throwing to allow dashboard to render
     return [];
   }
@@ -615,6 +678,20 @@ export const AnalyticsDashboard = () => {
     }
 
     console.log('[AnalyticsDashboard] Starting analytics load for userId:', userId, 'timeRange:', timeRange);
+    
+    // Log Amplify configuration to help diagnose environment issues
+    try {
+      const config = Amplify.getConfig();
+      console.log('[AnalyticsDashboard] Amplify API Configuration:', {
+        hasAPI: !!config.API,
+        graphqlEndpoint: config.API?.GraphQL?.endpoint || 'NOT SET',
+        region: config.API?.GraphQL?.region || 'NOT SET',
+        defaultAuthMode: config.API?.GraphQL?.defaultAuthMode || 'NOT SET',
+      });
+    } catch (configError) {
+      console.warn('[AnalyticsDashboard] Could not read Amplify config:', configError);
+    }
+    
     setIsLoading(true);
     setError(null);
     try {
@@ -622,17 +699,32 @@ export const AnalyticsDashboard = () => {
 
       // Fetch all data in parallel
       console.log('[AnalyticsDashboard] Fetching all data sources in parallel...');
+      console.log('[AnalyticsDashboard] Starting Promise.all for activities, subscriptions, and SES contacts...');
+      
       const [activities, subscriptions, sesContacts] = await Promise.all([
         fetchAllActivities(client),
         fetchAllSubscriptions(client),
         fetchAllSESCampaignContacts(client),
       ]);
 
+      console.log('[AnalyticsDashboard] ===== Promise.all complete =====');
       console.log('[AnalyticsDashboard] Data fetch complete:', {
         activitiesCount: activities.length,
         subscriptionsCount: subscriptions.length,
         sesContactsCount: sesContacts.length,
       });
+      
+      // Log detailed info about sesContacts
+      if (sesContacts.length === 0) {
+        console.warn('[AnalyticsDashboard] ⚠️⚠️⚠️ sesContacts array is EMPTY!');
+        console.warn('[AnalyticsDashboard] This will cause all SES metrics to show zero.');
+        console.warn('[AnalyticsDashboard] Check the fetchAllSESCampaignContacts logs above for details.');
+      } else {
+        console.log('[AnalyticsDashboard] ✅ sesContacts fetched successfully:', {
+          count: sesContacts.length,
+          firstContactSample: sesContacts[0] ? Object.keys(sesContacts[0]) : 'N/A',
+        });
+      }
 
       // Aggregate analytics in the frontend (exclude master user data)
       console.log('[AnalyticsDashboard] Aggregating user analytics...');

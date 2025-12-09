@@ -15,6 +15,7 @@
 
 import { DynamoDBClient, ListTablesCommand } from '@aws-sdk/client-dynamodb';
 import { CloudFormationClient, DescribeStacksCommand } from '@aws-sdk/client-cloudformation';
+import { execSync } from 'child_process';
 
 /**
  * Discover the actual DynamoDB table name for a given model
@@ -57,7 +58,6 @@ export async function discoverTableName(
     try {
       const cfnTableName = await getTableNameFromCloudFormation(outputKeyName);
       if (cfnTableName) {
-        console.log(`✓ Found table from CloudFormation stack: ${cfnTableName}`);
         return cfnTableName;
       }
     } catch (error) {
@@ -85,29 +85,76 @@ export async function discoverTableName(
 }
 
 /**
+ * Get the current git branch name
+ * Returns null if git is not available or not in a git repository
+ */
+function getCurrentGitBranch(): string | null {
+  try {
+    const branch = execSync('git branch --show-current', { encoding: 'utf-8' }).trim();
+    return branch || null;
+  } catch (error) {
+    // Git not available or not in a git repo
+    return null;
+  }
+}
+
+/**
  * Get table name from CloudFormation stack outputs
  * This is the recommended method for multi-branch deployments
+ * Now branch-aware: filters stacks by current git branch
  */
 async function getTableNameFromCloudFormation(outputKeyName: string): Promise<string | null> {
   const cfnClient = new CloudFormationClient({});
   
   try {
+    // Get current git branch for branch-aware filtering
+    const currentBranch = getCurrentGitBranch();
+    if (currentBranch) {
+      console.log(`Detected git branch: ${currentBranch}`);
+    } else {
+      console.log(`⚠ Could not detect git branch. Will search all stacks.`);
+    }
+    
     // Get all stacks (Amplify Gen 2 creates stacks with pattern: amplify-{appname}-{branch}-...)
     const response = await cfnClient.send(new DescribeStacksCommand({}));
     const stacks = response.Stacks || [];
     
     // Find Amplify data stacks (they contain the table outputs)
     // Stack name pattern: amplify-{appname}-{branch}-data-{hash} or similar
-    const amplifyDataStacks = stacks.filter(stack => 
+    let amplifyDataStacks = stacks.filter(stack => 
       stack.StackName?.includes('amplify') && 
       stack.StackName?.includes('data') &&
       stack.StackStatus !== 'DELETE_COMPLETE'
     );
     
-    // Search for the output in all matching stacks
+    // Filter by branch if we detected a branch
+    if (currentBranch) {
+      const branchFilteredStacks = amplifyDataStacks.filter(stack => {
+        const stackName = stack.StackName || '';
+        // Check if stack name contains the branch name
+        // Handle both direct branch name and normalized versions (e.g., main vs master)
+        return stackName.includes(`-${currentBranch}-`) || 
+               stackName.includes(`-${currentBranch}_`) ||
+               stackName.endsWith(`-${currentBranch}`);
+      });
+      
+      if (branchFilteredStacks.length > 0) {
+        amplifyDataStacks = branchFilteredStacks;
+        console.log(`Found ${amplifyDataStacks.length} stack(s) matching branch "${currentBranch}"`);
+      } else {
+        console.log(`⚠ No stacks found matching branch "${currentBranch}". Searching all stacks...`);
+      }
+    }
+    
+    // Search for the output in matching stacks
     for (const stack of amplifyDataStacks) {
       const output = stack.Outputs?.find(o => o.OutputKey === outputKeyName);
       if (output?.OutputValue) {
+        if (currentBranch) {
+          console.log(`✓ Found table from CloudFormation stack "${stack.StackName}" (branch: ${currentBranch})`);
+        } else {
+          console.log(`✓ Found table from CloudFormation stack "${stack.StackName}"`);
+        }
         return output.OutputValue;
       }
     }
@@ -128,6 +175,7 @@ async function getTableNameFromCloudFormation(outputKeyName: string): Promise<st
  */
 async function discoverViaListTables(modelName: string): Promise<string | null> {
   try {
+    const currentBranch = getCurrentGitBranch();
     const ddbClient = new DynamoDBClient({});
     const listResponse = await ddbClient.send(new ListTablesCommand({}));
     const tableNames = listResponse.TableNames || [];
@@ -144,12 +192,23 @@ async function discoverViaListTables(modelName: string): Promise<string | null> 
       matchingTables.forEach((table, idx) => {
         console.log(`   ${idx + 1}. ${table}`);
       });
+      
+      if (currentBranch) {
+        console.log(`\n   Current git branch: ${currentBranch}`);
+        console.log(`   ⚠️  Cannot determine which table belongs to branch "${currentBranch}" from table names alone.`);
+      }
+      
       console.log(`\n   Using first match: ${matchingTables[0]}`);
-      console.log(`   This may not be the correct branch/environment!`);
-      console.log(`   \n   To specify the correct table, use environment variable:`);
-      console.log(`   CONTACT_TABLE_NAME=${matchingTables[0]} npm run script-name\n`);
+      console.log(`   ⚠️  This may not be the correct branch/environment!`);
+      console.log(`\n   Solutions:`);
+      console.log(`   1. Use CloudFormation discovery (requires cloudformation:DescribeStacks permission)`);
+      console.log(`   2. Specify the correct table via environment variable:`);
+      console.log(`      CONTACT_TABLE_NAME=${matchingTables[0]} npm run script-name\n`);
     } else {
       console.log(`✓ Found table via DynamoDB: ${matchingTables[0]}`);
+      if (currentBranch) {
+        console.log(`   (Note: Branch "${currentBranch}" detected, but table name doesn't indicate branch)`);
+      }
     }
     
     return matchingTables[0];
@@ -199,4 +258,3 @@ export async function discoverMultipleTables(
   
   return result;
 }
-
