@@ -28,7 +28,7 @@ const PrivacyPolicy: React.FC = () => {
             <p>The data controller responsible for your personal data is:</p>
             <p>
               <strong>Perkins News</strong><br />
-              Finu S.A.<br />
+              Perkins Intel<br />
               Email: info@perkinsintel.com
             </p>
 
@@ -140,7 +140,7 @@ const PrivacyPolicy: React.FC = () => {
             <p className="legal-contact">For privacy-related questions or rights requests:</p>
             <p>
               <strong>Perkins News</strong><br />
-              Finu S.A.<br />
+              Perkins Intel<br />
               Email: info@perkinsintel.com
             </p>
           </div>
