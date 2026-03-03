@@ -36,6 +36,7 @@
 
 /* Article card */
 .article-card {
+  position: relative;
   background: var(--color-surface);
   border-radius: var(--border-radius-md);
   padding: var(--space-sm);
@@ -47,6 +48,35 @@
   /* Optimize for animations */
   transform: translateZ(0);
   backface-visibility: hidden;
+}
+
+/* Forward via email - bottom left of card */
+.article-forward-btn {
+  position: absolute;
+  bottom: var(--space-xs);
+  left: var(--space-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  border-radius: var(--border-radius-sm);
+  transition: color var(--transition-normal), background-color var(--transition-normal);
+}
+
+.article-forward-btn:hover {
+  color: var(--color-primary);
+  background-color: var(--color-border-light);
+}
+
+.article-forward-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 /* Hover animation - use transform3d to avoid layout thrashing */

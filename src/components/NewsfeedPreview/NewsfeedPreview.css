@@ -65,6 +65,7 @@
 
 /* Article Cards - matching NewsSocketClient styles */
 .preview-article-card {
+  position: relative;
   background: var(--color-surface);
   border-radius: var(--border-radius-md);
   padding: var(--space-sm);
@@ -75,6 +76,35 @@
   border: var(--border-width) solid var(--color-border);
   transform: translateZ(0);
   backface-visibility: hidden;
+}
+
+/* Forward via email - bottom left of card */
+.preview-article-forward-btn {
+  position: absolute;
+  bottom: var(--space-xs);
+  left: var(--space-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  border-radius: var(--border-radius-sm);
+  transition: color var(--transition-normal), background-color var(--transition-normal);
+}
+
+.preview-article-forward-btn:hover {
+  color: var(--color-primary);
+  background-color: var(--color-border-light);
+}
+
+.preview-article-forward-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .preview-article-card:hover {

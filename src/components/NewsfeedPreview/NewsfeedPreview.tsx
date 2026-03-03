@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Share2 } from 'lucide-react';
 import { useTranslation } from '../../i18n';
 import './NewsfeedPreview.css';
 
@@ -121,6 +122,25 @@ function formatLocalTime(timestamp: string): string {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 }
 
+function buildMailtoUrl(article: MockArticle): string {
+  const time = formatLocalTime(article.timestamp);
+  const companyNames = article.companies ? Object.keys(article.companies).join(', ') : '';
+  const body = [
+    `Source: ${article.source}`,
+    `Industry: ${article.industry}`,
+    `Time: ${time}`,
+    `Link: ${article.link}`,
+    '',
+    article.title,
+    '',
+    article.summary,
+    companyNames ? `Companies: ${companyNames}` : ''
+  ].filter(Boolean).join('\n');
+  const subject = encodeURIComponent(article.title);
+  const bodyEncoded = encodeURIComponent(body);
+  return `mailto:?subject=${subject}&body=${bodyEncoded}`;
+}
+
 const NewsfeedPreview: React.FC = () => {
   const { t } = useTranslation();
   const [articles, setArticles] = useState<MockArticle[]>([]);
@@ -228,6 +248,19 @@ const NewsfeedPreview: React.FC = () => {
                   )}
                 </p>
               </a>
+              <button
+                type="button"
+                className="preview-article-forward-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  window.location.href = buildMailtoUrl(article);
+                }}
+                title="Forward via email"
+                aria-label="Forward article via email"
+              >
+                <Share2 size={14} />
+              </button>
             </motion.div>
           ))}
         </AnimatePresence>

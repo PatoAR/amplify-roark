@@ -7,7 +7,27 @@ import { useTranslation } from '../../i18n';
 import { COUNTRY_OPTIONS, getCountryName } from '../../constants/countries';
 import { useSubscriptionManager } from '../../hooks/useSubscriptionManager';
 import { GracePeriodBanner } from '../../components/GracePeriodBanner';
+import { Share2 } from 'lucide-react';
 import './NewsSocketClient.css';
+
+type NewsMessageCompanies = Record<string, unknown>;
+type NewsMessageCountries = Record<string, unknown> | string[];
+
+interface NewsMessage {
+  id: string;
+  seen?: boolean;
+  category?: string;
+  link?: string;
+  sponsorLink?: string | null;
+  callToAction?: string;
+  industry?: string | null;
+  timestamp?: string | null;
+  source: string;
+  title: string;
+  summary?: string;
+  companies?: NewsMessageCompanies;
+  countries?: NewsMessageCountries;
+}
 
 function formatLocalTime(timestamp?: string | null): string {
   if (!timestamp) return '';
@@ -20,6 +40,32 @@ function removeEmojis(text: string): string {
   if (!text) return text;
   // Remove emojis (including variation selectors U+FE00-FE0F) and trim leading/trailing spaces
   return text.replace(/[\u{1F300}-\u{1F9FF}]|[\u{1F100}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{FE00}-\u{FE0F}]/gu, '').trim();
+}
+
+function buildMailtoUrl(msg: NewsMessage): string {
+  const title = msg.title || '';
+  const source = msg.source || '';
+  const industry = msg.industry ? removeEmojis(String(msg.industry)) : '';
+  const time = msg.timestamp ? formatLocalTime(msg.timestamp) : '';
+  const link = msg.link || '';
+  const summary = msg.summary || '';
+  const companyNames = msg.companies && typeof msg.companies === 'object'
+    ? Object.keys(msg.companies).join(', ')
+    : '';
+  const body = [
+    `Source: ${source}`,
+    `Industry: ${industry}`,
+    `Time: ${time}`,
+    `Link: ${link}`,
+    '',
+    title,
+    '',
+    summary,
+    companyNames ? `Companies: ${companyNames}` : ''
+  ].filter(Boolean).join('\n');
+  const subject = encodeURIComponent(title);
+  const bodyEncoded = encodeURIComponent(body);
+  return `mailto:?subject=${subject}&body=${bodyEncoded}`;
 }
 
 function NewsSocketClient() {
@@ -167,7 +213,7 @@ function NewsSocketClient() {
   }, []);
 
   // Handles opening the article link to a new tab.
-  const handleArticleClick = useCallback(async (event: React.MouseEvent<HTMLAnchorElement>, link: string) => {
+  const handleArticleClick = useCallback(async (event: React.MouseEvent<HTMLElement>, link: string) => {
     event.preventDefault();
     const a = document.createElement('a');
     a.href = link;
@@ -260,7 +306,7 @@ function NewsSocketClient() {
       ) : (
         <div className="articles-container">
           <AnimatePresence initial={false}>
-            {displayedMessages.map((msg: any) => {
+            {displayedMessages.map((msg: NewsMessage) => {
               return (
                 <motion.div
                   key={msg.id}
@@ -400,13 +446,26 @@ function NewsSocketClient() {
                       <span className="sponsored-cta" onClick={(e) => {
                         e.stopPropagation();
                         e.preventDefault();
-                        handleArticleClick(e as any, String(msg.sponsorLink || msg.link || '#'));
+                        handleArticleClick(e, String(msg.sponsorLink || msg.link || '#'));
                       }}>
                         {msg.callToAction || 'Learn More'}
                       </span>
                     )}
                   </p>
                 </a>
+                <button
+                  type="button"
+                  className="article-forward-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    window.location.href = buildMailtoUrl(msg);
+                  }}
+                  title="Forward via email"
+                  aria-label="Forward article via email"
+                >
+                  <Share2 size={14} />
+                </button>
               </motion.div>
             );
           })}
