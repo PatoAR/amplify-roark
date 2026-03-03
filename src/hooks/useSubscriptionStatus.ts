@@ -20,6 +20,12 @@ export interface SubscriptionStatus {
 
 const GRACE_PERIOD_DAYS = 14;
 
+/** Shape of a subscription item from listUserSubscriptions */
+interface SubscriptionListItem {
+  trialEndDate?: string | null;
+  subscriptionType?: string | null;
+}
+
 export function useSubscriptionStatus(): SubscriptionStatus {
   const { userId, isAuthenticated } = useSession();
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>({
@@ -53,9 +59,9 @@ export function useSubscriptionStatus(): SubscriptionStatus {
         const result = await client.graphql({
           query: listUserSubscriptions,
           variables: { filter: { owner: { eq: userId } } }
-        }) as any;
+        }) as { data?: { listUserSubscriptions?: { items?: SubscriptionListItem[] } } };
         
-        const items = result.data?.listUserSubscriptions?.items || [];
+        const items = result.data?.listUserSubscriptions?.items ?? [];
         
         // Debug logging removed to reduce console noise
         
@@ -132,7 +138,7 @@ export function useSubscriptionStatus(): SubscriptionStatus {
             canAccessContent,
             canCreateContent,
             trialEndDate,
-            subscriptionType: subscription.subscriptionType,
+            subscriptionType: subscription.subscriptionType ?? undefined,
             isLoading: false,
             hasError: false,
           };

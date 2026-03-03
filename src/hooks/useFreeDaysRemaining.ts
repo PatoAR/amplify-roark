@@ -27,9 +27,9 @@ export function useFreeDaysRemaining() {
         const result = await client.graphql({
           query: listUserSubscriptions,
           variables: { filter: { owner: { eq: userId } } }
-        }) as any;
+        }) as { data?: { listUserSubscriptions?: { items?: Array<{ trialEndDate?: string | null }> } } };
         
-        const items = result.data?.listUserSubscriptions?.items || [];
+        const items = result.data?.listUserSubscriptions?.items ?? [];
         if (items.length > 0 && items[0].trialEndDate) {
           const end = new Date(items[0].trialEndDate);
           const now = new Date();

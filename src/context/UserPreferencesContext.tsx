@@ -7,6 +7,20 @@ interface UserPreferences {
   countries: string[];
 }
 
+/** GraphQL list response shape for user profile fetch */
+interface ListUserProfilesResult {
+  data?: {
+    listUserProfiles?: {
+      items?: Array<{ id: string; industryPreferences?: string[] | null; countryPreferences?: string[] | null }>;
+    };
+  };
+}
+
+/** GraphQL create response shape */
+interface CreateUserProfileResult {
+  data?: { createUserProfile?: { id: string } };
+}
+
 interface UserPreferencesContextType {
   preferences: UserPreferences;
   savePreferences: (newPrefs: UserPreferences) => Promise<void>;
@@ -67,9 +81,9 @@ export const UserPreferencesProvider: React.FC<UserPreferencesProviderProps> = (
         variables: {
           filter: { owner: { eq: cognitoUserId } }
         }
-      }) as any;
+      }) as ListUserProfilesResult;
 
-      const profiles = result.data?.listUserProfiles?.items || [];
+      const profiles = result.data?.listUserProfiles?.items ?? [];
       if (profiles && profiles.length > 0) {
         const profile = profiles[0];
         setPreferences({
@@ -156,7 +170,7 @@ export const UserPreferencesProvider: React.FC<UserPreferencesProviderProps> = (
             variables: {
               input: { id: userProfileId, ...payload }
             }
-          }) as any;
+          });
         } else {
           // Create new profile
           const createUserProfileMutation = /* GraphQL */ `
@@ -175,7 +189,7 @@ export const UserPreferencesProvider: React.FC<UserPreferencesProviderProps> = (
             variables: {
               input: payload
             }
-          }) as any;
+          }) as CreateUserProfileResult;
 
           if (result.data?.createUserProfile) {
             setUserProfileId(result.data.createUserProfile.id);

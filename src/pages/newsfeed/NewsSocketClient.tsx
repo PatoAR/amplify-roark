@@ -299,6 +299,7 @@ function NewsSocketClient() {
                   transition={{ duration: 0.3, ease: "easeOut" }}
                   layoutId={msg.id}
                 >
+                <div className="article-card-inner">
                 <a 
                   href={msg.link} 
                   onClick={(e) => handleArticleClick(e, msg.link)} 
@@ -434,19 +435,22 @@ function NewsSocketClient() {
                     )}
                   </p>
                 </a>
-                <button
-                  type="button"
-                  className="article-forward-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    window.location.href = buildMailtoUrl(msg);
-                  }}
-                  title="Forward via email"
-                  aria-label="Forward article via email"
-                >
-                  <Share2 size={14} />
-                </button>
+                <div className="article-card-actions">
+                  <button
+                    type="button"
+                    className="article-forward-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      window.location.href = buildMailtoUrl(msg);
+                    }}
+                    title="Forward via email"
+                    aria-label="Forward article via email"
+                  >
+                    <Share2 size={14} />
+                  </button>
+                </div>
+                </div>
               </motion.div>
             );
           })}

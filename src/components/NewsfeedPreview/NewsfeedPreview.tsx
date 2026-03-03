@@ -219,6 +219,7 @@ const NewsfeedPreview: React.FC = () => {
               transition={{ duration: 0.3, ease: "easeOut" }}
               layoutId={article.id}
             >
+              <div className="preview-article-card-inner">
               <a 
                 href={article.link} 
                 onClick={handleArticleClick}
@@ -248,19 +249,22 @@ const NewsfeedPreview: React.FC = () => {
                   )}
                 </p>
               </a>
-              <button
-                type="button"
-                className="preview-article-forward-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  window.location.href = buildMailtoUrl(article);
-                }}
-                title="Forward via email"
-                aria-label="Forward article via email"
-              >
-                <Share2 size={14} />
-              </button>
+              <div className="preview-article-card-actions">
+                <button
+                  type="button"
+                  className="preview-article-forward-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    window.location.href = buildMailtoUrl(article);
+                  }}
+                  title="Forward via email"
+                  aria-label="Forward article via email"
+                >
+                  <Share2 size={14} />
+                </button>
+              </div>
+              </div>
             </motion.div>
           ))}
         </AnimatePresence>
