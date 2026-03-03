@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUserPreferences } from '../../context/UserPreferencesContext';
-import { useNews } from '../../context/NewsContext';
+import { useNews, type ArticleForState } from '../../context/NewsContext';
 import WelcomeScreen from '../../components/WelcomeScreen/WelcomeScreen';
 import { useTranslation } from '../../i18n';
 import { COUNTRY_OPTIONS, getCountryName } from '../../constants/countries';
@@ -9,25 +9,6 @@ import { useSubscriptionManager } from '../../hooks/useSubscriptionManager';
 import { GracePeriodBanner } from '../../components/GracePeriodBanner';
 import { Share2 } from 'lucide-react';
 import './NewsSocketClient.css';
-
-type NewsMessageCompanies = Record<string, unknown>;
-type NewsMessageCountries = Record<string, unknown> | string[];
-
-interface NewsMessage {
-  id: string;
-  seen?: boolean;
-  category?: string;
-  link?: string;
-  sponsorLink?: string | null;
-  callToAction?: string;
-  industry?: string | null;
-  timestamp?: string | null;
-  source: string;
-  title: string;
-  summary?: string;
-  companies?: NewsMessageCompanies;
-  countries?: NewsMessageCountries;
-}
 
 function formatLocalTime(timestamp?: string | null): string {
   if (!timestamp) return '';
@@ -42,7 +23,7 @@ function removeEmojis(text: string): string {
   return text.replace(/[\u{1F300}-\u{1F9FF}]|[\u{1F100}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{FE00}-\u{FE0F}]/gu, '').trim();
 }
 
-function buildMailtoUrl(msg: NewsMessage): string {
+function buildMailtoUrl(msg: ArticleForState): string {
   const title = msg.title || '';
   const source = msg.source || '';
   const industry = msg.industry ? removeEmojis(String(msg.industry)) : '';
@@ -306,7 +287,7 @@ function NewsSocketClient() {
       ) : (
         <div className="articles-container">
           <AnimatePresence initial={false}>
-            {displayedMessages.map((msg: NewsMessage) => {
+            {displayedMessages.map((msg: ArticleForState) => {
               return (
                 <motion.div
                   key={msg.id}
@@ -327,7 +308,7 @@ function NewsSocketClient() {
                     {msg.category === 'SPONSORED' && (
                       <span className="article-sponsored-label">SPONSORED</span>
                     )}
-                    <span className="article-industry">{removeEmojis(msg.industry)}</span>{" "}
+                    <span className="article-industry">{removeEmojis(msg.industry ?? '')}</span>{" "}
                     <span className="article-timestamp-wrapper">
                       <span className="article-timestamp">{formatLocalTime(msg.timestamp)}</span>
                     </span>
