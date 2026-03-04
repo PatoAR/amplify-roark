@@ -6,7 +6,7 @@ backend:
       commands:
         - node -v
         - npm -v
-        - (cd amplify && npm ci)
+        - (cd amplify && npm install)
     build:
       commands:
         - echo "Debug AWS_BRANCH=$AWS_BRANCH"
@@ -24,7 +24,7 @@ frontend:
       commands:
         - node -v
         - npm -v
-        - npm ci       # Fast, clean, respects lockfile — never delete node_modules manually
+        - npm install       # Fast, clean, respects lockfile — never delete node_modules manually
     build:
       commands:
         - npm run build
