@@ -21,8 +21,8 @@ export function toBoldUnicode(text: string): string {
   }).join('');
 }
 
-/** Collapses newlines/carriage returns to a single space so mailto body lines don't get extra blank lines. */
+/** Collapses all line-break variants to a single space so mailto body lines don't get extra blank lines. */
 export function collapseNewlinesForEmail(text: string): string {
   if (!text) return text;
-  return text.replace(/\r?\n/g, ' ').trim();
+  return text.replace(/[\r\n\u2028\u2029\v\f]+/g, ' ').trim();
 }
