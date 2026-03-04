@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Share2 } from 'lucide-react';
 import { useTranslation } from '../../i18n';
+import { toBoldUnicode } from '../../utils/emailFormatting';
 import './NewsfeedPreview.css';
 
 interface MockArticle {
@@ -125,13 +126,13 @@ function formatLocalTime(timestamp: string): string {
 function buildMailtoUrl(article: MockArticle, marketingMessage: string): string {
   const time = formatLocalTime(article.timestamp);
   const companyNames = article.companies ? Object.keys(article.companies).join(', ') : '';
-  const line1 = [`*${article.industry}*`, time, `*${article.title}*`, article.summary].filter(Boolean).join(' ');
-  const body = [
+  const line1 = [toBoldUnicode(article.industry), time, toBoldUnicode(article.title), article.summary].filter(Boolean).join(' ');
+  const topBlock = [
     line1,
-    article.link,
-    companyNames ? `*Companies:* ${companyNames}` : '',
-    marketingMessage
+    companyNames ? `${toBoldUnicode('Companies')}: ${companyNames}` : '',
+    article.link
   ].filter(Boolean).join('\n');
+  const body = `${topBlock}\n\n${marketingMessage}`;
   const subject = [article.source, article.title].filter(Boolean).join(' - ');
   const subjectEncoded = encodeURIComponent(subject);
   const bodyEncoded = encodeURIComponent(body);

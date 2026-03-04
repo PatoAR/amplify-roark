@@ -8,6 +8,7 @@ import { COUNTRY_OPTIONS, getCountryName } from '../../constants/countries';
 import { useSubscriptionManager } from '../../hooks/useSubscriptionManager';
 import { GracePeriodBanner } from '../../components/GracePeriodBanner';
 import { Share2 } from 'lucide-react';
+import { toBoldUnicode } from '../../utils/emailFormatting';
 import './NewsSocketClient.css';
 
 function formatLocalTime(timestamp?: string | null): string {
@@ -33,13 +34,13 @@ function buildMailtoUrl(msg: ArticleForState, marketingMessage: string): string 
   const companyNames = msg.companies && typeof msg.companies === 'object'
     ? Object.keys(msg.companies).join(', ')
     : '';
-  const line1 = [`*${industry}*`, time, `*${title}*`, summary].filter(Boolean).join(' ');
-  const body = [
+  const line1 = [toBoldUnicode(industry), time, toBoldUnicode(title), summary].filter(Boolean).join(' ');
+  const topBlock = [
     line1,
-    link,
-    companyNames ? `*Companies:* ${companyNames}` : '',
-    marketingMessage
+    companyNames ? `${toBoldUnicode('Companies')}: ${companyNames}` : '',
+    link
   ].filter(Boolean).join('\n');
+  const body = `${topBlock}\n\n${marketingMessage}`;
   const subject = [source, title].filter(Boolean).join(' - ');
   const subjectEncoded = encodeURIComponent(subject);
   const bodyEncoded = encodeURIComponent(body);
