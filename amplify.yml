@@ -15,9 +15,10 @@ backend:
         - npm install --build-from-source @parcel/watcher
         - npm install -g aws-cdk@latest
         - npm install -g @aws-amplify/backend-cli@latest
+        - rm -rf node_modules package-lock.json
+        - npm install
         - rm -rf amplify/node_modules amplify/package-lock.json
         - (cd amplify && npm install)
-        - find /root -name "esbuild" -type f 2>/dev/null | head -20
     build:
       commands:
         - npm rebuild @parcel/watcher
