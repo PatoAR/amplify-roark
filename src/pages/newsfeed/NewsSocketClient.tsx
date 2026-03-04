@@ -34,13 +34,12 @@ function buildMailtoUrl(msg: ArticleForState, marketingMessage: string): string 
   const companyNames = msg.companies && typeof msg.companies === 'object'
     ? collapseNewlinesForEmail(Object.keys(msg.companies).join(', '))
     : '';
-  const part1 = [toBoldUnicode(industry), time].filter(Boolean).join(' ');
-  const part2 = [toBoldUnicode(title), summary].filter(Boolean).join(' ');
-  const line1 = collapseNewlinesForEmail(
-    part2 ? (part1 ? `${part1} - ${part2}` : part2) : part1
+  const headingLine = collapseNewlinesForEmail(
+    [toBoldUnicode(industry), time, '-', toBoldUnicode(title)].filter(Boolean).join(' ')
   );
   const topBlock = [
-    line1,
+    headingLine,
+    summary,
     companyNames ? `${toBoldUnicode('Companies')}: ${companyNames}` : '',
     link
   ].filter(Boolean).join('\n');
