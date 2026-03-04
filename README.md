@@ -34,9 +34,9 @@ Quick check before deployment
 # Delete sandbox (removes all resources): npx ampx sandbox delete
 
 ## Deploy to PROD - merge dev into main
-        1. git checkout main
-        2. git merge dev [or branch name]
-        3. git push origin main
+git checkout main
+git merge dev
+git push origin main
 
 ## Tests
 - Login / Logout
