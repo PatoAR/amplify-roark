@@ -15,6 +15,7 @@ backend:
         - npm install -g aws-cdk@latest
         - npm install -g @aws-amplify/backend-cli@latest
         - (cd amplify && npm install)
+        - (cd amplify && npm install @esbuild/linux-x64 --no-save)
     build:
       commands:
         - npm rebuild @parcel/watcher
