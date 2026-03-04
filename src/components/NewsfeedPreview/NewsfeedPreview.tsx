@@ -130,16 +130,14 @@ function buildMailtoUrl(article: MockArticle, marketingMessage: string): string 
   const summary = collapseNewlinesForEmail(article.summary);
   const link = collapseNewlinesForEmail(article.link);
   const companyNames = article.companies ? collapseNewlinesForEmail(Object.keys(article.companies).join(', ')) : '';
-  const headingLine = collapseNewlinesForEmail(
-    [toBoldUnicode(industry), time, '-', toBoldUnicode(title)].filter(Boolean).join(' ')
-  );
-  const topBlock = [
-    headingLine,
-    summary,
-    companyNames ? `${toBoldUnicode('Companies')}: ${companyNames}` : '',
-    link
-  ].filter(Boolean).join('\n');
-  const body = `${topBlock}\n\n${collapseNewlinesForEmail(marketingMessage)}`;
+  const parts = [
+    toBoldUnicode(industry), time, '-', toBoldUnicode(title),
+    summary ? `${summary}.` : '',
+    companyNames ? `${toBoldUnicode('Companies')}: ${companyNames}.` : '',
+    link ? `(${link})` : ''
+  ].filter(Boolean).join(' ');
+  const mainLine = collapseNewlinesForEmail(parts);
+  const body = `${mainLine}\n\n${collapseNewlinesForEmail(marketingMessage)}`;
   const subject = [article.source, article.title].filter(Boolean).join(' - ');
   const subjectEncoded = encodeURIComponent(subject);
   const bodyEncoded = encodeURIComponent(body);
