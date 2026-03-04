@@ -122,23 +122,20 @@ function formatLocalTime(timestamp: string): string {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 }
 
-function buildMailtoUrl(article: MockArticle): string {
+function buildMailtoUrl(article: MockArticle, marketingMessage: string): string {
   const time = formatLocalTime(article.timestamp);
   const companyNames = article.companies ? Object.keys(article.companies).join(', ') : '';
+  const line1 = [`*${article.industry}*`, time, `*${article.title}*`, article.summary].filter(Boolean).join(' ');
   const body = [
-    `Source: ${article.source}`,
-    `Industry: ${article.industry}`,
-    `Time: ${time}`,
-    `Link: ${article.link}`,
-    '',
-    article.title,
-    '',
-    article.summary,
-    companyNames ? `Companies: ${companyNames}` : ''
+    line1,
+    article.link,
+    companyNames ? `*Companies:* ${companyNames}` : '',
+    marketingMessage
   ].filter(Boolean).join('\n');
-  const subject = encodeURIComponent(article.title);
+  const subject = [article.source, article.title].filter(Boolean).join(' - ');
+  const subjectEncoded = encodeURIComponent(subject);
   const bodyEncoded = encodeURIComponent(body);
-  return `mailto:?subject=${subject}&body=${bodyEncoded}`;
+  return `mailto:?subject=${subjectEncoded}&body=${bodyEncoded}`;
 }
 
 const NewsfeedPreview: React.FC = () => {
@@ -254,7 +251,7 @@ const NewsfeedPreview: React.FC = () => {
                 onClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
-                  window.location.href = buildMailtoUrl(article);
+                  window.location.href = buildMailtoUrl(article, t('articleForward.marketingMessage'));
                 }}
                 title="Forward via email"
                 aria-label="Forward article via email"

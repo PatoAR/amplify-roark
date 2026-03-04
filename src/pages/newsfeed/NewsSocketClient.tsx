@@ -23,7 +23,7 @@ function removeEmojis(text: string): string {
   return text.replace(/[\u{1F300}-\u{1F9FF}]|[\u{1F100}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{FE00}-\u{FE0F}]/gu, '').trim();
 }
 
-function buildMailtoUrl(msg: ArticleForState): string {
+function buildMailtoUrl(msg: ArticleForState, marketingMessage: string): string {
   const title = msg.title || '';
   const source = msg.source || '';
   const industry = msg.industry ? removeEmojis(String(msg.industry)) : '';
@@ -33,20 +33,17 @@ function buildMailtoUrl(msg: ArticleForState): string {
   const companyNames = msg.companies && typeof msg.companies === 'object'
     ? Object.keys(msg.companies).join(', ')
     : '';
+  const line1 = [`*${industry}*`, time, `*${title}*`, summary].filter(Boolean).join(' ');
   const body = [
-    `Source: ${source}`,
-    `Industry: ${industry}`,
-    `Time: ${time}`,
-    `Link: ${link}`,
-    '',
-    title,
-    '',
-    summary,
-    companyNames ? `Companies: ${companyNames}` : ''
+    line1,
+    link,
+    companyNames ? `*Companies:* ${companyNames}` : '',
+    marketingMessage
   ].filter(Boolean).join('\n');
-  const subject = encodeURIComponent(title);
+  const subject = [source, title].filter(Boolean).join(' - ');
+  const subjectEncoded = encodeURIComponent(subject);
   const bodyEncoded = encodeURIComponent(body);
-  return `mailto:?subject=${subject}&body=${bodyEncoded}`;
+  return `mailto:?subject=${subjectEncoded}&body=${bodyEncoded}`;
 }
 
 function NewsSocketClient() {
@@ -440,7 +437,7 @@ function NewsSocketClient() {
                   onClick={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
-                    window.location.href = buildMailtoUrl(msg);
+                    window.location.href = buildMailtoUrl(msg, t('articleForward.marketingMessage'));
                   }}
                   title="Forward via email"
                   aria-label="Forward article via email"
