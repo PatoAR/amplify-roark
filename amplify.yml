@@ -6,6 +6,8 @@ backend:
       commands:
         - node -v
         - npm -v
+        - npm install -g aws-cdk@latest --force
+        - npm install -g @aws-amplify/backend-cli@latest --force
         - (cd amplify && npm install)
     build:
       commands:
