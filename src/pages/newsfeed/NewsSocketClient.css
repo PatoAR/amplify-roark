@@ -40,7 +40,7 @@
   background: var(--color-surface);
   border-radius: var(--border-radius-md);
   padding: var(--space-sm);
-  padding-bottom: calc(var(--space-sm) + 12px);
+  padding-bottom: calc(var(--space-sm) + 6px);
   box-shadow: var(--shadow-md);
   transition: all var(--transition-normal);
   will-change: transform, opacity;
@@ -53,8 +53,8 @@
 /* Floating share button: own element at bottom-left, slightly overlapping card edge */
 .article-forward-btn {
   position: absolute;
-  bottom: -4px;
-  left: -2px;
+  bottom: -8px;
+  left: 2px;
   display: flex;
   align-items: center;
   justify-content: center;
