@@ -445,7 +445,7 @@ function NewsSocketClient() {
                   title="Forward via email"
                   aria-label="Forward article via email"
                 >
-                  <Share2 size={14} />
+                  <Share2 size={10} />
                 </button>
               </motion.div>
             );

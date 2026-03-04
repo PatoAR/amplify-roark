@@ -1,25 +1,17 @@
 version: 1
+
 backend:
   phases:
     preBuild:
       commands:
-        - export N_PREFIX=$HOME/n
-        - export PATH=$N_PREFIX/bin:$PATH
-        - npm install -g n
-        - n 20
-        - export PATH=$HOME/n/bin:$PATH
-        - hash -r
         - node -v
         - npm -v
-        - npm install --build-from-source @parcel/watcher
         - npm install -g aws-cdk@latest
         - npm install -g @aws-amplify/backend-cli@latest
-        - (cd amplify && npm install)
+        - (cd amplify && npm ci)
     build:
       commands:
-        - npm rebuild @parcel/watcher
         - echo "Debug AWS_BRANCH=$AWS_BRANCH"
-        - echo "Debug Git branch=$(git rev-parse --abbrev-ref HEAD)"
         - |
           if [ -z "$AWS_BRANCH" ]; then
             BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
@@ -27,22 +19,14 @@ backend:
             BRANCH_NAME=$AWS_BRANCH
           fi
         - npx ampx pipeline-deploy --branch $BRANCH_NAME --app-id $AWS_APP_ID
+
 frontend:
   phases:
     preBuild:
       commands:
-        - export N_PREFIX=$HOME/n
-        - export PATH=$N_PREFIX/bin:$PATH
-        - npm install -g n
-        - n 20
-        - export PATH=$HOME/n/bin:$PATH
-        - hash -r
         - node -v
         - npm -v
-        - npm install -g npm@latest    # update npm to latest to avoid bugs
-        - npm install -g aws-cdk@latest
-        - rm -rf node_modules package-lock.json
-        - npm install
+        - npm ci       # Fast, clean, respects lockfile — never delete node_modules manually
     build:
       commands:
         - npm run build
@@ -52,5 +36,6 @@ frontend:
       - '**/*'
   cache:
     paths:
+      - node_modules/**/*        # Cache works now (since we no longer rm -rf it)
+      - amplify/node_modules/**/*
       - .npm/**/*
-      - node_modules/**/*
