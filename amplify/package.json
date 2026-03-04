@@ -8,5 +8,8 @@
     "aws-cdk-lib": "^2.189.0",
     "constructs": "^10.3.0",
     "node-fetch": "^3.3.2"
+  },
+  "optionalDependencies": {
+    "@esbuild/linux-x64": "^0.25.0"
   }
 }
