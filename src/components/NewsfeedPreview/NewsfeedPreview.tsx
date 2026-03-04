@@ -132,7 +132,9 @@ function buildMailtoUrl(article: MockArticle, marketingMessage: string): string 
   const companyNames = article.companies ? collapseNewlinesForEmail(Object.keys(article.companies).join(', ')) : '';
   const part1 = [toBoldUnicode(industry), time].filter(Boolean).join(' ');
   const part2 = [toBoldUnicode(title), summary].filter(Boolean).join(' ');
-  const line1 = part2 ? (part1 ? `${part1} - ${part2}` : part2) : part1;
+  const line1 = collapseNewlinesForEmail(
+    part2 ? (part1 ? `${part1} - ${part2}` : part2) : part1
+  );
   const topBlock = [
     line1,
     companyNames ? `${toBoldUnicode('Companies')}: ${companyNames}` : '',

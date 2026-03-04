@@ -36,7 +36,9 @@ function buildMailtoUrl(msg: ArticleForState, marketingMessage: string): string 
     : '';
   const part1 = [toBoldUnicode(industry), time].filter(Boolean).join(' ');
   const part2 = [toBoldUnicode(title), summary].filter(Boolean).join(' ');
-  const line1 = part2 ? (part1 ? `${part1} - ${part2}` : part2) : part1;
+  const line1 = collapseNewlinesForEmail(
+    part2 ? (part1 ? `${part1} - ${part2}` : part2) : part1
+  );
   const topBlock = [
     line1,
     companyNames ? `${toBoldUnicode('Companies')}: ${companyNames}` : '',
