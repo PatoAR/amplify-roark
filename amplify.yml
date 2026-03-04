@@ -12,7 +12,7 @@ backend:
         - hash -r
         - node -v
         - npm -v
-        - npm install --build-from-source --legacy-peer-deps @parcel/watcher
+        - npm cache clean --force
         - npm install -g aws-cdk@latest
         - npm install -g @aws-amplify/backend-cli@latest
         - rm -rf node_modules package-lock.json
@@ -43,7 +43,8 @@ frontend:
         - hash -r
         - node -v
         - npm -v
-        - npm install -g npm@latest    # update npm to latest to avoid bugs
+        - npm cache clean --force
+        - npm install -g npm@latest
         - npm install -g aws-cdk@latest
         - rm -rf node_modules package-lock.json
         - npm install --legacy-peer-deps
