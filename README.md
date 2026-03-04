@@ -5,7 +5,6 @@ Front end webapp repository for Perkins News Service. Back-end in AWS Lambda fet
 - Migrate email from Zoho to AWS Workmail
 - Platform for original content publishers (CGI) self-service.
 - Follow companies
-
 - Platform for publicity self-service
 - Implement subscription workflow. Use MPago account.
 - Native IOS / Android App

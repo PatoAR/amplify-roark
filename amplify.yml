@@ -6,7 +6,7 @@ backend:
       commands:
         - node -v
         - npm -v
-        - npm install -g aws-cdk@2.1108.0 --force
+        - npm install -g aws-cdk@latest --force
         - npm install -g @aws-amplify/backend-cli@latest --force
         - (cd amplify && npm install)
     build:
@@ -26,7 +26,7 @@ frontend:
       commands:
         - node -v
         - npm -v
-        - npm install       # Fast, clean, respects lockfile — never delete node_modules manually
+        - npm install
     build:
       commands:
         - npm run build
@@ -36,6 +36,6 @@ frontend:
       - '**/*'
   cache:
     paths:
-      - node_modules/**/*        # Cache works now (since we no longer rm -rf it)
+      - node_modules/**/*
       - amplify/node_modules/**/*
       - .npm/**/*
