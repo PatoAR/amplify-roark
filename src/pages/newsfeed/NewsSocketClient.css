@@ -34,19 +34,51 @@
   transform: translateZ(0);
 }
 
-/* Article card */
+/* Article card - extra bottom/left padding reserves space for floating share button */
 .article-card {
+  position: relative;
   background: var(--color-surface);
   border-radius: var(--border-radius-md);
   padding: var(--space-sm);
+  padding-bottom: calc(var(--space-sm) + 6px);
   box-shadow: var(--shadow-md);
   transition: all var(--transition-normal);
   will-change: transform, opacity;
   border-left: var(--border-width-thick) solid transparent;
   border: var(--border-width) solid var(--color-border);
-  /* Optimize for animations */
   transform: translateZ(0);
   backface-visibility: hidden;
+}
+
+/* Floating share button: own element at bottom-left, slightly overlapping card edge */
+.article-forward-btn {
+  position: absolute;
+  bottom: -8px;
+  left: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  border-radius: var(--border-radius-sm);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: color var(--transition-normal), background-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.article-forward-btn:hover {
+  color: var(--color-primary);
+  background-color: var(--color-border-light);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.article-forward-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 /* Hover animation - use transform3d to avoid layout thrashing */

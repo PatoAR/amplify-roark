@@ -64,7 +64,8 @@ export function useSubscriptionManager() {
       });
 
       // GraphQL returns data nested under the mutation name
-      const result = ((response.data as any)?.upgradeSubscription || response.data) as SubscriptionUpgradeResult;
+      const data = response.data as { upgradeSubscription?: SubscriptionUpgradeResult } | undefined;
+      const result = (data?.upgradeSubscription ?? response.data) as SubscriptionUpgradeResult;
       
       if (result.success) {
         // Refresh subscription status
@@ -86,7 +87,7 @@ export function useSubscriptionManager() {
     } finally {
       setIsUpgrading(false);
     }
-  }, [userId, isAuthenticated]);
+  }, [userId, isAuthenticated, getClient]);
 
   const shouldShowWarning = useCallback(() => {
     // Show warning if:

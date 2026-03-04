@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Share2 } from 'lucide-react';
 import { useTranslation } from '../../i18n';
+import { toBoldUnicode, collapseNewlinesForEmail } from '../../utils/emailFormatting';
 import './NewsfeedPreview.css';
 
 interface MockArticle {
@@ -121,6 +123,28 @@ function formatLocalTime(timestamp: string): string {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 }
 
+function buildMailtoUrl(article: MockArticle, marketingMessage: string): string {
+  const time = formatLocalTime(article.timestamp);
+  const industry = collapseNewlinesForEmail(article.industry);
+  const title = collapseNewlinesForEmail(article.title);
+  const summary = collapseNewlinesForEmail(article.summary);
+  const link = collapseNewlinesForEmail(article.link);
+  const companyNames = article.companies ? collapseNewlinesForEmail(Object.keys(article.companies).join(', ')) : '';
+  const part1 = [toBoldUnicode(industry), time].filter(Boolean).join(' ');
+  const part2 = [toBoldUnicode(title), summary].filter(Boolean).join(' ');
+  const line1 = part2 ? (part1 ? `${part1} - ${part2}` : part2) : part1;
+  const topBlock = [
+    line1,
+    companyNames ? `${toBoldUnicode('Companies')}: ${companyNames}` : '',
+    link
+  ].filter(Boolean).join('\n');
+  const body = `${topBlock}\n\n${collapseNewlinesForEmail(marketingMessage)}`;
+  const subject = [article.source, article.title].filter(Boolean).join(' - ');
+  const subjectEncoded = encodeURIComponent(subject);
+  const bodyEncoded = encodeURIComponent(body);
+  return `mailto:?subject=${subjectEncoded}&body=${bodyEncoded}`;
+}
+
 const NewsfeedPreview: React.FC = () => {
   const { t } = useTranslation();
   const [articles, setArticles] = useState<MockArticle[]>([]);
@@ -228,6 +252,19 @@ const NewsfeedPreview: React.FC = () => {
                   )}
                 </p>
               </a>
+              <button
+                type="button"
+                className="preview-article-forward-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  window.location.href = buildMailtoUrl(article, t('articleForward.marketingMessage'));
+                }}
+                title="Forward via email"
+                aria-label="Forward article via email"
+              >
+                <Share2 size={10} />
+              </button>
             </motion.div>
           ))}
         </AnimatePresence>

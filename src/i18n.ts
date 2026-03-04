@@ -107,7 +107,8 @@ const customTranslations = {
     'referral.errorCopyLink': 'Failed to copy link:',
     'referral.errorWhatsApp': 'Failed to share via WhatsApp:',
     'referral.errorEmail': 'Failed to share via email:',
-    
+    'articleForward.marketingMessage': 'Try Perkins Intel for tailored market and business intelligence: https://perkinsintel.com',
+
     // Subscription
     'subscription.referralAlternative': 'Prefer to keep it free? Invite friends instead',
     'subscription.chooseAccessMethod': 'Choose Your Access Method',
@@ -415,7 +416,8 @@ const customTranslations = {
     'referral.errorCopyLink': 'Error al copiar enlace:',
     'referral.errorWhatsApp': 'Error al compartir via WhatsApp:',
     'referral.errorEmail': 'Error al compartir via email:',
-    
+    'articleForward.marketingMessage': 'Prueba Perkins Intel para inteligencia de mercados y empresarial a tu medida: https://perkinsintel.com',
+
     // Password
     'password.title': 'Cambiar Contraseña',
     'password.currentPassword': 'Contraseña Actual',
@@ -723,7 +725,8 @@ const customTranslations = {
     'referral.errorCopyLink': 'Erro ao copiar link:',
     'referral.errorWhatsApp': 'Erro ao compartilhar via WhatsApp:',
     'referral.errorEmail': 'Erro ao compartilhar via email:',
-    
+    'articleForward.marketingMessage': 'Experimente o Perkins Intel para inteligência de mercados e empresarial sob medida: https://perkinsintel.com',
+
     // Password
     'password.title': 'Alterar Senha',
     'password.currentPassword': 'Senha Atual',

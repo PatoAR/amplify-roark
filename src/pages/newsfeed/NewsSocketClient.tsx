@@ -1,12 +1,14 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUserPreferences } from '../../context/UserPreferencesContext';
-import { useNews } from '../../context/NewsContext';
+import { useNews, type ArticleForState } from '../../context/NewsContext';
 import WelcomeScreen from '../../components/WelcomeScreen/WelcomeScreen';
 import { useTranslation } from '../../i18n';
 import { COUNTRY_OPTIONS, getCountryName } from '../../constants/countries';
 import { useSubscriptionManager } from '../../hooks/useSubscriptionManager';
 import { GracePeriodBanner } from '../../components/GracePeriodBanner';
+import { Share2 } from 'lucide-react';
+import { toBoldUnicode, collapseNewlinesForEmail } from '../../utils/emailFormatting';
 import './NewsSocketClient.css';
 
 function formatLocalTime(timestamp?: string | null): string {
@@ -20,6 +22,31 @@ function removeEmojis(text: string): string {
   if (!text) return text;
   // Remove emojis (including variation selectors U+FE00-FE0F) and trim leading/trailing spaces
   return text.replace(/[\u{1F300}-\u{1F9FF}]|[\u{1F100}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{FE00}-\u{FE0F}]/gu, '').trim();
+}
+
+function buildMailtoUrl(msg: ArticleForState, marketingMessage: string): string {
+  const title = collapseNewlinesForEmail(msg.title || '');
+  const source = collapseNewlinesForEmail(msg.source || '');
+  const industry = msg.industry ? collapseNewlinesForEmail(removeEmojis(String(msg.industry))) : '';
+  const time = msg.timestamp ? formatLocalTime(msg.timestamp) : '';
+  const link = collapseNewlinesForEmail(msg.link || '');
+  const summary = collapseNewlinesForEmail(msg.summary || '');
+  const companyNames = msg.companies && typeof msg.companies === 'object'
+    ? collapseNewlinesForEmail(Object.keys(msg.companies).join(', '))
+    : '';
+  const part1 = [toBoldUnicode(industry), time].filter(Boolean).join(' ');
+  const part2 = [toBoldUnicode(title), summary].filter(Boolean).join(' ');
+  const line1 = part2 ? (part1 ? `${part1} - ${part2}` : part2) : part1;
+  const topBlock = [
+    line1,
+    companyNames ? `${toBoldUnicode('Companies')}: ${companyNames}` : '',
+    link
+  ].filter(Boolean).join('\n');
+  const body = `${topBlock}\n\n${collapseNewlinesForEmail(marketingMessage)}`;
+  const subject = [source, title].filter(Boolean).join(' - ');
+  const subjectEncoded = encodeURIComponent(subject);
+  const bodyEncoded = encodeURIComponent(body);
+  return `mailto:?subject=${subjectEncoded}&body=${bodyEncoded}`;
 }
 
 function NewsSocketClient() {
@@ -167,7 +194,7 @@ function NewsSocketClient() {
   }, []);
 
   // Handles opening the article link to a new tab.
-  const handleArticleClick = useCallback(async (event: React.MouseEvent<HTMLAnchorElement>, link: string) => {
+  const handleArticleClick = useCallback(async (event: React.MouseEvent<HTMLElement>, link: string) => {
     event.preventDefault();
     const a = document.createElement('a');
     a.href = link;
@@ -260,7 +287,7 @@ function NewsSocketClient() {
       ) : (
         <div className="articles-container">
           <AnimatePresence initial={false}>
-            {displayedMessages.map((msg: any) => {
+            {displayedMessages.map((msg: ArticleForState) => {
               return (
                 <motion.div
                   key={msg.id}
@@ -281,7 +308,7 @@ function NewsSocketClient() {
                     {msg.category === 'SPONSORED' && (
                       <span className="article-sponsored-label">SPONSORED</span>
                     )}
-                    <span className="article-industry">{removeEmojis(msg.industry)}</span>{" "}
+                    <span className="article-industry">{removeEmojis(msg.industry ?? '')}</span>{" "}
                     <span className="article-timestamp-wrapper">
                       <span className="article-timestamp">{formatLocalTime(msg.timestamp)}</span>
                     </span>
@@ -400,13 +427,26 @@ function NewsSocketClient() {
                       <span className="sponsored-cta" onClick={(e) => {
                         e.stopPropagation();
                         e.preventDefault();
-                        handleArticleClick(e as any, String(msg.sponsorLink || msg.link || '#'));
+                        handleArticleClick(e, String(msg.sponsorLink || msg.link || '#'));
                       }}>
                         {msg.callToAction || 'Learn More'}
                       </span>
                     )}
                   </p>
                 </a>
+                <button
+                  type="button"
+                  className="article-forward-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    window.location.href = buildMailtoUrl(msg, t('articleForward.marketingMessage'));
+                  }}
+                  title="Forward via email"
+                  aria-label="Forward article via email"
+                >
+                  <Share2 size={10} />
+                </button>
               </motion.div>
             );
           })}

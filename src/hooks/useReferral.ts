@@ -35,49 +35,7 @@ export const useReferral = () => {
     return clientRef.current;
   }, []);
 
-  const loadReferralData = useCallback(async () => {
-    if (!user?.userId) return;
-
-    try {
-      setIsLoading(true);
-      setError('');
-
-      const client = getClient();
-      const result = await client.graphql({
-        query: listReferralCodes,
-        variables: { filter: { owner: { eq: user.userId } } }
-      }) as any;
-      const referralCodes = result.data?.listReferralCodes?.items || [];
-
-      if (referralCodes.length > 0) {
-        const code = referralCodes[0];
-        setReferralCode(code.code);
-        setReferralStats({
-          totalReferrals: code.totalReferrals || 0,
-          successfulReferrals: code.successfulReferrals || 0,
-          earnedMonths: (code.successfulReferrals || 0) * 3,
-        });
-      } else {
-        // Generate new referral code if none exists
-        await generateReferralCode();
-      }
-      // Only track generation when a new code is actually created
-    } catch (err) {
-      console.error('Error loading referral data:', err);
-      setError('Failed to load referral data');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user]);
-
-  // Load user's referral code and stats
-  useEffect(() => {
-    if (user?.userId) {
-      loadReferralData();
-    }
-  }, [user, loadReferralData]);
-
-  const generateReferralCode = async () => {
+  const generateReferralCode = useCallback(async () => {
     if (!user?.userId) return;
 
     try {
@@ -105,7 +63,49 @@ export const useReferral = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user?.userId, getClient]);
+
+  const loadReferralData = useCallback(async () => {
+    if (!user?.userId) return;
+
+    try {
+      setIsLoading(true);
+      setError('');
+
+      const client = getClient();
+      const result = await client.graphql({
+        query: listReferralCodes,
+        variables: { filter: { owner: { eq: user.userId } } }
+      }) as { data?: { listReferralCodes?: { items?: Array<{ code?: string; totalReferrals?: number; successfulReferrals?: number }> } } };
+      const referralCodes = result.data?.listReferralCodes?.items ?? [];
+
+      if (referralCodes.length > 0) {
+        const code = referralCodes[0];
+        setReferralCode(code.code ?? '');
+        setReferralStats({
+          totalReferrals: code.totalReferrals || 0,
+          successfulReferrals: code.successfulReferrals || 0,
+          earnedMonths: (code.successfulReferrals || 0) * 3,
+        });
+      } else {
+        // Generate new referral code if none exists
+        await generateReferralCode();
+      }
+      // Only track generation when a new code is actually created
+    } catch (err) {
+      console.error('Error loading referral data:', err);
+      setError('Failed to load referral data');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user, getClient, generateReferralCode]);
+
+  // Load user's referral code and stats
+  useEffect(() => {
+    if (user?.userId) {
+      loadReferralData();
+    }
+  }, [user, loadReferralData]);
 
   const shareReferralLink = async (platform: 'whatsapp' | 'email' | 'copy') => {
     if (!referralCode) {
@@ -118,20 +118,20 @@ export const useReferral = () => {
 
     try {
       switch (platform) {
-        case 'whatsapp':
+        case 'whatsapp': {
           const message = t('referral.shareMessage').replace('{link}', referralUrl);
           const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
           window.open(whatsappUrl, '_blank');
           break;
-
-        case 'email':
+        }
+        case 'email': {
           const emailSubject = encodeURIComponent(t('referral.emailSubject'));
           const emailBody = encodeURIComponent(
             t('referral.emailBody').replace('{code}', referralCode).replace('{link}', referralUrl)
           );
           window.location.href = `mailto:?subject=${emailSubject}&body=${emailBody}`;
           break;
-
+        }
         case 'copy':
           await navigator.clipboard.writeText(referralUrl);
           break;
