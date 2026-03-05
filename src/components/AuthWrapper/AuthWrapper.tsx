@@ -6,7 +6,6 @@ import perkinsLogo from '/PerkinsLogo_Base_Gray.png';
 import { UserPreferencesProvider } from '../../context/UserPreferencesContext';
 import { SessionProvider } from '../../context/SessionContext';
 import { NewsProvider } from '../../context/NewsContext';
-import '@aws-amplify/ui-react/styles.css';
 
 interface AuthWrapperProps {
   initialAuthState?: 'signIn' | 'signUp';

@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { updatePassword } from 'aws-amplify/auth';
 import { Card, Flex, Heading, Text, PasswordField, Button, Alert } from '@aws-amplify/ui-react';
 import { validatePassword } from '../../types/auth';
-import { isApiError, AuthError, ErrorContext } from '../../types/errors';
+import { isApiError, AuthError } from '../../types/errors';
+import { createErrorContext } from '../../utils/errorContext';
 import { useTranslation } from '../../i18n';
 import './PasswordSettings.css';
 
@@ -15,12 +16,6 @@ const PasswordSettings = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-
-  const createErrorContext = (action: string): ErrorContext => ({
-    component: 'PasswordSettings',
-    action,
-    timestamp: new Date().toISOString(),
-  });
 
   const handleBack = () => {
     navigate('/settings');
@@ -54,7 +49,7 @@ const PasswordSettings = () => {
       // Redirect to settings page with success message
       navigate('/settings?success=password-changed');
     } catch (err: unknown) {
-      const errorContext = createErrorContext('changePassword');
+      const errorContext = createErrorContext('PasswordSettings', 'changePassword');
       
       let authError: AuthError;
       

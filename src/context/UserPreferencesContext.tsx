@@ -253,3 +253,7 @@ export const useUserPreferences = () => {
   }
   return context;
 };
+
+export const useUserPreferencesOptional = () => {
+  return useContext(UserPreferencesContext);
+};

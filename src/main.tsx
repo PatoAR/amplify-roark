@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import ReactDOM from "react-dom/client";
 import { Amplify } from "aws-amplify";
 import { getCurrentUser } from 'aws-amplify/auth';
@@ -10,16 +10,18 @@ Amplify.configure(outputs);
 
 // Now import other components after Amplify is configured
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import CustomSignUp from "./components/CustomSignUp/CustomSignUp";
-import LandingPage from "./components/LandingPage";
 import AuthWrapper from "./components/AuthWrapper";
-import TermsAndConditions from "./pages/legal/TermsAndConditions";
-import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
 import { LanguageProvider } from './context/LanguageContext';
 import { CookieConsent } from './components/CookieConsent';
+import '@aws-amplify/ui-react/styles.css';
 import "./index.css";
 
 import './i18n'; // Initialize our custom translations
+
+const CustomSignUp = React.lazy(() => import("./components/CustomSignUp/CustomSignUp"));
+const LandingPage = React.lazy(() => import("./components/LandingPage"));
+const TermsAndConditions = React.lazy(() => import("./pages/legal/TermsAndConditions"));
+const PrivacyPolicy = React.lazy(() => import("./pages/legal/PrivacyPolicy"));
 
 // Main app component that handles authentication routing
 const MainApp: React.FC = () => {
@@ -83,11 +85,13 @@ const MainApp: React.FC = () => {
     return <AuthWrapper />;
   } else {
     return (
-      <Routes>
-        <Route path="/terms" element={<TermsAndConditions />} />
-        <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="*" element={<LandingPage />} />
-      </Routes>
+      <Suspense fallback={<div>Loading...</div>}>
+        <Routes>
+          <Route path="/terms" element={<TermsAndConditions />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="*" element={<LandingPage />} />
+        </Routes>
+      </Suspense>
     );
   }
 };
@@ -107,7 +111,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       // Only include essential contexts that don't depend on useAuthenticator
       <BrowserRouter>
         <LanguageProvider>
-          <CustomSignUp />
+          <Suspense fallback={<div>Loading...</div>}>
+            <CustomSignUp />
+          </Suspense>
           <CookieConsent />
         </LanguageProvider>
       </BrowserRouter>

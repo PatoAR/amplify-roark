@@ -12,7 +12,6 @@ import LanguageSwitcher from '../LanguageSwitcher/LanguageSwitcher';
 import { NewsfeedPreview } from '../NewsfeedPreview';
 import { WhatsAppChannels } from '../WhatsAppChannels';
 import { useTranslation } from '../../i18n';
-import '@aws-amplify/ui-react/styles.css';
 import './LandingPage.css';
 
 // Custom components to pass to the Authenticator

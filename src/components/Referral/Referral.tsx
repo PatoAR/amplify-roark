@@ -12,6 +12,7 @@ import {
 } from '@aws-amplify/ui-react';
 import { useReferral } from '../../hooks/useReferral';
 import { useSubscriptionManager } from '../../hooks/useSubscriptionManager';
+import { useReferralShareHandlers } from '../../hooks/useReferralShareHandlers';
 import { SubscriptionUpgradeModal } from '../SubscriptionUpgradeModal';
 import { useTranslation } from '../../i18n';
 import { isSubscriptionButtonEnabled } from '../../config/features';
@@ -39,41 +40,16 @@ const Referral: React.FC = () => {
     upgradeError,
   } = useSubscriptionManager();
 
-  const [copied, setCopied] = useState(false);
-  const [shareSuccess, setShareSuccess] = useState<string>('');
+  const {
+    copied,
+    shareSuccess,
+    setShareSuccess,
+    handleCopyLink,
+    handleShareWhatsApp,
+    handleShareEmail,
+  } = useReferralShareHandlers({ shareReferralLink });
+
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-
-  const handleCopyLink = async () => {
-    try {
-      await shareReferralLink('copy');
-      setCopied(true);
-      setShareSuccess(t('referral.linkCopied'));
-      setTimeout(() => setCopied(false), 2000);
-      setTimeout(() => setShareSuccess(''), 3000);
-    } catch (err) {
-      console.error(t('referral.errorCopyLink'), err);
-    }
-  };
-
-  const handleShareWhatsApp = async () => {
-    try {
-      await shareReferralLink('whatsapp');
-      setShareSuccess(t('referral.openingWhatsApp'));
-      setTimeout(() => setShareSuccess(''), 3000);
-    } catch (err) {
-      console.error(t('referral.errorWhatsApp'), err);
-    }
-  };
-
-  const handleShareEmail = async () => {
-    try {
-      await shareReferralLink('email');
-      setShareSuccess(t('referral.openingEmail'));
-      setTimeout(() => setShareSuccess(''), 3000);
-    } catch (err) {
-      console.error(t('referral.errorEmail'), err);
-    }
-  };
 
   const handleUpgradeClick = () => {
     setShowUpgradeModal(true);

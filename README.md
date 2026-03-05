@@ -37,11 +37,3 @@ Quick check before deployment
 git checkout main
 git merge dev
 git push origin main
-
-## Tests
-- Login / Logout
-- Inactivity logout
-- First time login instructions
-- Referrals
-- Access days left - dynamic getting close to cero on days
-- Deleted emails

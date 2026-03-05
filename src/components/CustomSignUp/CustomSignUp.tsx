@@ -17,11 +17,11 @@ import {
   Divider
 } from '@aws-amplify/ui-react';
 import { UserAttributes, SignUpOptions, validateEmail, validatePassword, validateUserAttributes } from '../../types/auth';
-import { isApiError, AuthError, ErrorContext } from '../../types/errors';
+import { isApiError, AuthError } from '../../types/errors';
+import { createErrorContext } from '../../utils/errorContext';
 import { useTranslation } from '../../i18n';
 import { useEmailValidation } from '../../hooks/useEmailValidation';
 import perkinsLogo from '/PerkinsLogo_Base_Transp.png';
-import '@aws-amplify/ui-react/styles.css';
 import './CustomSignUp.css';
 
 interface CustomSignUpProps {
@@ -63,12 +63,8 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
     setReferralCodeFromUrl(false);
   };
 
-  const createErrorContext = (action: string): ErrorContext => ({
-    component: 'CustomSignUp',
-    action,
-    timestamp: new Date().toISOString(),
-    additionalData: { email, referralCode },
-  });
+  const makeErrorContext = (action: string) =>
+    createErrorContext('CustomSignUp', action, { email, referralCode });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,7 +103,7 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
       const userAttributes: UserAttributes = { email };
 
       if (!validateUserAttributes(userAttributes)) {
-        const errorContext = createErrorContext('validateUserAttributes');
+        const errorContext = makeErrorContext('validateUserAttributes');
         const authError: AuthError = {
           message: t('signup.invalidUserAttributes') || 'Invalid user attributes',
           code: 'INVALID_EMAIL',
@@ -137,7 +133,7 @@ const CustomSignUp: React.FC<CustomSignUpProps> = ({ onSuccess }) => {
       setIsVerificationStep(true);
       onSuccess?.();
     } catch (err: unknown) {
-      const errorContext = createErrorContext('signUp');
+      const errorContext = makeErrorContext('signUp');
       
       let authError: AuthError;
       

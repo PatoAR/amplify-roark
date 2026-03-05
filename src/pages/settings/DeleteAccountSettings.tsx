@@ -4,7 +4,8 @@ import { deleteUser, getCurrentUser } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
 import { type Schema } from '../../../amplify/data/resource';
 import { Card, Flex, Heading, Text, Button, Alert } from '@aws-amplify/ui-react';
-import { isApiError, AuthError, ErrorContext } from '../../types/errors';
+import { isApiError, AuthError } from '../../types/errors';
+import { createErrorContext } from '../../utils/errorContext';
 import { useTranslation } from '../../i18n';
 import './DeleteAccountSettings.css';
 
@@ -14,12 +15,6 @@ const DeleteAccountSettings = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-
-  const createErrorContext = (action: string): ErrorContext => ({
-    component: 'DeleteAccountSettings',
-    action,
-    timestamp: new Date().toISOString(),
-  });
 
   const handleBack = () => {
     navigate('/settings');
@@ -60,7 +55,7 @@ const DeleteAccountSettings = () => {
         window.location.href = '/';
       }, 2000);
     } catch (err: unknown) {
-      const errorContext = createErrorContext('deleteAccount');
+      const errorContext = createErrorContext('DeleteAccountSettings', 'deleteAccount');
       
       let authError: AuthError;
       
