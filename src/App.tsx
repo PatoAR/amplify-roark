@@ -1,22 +1,29 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout/Layout";
 import NewsSocketClient from "./pages/newsfeed/NewsSocketClient";
-import UserSettings from "./pages/settings/UserSettings";
-import PasswordSettings from "./pages/settings/PasswordSettings";
-import DeleteAccountSettings from "./pages/settings/DeleteAccountSettings";
-import ReferralSettings from "./pages/settings/ReferralSettings";
-import { AnalyticsDashboard } from "./components/Analytics/AnalyticsDashboard";
-import CustomSignUp from "./components/CustomSignUp/CustomSignUp";
-import LandingPage from "./components/LandingPage";
-import TermsAndConditions from "./pages/legal/TermsAndConditions";
-import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
 import { useSession } from './context/SessionContext';
 import { useInactivityTimer } from './hooks/useInactivityTimer';
 import { AuthErrorFallback } from './components/AuthErrorFallback';
 import { useSubscriptionManager } from './hooks/useSubscriptionManager';
 import { GracePeriodExpiredModal } from './components/GracePeriodExpiredModal';
 import "./App.css"
+
+const UserSettings = React.lazy(() => import("./pages/settings/UserSettings"));
+const PasswordSettings = React.lazy(() => import("./pages/settings/PasswordSettings"));
+const DeleteAccountSettings = React.lazy(() => import("./pages/settings/DeleteAccountSettings"));
+const ReferralSettings = React.lazy(() => import("./pages/settings/ReferralSettings"));
+const AnalyticsDashboard = React.lazy(() => import("./components/Analytics/AnalyticsDashboard").then(m => ({ default: m.AnalyticsDashboard })));
+const CustomSignUp = React.lazy(() => import("./components/CustomSignUp/CustomSignUp"));
+const LandingPage = React.lazy(() => import("./components/LandingPage"));
+const TermsAndConditions = React.lazy(() => import("./pages/legal/TermsAndConditions"));
+const PrivacyPolicy = React.lazy(() => import("./pages/legal/PrivacyPolicy"));
+
+const RouteLoadingFallback = () => (
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh', fontSize: '16px' }}>
+    Loading...
+  </div>
+);
 
 export default function App() {
   // Auth error is now provided by SessionContext
@@ -160,40 +167,40 @@ export default function App() {
     );
   }
 
-  // If user is not authenticated, show landing page or legal pages
   if (authStatus === 'unauthenticated') {
     return (
-      <Routes>
-        <Route path="/terms" element={<TermsAndConditions />} />
-        <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="*" element={<LandingPage />} />
-      </Routes>
+      <Suspense fallback={<RouteLoadingFallback />}>
+        <Routes>
+          <Route path="/terms" element={<TermsAndConditions />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="*" element={<LandingPage />} />
+        </Routes>
+      </Suspense>
     );
   }
 
-  // If authStatus is authenticated, allow the app to run even if session state is unclear
-  // This prevents blocking the app during normal session startup
   if (authStatus === 'authenticated') {
     return (
       <div>
-        {/* Grace Period Expired Modal */}
         <GracePeriodExpiredModal
           isOpen={shouldShowExpiredModal}
         />
         
-        <Routes>
-          <Route path="/" element={<Layout />} >
-            <Route index element={<NewsSocketClient />} />
-            <Route path="settings" element={<UserSettings />} />
-            <Route path="settings/password" element={<PasswordSettings />} />
-            <Route path="settings/delete-account" element={<DeleteAccountSettings />} />
-            <Route path="settings/referral" element={<ReferralSettings />} />
-            <Route path="analytics" element={<AnalyticsDashboard />} />
-            <Route path="signup" element={<CustomSignUp />} />
-          </Route>
-          <Route path="/terms" element={<TermsAndConditions />} />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
-        </Routes>
+        <Suspense fallback={<RouteLoadingFallback />}>
+          <Routes>
+            <Route path="/" element={<Layout />} >
+              <Route index element={<NewsSocketClient />} />
+              <Route path="settings" element={<UserSettings />} />
+              <Route path="settings/password" element={<PasswordSettings />} />
+              <Route path="settings/delete-account" element={<DeleteAccountSettings />} />
+              <Route path="settings/referral" element={<ReferralSettings />} />
+              <Route path="analytics" element={<AnalyticsDashboard />} />
+              <Route path="signup" element={<CustomSignUp />} />
+            </Route>
+            <Route path="/terms" element={<TermsAndConditions />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+          </Routes>
+        </Suspense>
       </div>
     );
   }

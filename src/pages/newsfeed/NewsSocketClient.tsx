@@ -6,6 +6,7 @@ import WelcomeScreen from '../../components/WelcomeScreen/WelcomeScreen';
 import { useTranslation } from '../../i18n';
 import { COUNTRY_OPTIONS, getCountryName } from '../../constants/countries';
 import { useSubscriptionManager } from '../../hooks/useSubscriptionManager';
+import { useFilteredArticles, useCountryMatcher } from '../../hooks/useArticleFiltering';
 import { GracePeriodBanner } from '../../components/GracePeriodBanner';
 import { Share2 } from 'lucide-react';
 import { toBoldUnicode, collapseNewlinesForEmail } from '../../utils/emailFormatting';
@@ -61,114 +62,9 @@ function NewsSocketClient() {
     gracePeriodDaysRemaining,
   } = useSubscriptionManager();
 
-  // Memoize the country matching logic to avoid recreating functions on every render
-  const countryMatcher = useMemo(() => {
-    const countries = preferences.countries || [];
-    const hasGlobalSelected = countries.includes('global');
-    const selectedCountryIdSet = new Set<string>(
-      hasGlobalSelected 
-        ? countries.filter(id => id !== 'global')
-        : countries
-    );
-    
-    return {
-      hasGlobalSelected,
-      selectedCountryIdSet,
-      hasCountryFilters: countries.length > 0 && !(countries.length === COUNTRY_OPTIONS.length)
-    };
-  }, [preferences.countries]);
+  const countryMatcher = useCountryMatcher(preferences.countries || []);
 
-  // Memoize the industry matching logic
-  const industryMatcher = useMemo(() => {
-    const industries = preferences.industries || [];
-    const hasIndustryFilters = industries.length > 0;
-    const industrySet = new Set(industries);
-    
-    return {
-      hasIndustryFilters,
-      industrySet
-    };
-  }, [preferences.industries]);
-
-  // Optimized filtering logic using useMemo to prevent recalculation on every render
-  const filteredMessages = useMemo(() => {
-    // While preferences are loading, show nothing to avoid a flicker of unfiltered content.
-    if (isLoading) {
-      return [];
-    }
-
-    // Early return if no filters are set
-    if (!industryMatcher.hasIndustryFilters && !countryMatcher.hasCountryFilters) {
-      return articles;
-    }
-
-    // Pre-compute country matching helper function
-    const toCountryId = (value: unknown): string | null => {
-      const v = String(value).trim().toLowerCase();
-      const opt = COUNTRY_OPTIONS.find(
-        c => c.id.toLowerCase() === v || c.code.toLowerCase() === v
-      );
-      return opt ? opt.id : null;
-    };
-
-    const filtered = articles.filter(msg => {
-      // Industry matching
-      const industryMatches = !industryMatcher.hasIndustryFilters || 
-        (msg.industry && industryMatcher.industrySet.has(msg.industry));
-
-      // Early return if industry doesn't match
-      if (industryMatcher.hasIndustryFilters && !industryMatches) {
-        return false;
-      }
-
-      // Country matching
-      if (countryMatcher.hasCountryFilters) {
-        let countryMatches = false;
-        
-        if (countryMatcher.hasGlobalSelected) {
-          // Global option logic: show articles with no country value OR with country values NOT in COUNTRY_OPTIONS
-          const rawCountriesArr = Array.isArray(msg.countries)
-            ? msg.countries
-            : (msg.countries && typeof msg.countries === 'object')
-              ? Object.keys(msg.countries)
-              : [];
-          
-          const articleCountryIds = rawCountriesArr
-            .map(toCountryId)
-            .filter((id): id is string => id !== null);
-          
-          const allUnknown = rawCountriesArr.length > 0 && articleCountryIds.length === 0;
-          const hasNoCountries = rawCountriesArr.length === 0;
-          
-          // Check if article matches any explicitly selected country IDs
-          const matchesSelectedCountries = countryMatcher.selectedCountryIdSet.size > 0 &&
-            articleCountryIds.some(id => countryMatcher.selectedCountryIdSet.has(id));
-          
-          countryMatches = matchesSelectedCountries || hasNoCountries || allUnknown;
-        } else {
-          // Regular country matching
-          const rawCountriesArr = Array.isArray(msg.countries)
-            ? msg.countries
-            : (msg.countries && typeof msg.countries === 'object')
-              ? Object.keys(msg.countries)
-              : [];
-          
-          const articleCountryIds = rawCountriesArr
-            .map(toCountryId)
-            .filter((id): id is string => id !== null);
-          
-          countryMatches = countryMatcher.selectedCountryIdSet.size > 0 && 
-            articleCountryIds.some(id => countryMatcher.selectedCountryIdSet.has(id));
-        }
-
-        return countryMatches;
-      }
-
-      return true;
-    });
-    
-    return filtered;
-  }, [articles, isLoading, industryMatcher, countryMatcher]);
+  const filteredMessages = useFilteredArticles(articles, preferences, isLoading);
 
   // Limit the number of articles rendered to prevent performance issues
   const displayedMessages = useMemo(() => {
@@ -470,4 +366,4 @@ function NewsSocketClient() {
   );
 }
 
-export default NewsSocketClient;
+export default React.memo(NewsSocketClient);

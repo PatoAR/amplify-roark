@@ -45,6 +45,10 @@ export const useNews = (): NewsContextType => {
   return context;
 };
 
+export const useNewsOptional = (): NewsContextType | undefined => {
+  return useContext(NewsContext);
+};
+
 interface NewsProviderProps {
   children: ReactNode;
 }

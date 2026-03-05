@@ -1,7 +1,6 @@
 import React from 'react';
 import { useTranslation } from '../i18n';
 import { Button, Card, Flex, Heading, Text } from '@aws-amplify/ui-react';
-import '@aws-amplify/ui-react/styles.css';
 import { signOut } from 'aws-amplify/auth';
 
 interface AuthErrorFallbackProps {

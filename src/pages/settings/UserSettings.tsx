@@ -9,7 +9,6 @@ import {
   Alert,
   Text,
 } from '@aws-amplify/ui-react';
-import '@aws-amplify/ui-react/styles.css';
 import { useTranslation } from '../../i18n';
 import './UserSettings.css';
 

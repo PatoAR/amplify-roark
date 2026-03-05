@@ -272,5 +272,5 @@ const NewsfeedPreview: React.FC = () => {
   );
 };
 
-export default NewsfeedPreview;
+export default React.memo(NewsfeedPreview);
 

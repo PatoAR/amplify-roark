@@ -13,6 +13,7 @@ import { useTheme } from '@aws-amplify/ui-react';
 import { useTranslation } from '../../i18n';
 import { isSubscriptionUpgradeEnabled } from '../../config/features';
 import { useReferral } from '../../hooks/useReferral';
+import { useReferralShareHandlers } from '../../hooks/useReferralShareHandlers';
 import './SubscriptionUpgradeModal.css';
 
 interface SubscriptionPlan {
@@ -74,8 +75,6 @@ export const SubscriptionUpgradeModal: React.FC<SubscriptionUpgradeModalProps> =
   const { t } = useTranslation();
   const [selectedPlan, setSelectedPlan] = useState<string>('perkins-yearly');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [shareSuccess, setShareSuccess] = useState<string>('');
   
   const {
     shareReferralLink,
@@ -83,18 +82,15 @@ export const SubscriptionUpgradeModal: React.FC<SubscriptionUpgradeModalProps> =
     error: referralError,
   } = useReferral();
 
-  // If subscriptions are disabled, show referral-focused content
+  const shareHandlers = useReferralShareHandlers({ shareReferralLink });
+
   if (!isSubscriptionUpgradeEnabled()) {
     return <ReferralFocusedModal 
       isOpen={isOpen}
       onClose={onClose}
       currentDaysRemaining={currentDaysRemaining}
       isInGracePeriod={isInGracePeriod}
-      shareReferralLink={shareReferralLink}
-      copied={copied}
-      setCopied={setCopied}
-      shareSuccess={shareSuccess}
-      setShareSuccess={setShareSuccess}
+      shareHandlers={shareHandlers}
       isReferralLoading={isReferralLoading}
       referralError={referralError}
     />;
@@ -238,17 +234,12 @@ export const SubscriptionUpgradeModal: React.FC<SubscriptionUpgradeModalProps> =
   );
 };
 
-// Referral-focused modal component for when subscriptions are disabled
 interface ReferralFocusedModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentDaysRemaining: number;
   isInGracePeriod: boolean;
-  shareReferralLink: (method: 'copy' | 'whatsapp' | 'email') => Promise<void>;
-  copied: boolean;
-  setCopied: (copied: boolean) => void;
-  shareSuccess: string;
-  setShareSuccess: (message: string) => void;
+  shareHandlers: ReturnType<typeof useReferralShareHandlers>;
   isReferralLoading: boolean;
   referralError: string | null;
 }
@@ -258,48 +249,13 @@ const ReferralFocusedModal: React.FC<ReferralFocusedModalProps> = ({
   onClose,
   currentDaysRemaining,
   isInGracePeriod,
-  shareReferralLink,
-  copied,
-  setCopied,
-  shareSuccess,
-  setShareSuccess,
+  shareHandlers,
   isReferralLoading,
   referralError
 }) => {
   const { tokens } = useTheme();
   const { t } = useTranslation();
-
-  const handleCopyLink = async () => {
-    try {
-      await shareReferralLink('copy');
-      setCopied(true);
-      setShareSuccess(t('referral.linkCopied'));
-      setTimeout(() => setCopied(false), 2000);
-      setTimeout(() => setShareSuccess(''), 3000);
-    } catch (err) {
-      console.error(t('referral.errorCopyLink'), err);
-    }
-  };
-
-  const handleShareWhatsApp = async () => {
-    try {
-      await shareReferralLink('whatsapp');
-      setShareSuccess(t('referral.openingWhatsApp'));
-      setTimeout(() => setShareSuccess(''), 3000);
-    } catch (err) {
-      console.error(t('referral.errorWhatsApp'), err);
-    }
-  };
-
-  const handleShareEmail = async () => {
-    try {
-      await shareReferralLink('email');
-      setShareSuccess(t('referral.openingEmail'));
-      setTimeout(() => setShareSuccess(''), 3000);
-    } catch (err) {
-      console.error(t('referral.errorEmail'), err);
-    }
-  };
+  const { copied, shareSuccess, handleCopyLink, handleShareWhatsApp, handleShareEmail } = shareHandlers;
 
   if (!isOpen) return null;
 

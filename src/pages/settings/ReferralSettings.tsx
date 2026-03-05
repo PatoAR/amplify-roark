@@ -4,7 +4,6 @@ import {
   Flex,
   View,
 } from '@aws-amplify/ui-react';
-import '@aws-amplify/ui-react/styles.css';
 import { useTranslation } from '../../i18n';
 import './ReferralSettings.css';
 import Referral from '../../components/Referral/Referral';

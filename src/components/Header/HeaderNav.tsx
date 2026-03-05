@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Menu, MenuItem, Divider, Button } from "@aws-amplify/ui-react";
 import { useNavigate } from "react-router-dom";
 import { getCurrentUser } from 'aws-amplify/auth';
@@ -313,4 +313,4 @@ const HeaderNav = () => {
   );
 };
 
-export default HeaderNav;
+export default React.memo(HeaderNav);
